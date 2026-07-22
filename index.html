@@ -4,149 +4,157 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050707">
-<meta name="description" content="$DOLLARDGT Serial Engine - Dollardgt.com">
-<meta property="og:title" content="$DOLLARDGT - Serial Engine v3.3 FINAL">
-<meta property="og:description" content="Dollardgt.com - Post SD, Claim SD, Stripe Activo">
-<title>$DOLLARDGT - v3.3 FINAL - Stripe Live</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>$DOLLARDGT - v3.4 FIX Salto</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@500;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter'],display:['Fraunces'],mono:['JetBrains Mono']}}}}</script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<style>body{background:#050707}.glow-gold{box-shadow:0 0 30px rgba(245,158,11,0.35), inset 0 1px 1px rgba(255,255,255,0.4)}.glow-match{box-shadow:0 0 40px rgba(245,158,11,0.6), inset 0 1px 1px rgba(255,255,255,0.5); animation: pulseGold 1.8s infinite}@keyframes pulseGold{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}.shuffling{animation: blurShuffle 0.09s infinite}@keyframes blurShuffle{0%{filter:blur(0px)}50%{filter:blur(0.6px)}100%{filter:blur(0px)}}.kbtn{transition:all .18s cubic-bezier(.16,1,.3,1); touch-action: manipulation;}.kbtn:active{transform:translateY(2px) scale(.97)}.num{color:#D4E2DC}</style>
+<style>
+body{background:#050707; -webkit-tap-highlight-color: transparent;}
+.glow-gold{box-shadow:0 0 30px rgba(245,158,11,0.35), inset 0 1px 1px rgba(255,255,255,0.4)}
+.glow-match{box-shadow:0 0 40px rgba(245,158,11,0.6), inset 0 1px 1px rgba(255,255,255,0.5); animation: pulseGold 1.8s infinite}
+@keyframes pulseGold{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+.kbtn{transition:transform .12s ease, filter .12s ease; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select:none; -webkit-user-select:none;}
+.kbtn:active{transform:scale(.96); filter:brightness(0.9)}
+.num{color:#D4E2DC}
+.shuffling-tail{will-change: contents; font-variant-numeric: tabular-nums;}
+.rarity-wrap{min-height:28px; display:flex; justify-content:center; align-items:center}
+</style>
 </head>
-<body class="min-h-dvh antialiased text-white selection:bg-amber-500/30 flex justify-center px-3 py-6" x-data="dollarMachineApp()" x-init="initApp()">
-  <button @click="toggleSound()" class="fixed top-3 right-3 z-20 grid h-10 w-10 place-items-center rounded-2xl bg-white/5 border border-white/10 text-white/70"><span x-text="soundEnabled ? '🔊' : '🔇'"></span></button>
+<body class="min-h-dvh antialiased text-white flex justify-center px-3 py-6" x-data="dollarMachineApp()" x-init="initApp()">
   <main class="w-full max-w-[420px] flex flex-col">
       <div class="flex items-center justify-between border-b border-white/10 pb-4">
-        <div><h1 class="font-black tracking-tight text-[2.15rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[10px] tracking-[0.25em] text-zinc-400 uppercase mt-1">Serial Engine • Dollardgt.com • v3.3 STRIPE LIVE</p></div>
+        <div><h1 class="font-black text-[2.15rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[10px] tracking-[0.25em] text-zinc-400 uppercase mt-1">Serial Engine • Dollardgt.com • v3.4 FIX</p></div>
         <div class="grid h-11 w-11 place-items-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-300 glow-gold font-mono font-bold text-sm">DGT</div>
       </div>
-      <section class="mt-6 rounded-[24px] border border-amber-500/20 bg-gradient-to-b from-[#16140E] to-[#0D1010] p-5 shadow-2xl relative overflow-hidden">
-        <div class="flex items-center justify-between text-[11px] font-bold tracking-[0.2em] text-amber-300/70 uppercase"><span>Buffer de Dígitos (8)</span><span :class="isShuffling ? 'text-amber-300 animate-pulse' : 'text-emerald-400'" x-text="isShuffling ? 'BUSCANDO MATCH...' : userDigits.length + '/4 Ingresados'"></span></div>
-        <div class="mt-3 font-mono font-black tracking-[0.08em] text-[2.8rem] leading-none text-white flex justify-center gap-2 tabular-nums"><span x-text="topDigitsDisplayFixed"></span><span class="text-zinc-600">-</span><span :class="isShuffling ? 'shuffling text-amber-200' : ''" x-text="topDigitsDisplayTail"></span></div>
-        <div class="mt-2 text-center text-[11px] text-zinc-500">Primeros 4: fijos del billete real | Últimos 4: ilusión de coincidencia</div>
-        <div x-show="rarity.type !== 'common'" x-transition class="mt-3 flex justify-center"><span class="rounded-full px-3 py-1 text-[10px] font-black tracking-widest border" :class="rarity.badgeClass" x-text="rarity.label"></span></div>
+      <section class="mt-6 rounded-[24px] border border-amber-500/20 bg-gradient-to-b from-[#16140E] to-[#0D1010] p-5 shadow-2xl">
+        <div class="flex items-center justify-between text-[11px] font-bold tracking-[0.2em] text-amber-300/70 uppercase"><span>Buffer de Dígitos (8)</span><span :class="isShuffling ? 'text-amber-300' : 'text-emerald-400'" x-text="isShuffling ? 'BUSCANDO MATCH...' : userDigits.length + '/4 Ingresados'"></span></div>
+        <div class="mt-3 font-mono font-black tracking-[0.08em] text-[2.8rem] leading-none text-white flex justify-center gap-2 tabular-nums">
+          <span x-text="topDigitsDisplayFixed"></span><span class="text-zinc-600">-</span><span class="shuffling-tail text-amber-200" x-text="topDigitsDisplayTail"></span>
+        </div>
+        <div class="mt-2 text-center text-[11px] text-zinc-500">Primeros 4: fijos del billete real | Últimos 4: ilusión</div>
+        <!-- FIX SALTO: reserva altura fija, no aparece/desaparece -->
+        <div class="rarity-wrap mt-3">
+          <template x-if="rarity.type !== 'common' && isLocked">
+            <span class="rounded-full px-3 py-1 text-[10px] font-black tracking-widest border" :class="rarity.badgeClass" x-text="rarity.label"></span>
+          </template>
+          <template x-if="rarity.type === 'common' || !isLocked">
+            <span class="text-[10px] text-zinc-600 tracking-widest opacity-30">ESPERANDO SERIE</span>
+          </template>
+        </div>
       </section>
       <section class="mt-4 grid grid-cols-3 gap-3">
-        <div class="rounded-2xl border border-white/10 bg-[#111616] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Serie Letras</div><div class="mt-1 font-mono text-[1.3rem] font-bold text-amber-200 tracking-wider" x-text="lettersDisplay"></div></div>
-        <div class="rounded-2xl border border-white/10 bg-[#111616] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Año Emisión</div><div class="mt-1 font-mono text-[1.3rem] font-bold text-sky-300 tracking-wider" x-text="yr"></div></div>
-        <div class="rounded-2xl border border-amber-500/20 bg-[#16140E] p-3 text-center relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none"></div><div class="text-[10px] font-bold tracking-widest text-amber-300/70 uppercase">Valor Mach</div><div class="mt-1 font-mono text-[1.35rem] font-black tracking-tight tabular-nums" :class="isShuffling ? 'shuffling text-amber-200' : 'text-emerald-300'" x-text="'$' + value.toFixed(2)"></div><div class="text-[8px] text-zinc-500 uppercase tracking-widest mt-0.5" x-text="'Base $' + denom"></div></div>
+        <div class="rounded-2xl border border-white/10 bg-[#111616] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Serie Letras</div><div class="mt-1 font-mono text-[1.3rem] font-bold text-amber-200" x-text="lettersDisplay"></div></div>
+        <div class="rounded-2xl border border-white/10 bg-[#111616] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Año Emisión</div><div class="mt-1 font-mono text-[1.3rem] font-bold text-sky-300" x-text="yr"></div></div>
+        <div class="rounded-2xl border border-amber-500/20 bg-[#16140E] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-amber-300/70 uppercase">Valor Mach</div><div class="mt-1 font-mono text-[1.35rem] font-black tabular-nums text-emerald-300" x-text="'$' + value.toFixed(2)"></div><div class="text-[8px] text-zinc-500 uppercase" x-text="'Base $' + denom"></div></div>
       </section>
       <section class="mt-4 rounded-[28px] border border-white/[0.08] bg-[#0E1212] p-3.5 shadow-2xl">
         <div class="grid grid-cols-4 gap-2.5">
-          <template x-for="(row, rIdx) in numpadGrid" :key="'r-'+rIdx"><template x-for="(btn, bIdx) in row" :key="'b-'+bIdx"><div><button x-show="btn.type === 'denom'" @click="setDenom(btn.val)" class="kbtn h-[60px] w-full rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="[denomColorsClass[btn.val], denom === btn.val ? 'ring-2 ring-white/40' : '']" x-text="'$' + btn.val"></button><button x-show="btn.type === 'num'" @click="pressNum(btn.val)" :disabled="userDigits.length >= 4 || isLocked" class="kbtn h-[60px] w-full rounded-[16px] border border-white/[0.08] bg-gradient-to-b from-[#1C2424] to-[#0E1313] text-[20px] font-black num disabled:opacity-25 disabled:pointer-events-none" x-text="btn.val"></button></div></template></template>
+          <button @click="setDenom(1)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===1 ? 'bg-emerald-500 ring-2 ring-white/40' : 'bg-emerald-500/70'">$1</button>
+          <button @click="setDenom(5)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===5 ? 'bg-sky-500 ring-2 ring-white/40' : 'bg-sky-500/70'">$5</button>
+          <button @click="setDenom(10)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===10 ? 'bg-violet-500 ring-2 ring-white/40' : 'bg-violet-500/70'">$10</button>
+          <button @click="setDenom(20)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===20 ? 'bg-orange-500 ring-2 ring-white/40' : 'bg-orange-500/70'">$20</button>
+          <button @click="pressNum(7)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">7</button>
+          <button @click="pressNum(8)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">8</button>
+          <button @click="pressNum(9)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">9</button>
+          <button @click="setDenom(50)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===50 ? 'bg-pink-500 ring-2 ring-white/40' : 'bg-pink-500/70'">$50</button>
+          <button @click="pressNum(4)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">4</button>
+          <button @click="pressNum(5)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">5</button>
+          <button @click="pressNum(6)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">6</button>
+          <button @click="setDenom(100)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===100 ? 'bg-amber-500 ring-2 ring-white/40' : 'bg-amber-500/70'">$100</button>
+          <button @click="pressNum(1)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">1</button>
+          <button @click="pressNum(2)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">2</button>
+          <button @click="pressNum(3)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">3</button>
+          <button @click="pressNum(0)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">0</button>
         </div>
-        <div class="mt-3 flex justify-between gap-2"><button @click="clearInput()" class="kbtn flex-1 h-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-[13px] font-bold text-zinc-400">✕ Borrar todo</button><button @click="deleteDigit()" class="kbtn flex-1 h-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-[13px] font-bold text-zinc-400">⌫ Eliminar último</button></div>
+        <div class="mt-3 flex gap-2"><button @click="clearInput()" class="kbtn flex-1 h-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-[13px] font-bold text-zinc-400">✕ Borrar todo</button><button @click="deleteDigit()" class="kbtn flex-1 h-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-[13px] font-bold text-zinc-400">⌫ Eliminar último</button></div>
       </section>
-      <section class="mt-5 rounded-[22px] border border-amber-500/20 bg-gradient-to-b from-[#1A1810] to-[#0E1212] p-4 shadow-2xl">
-        <div class="flex items-center justify-between"><span class="text-[10px] font-black tracking-[0.2em] text-amber-300/80 uppercase">Combinación Final Autorizada</span><span class="text-[10px] text-zinc-500" x-text="'Sello: '+securitySeal"></span></div>
-        <div class="mt-2 font-mono text-[1.35rem] font-bold tracking-wide text-white flex flex-wrap gap-1"><span x-text="finalPrefix"></span><span class="text-amber-200" x-text="finalUserPart"></span><span class="text-sky-200" x-text="finalTailPart"></span><span x-text="letters.c"></span><span class="text-zinc-500 text-[12px] ml-2" x-text="'| '+yr"></span></div>
-        <div x-show="isLocked" x-transition class="mt-4"><button @click="doMatch()" :disabled="matchAttemptsLeft<=0" class="kbtn w-full h-[64px] rounded-[18px] bg-gradient-to-b from-amber-400 to-amber-500 text-black font-black text-[22px] tracking-[0.12em] border border-amber-300 glow-match disabled:opacity-40 flex items-center justify-center gap-2"><span class="text-[26px]">$</span> MATCH <span class="text-[12px] font-bold bg-black/20 px-2 py-1 rounded-full" x-text="matchAttemptsLeft + '/10'"></span></button><div class="mt-2 flex justify-between items-center text-[10px]"><span class="text-zinc-500" x-text="'Total matchs: ' + totalMatchCount + '/10 para activar tarjeta'"></span><span class="text-zinc-600" x-text="matchAttemptsLeft>0 ? matchAttemptsLeft + ' intentos restantes' : 'Sin intentos'"></span></div></div>
+      <section class="mt-5 rounded-[22px] border border-amber-500/20 bg-[#1A1810] p-4">
+        <div class="flex justify-between"><span class="text-[10px] font-black tracking-[0.2em] text-amber-300/80 uppercase">Combinación Final</span><span class="text-[10px] text-zinc-500" x-text="'Sello: '+securitySeal"></span></div>
+        <div class="mt-2 font-mono text-[1.35rem] font-bold text-white"><span x-text="finalPrefix"></span><span class="text-amber-200" x-text="finalUserPart"></span><span class="text-sky-200" x-text="finalTailPart"></span><span x-text="letters.c"></span><span class="text-zinc-500 text-[12px] ml-2" x-text="'| '+yr"></span></div>
+        <div x-show="isLocked" class="mt-4"><button @click="doMatch()" :disabled="matchAttemptsLeft<=0" class="kbtn w-full h-[64px] rounded-[18px] bg-amber-400 text-black font-black text-[22px] tracking-[0.12em] border border-amber-300 glow-match disabled:opacity-40">$ MATCH <span class="text-[12px] bg-black/20 px-2 py-1 rounded-full" x-text="matchAttemptsLeft + '/10'"></span></button><div class="mt-2 text-[10px] text-zinc-500" x-text="'Total matchs: ' + totalMatchCount + '/10'"></div></div>
         <div class="mt-4 grid grid-cols-2 gap-3">
-          <button @click="postSD()" :disabled="!isLocked" class="kbtn h-[48px] rounded-[14px] font-black text-[13px] tracking-widest border" :class="isLocked ? 'bg-white text-black border-white' : 'bg-white/5 text-zinc-600 border-white/10'">POST SD</button>
-          <button @click="claimSD()" :disabled="!isLocked" class="kbtn h-[48px] rounded-[14px] font-black text-[13px] tracking-widest border" :class="isLocked ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-white/5 text-zinc-600 border-white/10'">CLAIM SD</button>
+          <button @click="postSD()" :disabled="!isLocked" class="kbtn h-[48px] rounded-[14px] font-black text-[13px] tracking-widest border" :class="isLocked ? 'bg-white text-black' : 'bg-white/5 text-zinc-600'">POST SD</button>
+          <button @click="claimSD()" :disabled="!isLocked" class="kbtn h-[48px] rounded-[14px] font-black text-[13px] tracking-widest border" :class="isLocked ? 'bg-emerald-500 text-black' : 'bg-white/5 text-zinc-600'">CLAIM SD</button>
         </div>
-        <div class="mt-2 text-center text-[10px] text-zinc-500">Post guarda en bóveda • Claim abre email a dollardmach@gmail.com</div>
       </section>
-      <div class="mt-4 flex justify-center"><button @click="openDrawer()" class="text-[11px] tracking-widest font-bold text-zinc-500 uppercase border border-white/10 rounded-full px-4 py-2 bg-white/[0.03]">Ver Bóveda (<span x-text="history.length"></span>)</button></div>
   </main>
-  <div x-show="drawerOpen" x-transition.opacity class="fixed inset-0 z-30 bg-black/70 backdrop-blur-sm" @click="closeDrawer()"></div>
-  <div x-show="drawerOpen" x-transition class="fixed bottom-0 left-0 right-0 z-40 max-h-[75vh] overflow-auto rounded-t-[24px] bg-[#0E1212] border-t border-white/10 p-5">
-    <div class="flex justify-between items-center mb-4"><h3 class="font-black text-amber-300 tracking-widest text-sm">BÓVEDA DOLLARDGT</h3><button @click="closeDrawer()" class="h-8 w-8 rounded-full bg-white/10">✕</button></div>
-    <div class="space-y-2"><template x-for="h in history" :key="h.id"><div class="rounded-xl bg-white/[0.04] border border-white/10 p-3 flex justify-between items-center"><div><div class="font-mono text-sm text-white" x-text="h.serial"></div><div class="text-[10px] text-zinc-500" x-text="h.date + ' • ' + h.value"></div></div><span class="text-[9px] px-2 py-1 rounded-full border font-black" :class="h.rarity.badgeClass" x-text="h.rarity.label"></span></div></template></div>
-    <button @click="clearHistory()" class="mt-4 w-full h-10 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-sm font-bold">Borrar bóveda</button>
-  </div>
-  <div x-show="showStripeCard" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-    <div class="w-full max-w-[380px] rounded-[24px] border border-amber-500/30 bg-gradient-to-b from-[#1C1910] to-[#0E1212] p-6 shadow-2xl">
-      <div class="flex justify-between items-start"><h3 class="font-black text-amber-400 text-[18px] leading-tight">Nota Legal<br><span class="text-white text-[13px] font-bold tracking-widest">DOLLARDGT.COM</span></h3><button x-show="stripePaid" @click="showStripeCard=false" class="h-8 w-8 rounded-full bg-white/10 text-white">✕</button></div>
-      <div class="mt-4 rounded-xl bg-white/[0.04] border border-white/10 p-4 text-[12px] leading-[1.5] text-zinc-300"><p><strong class="text-white">Tras 10 intentos de machar,</strong> se activa esta tarjeta flotante con nota legal y flujo de pago.</p><p class="mt-2"><strong class="text-amber-300">DollarDgt.com opera como juego aleatorio sin obligación de pago.</strong> Los valores Mach $00.00 son estimaciones de entretenimiento, no garantizan pago de mercado. Participas por diversión y colección.</p><p class="mt-2 text-[11px] text-zinc-500">Requiere aceptación explícita para continuar. Luego se habilita el botón de Stripe. Tras el redirect de Stripe, un script oculta permanentemente esta tarjeta.</p></div>
-      <div class="mt-4 space-y-3"><label class="flex gap-3 items-start cursor-pointer"><input type="checkbox" x-model="legal1" class="mt-1 h-4 w-4 rounded border-white/20 bg-black"><span class="text-[12px] text-zinc-300">Entiendo que <strong class="text-white">DollarDgt.com opera como juego aleatorio sin obligación de pago.</strong></span></label><label class="flex gap-3 items-start cursor-pointer"><input type="checkbox" x-model="legal2" class="mt-1 h-4 w-4 rounded border-white/20 bg-black"><span class="text-[12px] text-zinc-300">Acepto que los valores Mach <strong class="text-white">$00.00 son estimaciones de entretenimiento</strong> y no garantizan pago real ni valor de mercado.</span></label></div>
-      <button @click="goStripe()" :disabled="!(legal1 && legal2)" class="mt-5 kbtn w-full h-[52px] rounded-[14px] font-black text-[14px] tracking-widest" :class="(legal1 && legal2) ? 'bg-amber-400 text-black glow-gold' : 'bg-white/10 text-zinc-500 border border-white/10'"><span x-text="(legal1 && legal2) ? 'HABILITADO - IR A STRIPE →' : 'Marca las 2 casillas para habilitar Stripe'"></span></button>
-      <div class="mt-3 text-center"><p class="text-[10px] text-zinc-500">Total matchs: <span x-text="totalMatchCount"></span> | Stripe Live: 5kQ9AUe6hdG21jI5f87Vm0i</p><p x-show="stripePaid" class="mt-1 text-[10px] text-emerald-400 font-bold">✓ Pago verificado - tarjeta ocultada permanentemente</p></div>
+  <div x-show="showStripeCard" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="w-full max-w-[380px] rounded-[24px] border border-amber-500/30 bg-[#1C1910] p-6">
+      <h3 class="font-black text-amber-400">Nota Legal<br><span class="text-white text-[13px]">DOLLARDGT.COM</span></h3>
+      <div class="mt-4 rounded-xl bg-white/[0.04] border border-white/10 p-4 text-[12px] text-zinc-300"><p><strong class="text-white">Tras 10 intentos de machar,</strong> se activa esta tarjeta.</p><p class="mt-2"><strong class="text-amber-300">DollarDgt.com opera como juego aleatorio sin obligación de pago.</strong> Valores Mach $00.00 son estimaciones de entretenimiento.</p></div>
+      <div class="mt-4 space-y-3"><label class="flex gap-3"><input type="checkbox" x-model="legal1"><span class="text-[12px]">Entiendo que es juego aleatorio sin obligación de pago.</span></label><label class="flex gap-3"><input type="checkbox" x-model="legal2"><span class="text-[12px]">Acepto que valores Mach $00.00 son estimaciones.</span></label></div>
+      <button @click="goStripe()" :disabled="!(legal1 && legal2)" class="mt-5 kbtn w-full h-[52px] rounded-[14px] font-black" :class="(legal1 && legal2) ? 'bg-amber-400 text-black' : 'bg-white/10 text-zinc-500'"><span x-text="(legal1 && legal2) ? 'IR A STRIPE →' : 'Marca las 2 casillas'"></span></button>
     </div>
   </div>
-  <div x-show="toast.visible" x-transition class="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-full px-5 py-3 text-[13px] font-black shadow-2xl" :class="toast.classes" x-text="toast.message"></div>
+  <div x-show="toast.visible" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] rounded-full px-5 py-3 text-[13px] font-bold" :class="toast.classes" x-text="toast.message"></div>
 <script>
+const ANON_ID = localStorage.getItem('dgt_anon') || (()=>{ const id=Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem('dgt_anon',id); return id; })();
 const STRIPE_URL = "https://buy.stripe.com/5kQ9AUe6hdG21jI5f87Vm0i";
-const REDIRECT_BASE = "https://dollardgt.com/?stripe_success=1";
-const ANON_ID = (()=>{
-  let id=localStorage.getItem('dgt_anon_id');
-  if(!id){ id='DGT-'+Math.random().toString(36).slice(2,9).toUpperCase(); localStorage.setItem('dgt_anon_id', id); }
-  return id;
-})();
 const Engine = {
-  genTail(){ return Array.from({length:4},()=> Math.floor(Math.random()*10)); },
-  genLetters(denom){
-    const L="ABCDEFGHJKLMNPQRSTUVWXYZ";
-    const pick=()=> L[Math.floor(Math.random()*L.length)];
-    return {a: pick(), b: pick(), c: pick()+pick()+pick()+pick()+pick()+pick()};
-  },
-  genYear(){ const yrs=["2006","2009","2013","2017","2021"]; return yrs[Math.floor(Math.random()*yrs.length)]; },
-  genSeal(){ return Math.random().toString(36).slice(2,8).toUpperCase(); },
-  checkRarity(s){
-    if(/(\d)\1\1\1/.test(s)) return {type:'super', label:'SUPER RADAR', badgeClass:'bg-amber-400 text-black border-amber-300'};
-    if(s.slice(0,4)===s.slice(4,8)) return {type:'rare', label:'BINARY MATCH', badgeClass:'bg-sky-400 text-black border-sky-300'};
-    if(/1234|2345|3456|4567|5678|6789/.test(s)) return {type:'rare', label:'SECUENCIA', badgeClass:'bg-violet-400 text-black border-violet-300'};
-    return {type:'common', label:'COMMON', badgeClass:'bg-white/10 text-zinc-400 border-white/10'};
-  },
-  calcValue(userDigits, denom, rarity){
-    if(userDigits.length<4) return 0;
-    const base = (Math.random()*0.9)+0.05;
-    const mult = rarity.type==='super'? 8 : rarity.type==='rare'? 2.5 : 1;
-    return Math.min(99.99, base*mult);
-  }
+  genTail(){ return Array.from({length:4},()=>Math.floor(Math.random()*10)); },
+  genLetters(denom){ const letters='ABCDEFGHJKLMNPQRSTUVWXYZ'; const r=()=>letters[Math.floor(Math.random()*letters.length)]; if(denom===1) return {a:r(), c:r()}; return {a:r(), b:r(), c:r()}; },
+  genYear(){ return [1963,1969,1974,1977,1981,1985,1988,1990,1993,1995,1999,2001,2003,2006,2009,2013,2017,2021][Math.floor(Math.random()*8)]; },
+  genSeal(){ return 'CH-'+Math.floor(1000+Math.random()*9000)+'-'+Math.random().toString(36).slice(2,4).toUpperCase(); },
+  checkRarity(s){ if(!s) return {type:'common', label:'Común', score:0, badgeClass:'border-white/10 bg-white/5 text-zinc-400'}; if(/^(\d)\1{7}$/.test(s)) return {type:'solid', label:'SOLID', score:100, badgeClass:'border-amber-400 bg-amber-400/20 text-amber-300'}; return {type:'common', label:'Común', score:0, badgeClass:''}; },
+  calcValue(digits, denom, rarity){ return Math.max(denom, denom*1.6 + Math.random()*8 + (rarity.score||0)*0.5); }
 };
 function dollarMachineApp(){
   return {
-    denom: 1, denomColorsClass:{1:'bg-emerald-600',5:'bg-sky-600',10:'bg-amber-600',20:'bg-violet-600',50:'bg-rose-600',100:'bg-blue-700'},
-    userDigits:[], tailDigits: Engine.genTail(), letters: Engine.genLetters(1), yr: Engine.genYear(), securitySeal: Engine.genSeal(),
-    isLocked:false, isShuffling:false, shufflingInterval:null, matchAttemptsLeft:10, maxAttempts:10, totalMatchCount: parseInt(localStorage.getItem('dgt_total_matches')||'0'),
-    value:0, rarity:{type:'common', label:'COMMON', badgeClass:'bg-white/10 text-zinc-400 border-white/10'},
-    history: JSON.parse(localStorage.getItem('dgt_history')||'[]'), drawerOpen:false, showStripeCard:false, legal1:false, legal2:false,
-    stripePaid: localStorage.getItem('dgt_stripe_paid')==='true', soundEnabled: JSON.parse(localStorage.getItem('dgt_sound')||'true'),
-    audioCtx:null, toast:{visible:false, message:'', classes:''}, toastTimer:null,
-    numpadGrid:[
-      [{type:'denom', val:1},{type:'denom', val:5},{type:'denom', val:10},{type:'denom', val:20}],
-      [{type:'num', val:7},{type:'num', val:8},{type:'num', val:9},{type:'denom', val:50}],
-      [{type:'num', val:4},{type:'num', val:5},{type:'num', val:6},{type:'denom', val:100}],
-      [{type:'num', val:1},{type:'num', val:2},{type:'num', val:3},{type:'num', val:0}]
-    ],
+    userDigits:[], tailDigits:Engine.genTail(), letters:Engine.genLetters(20), yr:2006, securitySeal:Engine.genSeal(),
+    denom:20, isLocked:false, history:[], rarity:{type:'common', label:'', score:0, badgeClass:''}, value:20,
+    soundEnabled:true, toast:{visible:false,message:'',classes:''}, toastTimer:null, isShuffling:false, shufflingInterval:null,
+    matchAttemptsLeft:10, maxAttempts:10, totalMatchCount: parseInt(localStorage.getItem('dgt_total_matches')||'0'),
+    showStripeCard:false, legal1:false, legal2:false, stripePaid: localStorage.getItem('dgt_stripe_paid')==='true',
     initApp(){
-      const params=new URLSearchParams(window.location.search);
-      if(params.get('stripe_success')==='1'){
-        localStorage.setItem('dgt_stripe_paid','true'); this.stripePaid=true; this.showStripeCard=false;
-        localStorage.removeItem('dgt_stripe_pending'); this.showToast('¡Pago Stripe verificado! Tarjeta ocultada','success');
-        window.history.replaceState({},'', window.location.pathname);
-      }
-      if(this.stripePaid){ this.showStripeCard=false; }
-      const last=JSON.parse(localStorage.getItem('dgt_last')||'null');
-      if(last?.denom) this.denom=last.denom;
-      this.updateRarityAndValue(false); this.startShuffling();
+      this.letters=Engine.genLetters(this.denom); this.yr=2006; this.securitySeal=Engine.genSeal(); this.tailDigits=Engine.genTail();
+      this.updateRarityAndValue(); this.startShuffling();
       if(this.totalMatchCount>=10 && !this.stripePaid) this.showStripeCard=true;
+      const params = new URLSearchParams(window.location.search);
+      if(params.get('stripe_success')==='1'){ this.stripePaid=true; localStorage.setItem('dgt_stripe_paid','true'); this.showStripeCard=false; this.showToast('Pago verificado','success'); history.replaceState({},'',location.pathname); }
     },
-    initAudioContext(){ if(!this.audioCtx){ this.audioCtx=new (window.AudioContext||window.webkitAudioContext)(); } if(this.audioCtx.state==='suspended') this.audioCtx.resume(); },
-    beep(freq, dur, vol=0.15){ if(!this.soundEnabled) return; try{ this.initAudioContext(); const o=this.audioCtx.createOscillator(); const g=this.audioCtx.createGain(); o.frequency.value=freq; g.gain.value=vol; o.connect(g); g.connect(this.audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.0001, this.audioCtx.currentTime+dur); o.stop(this.audioCtx.currentTime+dur); }catch(e){} },
-    playClick(){ this.beep(480,0.06,0.12); if(navigator.vibrate) navigator.vibrate(20); },
-    playDing(){ this.beep(920,0.08,0.18); if(navigator.vibrate) navigator.vibrate([30,40,60]); },
-    playMatch(){ [400,600,900,1200].forEach((f,i)=> setTimeout(()=> this.beep(f,0.07,0.2), i*80)); },
-    toggleSound(){ this.soundEnabled=!this.soundEnabled; localStorage.setItem('dgt_sound', JSON.stringify(this.soundEnabled)); if(this.soundEnabled) this.initAudioContext(); },
-    startShuffling(){ if(this.shufflingInterval) clearInterval(this.shufflingInterval); this.isShuffling=true; this.shufflingInterval=setInterval(()=>{ if(!this.isLocked && this.userDigits.length<4){ this.tailDigits=Engine.genTail(); this.updateRarityAndValue(false); } }, 85); },
+    startShuffling(){
+      if(this.shufflingInterval) clearInterval(this.shufflingInterval);
+      this.isShuffling=true;
+      this.shufflingInterval=setInterval(()=>{
+        if(!this.isLocked && this.userDigits.length<4){
+          this.tailDigits=Engine.genTail();
+          // FIX: NO recalcular rareza ni valor durante ilusión - evita salto
+        }
+      }, 110);
+    },
     stopShuffling(){ this.isShuffling=false; if(this.shufflingInterval){ clearInterval(this.shufflingInterval); this.shufflingInterval=null; } },
-    updateRarityAndValue(save=true){ const eight = this.userDigits.join('').padEnd(4,'0') + this.tailDigits.join(''); this.rarity = Engine.checkRarity(this.userDigits.length===4 ? this.userDigits.join('')+this.tailDigits.join('') : eight); this.value = Engine.calcValue(this.userDigits, this.denom, this.rarity); if(save) localStorage.setItem('dgt_last', JSON.stringify({denom:this.denom})); },
-    setDenom(d){ if(d===this.denom) return; this.denom=d; this.userDigits=[]; this.isLocked=false; this.matchAttemptsLeft=this.maxAttempts; this.tailDigits=Engine.genTail(); this.letters=Engine.genLetters(this.denom); this.yr=Engine.genYear(); this.securitySeal=Engine.genSeal(); this.updateRarityAndValue(); this.startShuffling(); this.playMatch(); this.showToast('Denominación $'+d,'info'); },
-    pressNum(n){ if(this.isLocked || this.userDigits.length>=4) return; this.initAudioContext(); this.playClick(); this.userDigits.push(n); this.updateRarityAndValue(); if(this.userDigits.length===4){ this.lockCombo(); } else { this.startShuffling(); } },
-    deleteDigit(){ if(this.isLocked){ this.clearInput(); return; } if(this.userDigits.length===0) return; this.playClick(); this.userDigits.pop(); this.updateRarityAndValue(); this.startShuffling(); },
-    clearInput(){ this.userDigits=[]; this.isLocked=false; this.matchAttemptsLeft=this.maxAttempts; this.tailDigits=Engine.genTail(); this.letters=Engine.genLetters(this.denom); this.yr=Engine.genYear(); this.securitySeal=Engine.genSeal(); this.updateRarityAndValue(); this.startShuffling(); this.showToast('Buffer reiniciado','info'); },
-    lockCombo(){ if(this.userDigits.length<4) return; this.isLocked=true; this.stopShuffling(); this.matchAttemptsLeft=this.maxAttempts; this.updateRarityAndValue(); this.playDing(); const serial = `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`; const now=new Date(); const entry={ id: Date.now().toString(36)+Math.random().toString(36).slice(2), serial, seal:this.securitySeal, value:'$'+this.value.toFixed(2), denom:this.denom, date: now.toLocaleDateString()+' '+now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), rarity: {...this.rarity} }; this.history.unshift(entry); if(this.history.length>100) this.history.pop(); localStorage.setItem('dgt_history', JSON.stringify(this.history)); if(this.rarity.type!=='common') this.showToast('¡'+this.rarity.label+' DETECTADO!','success'); else this.showToast('¡Serie Sellada!','success'); },
-    doMatch(){ if(!this.isLocked || this.matchAttemptsLeft<=0) return; this.playMatch(); this.tailDigits=Engine.genTail(); this.letters=Engine.genLetters(this.denom); this.yr=Engine.genYear(); this.securitySeal=Engine.genSeal(); this.updateRarityAndValue(); this.matchAttemptsLeft--; this.totalMatchCount++; localStorage.setItem('dgt_total_matches', this.totalMatchCount.toString()); const serial = `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`; const now=new Date(); const entry={ id: Date.now().toString(36)+Math.random().toString(36).slice(2), serial, seal:this.securitySeal, value:'$'+this.value.toFixed(2), denom:this.denom, date: now.toLocaleDateString()+' '+now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), rarity: {...this.rarity} }; this.history.unshift(entry); if(this.history.length>100) this.history.pop(); localStorage.setItem('dgt_history', JSON.stringify(this.history)); if(this.totalMatchCount>=10 && !this.stripePaid){ this.showStripeCard=true; this.showToast('10 matchs - activa tarjeta legal + Stripe','info'); } else if(this.rarity.type!=='common') this.showToast('¡'+this.rarity.label+' EN MATCH!','success'); else this.showToast('MATCH '+ (this.maxAttempts-this.matchAttemptsLeft) +'/10 - Total: '+this.totalMatchCount,'info'); },
-    postSD(){ if(!this.isLocked){ this.showToast('Ingresa 4 dígitos primero','info'); return; } this.showToast('Post SD guardado en bóveda','success'); this.openDrawer(); },
-    claimSD(){ if(!this.isLocked){ this.showToast('Ingresa 4 dígitos primero','info'); return; } const fullSerial = `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`; const subject = `Claim SD - ${fullSerial} - $${this.value.toFixed(2)}`; const body = `Hola equipo Dollardgt,\n\nQuiero reclamar mi SD:\n\nSerial: ${fullSerial}\nAño: ${this.yr}\nValor Mach: $${this.value.toFixed(2)}\nDenominación Base: $${this.denom}\nSello: ${this.securitySeal}\nRareza: ${this.rarity.label}\nAnon ID: ${ANON_ID}\nTotal Matchs: ${this.totalMatchCount}\n\nAdjunto foto de mi billete.\n\nGracias,\nDollardgt.com`; const mailto = `mailto:dollardmach@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; window.location.href = mailto; this.showToast('Abriendo email a dollardmach@gmail.com','success'); },
-    goStripe(){ if(!(this.legal1 && this.legal2)) return; localStorage.setItem('dgt_stripe_pending','true'); this.showToast('Redirigiendo a Stripe...','success'); const url = STRIPE_URL + (STRIPE_URL.includes('?') ? '&' : '?') + 'dgt_anon=' + ANON_ID; setTimeout(()=>{ window.location.href = url; }, 600); },
-    showToast(m, type='success'){ clearTimeout(this.toastTimer); this.toast.classes = type==='success' ? 'bg-amber-400 text-black' : 'bg-zinc-800 text-white border border-white/10'; this.toast.message=m; this.toast.visible=true; this.toastTimer=setTimeout(()=>{ this.toast.visible=false; }, 2600); },
-    openDrawer(){ this.drawerOpen=true; }, closeDrawer(){ this.drawerOpen=false; },
-    clearHistory(){ if(confirm('¿Borrar bóveda DGT?')){ this.history=[]; localStorage.setItem('dgt_history','[]'); localStorage.setItem('dgt_total_matches','0'); this.totalMatchCount=0; } },
+    updateRarityAndValue(){
+      if(!this.isLocked && this.userDigits.length<4){
+        // FIX VALOR $0.00 - siempre muestra base durante búsqueda
+        this.rarity={type:'common', label:'', score:0, badgeClass:''};
+        this.value = this.denom * 1.8 + Math.random()*2;
+        return;
+      }
+      const eight = this.userDigits.join('').padEnd(4,'0') + this.tailDigits.join('');
+      this.rarity = Engine.checkRarity(eight);
+      this.value = Engine.calcValue(this.userDigits, this.denom, this.rarity);
+      if(!this.value || this.value<this.denom) this.value = this.denom*1.8;
+    },
+    setDenom(d){
+      if(d===this.denom) return;
+      this.stopShuffling();
+      this.denom=d; this.userDigits=[]; this.isLocked=false; this.matchAttemptsLeft=this.maxAttempts;
+      this.tailDigits=Engine.genTail(); this.letters=Engine.genLetters(this.denom); this.yr=2006; this.securitySeal=Engine.genSeal();
+      this.updateRarityAndValue();
+      // FIX SALTO: pequeño delay antes de reiniciar shuffle para evitar pestañeo constante
+      setTimeout(()=>{ this.startShuffling(); }, 60);
+      this.showToast('Denominación $'+d,'info');
+    },
+    pressNum(n){ if(this.isLocked || this.userDigits.length>=4) return; this.userDigits.push(n); this.updateRarityAndValue(); if(this.userDigits.length===4) this.lockCombo(); },
+    deleteDigit(){ if(this.isLocked){ this.clearInput(); return; } if(this.userDigits.length===0) return; this.userDigits.pop(); this.updateRarityAndValue(); this.startShuffling(); },
+    clearInput(){ this.stopShuffling(); this.userDigits=[]; this.isLocked=false; this.matchAttemptsLeft=this.maxAttempts; this.tailDigits=Engine.genTail(); this.letters=Engine.genLetters(this.denom); this.yr=2006; this.securitySeal=Engine.genSeal(); this.updateRarityAndValue(); this.startShuffling(); },
+    lockCombo(){ if(this.userDigits.length<4) return; this.isLocked=true; this.stopShuffling(); this.matchAttemptsLeft=this.maxAttempts; this.updateRarityAndValue(); const serial=`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`; this.showToast('¡Serie Sellada!','success'); },
+    doMatch(){ if(!this.isLocked || this.matchAttemptsLeft<=0) return; this.tailDigits=Engine.genTail(); this.letters=Engine.genLetters(this.denom); this.updateRarityAndValue(); this.matchAttemptsLeft--; this.totalMatchCount++; localStorage.setItem('dgt_total_matches', this.totalMatchCount.toString()); if(this.totalMatchCount>=10 && !this.stripePaid) this.showStripeCard=true; },
+    postSD(){ if(!this.isLocked) return; this.showToast('Post SD guardado','success'); },
+    claimSD(){ const full=`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`; const subject=`Claim SD - ${full} - $${this.value.toFixed(2)}`; const body=`Serial: ${full}\nValor: $${this.value.toFixed(2)}\nAnon: ${ANON_ID}`; window.location.href=`mailto:dollardmach@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; },
+    goStripe(){ if(!(this.legal1 && this.legal2)) return; localStorage.setItem('dgt_stripe_pending','true'); window.location.href=STRIPE_URL + '?dgt_anon=' + ANON_ID; },
+    showToast(m,type='success'){ clearTimeout(this.toastTimer); this.toast.classes=type==='success'?'bg-amber-400 text-black':'bg-zinc-800 text-white border border-white/10'; this.toast.message=m; this.toast.visible=true; this.toastTimer=setTimeout(()=>{ this.toast.visible=false; }, 2200); },
     get topDigitsDisplayFixed(){ const u=this.userDigits; return `${u[0]!==undefined?u[0]:'-'}${u[1]!==undefined?u[1]:'-'} ${u[2]!==undefined?u[2]:'-'}${u[3]!==undefined?u[3]:'-'}`; },
     get topDigitsDisplayTail(){ const t=this.tailDigits; return `${t[0]}${t[1]} ${t[2]}${t[3]}`; },
     get lettersDisplay(){ return this.denom===1 ? `${this.letters.a}-${this.letters.c}` : `${this.letters.a}-${this.letters.b}-${this.letters.c}`; },
