@@ -1,1 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050707">
+<meta name="description" content="$DOLLARMACH Serial Engine - Generador de series coleccionables con detector de rareza">
+<meta property="og:title" content="$DOLLARMACH - Serial Engine v2.7">
+<meta property="og:description" content="Genera, detecta rarezas y sella series. Solid, ladder, radar, binary.">
+<title>$DOLLARMACH - Serial Engine v2.7 FIXED</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@500;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter'],display:['Fraunces'],mono:['JetBrains Mono']}}}}</script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<style>
+  :root{ --denom-1:#10b981; --denom-5:#0ea5e9; --denom-10:#8b5cf6; --denom-20:#f97316; --denom-50:#ec4899; --denom-100:#f59e0b; }
+  body{background:#050707}
+  .glow-gold{box-shadow:0 0 30px rgba(245,158,11,0.35), inset 0 1px 1px rgba(255,255,255,0.4)}
+  .glow-green{box-shadow:0 0 24px rgba(16,185,129,.45),inset 0 1px 0 rgba(255,255,255,.35)}
+  .glow-blue{box-shadow:0 0 24px rgba(14,165,233,.45),inset 0 1px 0 rgba(255,255,255,.35)}
+  .glow-purple{box-shadow:0 0 24px rgba(139,92,246,.45),inset 0 1px 0 rgba(255,255,255,.35)}
+  .glow-orange{box-shadow:0 0 24px rgba(249,115,22,.55),inset 0 1px 0 rgba(255,255,255,.4)}
+  .glow-pink{box-shadow:0 0 24px rgba(236,72,153,.45),inset 0 1px 0 rgba(255,255,255,.35)}
+  .kbtn{transition:all .18s cubic-bezier(.16,1,.3,1); touch-action: manipulation;}
+  .kbtn:active{transform:translateY(2px) scale(.97)}
+  .num{color:#D4E2DC; text-shadow:0 1px 2px rgba(0,0,0,0.9)}
+  @media (prefers-reduced-motion: reduce){ .kbtn{transition:none} }
+</style>
+</head>
+<body class="min-h-dvh antialiased text-white selection:bg-amber-500/30 flex justify-center px-3 py-6" x-data="dollarMachineApp()" x-init="initApp()">
 
+  <button @click="toggleSound()" :aria-label="soundEnabled ? 'Silenciar' : 'Activar sonido'" class="fixed top-3 right-3 z-20 grid h-10 w-10 place-items-center rounded-2xl bg-white/5 border border-white/10 text-white/70 shadow-lg transition-all hover:bg-white/10 active:scale-95">
+    <span x-text="soundEnabled ? '🔊' : '🔇'"></span>
+  </button>
+
+  <main class="w-full max-w-[420px] flex flex-col justify-between">
+    <div>
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div>
+          <h1 class="font-black tracking-tight text-[2.2rem] leading-none text-amber-400 font-display">$DOLLARMACH</h1>
+          <p class="text-[10px] tracking-[0.25em] text-zinc-400 uppercase mt-1">Serial Engine • Secure Vault v2.7 FIXED</p>
+        </div>
+        <div class="grid h-11 w-11 place-items-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-300 glow-gold font-mono font-bold text-sm">🏛️</div>
+      </div>
+
+      <section class="mt-6 rounded-[24px] border border-amber-500/20 bg-gradient-to-b from-[#16140E] to-[#0D1010] p-5 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/5 blur-2xl pointer-events-none"></div>
+        <div class="flex items-center justify-between text-[11px] font-bold tracking-[0.2em] text-amber-300/70 uppercase">
+          <span>Buffer de Dígitos (8)</span>
+          <span class="text-emerald-400" x-text="userDigits.length + '/4 Ingresados'"></span>
+        </div>
+        <div class="mt-3 font-mono font-black tracking-[0.08em] text-[2.8rem] leading-none text-white flex justify-center gap-2 tabular-nums">
+          <span x-text="topDigitsDisplay"></span>
+        </div>
+        <div class="mt-2 text-center text-[11px] text-zinc-500">Primeros 4: manual | Últimos 4: sellados al generar</div>
+        <div x-show="rarity.type !== 'common'" x-transition class="mt-3 flex justify-center">
+          <span class="rounded-full px-3 py-1 text-[10px] font-black tracking-widest border" :class="rarity.badgeClass" x-text="rarity.label"></span>
+        </div>
+      </section>
+
+      <section class="mt-4 grid grid-cols-3 gap-3">
+        <div class="rounded-2xl border border-white/10 bg-[#111616] p-3 text-center shadow-inner">
+          <div class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Serie Letras</div>
+          <div class="mt-1 font-mono text-[1.3rem] font-bold text-amber-200 tracking-wider" x-text="lettersDisplay"></div>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-[#111616] p-3 text-center shadow-inner">
+          <div class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Año Emisión</div>
+          <div class="mt-1 font-mono text-[1.3rem] font-bold text-sky-300 tracking-wider" x-text="yr"></div>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-[#111616] p-3 text-center shadow-inner">
+          <div class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Valor</div>
+          <div class="mt-1 font-mono text-[1.3rem] font-black tracking-tight" :style="`color: ${denomColors[denom]}`" x-text="'$' + denom"></div>
+        </div>
+      </section>
+
+      <section class="mt-4 rounded-[28px] border border-white/[0.08] bg-[#0E1212] p-3.5 shadow-2xl backdrop-blur-xl">
+        <div class="grid grid-cols-4 gap-2.5">
+          <template x-for="(row, rIdx) in numpadGrid" :key="'r-'+rIdx">
+            <template x-for="(btn, bIdx) in row" :key="'b-'+bIdx">
+              <div>
+                <button x-show="btn.type === 'denom'" @click="setDenom(btn.val)" :aria-label="'Denominacion '+btn.val" class="kbtn h-[60px] w-full rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="[denomColorsClass[btn.val], denom === btn.val ? 'ring-2 ring-white/40' : '']" x-text="'$' + btn.val"></button>
+                <button x-show="btn.type === 'num'" @click="pressNum(btn.val)" :disabled="userDigits.length >= 4 || isLocked" :aria-label="'Numero '+btn.val" class="kbtn h-[60px] w-full rounded-[16px] border border-white/[0.08] bg-gradient-to-b from-[#1C2424] to-[#0E1313] text-[20px] font-black num shadow-[inset_0_1px_0_rgba(255,255,255,.08)] disabled:opacity-25 disabled:pointer-events-none" x-text="btn.val"></button>
+              </div>
+            </template>
+          </template>
+        </div>
+        <div class="mt-3 flex justify-between gap-2">
+          <button @click="clearInput()" aria-label="Borrar todo" class="flex-1 rounded-xl bg-white/[0.05] py-2.5 text-[12px] font-medium text-zinc-400 border border-white/10 hover:bg-white/10 active:scale-95 transition-all">✕ Borrar todo</button>
+          <button @click="deleteDigit()" :disabled="userDigits.length === 0 && !isLocked" aria-label="Eliminar ultimo" class="flex-1 rounded-xl bg-white/[0.05] py-2.5 text-[12px] font-medium text-zinc-400 border border-white/10 hover:bg-white/10 active:scale-95 transition-all disabled:opacity-30">⌫ Eliminar último</button>
+        </div>
+        <div class="mt-2 text-center text-[10px] text-zinc-600">Teclado físico 0-9 • Backspace • ESC para borrar</div>
+      </section>
+
+      <section class="mt-4 rounded-[22px] border border-amber-500/30 bg-gradient-to-b from-[#1E1911]/90 to-[#121413]/95 p-4 backdrop-blur-xl glow-gold">
+        <div class="flex items-center justify-between">
+          <div class="text-[10px] font-black tracking-[0.2em] text-amber-300 uppercase">Combinación Final Autorizada</div>
+          <button @click="doRematch()" class="items-center gap-1.5 rounded-full bg-amber-400/10 border border-amber-400/40 px-3 py-0.5 text-[10px] font-black tracking-wide text-amber-200 hover:bg-amber-400/20 transition-all active:scale-95 shadow-md" :class="isLocked ? 'flex' : 'hidden'">↻ Regenerar cola</button>
+        </div>
+        <div class="mt-2.5 flex flex-wrap items-baseline justify-between gap-2">
+          <div class="font-mono font-black text-[1.35rem] tracking-wider leading-none text-white flex items-baseline gap-1">
+            <span x-text="finalPrefix"></span>
+            <span class="text-amber-300" x-text="finalUserPart"></span><span x-text="finalTailPart"></span>
+            <span class="text-orange-400" x-text="letters.c"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="rounded-lg border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-200" x-text="yr"></span>
+            <span class="text-[1.1rem] font-black tracking-tight text-emerald-400" x-text="'$' + value.toFixed(2)"></span>
+          </div>
+        </div>
+        <div class="mt-2.5 flex items-center justify-between gap-2 text-[11px] text-zinc-400 border-t border-white/10 pt-2">
+          <span>Sello: <strong class="text-amber-300 font-mono" x-text="securitySeal"></strong></span>
+          <div class="flex gap-2">
+            <button @click="copySerial()" class="rounded-md bg-white/5 px-2 py-1 text-[10px] border border-white/10 hover:bg-white/10">📋 Copiar</button>
+            <span class="text-emerald-400 font-bold" x-text="isLocked ? 'SELLADO' : 'VIVO'"></span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="mt-4">
+      <button @click="openDrawer()" class="w-full rounded-2xl bg-white/[0.03] py-3 text-[12px] font-medium text-zinc-400 border border-white/5 hover:text-zinc-200 active:scale-95 transition-all">Ver registro (<span x-text="history.length"></span>) - guardado local</button>
+      <p class="mt-4 text-center text-[10px] tracking-widest text-white/20">$DOLLARMACH • v2.7 FIXED • 2026</p>
+    </div>
+  </main>
+
+  <div x-show="drawerOpen" x-transition.opacity class="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm" @click="closeDrawer()"></div>
+  <aside class="fixed bottom-0 left-0 right-0 z-50 flex max-h-[75vh] flex-col rounded-t-[28px] border-t border-white/15 bg-[#0A0E0E] p-5 transition-transform duration-500 shadow-2xl" :class="drawerOpen ? 'translate-y-0' : 'translate-y-full'">
+    <div class="mx-auto mb-3 h-1.5 w-12 rounded-full bg-white/20 cursor-pointer" @click="closeDrawer()"></div>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-display text-lg font-bold text-zinc-100">Historial</h2>
+      <button @click="clearHistory()" class="text-[11px] text-zinc-500 hover:text-red-400">Limpiar todo</button>
+    </div>
+    <div class="flex flex-col gap-2.5 overflow-y-auto pr-1">
+      <template x-for="h in history" :key="h.id">
+        <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.02] p-3.5">
+          <div>
+            <div class="flex gap-2 items-center">
+              <span class="rounded px-2 py-0.5 text-[10px] font-black text-black" :style="`background: ${denomColors[h.denom]}`" x-text="'$' + h.denom"></span>
+              <span class="text-[10px] text-zinc-500" x-text="h.date"></span>
+              <span x-show="h.rarity.type !== 'common'" class="rounded-full px-2 py-0.5 text-[8px] font-black border" :class="h.rarity.badgeClass" x-text="h.rarity.label"></span>
+            </div>
+            <div class="mt-1 font-mono text-[13px] text-amber-200 tracking-wider" x-text="h.serial"></div>
+            <div class="font-mono text-[10px] text-zinc-500" x-text="'Sello: ' + h.seal"></div>
+          </div>
+          <div class="text-[14px] font-black text-emerald-400" x-text="h.value"></div>
+        </div>
+      </template>
+      <div class="py-12 text-center text-zinc-500" x-show="history.length === 0">
+        <span class="text-3xl">🏦</span><br><span class="text-xs mt-2 block">No hay billetes aún</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="fixed top-6 left-1/2 z-[100] -translate-x-1/2 whitespace-nowrap rounded-2xl px-5 py-3 text-[13px] font-black shadow-2xl transition-all duration-300 pointer-events-none" :class="toast.classes" x-text="toast.message" x-show="toast.visible" x-transition.opacity></div>
+
+<script>
+
+    // === CONFIG CLOUDFLARE - REEMPLAZA ESTA URL ===
+    const CLOUDFLARE_URL = 'https://dollarmach-api.TU_SUBDOMINIO.workers.dev'; // <-- PEGA AQUI TU URL DEL WORKER
+    const ANON_ID = localStorage.getItem('dm_anon') || (localStorage.setItem('dm_anon', crypto.randomUUID()), localStorage.getItem('dm_anon'));
+
+// === CORE ENGINE - PURO, SIN DOM ===
+const Engine = {
+  rand(min, max){
+    try{
+      const arr = new Uint32Array(1);
+      crypto.getRandomValues(arr);
+      return min + (arr[0] % (max - min + 1));
+    }catch{ return Math.floor(Math.random()*(max-min+1))+min; }
+  },
+  rL(){ return String.fromCharCode(65 + this.rand(0,25)); },
+  genTail(){ return [this.rand(0,9),this.rand(0,9),this.rand(0,9),this.rand(0,9)]; },
+  genLetters(denom){
+    if(denom===1) return {a:this.rL(), b:'', c:this.rL()};
+    return {a:this.rL(), b:this.rL(), c:this.rL()};
+  },
+  genYear(){ return this.rand(1928, 2026); },
+  genSeal(){
+    const p=['US','FR','DE','JP','CH','UK','CA'][this.rand(0,6)];
+    return `${p}-${this.rand(1000,9999)}-${this.rL()}${this.rL()}`;
+  },
+  checkRarity(eightStr){
+    const s = eightStr;
+    if(!s || s.length<8) return {type:'common', label:'COMMON', score:0, badgeClass:'bg-zinc-800 text-zinc-400 border-zinc-700'};
+    if(/^(\d)\1{7}$/.test(s)) return {type:'solid', label:'SOLID 8!', score:100, badgeClass:'bg-amber-400 text-black border-amber-300'};
+    if(s==='12345678' || s==='87654321') return {type:'ladder', label:'LADDER', score:90, badgeClass:'bg-purple-500 text-white border-purple-300'};
+    if(s===s.split('').reverse().join('')) return {type:'radar', label:'RADAR', score:80, badgeClass:'bg-sky-400 text-black border-sky-200'};
+    if(/^(.)\1{2}(.)\2{2}(.)\3{1}(.)\4{0}$/.test(s) || /^(\d)\1{3}(\d)\2{3}$/.test(s)) return {type:'binary', label:'BINARY', score:70, badgeClass:'bg-emerald-400 text-black border-emerald-200'};
+    if(/(\d)\1{3}/.test(s)) return {type:'quad', label:'QUAD', score:50, badgeClass:'bg-orange-400 text-black border-orange-200'};
+    if(/(\d)\1{2}/.test(s)) return {type:'triple', label:'TRIPLE', score:30, badgeClass:'bg-zinc-700 text-amber-200 border-zinc-600'};
+    if(new Set(s).size===2) return {type:'binary2', label:'BINARY 2', score:40, badgeClass:'bg-pink-400 text-black border-pink-200'};
+    return {type:'common', label:'COMMON', score:0, badgeClass:'bg-zinc-800 text-zinc-400 border-zinc-700'};
+  },
+  calcValue(userDigits, denom, rarity){
+    const sum = userDigits.reduce((a,b)=>a+b,0) || 10;
+    let base = (sum * 1.8 + denom * 2.3) % 80 + 5;
+    base += rarity.score * 0.8;
+    if(rarity.type!=='common') base += 20;
+    return Number(base.toFixed(2));
+  }
+};
+
+function dollarMachineApp(){
+  return {
+    soundEnabled: JSON.parse(localStorage.getItem('dm_sound') ?? 'true'),
+    audioCtx: null,
+    denom: 20,
+    denomColors: {1:'#10b981', 5:'#0ea5e9', 10:'#8b5cf6', 20:'#f97316', 50:'#ec4899', 100:'#f59e0b'},
+    denomColorsClass: {
+      1: 'bg-gradient-to-b from-[#1ED6A0] to-[#0FB87F] glow-green',
+      5: 'bg-gradient-to-b from-[#3AB6FF] to-[#1E90FF] glow-blue',
+      10: 'bg-gradient-to-b from-[#A07AFF] to-[#7A4DFF] glow-purple',
+      20: 'bg-gradient-to-b from-[#FF8C3A] to-[#FF6A00] glow-orange',
+      50: 'bg-gradient-to-b from-[#FF5AA6] to-[#FF2A7A] glow-pink',
+      100: 'bg-gradient-to-b from-[#FFD84D] to-[#FFB800] glow-gold'
+    },
+    userDigits: [],
+    tailDigits: [0,0,0,0],
+    letters: {a:'A', b:'B', c:'C'},
+    yr: 1976,
+    value: 25.00,
+    securitySeal: 'US-0000-AA',
+    rarity: {type:'common', label:'COMMON', score:0, badgeClass:'bg-zinc-800 text-zinc-400 border-zinc-700'},
+    isLocked: false,
+    history: [],
+    drawerOpen: false,
+    toast: {visible:false, message:'', classes:'bg-amber-400 text-black'},
+    toastTimer: null,
+    numpadGrid: [
+      [{type:'num', val:7}, {type:'num', val:8}, {type:'num', val:9}, {type:'denom', val:1}],
+      [{type:'num', val:4}, {type:'num', val:5}, {type:'num', val:6}, {type:'denom', val:5}],
+      [{type:'num', val:1}, {type:'num', val:2}, {type:'num', val:3}, {type:'denom', val:10}],
+      [{type:'denom', val:20}, {type:'num', val:0}, {type:'denom', val:50}, {type:'denom', val:100}]
+    ],
+
+    initApp(){
+      // Load history
+      try{ this.history = JSON.parse(localStorage.getItem('dm_history') || '[]'); }catch{ this.history=[]; }
+      this.tailDigits = Engine.genTail();
+      this.letters = Engine.genLetters(this.denom);
+      this.yr = Engine.genYear();
+      this.securitySeal = Engine.genSeal();
+      this.updateRarityAndValue();
+      window.addEventListener('pointerdown', ()=> this.initAudioContext(), {once:true});
+      window.addEventListener('keydown', (e)=> this.handleKey(e));
+    },
+    handleKey(e){
+      if(e.key>='0' && e.key<='9'){ e.preventDefault(); this.pressNum(parseInt(e.key)); }
+      else if(e.key==='Backspace'){ e.preventDefault(); this.deleteDigit(); }
+      else if(e.key==='Escape'){ e.preventDefault(); this.clearInput(); }
+      else if(e.key==='Enter' && this.userDigits.length===4){ e.preventDefault(); this.lockCombo(); }
+    },
+    initAudioContext(){
+      if(!this.soundEnabled) return;
+      try{
+        if(!this.audioCtx || this.audioCtx.state==='closed'){
+          this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if(this.audioCtx.state==='suspended') this.audioCtx.resume();
+      }catch{}
+    },
+    beep(f=440, vol=0.08, dur=0.14){
+      if(!this.soundEnabled || !this.audioCtx) return;
+      try{
+        const o=this.audioCtx.createOscillator();
+        const g=this.audioCtx.createGain();
+        o.type='sine'; o.frequency.value=f;
+        g.gain.setValueAtTime(vol, this.audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime+dur);
+        o.connect(g); g.connect(this.audioCtx.destination);
+        o.start(); o.stop(this.audioCtx.currentTime+dur);
+        o.onended=()=>{ try{o.disconnect(); g.disconnect();}catch{} };
+      }catch{}
+    },
+    playClick(){ this.beep(480,0.06,0.12); if(navigator.vibrate) navigator.vibrate(20); },
+    playDing(){ this.beep(920,0.08,0.18); if(navigator.vibrate) navigator.vibrate([30,40,60]); },
+    playChord(){ [520,640,800].forEach((f,i)=> setTimeout(()=> this.beep(f,0.05,0.15), i*60)); },
+
+    toggleSound(){
+      this.soundEnabled=!this.soundEnabled;
+      localStorage.setItem('dm_sound', JSON.stringify(this.soundEnabled));
+      if(this.soundEnabled) this.initAudioContext();
+    },
+    updateRarityAndValue(){
+      const eight = this.userDigits.join('').padEnd(4,'0') + this.tailDigits.join('');
+      this.rarity = Engine.checkRarity(this.userDigits.length===4 ? this.userDigits.join('')+this.tailDigits.join('') : eight);
+      this.value = Engine.calcValue(this.userDigits, this.denom, this.rarity);
+    },
+    setDenom(d){
+      if(d===this.denom) return;
+      this.denom=d;
+      this.userDigits=[]; this.isLocked=false;
+      this.tailDigits=Engine.genTail();
+      this.letters=Engine.genLetters(this.denom);
+      this.yr=Engine.genYear();
+      this.securitySeal=Engine.genSeal();
+      this.updateRarityAndValue();
+      this.playChord();
+      this.showToast('Denominación $'+d,'info');
+    },
+    pressNum(n){
+      if(this.isLocked || this.userDigits.length>=4) return;
+      this.playClick();
+      this.userDigits.push(n);
+      // FIX: NO regenerar cola aquí, solo valor y rareza
+      this.updateRarityAndValue();
+      if(this.userDigits.length===4) this.lockCombo();
+    },
+    deleteDigit(){
+      if(this.isLocked){ this.clearInput(); return; }
+      if(this.userDigits.length===0) return;
+      this.playClick();
+      this.userDigits.pop();
+      this.updateRarityAndValue();
+    },
+    clearInput(){
+      this.userDigits=[]; this.isLocked=false;
+      this.tailDigits=Engine.genTail();
+      this.letters=Engine.genLetters(this.denom);
+      this.yr=Engine.genYear();
+      this.securitySeal=Engine.genSeal();
+      this.updateRarityAndValue();
+      this.showToast('Buffer reiniciado','info');
+    },
+    lockCombo(){
+      if(this.userDigits.length<4) return;
+      this.isLocked=true;
+      this.updateRarityAndValue();
+      this.playDing();
+      const serial = `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`;
+      const now=new Date();
+      const entry={
+        id: Date.now().toString(36)+Math.random().toString(36).slice(2),
+        serial, seal:this.securitySeal,
+        value:'$'+this.value.toFixed(2),
+        denom:this.denom,
+        date: now.toLocaleDateString()+' '+now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),
+        rarity: {...this.rarity}
+      };
+      this.history.unshift(entry);
+      if(this.history.length>100) this.history.pop();
+      localStorage.setItem('dm_history', JSON.stringify(this.history));
+
+      // --- SYNC A CLOUDFLARE (no bloquea si falla) ---
+      try{
+        if(CLOUDFLARE_URL && !CLOUDFLARE_URL.includes('TU_SUBDOMINIO')){
+          fetch(CLOUDFLARE_URL + '/api/mint', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+              anon_id: ANON_ID,
+              full_serial: serial,
+              digits: this.userDigits.join('') + this.tailDigits.join(''),
+              denom: this.denom,
+              rarity_type: this.rarity.type,
+              rarity_label: this.rarity.label,
+              rarity_score: this.rarity.score,
+              seal: this.securitySeal,
+              year: this.yr
+            })
+          }).catch(()=>{});
+        }
+      }catch(e){}
+
+      if(this.rarity.type!=='common') this.showToast('¡'+this.rarity.label+' DETECTADO!', 'success');
+      else this.showToast('¡Serie Sellada!', 'success');
+    },
+    doRematch(){
+      if(!this.isLocked) return;
+      this.playChord();
+      // FIX: solo regenera cola, mantiene los 4 dígitos del usuario
+      this.tailDigits=Engine.genTail();
+      this.letters=Engine.genLetters(this.denom);
+      this.yr=Engine.genYear();
+      this.securitySeal=Engine.genSeal();
+      this.updateRarityAndValue();
+      this.isLocked=false;
+      this.lockCombo();
+    },
+    async copySerial(){
+      const full = `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c} | ${this.yr} | ${this.securitySeal}`;
+      try{ await navigator.clipboard.writeText(full); this.showToast('Copiado al portapapeles','success'); }
+      catch{ this.showToast(full,'info'); }
+    },
+    showToast(m, type='success'){
+      clearTimeout(this.toastTimer);
+      this.toast.classes = type==='success' ? 'bg-amber-400 text-black' : 'bg-zinc-800 text-white border border-white/10';
+      this.toast.message=m; this.toast.visible=true;
+      this.toastTimer=setTimeout(()=>{ this.toast.visible=false; }, 2200);
+    },
+    openDrawer(){ this.drawerOpen=true; },
+    closeDrawer(){ this.drawerOpen=false; },
+    clearHistory(){ if(confirm('¿Borrar todo el historial?')){ this.history=[]; localStorage.setItem('dm_history','[]'); } },
+
+    get topDigitsDisplay(){
+      const u=this.userDigits;
+      const t=this.tailDigits;
+      const p1=`${u[0]!==undefined?u[0]:'-'}${u[1]!==undefined?u[1]:'-'}`;
+      const p2=`${u[2]!==undefined?u[2]:'-'}${u[3]!==undefined?u[3]:'-'}`;
+      return `${p1} ${p2}  ${t[0]}${t[1]} ${t[2]}${t[3]}`;
+    },
+    get lettersDisplay(){ return this.denom===1 ? `${this.letters.a}-${this.letters.c}` : `${this.letters.a}-${this.letters.b}-${this.letters.c}`; },
+    get finalPrefix(){ return this.denom===1 ? this.letters.a : `${this.letters.a}${this.letters.b}`; },
+    get finalUserPart(){ return this.userDigits.join('').padEnd(4,'0'); },
+    get finalTailPart(){ return this.tailDigits.join(''); }
+  }
+}
+</script>
+</body>
+</html>
