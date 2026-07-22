@@ -4,163 +4,204 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050707">
-<title>$DOLLARDGT - v3.4 FIX Salto</title>
+<title>$DOLLARDGT v3.5 Ilusión Real</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@500;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter'],display:['Fraunces'],mono:['JetBrains Mono']}}}}</script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <style>
-body{background:#050707; -webkit-tap-highlight-color: transparent;}
-.glow-gold{box-shadow:0 0 30px rgba(245,158,11,0.35), inset 0 1px 1px rgba(255,255,255,0.4)}
-.glow-match{box-shadow:0 0 40px rgba(245,158,11,0.6), inset 0 1px 1px rgba(255,255,255,0.5); animation: pulseGold 1.8s infinite}
+body{background:#050707;-webkit-tap-highlight-color:transparent}
+.glow-gold{box-shadow:0 0 30px rgba(245,158,11,.35),inset 0 1px 1px rgba(255,255,255,.4)}
+.glow-match{box-shadow:0 0 40px rgba(245,158,11,.6),inset 0 1px 1px rgba(255,255,255,.5);animation:pulseGold 1.8s infinite}
 @keyframes pulseGold{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-.kbtn{transition:transform .12s ease, filter .12s ease; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select:none; -webkit-user-select:none;}
-.kbtn:active{transform:scale(.96); filter:brightness(0.9)}
+.kbtn{transition:transform .12s ease,filter .12s ease;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.kbtn:active{transform:scale(.96);filter:brightness(.9)}
 .num{color:#D4E2DC}
-.shuffling-tail{will-change: contents; font-variant-numeric: tabular-nums;}
-.rarity-wrap{min-height:28px; display:flex; justify-content:center; align-items:center}
+.rarity-wrap{min-height:28px;display:flex;justify-content:center;align-items:center}
+.tail-running{animation:blurRun .08s infinite;will-change:contents}
+@keyframes blurRun{0%{filter:blur(0)}50%{filter:blur(.7px) brightness(1.3)}100%{filter:blur(0)}}
 </style>
 </head>
 <body class="min-h-dvh antialiased text-white flex justify-center px-3 py-6" x-data="dollarMachineApp()" x-init="initApp()">
-  <main class="w-full max-w-[420px] flex flex-col">
-      <div class="flex items-center justify-between border-b border-white/10 pb-4">
-        <div><h1 class="font-black text-[2.15rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[10px] tracking-[0.25em] text-zinc-400 uppercase mt-1">Serial Engine • Dollardgt.com • v3.4 FIX</p></div>
-        <div class="grid h-11 w-11 place-items-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-300 glow-gold font-mono font-bold text-sm">DGT</div>
-      </div>
-      <section class="mt-6 rounded-[24px] border border-amber-500/20 bg-gradient-to-b from-[#16140E] to-[#0D1010] p-5 shadow-2xl">
-        <div class="flex items-center justify-between text-[11px] font-bold tracking-[0.2em] text-amber-300/70 uppercase"><span>Buffer de Dígitos (8)</span><span :class="isShuffling ? 'text-amber-300' : 'text-emerald-400'" x-text="isShuffling ? 'BUSCANDO MATCH...' : userDigits.length + '/4 Ingresados'"></span></div>
-        <div class="mt-3 font-mono font-black tracking-[0.08em] text-[2.8rem] leading-none text-white flex justify-center gap-2 tabular-nums">
-          <span x-text="topDigitsDisplayFixed"></span><span class="text-zinc-600">-</span><span class="shuffling-tail text-amber-200" x-text="topDigitsDisplayTail"></span>
-        </div>
-        <div class="mt-2 text-center text-[11px] text-zinc-500">Primeros 4: fijos del billete real | Últimos 4: ilusión</div>
-        <!-- FIX SALTO: reserva altura fija, no aparece/desaparece -->
-        <div class="rarity-wrap mt-3">
-          <template x-if="rarity.type !== 'common' && isLocked">
-            <span class="rounded-full px-3 py-1 text-[10px] font-black tracking-widest border" :class="rarity.badgeClass" x-text="rarity.label"></span>
-          </template>
-          <template x-if="rarity.type === 'common' || !isLocked">
-            <span class="text-[10px] text-zinc-600 tracking-widest opacity-30">ESPERANDO SERIE</span>
-          </template>
-        </div>
-      </section>
-      <section class="mt-4 grid grid-cols-3 gap-3">
-        <div class="rounded-2xl border border-white/10 bg-[#111616] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Serie Letras</div><div class="mt-1 font-mono text-[1.3rem] font-bold text-amber-200" x-text="lettersDisplay"></div></div>
-        <div class="rounded-2xl border border-white/10 bg-[#111616] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Año Emisión</div><div class="mt-1 font-mono text-[1.3rem] font-bold text-sky-300" x-text="yr"></div></div>
-        <div class="rounded-2xl border border-amber-500/20 bg-[#16140E] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-amber-300/70 uppercase">Valor Mach</div><div class="mt-1 font-mono text-[1.35rem] font-black tabular-nums text-emerald-300" x-text="'$' + value.toFixed(2)"></div><div class="text-[8px] text-zinc-500 uppercase" x-text="'Base $' + denom"></div></div>
-      </section>
-      <section class="mt-4 rounded-[28px] border border-white/[0.08] bg-[#0E1212] p-3.5 shadow-2xl">
-        <div class="grid grid-cols-4 gap-2.5">
-          <button @click="setDenom(1)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===1 ? 'bg-emerald-500 ring-2 ring-white/40' : 'bg-emerald-500/70'">$1</button>
-          <button @click="setDenom(5)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===5 ? 'bg-sky-500 ring-2 ring-white/40' : 'bg-sky-500/70'">$5</button>
-          <button @click="setDenom(10)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===10 ? 'bg-violet-500 ring-2 ring-white/40' : 'bg-violet-500/70'">$10</button>
-          <button @click="setDenom(20)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===20 ? 'bg-orange-500 ring-2 ring-white/40' : 'bg-orange-500/70'">$20</button>
-          <button @click="pressNum(7)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">7</button>
-          <button @click="pressNum(8)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">8</button>
-          <button @click="pressNum(9)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">9</button>
-          <button @click="setDenom(50)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===50 ? 'bg-pink-500 ring-2 ring-white/40' : 'bg-pink-500/70'">$50</button>
-          <button @click="pressNum(4)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">4</button>
-          <button @click="pressNum(5)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">5</button>
-          <button @click="pressNum(6)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">6</button>
-          <button @click="setDenom(100)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===100 ? 'bg-amber-500 ring-2 ring-white/40' : 'bg-amber-500/70'">$100</button>
-          <button @click="pressNum(1)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">1</button>
-          <button @click="pressNum(2)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">2</button>
-          <button @click="pressNum(3)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">3</button>
-          <button @click="pressNum(0)" :disabled="userDigits.length>=4 || isLocked" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">0</button>
-        </div>
-        <div class="mt-3 flex gap-2"><button @click="clearInput()" class="kbtn flex-1 h-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-[13px] font-bold text-zinc-400">✕ Borrar todo</button><button @click="deleteDigit()" class="kbtn flex-1 h-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-[13px] font-bold text-zinc-400">⌫ Eliminar último</button></div>
-      </section>
-      <section class="mt-5 rounded-[22px] border border-amber-500/20 bg-[#1A1810] p-4">
-        <div class="flex justify-between"><span class="text-[10px] font-black tracking-[0.2em] text-amber-300/80 uppercase">Combinación Final</span><span class="text-[10px] text-zinc-500" x-text="'Sello: '+securitySeal"></span></div>
-        <div class="mt-2 font-mono text-[1.35rem] font-bold text-white"><span x-text="finalPrefix"></span><span class="text-amber-200" x-text="finalUserPart"></span><span class="text-sky-200" x-text="finalTailPart"></span><span x-text="letters.c"></span><span class="text-zinc-500 text-[12px] ml-2" x-text="'| '+yr"></span></div>
-        <div x-show="isLocked" class="mt-4"><button @click="doMatch()" :disabled="matchAttemptsLeft<=0" class="kbtn w-full h-[64px] rounded-[18px] bg-amber-400 text-black font-black text-[22px] tracking-[0.12em] border border-amber-300 glow-match disabled:opacity-40">$ MATCH <span class="text-[12px] bg-black/20 px-2 py-1 rounded-full" x-text="matchAttemptsLeft + '/10'"></span></button><div class="mt-2 text-[10px] text-zinc-500" x-text="'Total matchs: ' + totalMatchCount + '/10'"></div></div>
-        <div class="mt-4 grid grid-cols-2 gap-3">
-          <button @click="postSD()" :disabled="!isLocked" class="kbtn h-[48px] rounded-[14px] font-black text-[13px] tracking-widest border" :class="isLocked ? 'bg-white text-black' : 'bg-white/5 text-zinc-600'">POST SD</button>
-          <button @click="claimSD()" :disabled="!isLocked" class="kbtn h-[48px] rounded-[14px] font-black text-[13px] tracking-widest border" :class="isLocked ? 'bg-emerald-500 text-black' : 'bg-white/5 text-zinc-600'">CLAIM SD</button>
-        </div>
-      </section>
-  </main>
-  <div x-show="showStripeCard" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-    <div class="w-full max-w-[380px] rounded-[24px] border border-amber-500/30 bg-[#1C1910] p-6">
-      <h3 class="font-black text-amber-400">Nota Legal<br><span class="text-white text-[13px]">DOLLARDGT.COM</span></h3>
-      <div class="mt-4 rounded-xl bg-white/[0.04] border border-white/10 p-4 text-[12px] text-zinc-300"><p><strong class="text-white">Tras 10 intentos de machar,</strong> se activa esta tarjeta.</p><p class="mt-2"><strong class="text-amber-300">DollarDgt.com opera como juego aleatorio sin obligación de pago.</strong> Valores Mach $00.00 son estimaciones de entretenimiento.</p></div>
-      <div class="mt-4 space-y-3"><label class="flex gap-3"><input type="checkbox" x-model="legal1"><span class="text-[12px]">Entiendo que es juego aleatorio sin obligación de pago.</span></label><label class="flex gap-3"><input type="checkbox" x-model="legal2"><span class="text-[12px]">Acepto que valores Mach $00.00 son estimaciones.</span></label></div>
-      <button @click="goStripe()" :disabled="!(legal1 && legal2)" class="mt-5 kbtn w-full h-[52px] rounded-[14px] font-black" :class="(legal1 && legal2) ? 'bg-amber-400 text-black' : 'bg-white/10 text-zinc-500'"><span x-text="(legal1 && legal2) ? 'IR A STRIPE →' : 'Marca las 2 casillas'"></span></button>
-    </div>
+<main class="w-full max-w-[420px] flex flex-col">
+  <div class="flex items-center justify-between border-b border-white/10 pb-4">
+    <div><h1 class="font-black text-[2.15rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[10px] tracking-[0.25em] text-zinc-400 uppercase mt-1">Serial Engine • v3.5 Ilusión Real</p></div>
+    <div class="grid h-11 w-11 place-items-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-300 glow-gold font-mono font-bold text-sm">DGT</div>
   </div>
-  <div x-show="toast.visible" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] rounded-full px-5 py-3 text-[13px] font-bold" :class="toast.classes" x-text="toast.message"></div>
+
+  <section class="mt-6 rounded-[24px] border border-amber-500/20 bg-gradient-to-b from-[#16140E] to-[#0D1010] p-5 shadow-2xl">
+    <div class="flex items-center justify-between text-[11px] font-bold tracking-[0.2em] uppercase"><span class="text-zinc-400">Buffer de Dígitos (8)</span><span :class="isShuffling ? 'text-amber-300 animate-pulse' : 'text-emerald-400'" x-text="isShuffling ? 'BUSCANDO...' : userDigits.length + '/4 Ingresados'"></span></div>
+    <div class="mt-3 font-mono font-black tracking-[0.08em] text-[2.8rem] leading-none text-white flex justify-center gap-2 tabular-nums">
+      <span x-text="topDigitsDisplayFixed"></span><span class="text-zinc-600">-</span><span :class="isShuffling ? 'tail-running text-amber-200' : 'text-zinc-300'" x-text="topDigitsDisplayTail"></span>
+    </div>
+    <div class="mt-2 text-center text-[11px] text-zinc-500">Primeros 4: fijos del billete real | Últimos 4: búsqueda al apretar</div>
+    <div class="rarity-wrap mt-3">
+      <template x-if="rarity.type !== 'common' && isLocked"><span class="rounded-full px-3 py-1 text-[10px] font-black tracking-widest border" :class="rarity.badgeClass" x-text="rarity.label"></span></template>
+      <template x-if="rarity.type === 'common' || !isLocked"><span class="text-[10px] text-zinc-600 tracking-widest opacity-30" x-text="isShuffling ? 'ESCANEANDO...' : 'ESPERANDO SERIE'"></span></template>
+    </div>
+  </section>
+
+  <section class="mt-4 grid grid-cols-3 gap-3">
+    <div class="rounded-2xl border border-white/10 bg-[#111616] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Serie Letras</div><div class="mt-1 font-mono text-[1.3rem] font-bold text-amber-200" x-text="lettersDisplay"></div></div>
+    <div class="rounded-2xl border border-white/10 bg-[#111616] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Año Emisión</div><div class="mt-1 font-mono text-[1.3rem] font-bold text-sky-300" x-text="yr"></div></div>
+    <div class="rounded-2xl border border-amber-500/20 bg-[#16140E] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-amber-300/70 uppercase">Valor Mach</div><div class="mt-1 font-mono text-[1.35rem] font-black tabular-nums text-emerald-300" x-text="'$' + value.toFixed(2)"></div><div class="text-[8px] text-zinc-500 uppercase" x-text="'Base $' + denom"></div></div>
+  </section>
+
+  <section class="mt-4 rounded-[28px] border border-white/[0.08] bg-[#0E1212] p-3.5 shadow-2xl">
+    <div class="grid grid-cols-4 gap-2.5">
+      <button @click="setDenom(1)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===1 ? 'bg-emerald-500 ring-2 ring-white/40' : 'bg-emerald-500/70'">$1</button>
+      <button @click="setDenom(5)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===5 ? 'bg-sky-500 ring-2 ring-white/40' : 'bg-sky-500/70'">$5</button>
+      <button @click="setDenom(10)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===10 ? 'bg-violet-500 ring-2 ring-white/40' : 'bg-violet-500/70'">$10</button>
+      <button @click="setDenom(20)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===20 ? 'bg-orange-500 ring-2 ring-white/40' : 'bg-orange-500/70'">$20</button>
+      <button @click="pressNum(7)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">7</button>
+      <button @click="pressNum(8)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">8</button>
+      <button @click="pressNum(9)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">9</button>
+      <button @click="setDenom(50)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===50 ? 'bg-pink-500 ring-2 ring-white/40' : 'bg-pink-500/70'">$50</button>
+      <button @click="pressNum(4)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">4</button>
+      <button @click="pressNum(5)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">5</button>
+      <button @click="pressNum(6)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">6</button>
+      <button @click="setDenom(100)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===100 ? 'bg-amber-500 ring-2 ring-white/40' : 'bg-amber-500/70'">$100</button>
+      <button @click="pressNum(1)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">1</button>
+      <button @click="pressNum(2)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">2</button>
+      <button @click="pressNum(3)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">3</button>
+      <button @click="pressNum(0)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">0</button>
+    </div>
+    <div class="mt-3 flex gap-2"><button @click="clearInput()" class="kbtn flex-1 h-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-[13px] font-bold text-zinc-400">✕ Borrar todo</button><button @click="deleteDigit()" class="kbtn flex-1 h-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-[13px] font-bold text-zinc-400">⌫ Eliminar último</button></div>
+  </section>
+
+  <section id="boveda" class="mt-5 rounded-[22px] border border-amber-500/20 bg-[#1A1810] p-4 shadow-2xl">
+    <div class="flex justify-between"><span class="text-[10px] font-black tracking-[0.2em] text-amber-300/80 uppercase">Bóveda - Combinación Final</span><span class="text-[10px] text-zinc-500" x-text="'Sello: '+securitySeal"></span></div>
+    <div class="mt-2 font-mono text-[1.35rem] font-bold text-white"><span x-text="finalPrefix"></span><span class="text-amber-200" x-text="finalUserPart"></span><span class="text-sky-200" x-text="finalTailPart"></span><span x-text="letters.c"></span><span class="text-zinc-500 text-[12px] ml-2" x-text="'| '+yr"></span></div>
+    <div x-show="isLocked" x-transition class="mt-4"><button @click="doMatch()" :disabled="matchAttemptsLeft<=0" class="kbtn w-full h-[64px] rounded-[18px] bg-amber-400 text-black font-black text-[22px] tracking-[0.12em] border border-amber-300 glow-match disabled:opacity-40">$ MATCH <span class="text-[12px] bg-black/20 px-2 py-1 rounded-full" x-text="matchAttemptsLeft + '/10'"></span></button><div class="mt-2 text-[10px] text-zinc-500" x-text="'Total matchs: ' + totalMatchCount + '/10'"></div></div>
+    <div class="mt-4 grid grid-cols-2 gap-3">
+      <button @click="postSD()" :disabled="!isLocked" class="kbtn h-[48px] rounded-[14px] font-black text-[13px] tracking-widest border" :class="isLocked ? 'bg-white text-black' : 'bg-white/5 text-zinc-600'">POST SD</button>
+      <button @click="claimSD()" :disabled="!isLocked" class="kbtn h-[48px] rounded-[14px] font-black text-[13px] tracking-widest border" :class="isLocked ? 'bg-emerald-500 text-black' : 'bg-white/5 text-zinc-600'">CLAIM SD</button>
+    </div>
+  </section>
+</main>
+<div x-show="showStripeCard" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+  <div class="w-full max-w-[380px] rounded-[24px] border border-amber-500/30 bg-[#1C1910] p-6">
+    <h3 class="font-black text-amber-400">Nota Legal<br><span class="text-white text-[13px]">DOLLARDGT.COM</span></h3>
+    <div class="mt-4 rounded-xl bg-white/[0.04] border border-white/10 p-4 text-[12px] text-zinc-300"><p><strong class="text-white">Tras 10 intentos de machar,</strong> se activa esta tarjeta.</p><p class="mt-2"><strong class="text-amber-300">DollarDgt.com opera como juego aleatorio sin obligación de pago.</strong> Valores Mach $00.00 son estimaciones.</p></div>
+    <div class="mt-4 space-y-3"><label class="flex gap-3"><input type="checkbox" x-model="legal1"><span class="text-[12px]">Entiendo que es juego aleatorio.</span></label><label class="flex gap-3"><input type="checkbox" x-model="legal2"><span class="text-[12px]">Acepto que valores Mach son estimaciones.</span></label></div>
+    <button @click="goStripe()" :disabled="!(legal1 && legal2)" class="mt-5 kbtn w-full h-[52px] rounded-[14px] font-black" :class="(legal1 && legal2) ? 'bg-amber-400 text-black' : 'bg-white/10 text-zinc-500'"><span x-text="(legal1 && legal2) ? 'IR A STRIPE →' : 'Marca las 2 casillas'"></span></button>
+  </div>
+</div>
+<div x-show="toast.visible" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] rounded-full px-5 py-3 text-[13px] font-bold" :class="toast.classes" x-text="toast.message"></div>
 <script>
-const ANON_ID = localStorage.getItem('dgt_anon') || (()=>{ const id=Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem('dgt_anon',id); return id; })();
-const STRIPE_URL = "https://buy.stripe.com/5kQ9AUe6hdG21jI5f87Vm0i";
-const Engine = {
-  genTail(){ return Array.from({length:4},()=>Math.floor(Math.random()*10)); },
-  genLetters(denom){ const letters='ABCDEFGHJKLMNPQRSTUVWXYZ'; const r=()=>letters[Math.floor(Math.random()*letters.length)]; if(denom===1) return {a:r(), c:r()}; return {a:r(), b:r(), c:r()}; },
-  genYear(){ return [1963,1969,1974,1977,1981,1985,1988,1990,1993,1995,1999,2001,2003,2006,2009,2013,2017,2021][Math.floor(Math.random()*8)]; },
-  genSeal(){ return 'CH-'+Math.floor(1000+Math.random()*9000)+'-'+Math.random().toString(36).slice(2,4).toUpperCase(); },
-  checkRarity(s){ if(!s) return {type:'common', label:'Común', score:0, badgeClass:'border-white/10 bg-white/5 text-zinc-400'}; if(/^(\d)\1{7}$/.test(s)) return {type:'solid', label:'SOLID', score:100, badgeClass:'border-amber-400 bg-amber-400/20 text-amber-300'}; return {type:'common', label:'Común', score:0, badgeClass:''}; },
-  calcValue(digits, denom, rarity){ return Math.max(denom, denom*1.6 + Math.random()*8 + (rarity.score||0)*0.5); }
+const ANON_ID = localStorage.getItem('dgt_anon') || (()=>{const id=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('dgt_anon',id);return id;})();
+const STRIPE_URL="https://buy.stripe.com/5kQ9AUe6hdG21jI5f87Vm0i";
+const Engine={
+  genTail(){return Array.from({length:4},()=>Math.floor(Math.random()*10))},
+  genLetters(denom){const letters='ABCDEFGHJKLMNPQRSTUVWXYZ';const r=()=>letters[Math.floor(Math.random()*letters.length)];if(denom===1)return{a:r(),c:r()};return{a:r(),b:r(),c:r()}},
+  genSeal(){return 'CH-'+Math.floor(1000+Math.random()*9000)+'-'+Math.random().toString(36).slice(2,4).toUpperCase()},
+  checkRarity(s){if(!s)return{type:'common',label:'Común',score:0,badgeClass:''};if(/^(\d)\1{7}$/.test(s))return{type:'solid',label:'SOLID',score:100,badgeClass:'border-amber-400 bg-amber-400/20 text-amber-300'};if(/0123|1234|2345|3456|4567|5678|6789/.test(s))return{type:'ladder',label:'LADDER',score:60,badgeClass:'border-sky-400 bg-sky-400/20 text-sky-300'};return{type:'common',label:'Común',score:0,badgeClass:''}},
+  calcValue(digits,denom,rarity){return Math.max(denom,denom*1.6+Math.random()*8+(rarity.score||0)*0.5)}
 };
 function dollarMachineApp(){
-  return {
-    userDigits:[], tailDigits:Engine.genTail(), letters:Engine.genLetters(20), yr:2006, securitySeal:Engine.genSeal(),
-    denom:20, isLocked:false, history:[], rarity:{type:'common', label:'', score:0, badgeClass:''}, value:20,
-    soundEnabled:true, toast:{visible:false,message:'',classes:''}, toastTimer:null, isShuffling:false, shufflingInterval:null,
-    matchAttemptsLeft:10, maxAttempts:10, totalMatchCount: parseInt(localStorage.getItem('dgt_total_matches')||'0'),
-    showStripeCard:false, legal1:false, legal2:false, stripePaid: localStorage.getItem('dgt_stripe_paid')==='true',
+  return{
+    userDigits:[],tailDigits:['-','-','-','-'],letters:Engine.genLetters(20),yr:2006,securitySeal:Engine.genSeal(),
+    denom:20,isLocked:false,rarity:{type:'common',label:'',score:0,badgeClass:''},value:20,
+    toast:{visible:false,message:'',classes:''},toastTimer:null,isShuffling:false,animInterval:null,
+    matchAttemptsLeft:10,maxAttempts:10,totalMatchCount:parseInt(localStorage.getItem('dgt_total_matches')||'0'),
+    showStripeCard:false,legal1:false,legal2:false,stripePaid:localStorage.getItem('dgt_stripe_paid')==='true',
     initApp(){
-      this.letters=Engine.genLetters(this.denom); this.yr=2006; this.securitySeal=Engine.genSeal(); this.tailDigits=Engine.genTail();
-      this.updateRarityAndValue(); this.startShuffling();
-      if(this.totalMatchCount>=10 && !this.stripePaid) this.showStripeCard=true;
-      const params = new URLSearchParams(window.location.search);
-      if(params.get('stripe_success')==='1'){ this.stripePaid=true; localStorage.setItem('dgt_stripe_paid','true'); this.showStripeCard=false; this.showToast('Pago verificado','success'); history.replaceState({},'',location.pathname); }
+      this.letters=Engine.genLetters(this.denom);this.securitySeal=Engine.genSeal();this.tailDigits=['-','-','-','-'];this.updateRarityAndValue();
+      if(this.totalMatchCount>=10&&!this.stripePaid)this.showStripeCard=true;
+      const p=new URLSearchParams(window.location.search);
+      if(p.get('stripe_success')==='1'){this.stripePaid=true;localStorage.setItem('dgt_stripe_paid','true');this.showStripeCard=false;this.showToast('Pago verificado','success');history.replaceState({},'',location.pathname);}
     },
-    startShuffling(){
-      if(this.shufflingInterval) clearInterval(this.shufflingInterval);
+    // NUEVA ILUSION: solo corre al apretar
+    animateTailOnPress(cb){
+      if(this.animInterval)clearInterval(this.animInterval);
       this.isShuffling=true;
-      this.shufflingInterval=setInterval(()=>{
-        if(!this.isLocked && this.userDigits.length<4){
+      let ticks=0;
+      this.animInterval=setInterval(()=>{
+        this.tailDigits=Engine.genTail();
+        ticks++;
+        if(ticks>=9){
+          clearInterval(this.animInterval);
+          this.isShuffling=false;
           this.tailDigits=Engine.genTail();
-          // FIX: NO recalcular rareza ni valor durante ilusión - evita salto
+          this.updateRarityAndValue();
+          if(cb)cb();
         }
-      }, 110);
+      },75);
     },
-    stopShuffling(){ this.isShuffling=false; if(this.shufflingInterval){ clearInterval(this.shufflingInterval); this.shufflingInterval=null; } },
     updateRarityAndValue(){
       if(!this.isLocked && this.userDigits.length<4){
-        // FIX VALOR $0.00 - siempre muestra base durante búsqueda
-        this.rarity={type:'common', label:'', score:0, badgeClass:''};
-        this.value = this.denom * 1.8 + Math.random()*2;
+        this.rarity={type:'common',label:'',score:0,badgeClass:''};
+        this.value=this.denom*1.8+Math.random()*2;
+        if(this.userDigits.length===0)this.value=this.denom*1.8;
         return;
       }
-      const eight = this.userDigits.join('').padEnd(4,'0') + this.tailDigits.join('');
-      this.rarity = Engine.checkRarity(eight);
-      this.value = Engine.calcValue(this.userDigits, this.denom, this.rarity);
-      if(!this.value || this.value<this.denom) this.value = this.denom*1.8;
+      const eight=this.userDigits.join('').padEnd(4,'0')+this.tailDigits.join('').replace(/-/g,'0');
+      this.rarity=Engine.checkRarity(eight);
+      this.value=Engine.calcValue(this.userDigits,this.denom,this.rarity);
+      if(!this.value||this.value<this.denom)this.value=this.denom*1.8;
     },
     setDenom(d){
-      if(d===this.denom) return;
-      this.stopShuffling();
-      this.denom=d; this.userDigits=[]; this.isLocked=false; this.matchAttemptsLeft=this.maxAttempts;
-      this.tailDigits=Engine.genTail(); this.letters=Engine.genLetters(this.denom); this.yr=2006; this.securitySeal=Engine.genSeal();
+      if(d===this.denom)return;
+      if(this.animInterval)clearInterval(this.animInterval);
+      this.isShuffling=false;
+      this.denom=d;this.userDigits=[];this.isLocked=false;this.matchAttemptsLeft=this.maxAttempts;
+      this.tailDigits=['-','-','-','-'];this.letters=Engine.genLetters(this.denom);this.securitySeal=Engine.genSeal();
       this.updateRarityAndValue();
-      // FIX SALTO: pequeño delay antes de reiniciar shuffle para evitar pestañeo constante
-      setTimeout(()=>{ this.startShuffling(); }, 60);
       this.showToast('Denominación $'+d,'info');
     },
-    pressNum(n){ if(this.isLocked || this.userDigits.length>=4) return; this.userDigits.push(n); this.updateRarityAndValue(); if(this.userDigits.length===4) this.lockCombo(); },
-    deleteDigit(){ if(this.isLocked){ this.clearInput(); return; } if(this.userDigits.length===0) return; this.userDigits.pop(); this.updateRarityAndValue(); this.startShuffling(); },
-    clearInput(){ this.stopShuffling(); this.userDigits=[]; this.isLocked=false; this.matchAttemptsLeft=this.maxAttempts; this.tailDigits=Engine.genTail(); this.letters=Engine.genLetters(this.denom); this.yr=2006; this.securitySeal=Engine.genSeal(); this.updateRarityAndValue(); this.startShuffling(); },
-    lockCombo(){ if(this.userDigits.length<4) return; this.isLocked=true; this.stopShuffling(); this.matchAttemptsLeft=this.maxAttempts; this.updateRarityAndValue(); const serial=`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`; this.showToast('¡Serie Sellada!','success'); },
-    doMatch(){ if(!this.isLocked || this.matchAttemptsLeft<=0) return; this.tailDigits=Engine.genTail(); this.letters=Engine.genLetters(this.denom); this.updateRarityAndValue(); this.matchAttemptsLeft--; this.totalMatchCount++; localStorage.setItem('dgt_total_matches', this.totalMatchCount.toString()); if(this.totalMatchCount>=10 && !this.stripePaid) this.showStripeCard=true; },
-    postSD(){ if(!this.isLocked) return; this.showToast('Post SD guardado','success'); },
-    claimSD(){ const full=`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`; const subject=`Claim SD - ${full} - $${this.value.toFixed(2)}`; const body=`Serial: ${full}\nValor: $${this.value.toFixed(2)}\nAnon: ${ANON_ID}`; window.location.href=`mailto:dollardmach@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; },
-    goStripe(){ if(!(this.legal1 && this.legal2)) return; localStorage.setItem('dgt_stripe_pending','true'); window.location.href=STRIPE_URL + '?dgt_anon=' + ANON_ID; },
-    showToast(m,type='success'){ clearTimeout(this.toastTimer); this.toast.classes=type==='success'?'bg-amber-400 text-black':'bg-zinc-800 text-white border border-white/10'; this.toast.message=m; this.toast.visible=true; this.toastTimer=setTimeout(()=>{ this.toast.visible=false; }, 2200); },
-    get topDigitsDisplayFixed(){ const u=this.userDigits; return `${u[0]!==undefined?u[0]:'-'}${u[1]!==undefined?u[1]:'-'} ${u[2]!==undefined?u[2]:'-'}${u[3]!==undefined?u[3]:'-'}`; },
-    get topDigitsDisplayTail(){ const t=this.tailDigits; return `${t[0]}${t[1]} ${t[2]}${t[3]}`; },
-    get lettersDisplay(){ return this.denom===1 ? `${this.letters.a}-${this.letters.c}` : `${this.letters.a}-${this.letters.b}-${this.letters.c}`; },
-    get finalPrefix(){ return this.denom===1 ? this.letters.a : `${this.letters.a}${this.letters.b}`; },
-    get finalUserPart(){ return this.userDigits.join('').padEnd(4,'0'); },
-    get finalTailPart(){ return this.tailDigits.join(''); }
+    pressNum(n){
+      if(this.isLocked||this.userDigits.length>=4||this.isShuffling)return;
+      this.userDigits.push(n);
+      this.animateTailOnPress(()=>{
+        if(this.userDigits.length===4){
+          this.lockCombo();
+        }
+      });
+    },
+    deleteDigit(){
+      if(this.animInterval)clearInterval(this.animInterval);
+      this.isShuffling=false;
+      if(this.isLocked){this.clearInput();return;}
+      if(this.userDigits.length===0)return;
+      this.userDigits.pop();
+      if(this.userDigits.length===0)this.tailDigits=['-','-','-','-'];
+      this.updateRarityAndValue();
+    },
+    clearInput(){
+      if(this.animInterval)clearInterval(this.animInterval);
+      this.isShuffling=false;
+      this.userDigits=[];this.isLocked=false;this.matchAttemptsLeft=this.maxAttempts;
+      this.tailDigits=['-','-','-','-'];this.letters=Engine.genLetters(this.denom);this.securitySeal=Engine.genSeal();
+      this.updateRarityAndValue();
+    },
+    lockCombo(){
+      if(this.userDigits.length<4)return;
+      this.isLocked=true;
+      this.updateRarityAndValue();
+      this.showToast('¡Serie Sellada!','success');
+      // FIX BOVEDA: auto scroll para que se vea
+      this.$nextTick(()=>{
+        setTimeout(()=>{
+          document.getElementById('boveda')?.scrollIntoView({behavior:'smooth',block:'start'});
+        },150);
+      });
+    },
+    doMatch(){
+      if(!this.isLocked||this.matchAttemptsLeft<=0)return;
+      this.tailDigits=Engine.genTail();this.letters=Engine.genLetters(this.denom);this.updateRarityAndValue();
+      this.matchAttemptsLeft--;this.totalMatchCount++;localStorage.setItem('dgt_total_matches',this.totalMatchCount.toString());
+      if(this.totalMatchCount>=10&&!this.stripePaid)this.showStripeCard=true;
+    },
+    postSD(){if(!this.isLocked)return;this.showToast('Post SD guardado','success');},
+    claimSD(){const full=`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`;const subject=`Claim SD - ${full} - $${this.value.toFixed(2)}`;const body=`Serial: ${full}\nValor: $${this.value.toFixed(2)}\nAnon: ${ANON_ID}`;window.location.href=`mailto:dollardmach@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;},
+    goStripe(){if(!(this.legal1&&this.legal2))return;localStorage.setItem('dgt_stripe_pending','true');window.location.href=STRIPE_URL+'?dgt_anon='+ANON_ID;},
+    showToast(m,type='success'){clearTimeout(this.toastTimer);this.toast.classes=type==='success'?'bg-amber-400 text-black':'bg-zinc-800 text-white border border-white/10';this.toast.message=m;this.toast.visible=true;this.toastTimer=setTimeout(()=>{this.toast.visible=false;},2200);},
+    get topDigitsDisplayFixed(){const u=this.userDigits;return `${u[0]!==undefined?u[0]:'-'}${u[1]!==undefined?u[1]:'-'} ${u[2]!==undefined?u[2]:'-'}${u[3]!==undefined?u[3]:'-'}`;},
+    get topDigitsDisplayTail(){const t=this.tailDigits;if(t[0]==='-')return '-- --';return `${t[0]}${t[1]} ${t[2]}${t[3]}`;},
+    get lettersDisplay(){return this.denom===1?`${this.letters.a}-${this.letters.c}`:`${this.letters.a}-${this.letters.b}-${this.letters.c}`;},
+    get finalPrefix(){return this.denom===1?this.letters.a:`${this.letters.a}${this.letters.b}`;},
+    get finalUserPart(){return this.userDigits.join('').padEnd(4,'0');},
+    get finalTailPart(){return this.tailDigits.join('').replace(/-/g,'0');}
   }
 }
 </script>
