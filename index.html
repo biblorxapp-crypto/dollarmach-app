@@ -42,7 +42,7 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
       </div>
       <button @click="goStripe()" :disabled="!(legal1&&legal2)" class="mt-5 w-full kbtn rounded-[14px] bg-white py-4 font-black text-black text-[13px] tracking-widest disabled:opacity-30 disabled:cursor-not-allowed">DESBLOQUEAR BÓVEDA — $29 USD →</button>
       <div class="mt-3 text-[9px] text-center text-zinc-600 tracking-widest uppercase">Pago seguro procesado por Stripe • Acceso inmediato</div>
-      <button type="button" @click="localStorage.removeItem('dgt_total_matches'); localStorage.removeItem('dgt_history'); location.href=location.pathname+'?reset=1'" class="mt-4 text-[10px] text-zinc-500 underline">🔄 Reset de prueba (borra los 10 intentos)</button>
+      
     </div>
     
     <div class="mt-4 flex justify-center gap-3 text-[10px] underline text-zinc-600"><button type="button" @click.stop="showTerms=true">Términos</button><button type="button" @click.stop="showPrivacy=true">Privacidad</button><button type="button" @click.stop="showDisclaimer=true">Descargo</button><button type="button" @click.stop="showRefund=true">Reembolsos</button></div>
@@ -179,16 +179,6 @@ function dollarMachineApp(){
     refundText:`Suscripciones digitales: puedes cancelar en cualquier momento desde tu portal de Stripe. Reembolsos dentro de 7 días si no usaste funciones premium, escribiendo a dollardmach@gmail.com con tu ID.`,
     initApp(){
       const p=new URLSearchParams(window.location.search);
-      if(p.get('reset')==='1' || p.get('clear')==='1' || p.get('test')==='1' || p.get('reset_dgt')==='1'){
-        localStorage.removeItem('dgt_total_matches');
-        localStorage.removeItem('dgt_history');
-        localStorage.removeItem('dgt_stripe_paid');
-        this.totalMatchCount=0;
-        this.stripePaid=false;
-        this.history=[];
-        this.showToast('Bóveda reseteada para prueba','info');
-        history.replaceState({},'',location.pathname);
-      }
       this.letters=Engine.genLetters(this.denom);this.securitySeal=Engine.genSeal();this.tailDigits=['-','-','-','-'];this.updateRarityAndValue();
       if(this.totalMatchCount>=10&&!this.stripePaid)this.showStripeCard=true;
       if(p.get('stripe_success')==='1'){this.stripePaid=true;localStorage.setItem('dgt_stripe_paid','true');this.showStripeCard=false;this.showToast('Pago verificado','success');history.replaceState({},'',location.pathname);}
