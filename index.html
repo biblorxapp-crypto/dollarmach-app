@@ -73,34 +73,35 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
     <div class="rounded-2xl border border-amber-500/20 bg-[#16140E] p-3 text-center"><div class="text-[10px] font-bold tracking-widest text-amber-300/70 uppercase">Valor Mach</div><div class="mt-1 font-mono text-[1.35rem] font-black tabular-nums text-emerald-300" x-text="'$' + value.toFixed(2)"></div><div class="text-[8px] text-zinc-500 uppercase" x-text="'Base $' + denom"></div></div>
   </section>
 
-  <section class="mt-4 rounded-[28px] border border-white/[0.08] bg-[#0E1212] p-3.5 shadow-2xl">
-    <div class="grid grid-cols-4 gap-2.5">
-      <button @click="setDenom(1)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===1 ? 'bg-emerald-500 ring-2 ring-white/40' : 'bg-emerald-500/70'">$1</button>
-      <button @click="setDenom(5)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===5 ? 'bg-sky-500 ring-2 ring-white/40' : 'bg-sky-500/70'">$5</button>
-      <button @click="setDenom(10)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===10 ? 'bg-violet-500 ring-2 ring-white/40' : 'bg-violet-500/70'">$10</button>
-      <button @click="setDenom(20)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===20 ? 'bg-orange-500 ring-2 ring-white/40' : 'bg-orange-500/70'">$20</button>
+    <section class="mt-4 rounded-[28px] border border-white/[0.08] bg-[#0E1212] p-3.5 shadow-2xl">
+    <div class="grid grid-cols-3 gap-2.5">
+      <button @click="setDenom(1)" class="kbtn h-[52px] rounded-[14px] text-[14px] font-black text-white border border-white/15 shadow-md" :class="denom===1 ? 'bg-emerald-500 ring-2 ring-white/40' : 'bg-emerald-500/70'">$1</button>
+      <button @click="setDenom(5)" class="kbtn h-[52px] rounded-[14px] text-[14px] font-black text-white border border-white/15 shadow-md" :class="denom===5 ? 'bg-sky-500 ring-2 ring-white/40' : 'bg-sky-500/70'">$5</button>
+      <button @click="setDenom(10)" class="kbtn h-[52px] rounded-[14px] text-[14px] font-black text-white border border-white/15 shadow-md" :class="denom===10 ? 'bg-violet-500 ring-2 ring-white/40' : 'bg-violet-500/70'">$10</button>
+      <button @click="setDenom(20)" class="kbtn h-[52px] rounded-[14px] text-[14px] font-black text-white border border-white/15 shadow-md" :class="denom===20 ? 'bg-orange-500 ring-2 ring-white/40' : 'bg-orange-500/70'">$20</button>
+      <button @click="setDenom(50)" class="kbtn h-[52px] rounded-[14px] text-[14px] font-black text-white border border-white/15 shadow-md" :class="denom===50 ? 'bg-pink-500 ring-2 ring-white/40' : 'bg-pink-500/70'">$50</button>
+      <button @click="setDenom(100)" class="kbtn h-[52px] rounded-[14px] text-[14px] font-black text-white border border-white/15 shadow-md" :class="denom===100 ? 'bg-amber-500 ring-2 ring-white/40' : 'bg-amber-500/70'">$100</button>
+    </div>
+    <div class="my-3 h-[1px] bg-white/10"></div>
+    <div class="grid grid-cols-3 gap-2.5">
       <button @click="pressNum(7)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">7</button>
       <button @click="pressNum(8)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">8</button>
       <button @click="pressNum(9)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">9</button>
-      <button @click="setDenom(50)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===50 ? 'bg-pink-500 ring-2 ring-white/40' : 'bg-pink-500/70'">$50</button>
       <button @click="pressNum(4)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">4</button>
       <button @click="pressNum(5)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">5</button>
       <button @click="pressNum(6)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">6</button>
-      <button @click="setDenom(100)" class="kbtn h-[60px] rounded-[16px] text-[15px] font-black text-white border border-white/15 shadow-md" :class="denom===100 ? 'bg-amber-500 ring-2 ring-white/40' : 'bg-amber-500/70'">$100</button>
       <button @click="pressNum(1)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">1</button>
       <button @click="pressNum(2)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">2</button>
       <button @click="pressNum(3)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">3</button>
-      <button @click="deleteDigit()" class="kbtn h-[60px] rounded-[16px] border border-white/10 bg-zinc-800 text-[18px]">⌫</button>
-      <div></div>
       <button @click="pressNum(0)" :disabled="userDigits.length>=4 || isLocked || isShuffling" class="kbtn h-[60px] rounded-[16px] border border-white/[0.08] bg-[#1C2424] text-[20px] font-black num disabled:opacity-25">0</button>
-      <button @click="clearInput()" class="kbtn h-[60px] rounded-[16px] border border-amber-500/20 bg-amber-500/10 text-amber-300 text-[11px] font-black">CLEAR</button>
-      <div></div>
+      <button @click="clearInput()" class="kbtn h-[60px] rounded-[16px] border border-amber-500/20 bg-amber-500/10 text-amber-300 text-[11px] font-black tracking-widest">CLEAR</button>
+      <button @click="deleteDigit()" class="kbtn h-[60px] rounded-[16px] border border-white/10 bg-zinc-800 text-[18px]">⌫</button>
     </div>
     <div class="mt-3 grid grid-cols-2 gap-2.5">
       <button @click="doMatch()" :disabled="!isLocked || matchAttemptsLeft<=0" class="kbtn h-[52px] rounded-[14px] bg-amber-400 text-black font-black text-[13px] tracking-widest disabled:opacity-20">BUSCAR MATCH</button>
       <button @click="openHistory()" class="kbtn h-[52px] rounded-[14px] border border-white/10 bg-white/5 text-white font-bold text-[12px] tracking-widest">BÓVEDA (<span x-text="history.length"></span>)</button>
     </div>
-    <div class="mt-3 text-center text-[10px] text-zinc-500"><span x-text="matchAttemptsLeft"></span> intentos de coincidencia restantes • <span x-text="totalMatchCount"></span>/10 totales</div>
+    <div class="mt-3 text-center text-[10px] text-zinc-500"><span x-text="matchAttemptsLeft"></span> intentos de coincidencia restantes • <span x-text="totalMatchCount"></span>/40 totales</div>
   </section>
 
   <!-- BÓVEDA SIEMPRE ABIERTA - V3.8 FIX -->
@@ -184,6 +185,30 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
       <div x-show="filteredMarketListings.length===0" class="text-center py-8 text-[11px] text-zinc-600">No hay resultados. Sé el primero en registrar un billete con patrón interesante.</div>
     </div>
   </section>
+
+
+  <footer class="mt-10 mb-6 text-center">
+    <div class="rounded-[16px] border border-white/5 bg-[#0A0A0A] p-4">
+      <div class="flex justify-center gap-4 text-[10px] text-zinc-500">
+        <span>Series guardadas: <b class="text-zinc-300" x-text="history.length"></b></span>
+        <span>•</span>
+        <span>En mercado: <b class="text-amber-300" x-text="marketListings.length"></b></span>
+        <span>•</span>
+        <span>Intentos: <b class="text-white" x-text="totalMatchCount"></b>/40</span>
+      </div>
+      <div class="mt-3 text-[10px] leading-[1.5] text-zinc-600">
+        <span class="font-bold tracking-widest text-zinc-500">© 2026 DOLLARDGT.COM</span><br>
+        Todos los derechos reservados • Herramienta de simulación para entretenimiento y educación<br>
+        Valores algorítmicos simulados, no constituyen tasación oficial • Pago seguro por Stripe • Hecho con pasión para coleccionistas
+      </div>
+      <div class="mt-3 flex justify-center gap-3 text-[9px] underline text-zinc-700">
+        <button @click="showTerms=true">Términos</button>
+        <button @click="showPrivacy=true">Privacidad</button>
+        <button @click="showDisclaimer=true">Descargo</button>
+        <button @click="showRefund=true">Reembolsos</button>
+      </div>
+    </div>
+  </footer>
 
 </main>
 <script>
