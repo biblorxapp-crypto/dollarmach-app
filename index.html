@@ -26,12 +26,12 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
 </head>
 <body class="min-h-dvh antialiased text-white flex justify-center px-3 py-6" x-data="dollarMachineApp()" x-init="initApp()">
 
-<!-- BLOQUEO TOTAL NEGRO 10 INTENTOS - V3.8 -->
-<div x-show="totalMatchCount>=10 && !stripePaid" x-cloak x-transition.opacity class="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center p-5 text-center overflow-y-auto">
+<!-- BLOQUEO TOTAL NEGRO 40 INTENTOS - V3.8 -->
+<div x-show="totalMatchCount>=40 && !stripePaid" x-cloak x-transition.opacity class="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center p-5 text-center overflow-y-auto">
   <div class="w-full max-w-[420px] py-6">
     <div class="text-[68px] leading-none">🔒</div>
     <h1 class="font-black text-[36px] tracking-[0.15em] mt-3 leading-none">BÓVEDA<br><span class="text-amber-400">BLOQUEADA</span></h1>
-    <p class="mt-4 text-[13px] leading-[1.6] text-zinc-400">Has alcanzado el límite de <b class="text-white">10 intentos</b>. La bóveda se ha sellado por seguridad.<br><br>Realiza el desbloqueo para continuar analizando series ilimitadas.</p>
+    <p class="mt-4 text-[13px] leading-[1.6] text-zinc-400">Has alcanzado el límite de <b class="text-white">40 intentos</b>. La bóveda se ha sellado por seguridad.<br><br>Realiza el desbloqueo para continuar analizando series ilimitadas.</p>
     
     <div class="mt-6 rounded-[20px] border border-amber-500/20 bg-[#12110E] p-5 text-left shadow-2xl">
       <h3 class="font-black text-[13px] text-amber-300 tracking-wide">Términos de la Membresía y Descargo</h3>
@@ -121,7 +121,7 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
   </section>
 
   <!-- STRIPE CARD ORIGINAL MANTENIDO POR SI NO QUIERES EL BLOQUEO TOTAL, SE OCULTA AUTOMÁTICAMENTE CUANDO ACTIVA EL BLOQUEO NEGRO -->
-  <section class="mt-6 rounded-[20px] border border-amber-500/20 bg-[#12110E] p-5" x-show="showStripeCard && !(totalMatchCount>=10 && !stripePaid)" x-transition>
+  <section class="mt-6 rounded-[20px] border border-amber-500/20 bg-[#12110E] p-5" x-show="showStripeCard && !(totalMatchCount>=40 && !stripePaid)" x-transition>
     <h3 class="font-black text-[15px] text-amber-300">Términos de la Membresía y Descargo de Responsabilidad</h3>
     <p class="mt-2 text-[12px] leading-[1.5] text-zinc-300">Al suscribirte a DOLLARDGT.COM, aceptas que esta plataforma es una herramienta de simulación para fines de entretenimiento y educación. Los valores asignados a los billetes son estimaciones algorítmicas simuladas y no constituyen una tasación comercial, financiera, ni oficial del mercado de coleccionismo. El acceso a las funciones completas requiere una suscripción activa. Al presionar el botón de pago, confirmas que has leído y aceptas nuestros Términos de Servicio y Política de Reembolso.</p>
     <div class="mt-3 space-y-2 text-[11px] text-zinc-400">
@@ -139,6 +139,52 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
   <div x-show="showHistory" class="fixed inset-0 z-[1000] grid place-items-center bg-black/90 p-4 backdrop-blur-sm" @click.self="showHistory=false"><div class="max-h-[80vh] w-full max-w-[420px] overflow-auto rounded-2xl bg-[#111] p-5"><div class="flex justify-between"><h4 class="font-black">Bóveda • Digits Guardado Local POST SD</h4><button @click="clearHistory()" class="text-[11px] text-red-300 underline">Borrar todo</button></div><template x-for="h in history"><div class="mt-3 rounded-xl border border-white/10 p-3"><div class="font-mono text-[12px]" x-text="h.serial"></div><div class="text-[10px] text-zinc-500" x-text="h.date + ' • $' + h.value.toFixed(2)"></div></div></template><button @click="showHistory=false" class="mt-4 w-full rounded-xl bg-white text-black py-2.5 font-bold">Cerrar</button></div></div>
 
   <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all duration-300 pointer-events-none" :class="toast.visible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'"><div class="rounded-full px-4 py-2 text-[12px] font-bold shadow-2xl" :class="toast.classes" x-text="toast.message"></div></div>
+
+  <!-- MERCADO DE COLECCIONISTAS - V3.9 MOCK LOCAL -->
+  <section class="mt-8 rounded-[24px] border border-amber-500/20 bg-[#0F0F0A] p-5 shadow-2xl">
+    <div class="flex items-center justify-between">
+      <h2 class="font-black text-[16px] tracking-widest text-amber-300">🔍 MERCADO DGT</h2>
+      <span class="text-[9px] px-2 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/20">BETA • LOCAL</span>
+    </div>
+    <p class="mt-2 text-[11px] leading-[1.5] text-zinc-400">Registra el billete que crees que tiene valor. Otros coleccionistas podrán buscarlo y contactarte. <b class="text-zinc-200">Solo miembros con bóveda desbloqueada pueden publicar (próximamente).</b></p>
+    
+    <div class="mt-4 flex gap-2">
+      <input x-model="marketSearch" placeholder="Buscar: 7777, 2013, F-H-B, escalera..." class="flex-1 rounded-[12px] bg-black border border-white/10 px-3 py-2.5 text-[12px] text-white placeholder:text-zinc-600 outline-none focus:border-amber-500/50">
+      <button @click="showMarketForm=!showMarketForm" class="kbtn rounded-[12px] bg-amber-400 px-4 py-2.5 text-[11px] font-black text-black">+ REGISTRAR</button>
+    </div>
+
+    <div x-show="showMarketForm" x-transition class="mt-4 rounded-[16px] bg-black border border-white/10 p-4">
+      <div class="text-[11px] font-bold tracking-widest text-zinc-400 uppercase">Tu billete actual sellado</div>
+      <div class="mt-2 font-mono text-[13px] text-amber-200" x-text="isLocked ? `${finalPrefix} ${finalUserPart}${finalTailPart} ${letters.c} • ${yr} • $${value.toFixed(2)} • ${rarity.label || 'COMÚN'}` : 'Primero sella una serie de 4 dígitos arriba'"></div>
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        <input x-model="newListingContact" placeholder="WhatsApp o Email" class="rounded-[10px] bg-[#111] border border-white/10 px-3 py-2 text-[11px] text-white outline-none">
+        <input x-model="newListingNote" placeholder="Nota: capicúa, binario..." class="rounded-[10px] bg-[#111] border border-white/10 px-3 py-2 text-[11px] text-white outline-none">
+      </div>
+      <button @click="registerToMarket()" :disabled="!isLocked || !newListingContact" class="mt-3 w-full kbtn rounded-[12px] bg-white py-2.5 text-[11px] font-black tracking-widest text-black disabled:opacity-30">PUBLICAR EN MERCADO LOCAL →</button>
+      <div class="mt-2 text-[9px] text-zinc-600">* Por ahora se guarda solo en este celular (prueba). En Fase 2 será en la nube para todos.</div>
+    </div>
+
+    <div class="mt-5 space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+      <template x-for="item in filteredMarketListings" :key="item.id">
+        <div class="rounded-[14px] border border-white/10 bg-[#121212] p-3 flex justify-between items-center gap-3">
+          <div>
+            <div class="font-mono text-[12px] font-bold text-white" x-text="`${item.serial} • ${item.yr} • $${item.value}`"></div>
+            <div class="mt-1 flex gap-2 items-center">
+              <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/20" x-text="item.rarity"></span>
+              <span class="text-[10px] text-zinc-500" x-text="item.note"></span>
+            </div>
+            <div class="mt-1 text-[9px] text-zinc-600" x-text="`Contacto: ${item.contact} • ${item.date}`"></div>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <button @click="contactMarket(item)" class="kbtn rounded-[10px] bg-emerald-500 px-3 py-1.5 text-[10px] font-black text-black">CONTACTAR</button>
+            <button @click="deleteMarketListing(item.id)" class="text-[9px] text-zinc-600 underline">Borrar</button>
+          </div>
+        </div>
+      </template>
+      <div x-show="filteredMarketListings.length===0" class="text-center py-8 text-[11px] text-zinc-600">No hay resultados. Sé el primero en registrar un billete con patrón interesante.</div>
+    </div>
+  </section>
+
 </main>
 <script>
 const STRIPE_URL = "https://buy.stripe.com/7sY9AU9Q1gSeaUi9vo7Vm0j";
@@ -169,9 +215,10 @@ function dollarMachineApp(){
   return {
     denom:1,userDigits:[],isLocked:false,letters:{a:'A',b:'B',c:'C'},yr:2021,value:1.8,tailDigits:['-','-','-','-'],securitySeal:'SD-XXXXX',rarity:{type:'common',label:'',score:0,badgeClass:''},
     toast:{visible:false,message:'',classes:''},toastTimer:null,isShuffling:false,animInterval:null,
-    matchAttemptsLeft:10,maxAttempts:10,totalMatchCount:parseInt(localStorage.getItem('dgt_total_matches')||'0'),
+    matchAttemptsLeft:40,maxAttempts:40,totalMatchCount:parseInt(localStorage.getItem('dgt_total_matches')||'0'),
     showStripeCard:false,legal1:false,legal2:false,stripePaid:localStorage.getItem('dgt_stripe_paid')==='true',
     history:JSON.parse(localStorage.getItem('dgt_history')||'[]'),showHistory:false,
+    marketSearch:'',marketListings:JSON.parse(localStorage.getItem('dgt_market_listings')||'[]'),showMarketForm:false,newListingContact:'',newListingNote:'',
     showTerms:false,showPrivacy:false,showDisclaimer:false,showRefund:false,
     termsText:`1. DOLLARDGT.COM es una herramienta de simulación digital para entretenimiento y educación sobre numeración de billetes.\n2. No es un casino, lotería, casa de apuestas ni servicio financiero.\n3. No garantizamos valor comercial real. Los valores Mach son estimaciones algorítmicas con fines lúdicos.\n4. La suscripción otorga acceso a funciones premium de la simulación.\n5. Uso mayor de 18 años.\n6. Nos reservamos derecho de modificar funciones.`,
     privacyText:`Recopilamos solo ID anónimo local y conteo de usos para funcionamiento. No vendemos datos. Pagos procesados por Stripe bajo su política. Puedes solicitar borrado escribiendo a dollardmach@gmail.com`,
@@ -180,7 +227,7 @@ function dollarMachineApp(){
     initApp(){
       const p=new URLSearchParams(window.location.search);
       this.letters=Engine.genLetters(this.denom);this.securitySeal=Engine.genSeal();this.tailDigits=['-','-','-','-'];this.updateRarityAndValue();
-      if(this.totalMatchCount>=10&&!this.stripePaid)this.showStripeCard=true;
+      if(this.totalMatchCount>=40&&!this.stripePaid)this.showStripeCard=true;
       if(p.get('stripe_success')==='1'){this.stripePaid=true;localStorage.setItem('dgt_stripe_paid','true');this.showStripeCard=false;this.showToast('Pago verificado','success');history.replaceState({},'',location.pathname);}
 
     },
@@ -210,16 +257,41 @@ function dollarMachineApp(){
     pressNum(n){if(this.isLocked||this.userDigits.length>=4||this.isShuffling)return;this.userDigits.push(n);this.animateTailOnPress(()=>{if(this.userDigits.length===4){this.lockCombo();}});},
     deleteDigit(){if(this.animInterval)clearInterval(this.animInterval);this.isShuffling=false;if(this.isLocked){this.clearInput();return;}if(this.userDigits.length===0)return;this.userDigits.pop();if(this.userDigits.length===0)this.tailDigits=['-','-','-','-'];this.updateRarityAndValue();},
     clearInput(){if(this.animInterval)clearInterval(this.animInterval);this.isShuffling=false;this.userDigits=[];this.isLocked=false;this.matchAttemptsLeft=this.maxAttempts;this.tailDigits=['-','-','-','-'];this.letters=Engine.genLetters(this.denom);this.securitySeal=Engine.genSeal();this.updateRarityAndValue();},
-    lockCombo(){if(this.userDigits.length<4)return;this.isLocked=true;this.totalMatchCount++;localStorage.setItem('dgt_total_matches',this.totalMatchCount.toString());if(this.totalMatchCount>=10&&!this.stripePaid)this.showStripeCard=true;this.updateRarityAndValue();this.showToast('¡Serie Sellada! Intento '+this.totalMatchCount+'/10','success');this.$nextTick(()=>{setTimeout(()=>{document.getElementById('boveda')?.scrollIntoView({behavior:'smooth',block:'start'});},150);});},
-    doMatch(){if(!this.isLocked||this.matchAttemptsLeft<=0)return;this.tailDigits=Engine.genTail();this.letters=Engine.genLetters(this.denom);this.updateRarityAndValue();this.matchAttemptsLeft--;this.totalMatchCount++;localStorage.setItem('dgt_total_matches',this.totalMatchCount.toString());if(this.totalMatchCount>=10&&!this.stripePaid)this.showStripeCard=true;},
+    lockCombo(){if(this.userDigits.length<4)return;this.isLocked=true;this.totalMatchCount++;localStorage.setItem('dgt_total_matches',this.totalMatchCount.toString());if(this.totalMatchCount>=40&&!this.stripePaid)this.showStripeCard=true;this.updateRarityAndValue();this.showToast('¡Serie Sellada! Intento '+this.totalMatchCount+'/40','success');this.$nextTick(()=>{setTimeout(()=>{document.getElementById('boveda')?.scrollIntoView({behavior:'smooth',block:'start'});},150);});},
+    doMatch(){if(!this.isLocked||this.matchAttemptsLeft<=0)return;this.tailDigits=Engine.genTail();this.letters=Engine.genLetters(this.denom);this.updateRarityAndValue();this.matchAttemptsLeft--;this.totalMatchCount++;localStorage.setItem('dgt_total_matches',this.totalMatchCount.toString());if(this.totalMatchCount>=40&&!this.stripePaid)this.showStripeCard=true;},
     postSD(){if(!this.isLocked)return;const serial=`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`;const entry={denom:this.denom,serial:serial,seal:this.securitySeal,value:this.value,date:new Date().toLocaleString('es-PR',{month:'2-digit',day:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}),color:Engine.colorForDenom(this.denom)};this.history.push(entry);localStorage.setItem('dgt_history',JSON.stringify(this.history));this.showToast('Guardado en Bóveda 🗄️','success');},
     claimSD(){const full=`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`;const subject=`Claim SD - ${full} - $${this.value.toFixed(2)}`;const body=`Serial: ${full}\nValor: $${this.value.toFixed(2)}\nSello: ${this.securitySeal}\nAnon: ${ANON_ID}`;window.location.href=`mailto:dollardmach@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;},
     openHistory(){this.showHistory=true;},clearHistory(){if(confirm('¿Borrar toda la Bóveda?')){this.history=[];localStorage.setItem('dgt_history','[]');this.showHistory=false;}},
+    registerToMarket(){
+      if(!this.isLocked){this.showToast('Sella primero una serie','info');return;}
+      if(!this.newListingContact){this.showToast('Pon WhatsApp o Email','info');return;}
+      const serial=`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`;
+      const entry={id:Date.now(),serial:serial,yr:this.yr,value:this.value.toFixed(2),rarity:this.rarity.label||'COMÚN',note:this.newListingNote||'',contact:this.newListingContact,date:new Date().toLocaleDateString('es-PR'),denom:this.denom,full:`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c} ${this.yr}`};
+      const current=JSON.parse(localStorage.getItem('dgt_market_listings')||'[]');
+      current.push(entry);
+      localStorage.setItem('dgt_market_listings',JSON.stringify(current));
+      this.marketListings=current;
+      this.newListingContact='';this.newListingNote='';this.showMarketForm=false;
+      this.showToast('Publicado y conservado en Mercado ✓','success');
+    },
+    contactMarket(item){
+      const subject=`Interesado en tu serie ${item.serial} - DOLLARDGT`;
+      const body=`Hola, vi tu billete ${item.serial} ${item.yr} valor ${item.value} en DOLLARDGT. ¿Sigue disponible? Mi contacto: `;
+      if(item.contact.includes('@')){window.location.href=`mailto:${item.contact}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;}
+      else{const wa=item.contact.replace(/[^0-9]/g,'');window.open(`https://wa.me/${wa}?text=${encodeURIComponent(body+subject)}`,'_blank');}
+    },
+    deleteMarketListing(id){if(confirm('¿Borrar este registro del mercado local?')){const filtered=this.marketListings.filter(i=>i.id!==id);localStorage.setItem('dgt_market_listings',JSON.stringify(filtered));this.marketListings=filtered;}},
+
     goStripe(){if(!(this.legal1&&this.legal2)){this.showToast('Acepta los términos para desbloquear','info');return;}localStorage.setItem('dgt_stripe_pending','true');const url=STRIPE_URL+'?client_reference_id='+ANON_ID+'&dgt_anon='+ANON_ID;console.log('Stripe URL:',url);window.location.href=url;},
     showToast(m,type='success'){clearTimeout(this.toastTimer);this.toast.classes=type==='success'?'bg-amber-400 text-black':'bg-zinc-800 text-white border border-white/10';this.toast.message=m;this.toast.visible=true;this.toastTimer=setTimeout(()=>{this.toast.visible=false;},2200);},
     get topDigitsDisplayFixed(){const u=this.userDigits;return `${u[0]!==undefined?u[0]:'-'}${u[1]!==undefined?u[1]:'-'} ${u[2]!==undefined?u[2]:'-'}${u[3]!==undefined?u[3]:'-'}`;},
     get topDigitsDisplayTail(){const t=this.tailDigits;if(t[0]==='-')return '-- --';return `${t[0]}${t[1]} ${t[2]}${t[3]}`;},
     get lettersDisplay(){return this.denom===1?`${this.letters.a}-${this.letters.c}`:`${this.letters.a}-${this.letters.b}-${this.letters.c}`;},
+    get filteredMarketListings(){
+      const q=this.marketSearch.toLowerCase().trim();
+      if(!q)return this.marketListings.slice().reverse();
+      return this.marketListings.filter(i=> (i.serial+i.yr+i.rarity+i.note+i.value).toLowerCase().includes(q)).reverse();
+    },
     get finalPrefix(){return this.denom===1?this.letters.a:`${this.letters.a}${this.letters.b}`;},
     get finalUserPart(){return this.userDigits.join('').padEnd(4,'0');},
     get finalTailPart(){return this.tailDigits.join('').replace(/-/g,'0');}
