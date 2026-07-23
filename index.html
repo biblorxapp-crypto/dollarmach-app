@@ -40,7 +40,7 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
         <label class="flex gap-2 items-start cursor-pointer"><input type="checkbox" x-model="legal1" class="mt-0.5 accent-amber-400"> <span>Acepto <button type="button" @click.stop="showTerms=true" class="underline text-amber-300">Términos y Condiciones</button>, <button type="button" @click.stop="showPrivacy=true" class="underline text-amber-300">Privacidad</button> y <button type="button" @click.stop="showDisclaimer=true" class="underline text-amber-300">Descargo</button></span></label>
         <label class="flex gap-2 items-start cursor-pointer"><input type="checkbox" x-model="legal2" class="mt-0.5 accent-amber-400"> <span>Acepto <button type="button" @click.stop="showRefund=true" class="underline text-amber-300">Política de Reembolsos</button> y ser mayor de 18 años</span></label>
       </div>
-      <button @click="goStripe()" :disabled="!(legal1&&legal2)" class="mt-5 w-full kbtn rounded-[14px] bg-white py-4 font-black text-black text-[13px] tracking-widest disabled:opacity-30 disabled:cursor-not-allowed">DESBLOQUEAR BÓVEDA — $29 USD →</button>
+      <button @click="goStripe()" :disabled="!(legal1&&legal2)" class="mt-5 w-full kbtn rounded-[14px] bg-white py-4 font-black text-black text-[13px] tracking-widest disabled:opacity-30 disabled:cursor-not-allowed">DESBLOQUEAR BÓVEDA — $4.99 USD →</button>
       <div class="mt-3 text-[9px] text-center text-zinc-600 tracking-widest uppercase">Pago seguro procesado por Stripe • Acceso inmediato</div>
       
     </div>
