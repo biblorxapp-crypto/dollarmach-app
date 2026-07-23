@@ -10,6 +10,7 @@
 <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter'],display:['Fraunces'],mono:['JetBrains Mono']}}}}</script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <style>
+[x-cloak]{display:none !important}
 body{background:#050707;-webkit-tap-highlight-color:transparent}
 .glow-gold{box-shadow:0 0 30px rgba(245,158,11,.35),inset 0 1px 1px rgba(255,255,255,.4)}
 .glow-match{box-shadow:0 0 40px rgba(245,158,11,.6),inset 0 1px 1px rgba(255,255,255,.5);animation:pulseGold 1.8s infinite}
@@ -24,21 +25,44 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
 </style>
 </head>
 <body class="min-h-dvh antialiased text-white flex justify-center px-3 py-6" x-data="dollarMachineApp()" x-init="initApp()">
+
+<!-- BLOQUEO TOTAL NEGRO 10 INTENTOS - V3.8 -->
+<div x-show="totalMatchCount>=10 && !stripePaid" x-cloak x-transition.opacity class="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center p-5 text-center overflow-y-auto">
+  <div class="w-full max-w-[420px] py-6">
+    <div class="text-[68px] leading-none">🔒</div>
+    <h1 class="font-black text-[36px] tracking-[0.15em] mt-3 leading-none">BÓVEDA<br><span class="text-amber-400">BLOQUEADA</span></h1>
+    <p class="mt-4 text-[13px] leading-[1.6] text-zinc-400">Has alcanzado el límite de <b class="text-white">10 intentos</b>. La bóveda se ha sellado por seguridad.<br><br>Realiza el desbloqueo para continuar analizando series ilimitadas.</p>
+    
+    <div class="mt-6 rounded-[20px] border border-amber-500/20 bg-[#12110E] p-5 text-left shadow-2xl">
+      <h3 class="font-black text-[13px] text-amber-300 tracking-wide">Términos de la Membresía y Descargo</h3>
+      <p class="mt-2 text-[11px] leading-[1.5] text-zinc-300">Al suscribirte a DOLLARDGT.COM, aceptas que esta plataforma es una <b class="text-amber-200">herramienta de simulación para fines de entretenimiento y educación</b>. Los valores asignados a los billetes son estimaciones algorítmicas simuladas y no constituyen una tasación comercial, financiera, ni oficial del mercado de coleccionismo. El acceso a las funciones completas requiere una suscripción activa.</p>
+      <div class="mt-4 space-y-2.5 text-[11px] text-zinc-300">
+        <label class="flex gap-2 items-start cursor-pointer"><input type="checkbox" x-model="legal1" class="mt-0.5 accent-amber-400"> <span>Acepto <button type="button" @click="showTerms=true" class="underline text-amber-300">Términos y Condiciones</button>, <button type="button" @click="showPrivacy=true" class="underline text-amber-300">Privacidad</button> y <button type="button" @click="showDisclaimer=true" class="underline text-amber-300">Descargo</button></span></label>
+        <label class="flex gap-2 items-start cursor-pointer"><input type="checkbox" x-model="legal2" class="mt-0.5 accent-amber-400"> <span>Acepto <button type="button" @click="showRefund=true" class="underline text-amber-300">Política de Reembolsos</button> y ser mayor de 18 años</span></label>
+      </div>
+      <button @click="goStripe()" :disabled="!(legal1&&legal2)" class="mt-5 w-full kbtn rounded-[14px] bg-white py-4 font-black text-black text-[13px] tracking-widest disabled:opacity-30 disabled:cursor-not-allowed">DESBLOQUEAR BÓVEDA — $29 USD →</button>
+      <div class="mt-3 text-[9px] text-center text-zinc-600 tracking-widest uppercase">Pago seguro procesado por Stripe • Acceso inmediato</div>
+    </div>
+    
+    <div class="mt-4 flex justify-center gap-3 text-[10px] underline text-zinc-600"><button @click="showTerms=true">Términos</button><button @click="showPrivacy=true">Privacidad</button><button @click="showDisclaimer=true">Descargo</button><button @click="showRefund=true">Reembolsos</button></div>
+  </div>
+</div>
+
 <main class="w-full max-w-[420px] flex flex-col pb-24">
   <div class="flex items-center justify-between border-b border-white/10 pb-4">
-    <div><h1 class="font-black text-[2.15rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[10px] tracking-[0.25em] text-zinc-400 uppercase mt-1">Serial Engine • v3.7 Legal Shield</p></div>
+    <div><h1 class="font-black text-[2.15rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[10px] tracking-[0.25em] text-zinc-400 uppercase mt-1">Serial Engine • v3.8 BÓVEDA + BLOQUEO TOTAL</p></div>
     <div class="grid h-11 w-11 place-items-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-300 glow-gold font-mono font-bold text-sm">DGT</div>
   </div>
 
   <section class="mt-6 rounded-[24px] border border-amber-500/20 bg-gradient-to-b from-[#16140E] to-[#0D1010] p-5 shadow-2xl">
-    <div class="flex items-center justify-between text-[11px] font-bold tracking-[0.2em] uppercase"><span class="text-zinc-400">Buffer de Dígitos (8)</span><span :class="isShuffling ? 'text-amber-300 animate-pulse' : 'text-emerald-400'" x-text="isShuffling ? 'BUSCANDO...' : userDigits.length + '/4 Ingresados'"></span></div>
+    <div class="flex items-center justify-between text-[11px] font-bold tracking-[0.2em] uppercase"><span class="text-zinc-400">Buffer de Dígitos (8)</span><span :class="isShuffling ? 'text-amber-300 animate-pulse' : 'text-emerald-400'" x-text="isShuffling ? 'BUSCANDO 600ms...' : userDigits.length + '/4 Ingresados'"></span></div>
     <div class="mt-3 font-mono font-black tracking-[0.08em] text-[2.8rem] leading-none text-white flex justify-center gap-2 tabular-nums">
       <span x-text="topDigitsDisplayFixed"></span><span class="text-zinc-600">-</span><span :class="isShuffling ? 'tail-running text-amber-200' : 'text-zinc-300'" x-text="topDigitsDisplayTail"></span>
     </div>
-    <div class="mt-2 text-center text-[11px] text-zinc-500">Primeros 4: fijos del billete real | Últimos 4: búsqueda al apretar</div>
+    <div class="mt-2 text-center text-[11px] text-zinc-500">Primeros 4: fijos del billete real | Últimos 4: búsqueda 600ms al apretar cada dígito</div>
     <div class="rarity-wrap mt-3">
       <template x-if="rarity.type !== 'common' && isLocked"><span class="rounded-full px-3 py-1 text-[10px] font-black tracking-widest border" :class="rarity.badgeClass" x-text="rarity.label"></span></template>
-      <template x-if="rarity.type === 'common' || !isLocked"><span class="text-[10px] text-zinc-600 tracking-widest opacity-30" x-text="isShuffling ? 'ESCANEANDO...' : 'ESPERANDO SERIE'"></span></template>
+      <template x-if="rarity.type === 'common' || !isLocked"><span class="text-[10px] text-zinc-600 tracking-widest opacity-30" x-text="isShuffling ? 'ESCANEANDO 600ms...' : 'ESPERANDO SERIE'"></span></template>
     </div>
   </section>
 
@@ -75,16 +99,28 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
       <button @click="doMatch()" :disabled="!isLocked || matchAttemptsLeft<=0" class="kbtn h-[52px] rounded-[14px] bg-amber-400 text-black font-black text-[13px] tracking-widest disabled:opacity-20">BUSCAR MATCH</button>
       <button @click="openHistory()" class="kbtn h-[52px] rounded-[14px] border border-white/10 bg-white/5 text-white font-bold text-[12px] tracking-widest">BÓVEDA (<span x-text="history.length"></span>)</button>
     </div>
-    <div class="mt-3 text-center text-[10px] text-zinc-500"><span x-text="matchAttemptsLeft"></span> intentos de coincidencia restantes</div>
+    <div class="mt-3 text-center text-[10px] text-zinc-500"><span x-text="matchAttemptsLeft"></span> intentos de coincidencia restantes • <span x-text="totalMatchCount"></span>/10 totales</div>
   </section>
 
-  <section id="boveda" class="mt-4 rounded-[20px] border border-white/10 bg-[#0E1212] p-4" x-show="isLocked">
-    <div class="flex items-center justify-between"><h3 class="font-black tracking-widest text-[11px] text-amber-300">BÓVEDA • SERIE SELLADA</h3><span class="text-[10px] text-zinc-500" x-text="securitySeal"></span></div>
-    <div class="mt-3 font-mono text-[1.1rem] font-bold text-white" x-text="finalPrefix + ' ' + finalUserPart + finalTailPart + ' ' + letters.c"></div>
-    <div class="mt-3 grid grid-cols-2 gap-2"><button @click="postSD()" class="kbtn rounded-xl bg-white text-black font-black py-3 text-[12px]">GUARDAR SD</button><button @click="claimSD()" class="kbtn rounded-xl border border-white/15 bg-white/5 py-3 text-[12px] font-bold">RECLAMAR</button></div>
+  <!-- BÓVEDA SIEMPRE ABIERTA - V3.8 FIX -->
+  <section id="boveda" class="mt-4 rounded-[20px] border border-amber-500/20 bg-[#0E1212] p-4 shadow-lg">
+    <div class="flex items-center justify-between"><h3 class="font-black tracking-[0.2em] text-[11px] text-amber-300">🔓 BÓVEDA • SERIE SELLADA • SIEMPRE ABIERTA</h3><div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,.8)] animate-pulse"></span><span class="text-[10px] text-zinc-500" x-text="securitySeal"></span></div></div>
+    
+    <div x-show="isLocked" x-transition>
+      <div class="mt-3 font-mono text-[1.1rem] font-bold text-white tracking-wider" x-text="finalPrefix + ' ' + finalUserPart + finalTailPart + ' ' + letters.c"></div>
+      <div class="mt-1 text-[10px] text-zinc-500">Serie Sellada visible siempre abajo — guardada local</div>
+      <div class="mt-3 grid grid-cols-2 gap-2"><button @click="postSD()" class="kbtn rounded-xl bg-white text-black font-black py-3 text-[12px]">GUARDAR SD</button><button @click="claimSD()" class="kbtn rounded-xl border border-white/15 bg-white/5 py-3 text-[12px] font-bold">RECLAMAR</button></div>
+    </div>
+    
+    <div x-show="!isLocked" class="mt-4 rounded-xl border border-dashed border-white/10 bg-black/40 p-4 text-center">
+      <div class="text-[11px] font-bold tracking-widest text-zinc-400">BÓVEDA ABIERTA Y VACÍA</div>
+      <div class="mt-1 text-[10px] text-zinc-600 leading-[1.4]">La Serie Sellada permanece visible siempre aquí abajo.<br>No solo tras 4 dígitos. Ingresa 4 dígitos para sellar la primera.</div>
+      <div class="mt-3 font-mono text-[12px] text-zinc-700">-- -- -- --</div>
+    </div>
   </section>
 
-  <section class="mt-6 rounded-[20px] border border-amber-500/20 bg-[#12110E] p-5" x-show="showStripeCard" x-transition>
+  <!-- STRIPE CARD ORIGINAL MANTENIDO POR SI NO QUIERES EL BLOQUEO TOTAL, SE OCULTA AUTOMÁTICAMENTE CUANDO ACTIVA EL BLOQUEO NEGRO -->
+  <section class="mt-6 rounded-[20px] border border-amber-500/20 bg-[#12110E] p-5" x-show="showStripeCard && !(totalMatchCount>=10 && !stripePaid)" x-transition>
     <h3 class="font-black text-[15px] text-amber-300">Términos de la Membresía y Descargo de Responsabilidad</h3>
     <p class="mt-2 text-[12px] leading-[1.5] text-zinc-300">Al suscribirte a DOLLARDGT.COM, aceptas que esta plataforma es una herramienta de simulación para fines de entretenimiento y educación. Los valores asignados a los billetes son estimaciones algorítmicas simuladas y no constituyen una tasación comercial, financiera, ni oficial del mercado de coleccionismo. El acceso a las funciones completas requiere una suscripción activa. Al presionar el botón de pago, confirmas que has leído y aceptas nuestros Términos de Servicio y Política de Reembolso.</p>
     <div class="mt-3 space-y-2 text-[11px] text-zinc-400">
@@ -99,12 +135,12 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
   <div x-show="showPrivacy" class="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4" @click.self="showPrivacy=false"><div class="max-h-[80vh] w-full max-w-[420px] overflow-auto rounded-2xl bg-[#111] p-5"><h4 class="font-black">Privacidad</h4><p class="mt-2 whitespace-pre-line text-[12px] text-zinc-300" x-text="privacyText"></p><button @click="showPrivacy=false" class="mt-4 w-full rounded-xl bg-white text-black py-2.5 font-bold">Cerrar</button></div></div>
   <div x-show="showDisclaimer" class="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4" @click.self="showDisclaimer=false"><div class="max-h-[80vh] w-full max-w-[420px] overflow-auto rounded-2xl bg-[#111] p-5"><h4 class="font-black">Descargo</h4><p class="mt-2 whitespace-pre-line text-[12px] text-zinc-300" x-text="disclaimerText"></p><button @click="showDisclaimer=false" class="mt-4 w-full rounded-xl bg-white text-black py-2.5 font-bold">Cerrar</button></div></div>
   <div x-show="showRefund" class="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4" @click.self="showRefund=false"><div class="max-h-[80vh] w-full max-w-[420px] overflow-auto rounded-2xl bg-[#111] p-5"><h4 class="font-black">Reembolsos</h4><p class="mt-2 whitespace-pre-line text-[12px] text-zinc-300" x-text="refundText"></p><button @click="showRefund=false" class="mt-4 w-full rounded-xl bg-white text-black py-2.5 font-bold">Cerrar</button></div></div>
-  <div x-show="showHistory" class="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4" @click.self="showHistory=false"><div class="max-h-[80vh] w-full max-w-[420px] overflow-auto rounded-2xl bg-[#111] p-5"><div class="flex justify-between"><h4 class="font-black">Bóveda</h4><button @click="clearHistory()" class="text-[11px] text-red-300 underline">Borrar todo</button></div><template x-for="h in history"><div class="mt-3 rounded-xl border border-white/10 p-3"><div class="font-mono text-[12px]" x-text="h.serial"></div><div class="text-[10px] text-zinc-500" x-text="h.date + ' • $' + h.value.toFixed(2)"></div></div></template><button @click="showHistory=false" class="mt-4 w-full rounded-xl bg-white text-black py-2.5 font-bold">Cerrar</button></div></div>
+  <div x-show="showHistory" class="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4" @click.self="showHistory=false"><div class="max-h-[80vh] w-full max-w-[420px] overflow-auto rounded-2xl bg-[#111] p-5"><div class="flex justify-between"><h4 class="font-black">Bóveda • Digits Guardado Local POST SD</h4><button @click="clearHistory()" class="text-[11px] text-red-300 underline">Borrar todo</button></div><template x-for="h in history"><div class="mt-3 rounded-xl border border-white/10 p-3"><div class="font-mono text-[12px]" x-text="h.serial"></div><div class="text-[10px] text-zinc-500" x-text="h.date + ' • $' + h.value.toFixed(2)"></div></div></template><button @click="showHistory=false" class="mt-4 w-full rounded-xl bg-white text-black py-2.5 font-bold">Cerrar</button></div></div>
 
   <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all duration-300 pointer-events-none" :class="toast.visible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'"><div class="rounded-full px-4 py-2 text-[12px] font-bold shadow-2xl" :class="toast.classes" x-text="toast.message"></div></div>
 </main>
 <script>
-const STRIPE_URL = "https://buy.stripe.com/test_example";
+const STRIPE_URL = "https://buy.stripe.com/8x29AU0A1bXJ8e5cN1fMA00";
 const ANON_ID = localStorage.getItem('dgt_anon') || (()=>{const id='dgt_'+Math.random().toString(36).slice(2,10);localStorage.setItem('dgt_anon',id);return id;})();
 const Engine = {
   genLetters(denom){
@@ -146,7 +182,22 @@ function dollarMachineApp(){
       const p=new URLSearchParams(window.location.search);
       if(p.get('stripe_success')==='1'){this.stripePaid=true;localStorage.setItem('dgt_stripe_paid','true');this.showStripeCard=false;this.showToast('Pago verificado','success');history.replaceState({},'',location.pathname);}
     },
-    animateTailOnPress(cb){if(this.animInterval)clearInterval(this.animInterval);this.isShuffling=true;let ticks=0;this.animInterval=setInterval(()=>{this.tailDigits=Engine.genTail();ticks++;if(ticks>=9){clearInterval(this.animInterval);this.isShuffling=false;this.tailDigits=Engine.genTail();this.updateRarityAndValue();if(cb)cb();}},75);},
+    animateTailOnPress(cb){
+      if(this.animInterval)clearInterval(this.animInterval);
+      this.isShuffling=true;
+      let ticks=0;
+      this.animInterval=setInterval(()=>{
+        this.tailDigits=Engine.genTail();
+        ticks++;
+        if(ticks>=8){
+          clearInterval(this.animInterval);
+          this.isShuffling=false;
+          this.tailDigits=Engine.genTail();
+          this.updateRarityAndValue();
+          if(cb)cb();
+        }
+      },75);
+    },
     updateRarityAndValue(){if(!this.isLocked && this.userDigits.length<4){this.rarity={type:'common',label:'',score:0,badgeClass:''};this.value=this.denom*1.8+Math.random()*2;if(this.userDigits.length===0)this.value=this.denom*1.8;return;}const eight=this.userDigits.join('').padEnd(4,'0')+this.tailDigits.join('').replace(/-/g,'0');this.rarity=Engine.checkRarity(eight);this.value=Engine.calcValue(this.userDigits,this.denom,this.rarity);if(!this.value||this.value<this.denom)this.value=this.denom*1.8;},
     setDenom(d){if(d===this.denom)return;if(this.animInterval)clearInterval(this.animInterval);this.isShuffling=false;this.denom=d;this.userDigits=[];this.isLocked=false;this.matchAttemptsLeft=this.maxAttempts;this.tailDigits=['-','-','-','-'];this.letters=Engine.genLetters(this.denom);this.securitySeal=Engine.genSeal();this.updateRarityAndValue();this.showToast('Denominación $'+d,'info');},
     pressNum(n){if(this.isLocked||this.userDigits.length>=4||this.isShuffling)return;this.userDigits.push(n);this.animateTailOnPress(()=>{if(this.userDigits.length===4){this.lockCombo();}});},
