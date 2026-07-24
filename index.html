@@ -260,14 +260,13 @@ body { background: #050508; color: #f3f4f6; -webkit-tap-highlight-color: transpa
 </main>
 
 <script>
-// CAPA 1: Engine Puro y Configuración Multi-Moneda con Colores Distintivos por País
 const CURRENCY_CONFIGS = {
-  USD: { name: 'EEUU (USD)', symbol: '$', lettersCount: 3, digitsCount: 8, rate: 1.0, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XX XX XX XX', color: '#10b981' }, // Esmeralda
-  EUR: { name: 'UE (EUR)', symbol: '€', lettersCount: 1, digitsCount: 11, rate: 0.92, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'X XXX XXX XXX X', color: '#3b82f6' }, // Azul UE
-  GBP: { name: 'UK (GBP)', symbol: '£', lettersCount: 4, digitsCount: 6, rate: 0.79, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XXXX XXXXXX', color: '#8b5cf6' }, // Púrpura Real
-  CHF: { name: 'Suiza (CHF)', symbol: 'CHF', lettersCount: 2, digitsCount: 8, rate: 1.08, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XX XX XX XX', color: '#ef4444' }, // Rojo Suiza
-  CAD: { name: 'Canadá (CAD)', symbol: 'C$', lettersCount: 3, digitsCount: 7, rate: 0.73, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XXX XXXX', color: '#f97316' }, // Naranja Sunset
-  AUD: { name: 'Australia (AUD)', symbol: 'A$', lettersCount: 2, digitsCount: 9, rate: 0.65, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XX XXXXXXX', color: '#eab308' } // Ámbar Dorado
+  USD: { name: 'EEUU (USD)', symbol: '$', lettersCount: 3, digitsCount: 8, rate: 1.0, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XX XX XX XX', color: '#10b981' },
+  EUR: { name: 'UE (EUR)', symbol: '€', lettersCount: 1, digitsCount: 11, rate: 0.92, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'X XXX XXX XXX X', color: '#3b82f6' },
+  GBP: { name: 'UK (GBP)', symbol: '£', lettersCount: 4, digitsCount: 6, rate: 0.79, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XXXX XXXXXX', color: '#8b5cf6' },
+  CHF: { name: 'Suiza (CHF)', symbol: 'CHF', lettersCount: 2, digitsCount: 8, rate: 1.08, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XX XX XX XX', color: '#ef4444' },
+  CAD: { name: 'Canadá (CAD)', symbol: 'C$', lettersCount: 3, digitsCount: 7, rate: 0.73, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XXX XXXX', color: '#f97316' },
+  AUD: { name: 'Australia (AUD)', symbol: 'A$', lettersCount: 2, digitsCount: 9, rate: 0.65, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XX XXXXXXX', color: '#eab308' }
 };
 
 const Engine = {
@@ -297,7 +296,6 @@ const Engine = {
   }
 };
 
-// CAPA 2 & 3: State & UI High-Tech con Alpine.js y Supabase Real-Sync
 const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Lf1Bd6_mvlAlZCdcYBBR5A_fTjpEiyv';
 let supabaseClient = null;
@@ -410,7 +408,6 @@ function dgtWorldApp() {
 
     pressNum(n) {
       if(this.userDigits.length >= this.maxInputLen || this.isShuffling) return;
-      
       if(this.animInterval) clearInterval(this.animInterval);
       this.isShuffling = true;
       let ticks = 0;
@@ -473,6 +470,7 @@ function dgtWorldApp() {
       this.vaultHistory.push(entry);
       localStorage.setItem('dgtworld_history_v54', JSON.stringify(this.vaultHistory));
       this.showToast('¡Match Validado con Éxito!');
+      this.saveToCloud(); // Sincronización automática al validar match
     },
 
     clearLocalVault() {
@@ -502,17 +500,22 @@ function dgtWorldApp() {
             updated_at: d.updated_at
           }));
         }
-      } catch(e) {}
+      } catch(e) {
+        console.error("Supabase Load Error:", e);
+      }
       this.cloudLoading = false;
     },
 
     searchCloudVault() { this.loadCloudVault(this.cloudSearch); },
 
     async saveToCloud() {
-      if(!supabaseClient) return;
+      if(!supabaseClient) {
+        this.showToast('Supabase no conectado');
+        return;
+      }
       const serialFull = `${this.prefixDisplay} ${this.nativeSerialDisplay} ${this.suffixLetter} [${this.yearVal}]`;
       const payload = {
-        anon_id: ANON_ID,
+        anon_id: ANON_ID + '_' + Date.now(), // ID único para múltiples registros por usuario
         serial: serialFull,
         currency: this.currentCurrency,
         value: this.computedValue.toFixed(2),
@@ -522,11 +525,13 @@ function dgtWorldApp() {
         updated_at: new Date()
       };
       try {
-        await supabaseClient.from('dgt_world_vault').upsert(payload, { onConflict: 'anon_id' });
+        const { error } = await supabaseClient.from('dgt_world_vault').insert([payload]);
+        if(error) throw error;
         this.showToast('Sincronizado en Supabase Vault ✓');
         this.loadCloudVault();
       } catch(e) {
-        this.showToast('Error al sincronizar nube');
+        console.error("Supabase Save Error:", e);
+        this.showToast('Error Cloud: ' + (e.message || 'Ver consola'));
       }
     },
 
