@@ -23,6 +23,17 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
 @keyframes blurRun{0%{filter:blur(0)}50%{filter:blur(.7px) brightness(1.3)}100%{filter:blur(0)}}
 .drawer{transition:transform .35s cubic-bezier(.32,.72,0,1)}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_Lf1Bd6_mvlAlZCdcYBBR5A_fTjpEiyv';
+let supabaseClient = null;
+try {
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  console.log('Supabase conectado', SUPABASE_URL);
+} catch(e){ console.error('Supabase init error', e); }
+</script>
+
 </head>
 <body class="min-h-dvh antialiased text-white flex justify-center px-3 py-6" x-data="dollarMachineApp()" x-init="initApp()">
 
@@ -144,8 +155,8 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
   <!-- MERCADO DE COLECCIONISTAS - V3.9 MOCK LOCAL -->
   <section class="mt-8 rounded-[24px] border border-amber-500/20 bg-[#0F0F0A] p-5 shadow-2xl">
     <div class="flex items-center justify-between">
-      <h2 class="font-black text-[16px] tracking-widest text-amber-300">🔍 MERCADO DGT</h2>
-      <span class="text-[9px] px-2 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/20">BETA • LOCAL</span>
+      <h2 class="font-black text-[16px] tracking-widest text-amber-300">🔍 MERCADO DGT • NUBE</h2>
+      <span class="text-[9px] px-2 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/20">SUPABASE • GLOBAL</span>
     </div>
     <p class="mt-2 text-[11px] leading-[1.5] text-zinc-400">Registra el billete que crees que tiene valor. Otros coleccionistas podrán buscarlo y contactarte. <b class="text-zinc-200">Solo miembros con bóveda desbloqueada pueden publicar (próximamente).</b></p>
     
@@ -165,6 +176,7 @@ body{background:#050707;-webkit-tap-highlight-color:transparent}
       <div class="mt-2 text-[9px] text-zinc-600">* Por ahora se guarda solo en este celular (prueba). En Fase 2 será en la nube para todos.</div>
     </div>
 
+    <div x-show="marketLoading" class="text-center py-4 text-[11px] text-amber-300 animate-pulse">Cargando mercado global desde Supabase...</div>
     <div class="mt-5 space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
       <template x-for="item in filteredMarketListings" :key="item.id">
         <div class="rounded-[14px] border border-white/10 bg-[#121212] p-3 flex justify-between items-center gap-3">
@@ -243,7 +255,7 @@ function dollarMachineApp(){
     matchAttemptsLeft:40,maxAttempts:40,totalMatchCount:parseInt(localStorage.getItem('dgt_total_matches')||'0'),
     showStripeCard:false,legal1:false,legal2:false,stripePaid:localStorage.getItem('dgt_stripe_paid')==='true',
     history:JSON.parse(localStorage.getItem('dgt_history')||'[]'),showHistory:false,
-    marketSearch:'',marketListings:JSON.parse(localStorage.getItem('dgt_market_listings')||'[]'),showMarketForm:false,newListingContact:'',newListingNote:'',
+    marketSearch:'',marketListings:JSON.parse(localStorage.getItem('dgt_market_listings')||'[]'),showMarketForm:false,newListingContact:'',newListingNote:'',marketLoading:false,
     showTerms:false,showPrivacy:false,showDisclaimer:false,showRefund:false,
     termsText:`1. DOLLARDGT.COM es una herramienta de simulación digital para entretenimiento y educación sobre numeración de billetes.\n2. No es un casino, lotería, casa de apuestas ni servicio financiero.\n3. No garantizamos valor comercial real. Los valores Mach son estimaciones algorítmicas con fines lúdicos.\n4. La suscripción otorga acceso a funciones premium de la simulación.\n5. Uso mayor de 18 años.\n6. Nos reservamos derecho de modificar funciones.`,
     privacyText:`Recopilamos solo ID anónimo local y conteo de usos para funcionamiento. No vendemos datos. Pagos procesados por Stripe bajo su política. Puedes solicitar borrado escribiendo a dollardmach@gmail.com`,
@@ -287,17 +299,74 @@ function dollarMachineApp(){
     postSD(){if(!this.isLocked)return;const serial=`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`;const entry={denom:this.denom,serial:serial,seal:this.securitySeal,value:this.value,date:new Date().toLocaleString('es-PR',{month:'2-digit',day:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}),color:Engine.colorForDenom(this.denom)};this.history.push(entry);localStorage.setItem('dgt_history',JSON.stringify(this.history));this.showToast('Guardado en Bóveda 🗄️','success');},
     claimSD(){const full=`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`;const subject=`Claim SD - ${full} - $${this.value.toFixed(2)}`;const body=`Serial: ${full}\nValor: $${this.value.toFixed(2)}\nSello: ${this.securitySeal}\nAnon: ${ANON_ID}`;window.location.href=`mailto:dollardmach@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;},
     openHistory(){this.showHistory=true;},clearHistory(){if(confirm('¿Borrar toda la Bóveda?')){this.history=[];localStorage.setItem('dgt_history','[]');this.showHistory=false;}},
-    registerToMarket(){
+    async loadMarketSupabase(){
+      try{
+        if(!supabaseClient){ console.log('No supabase client'); return; }
+        this.marketLoading=true;
+        const { data, error } = await supabaseClient.from('listings').select('*').order('created_at',{ascending:false}).limit(100);
+        if(error) throw error;
+        if(data){
+          this.marketListings = data.map(d=>({
+            id: d.id,
+            serial: d.serial,
+            yr: d.yr,
+            value: d.value,
+            rarity: d.rarity,
+            note: d.note||'',
+            contact: d.contact,
+            date: new Date(d.created_at).toLocaleDateString('es-PR'),
+            denom: d.denom,
+            full: d.serial + ' ' + d.yr,
+            created_at: d.created_at,
+            _supabase: true
+          }));
+          localStorage.setItem('dgt_market_listings', JSON.stringify(this.marketListings));
+          console.log('Mercado cargado de Supabase', this.marketListings.length);
+        }
+        this.marketLoading=false;
+      }catch(e){
+        console.error('Error cargando Supabase', e);
+        this.marketLoading=false;
+        // fallback a local
+        this.marketListings=JSON.parse(localStorage.getItem('dgt_market_listings')||'[]');
+      }
+    },
+    async registerToMarket(){
       if(!this.isLocked){this.showToast('Sella primero una serie','info');return;}
       if(!this.newListingContact){this.showToast('Pon WhatsApp o Email','info');return;}
       const serial=`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`;
-      const entry={id:Date.now(),serial:serial,yr:this.yr,value:this.value.toFixed(2),rarity:this.rarity.label||'COMÚN',note:this.newListingNote||'',contact:this.newListingContact,date:new Date().toLocaleDateString('es-PR'),denom:this.denom,full:`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c} ${this.yr}`};
-      const current=JSON.parse(localStorage.getItem('dgt_market_listings')||'[]');
-      current.push(entry);
-      localStorage.setItem('dgt_market_listings',JSON.stringify(current));
-      this.marketListings=current;
+      const payload={
+        serial: serial,
+        yr: this.yr,
+        value: this.value.toFixed(2),
+        rarity: this.rarity.label||'COMÚN',
+        note: this.newListingNote||'',
+        contact: this.newListingContact,
+        denom: this.denom,
+        user_anon: ANON_ID,
+        status: 'activo'
+      };
+      try{
+        this.showToast('Publicando en la nube...','info');
+        if(supabaseClient){
+          const { data, error } = await supabaseClient.from('listings').insert(payload).select().single();
+          if(error) throw error;
+          this.showToast('¡Publicado en Mercado Global en la nube! ✓','success');
+          await this.loadMarketSupabase();
+        } else {
+          throw new Error('No supabase');
+        }
+      }catch(e){
+        console.error('Supabase insert fail, fallback local', e);
+        // fallback local
+        const entry={id:Date.now(),serial:serial,yr:this.yr,value:this.value.toFixed(2),rarity:this.rarity.label||'COMÚN',note:this.newListingNote||'',contact:this.newListingContact,date:new Date().toLocaleDateString('es-PR'),denom:this.denom,full:`${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c} ${this.yr}`};
+        const current=JSON.parse(localStorage.getItem('dgt_market_listings')||'[]');
+        current.push(entry);
+        localStorage.setItem('dgt_market_listings',JSON.stringify(current));
+        this.marketListings=current;
+        this.showToast('Guardado local (Supabase falló) ✓','info');
+      }
       this.newListingContact='';this.newListingNote='';this.showMarketForm=false;
-      this.showToast('Publicado y conservado en Mercado ✓','success');
     },
     contactMarket(item){
       const subject=`Interesado en tu serie ${item.serial} - DOLLARDGT`;
@@ -305,7 +374,19 @@ function dollarMachineApp(){
       if(item.contact.includes('@')){window.location.href=`mailto:${item.contact}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;}
       else{const wa=item.contact.replace(/[^0-9]/g,'');window.open(`https://wa.me/${wa}?text=${encodeURIComponent(body+subject)}`,'_blank');}
     },
-    deleteMarketListing(id){if(confirm('¿Borrar este registro del mercado local?')){const filtered=this.marketListings.filter(i=>i.id!==id);localStorage.setItem('dgt_market_listings',JSON.stringify(filtered));this.marketListings=filtered;}},
+    async deleteMarketListing(id){
+      if(!confirm('¿Borrar este registro del mercado?')) return;
+      try{
+        if(supabaseClient){
+          const { error } = await supabaseClient.from('listings').delete().eq('id', id);
+          if(error) throw error;
+        }
+      }catch(e){ console.error('Delete supabase error', e); }
+      const filtered=this.marketListings.filter(i=>i.id!==id);
+      localStorage.setItem('dgt_market_listings',JSON.stringify(filtered));
+      this.marketListings=filtered;
+      this.showToast('Borrado ✓','info');
+    },
 
     goStripe(){if(!(this.legal1&&this.legal2)){this.showToast('Acepta los términos para desbloquear','info');return;}localStorage.setItem('dgt_stripe_pending','true');const url=STRIPE_URL+'?client_reference_id='+ANON_ID+'&dgt_anon='+ANON_ID;console.log('Stripe URL:',url);window.location.href=url;},
     showToast(m,type='success'){clearTimeout(this.toastTimer);this.toast.classes=type==='success'?'bg-amber-400 text-black':'bg-zinc-800 text-white border border-white/10';this.toast.message=m;this.toast.visible=true;this.toastTimer=setTimeout(()=>{this.toast.visible=false;},2200);},
