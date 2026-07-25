@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050508">
-<title>DGT WORLD • DollarDgt.com v6.9 Vault Capture Engine</title>
+<title>DGT WORLD • DollarDgt.com v7.1 Collector Vault Engine</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -47,7 +47,7 @@ body { background: #050508; color: #f3f4f6; -webkit-tap-highlight-color: transpa
   <header class="flex items-center justify-between border-b border-white/10 pb-5">
     <div>
       <h1 class="font-display font-bold text-2xl tracking-tight transition-colors duration-300" :style="'color: ' + activeColor" x-text="'DGT ' + currentCurrency"></h1>
-      <p class="text-[10px] tracking-[0.25em] text-zinc-400 uppercase mt-1" x-text="currencies[currentCurrency].name + ' • Constant Engine'"></p>
+      <p class="text-[10px] tracking-[0.25em] text-zinc-400 uppercase mt-1" x-text="currencies[currentCurrency].name + ' • Collector Engine'"></p>
     </div>
     <div class="flex items-center gap-2">
       <span class="rounded-full px-2 py-0.5 text-[9px] font-mono font-bold" :style="isAdmin ? 'background: #a855f720; color: #a855f7; border: 1px solid #a855f740' : 'background: ' + activeColor + '20; color: ' + activeColor + '; border: 1px solid ' + activeColor + '40'" x-text="isAdmin ? 'ADMIN MODE' : (40 - sessionAttempts) + ' RESTANTES'"></span>
@@ -115,20 +115,18 @@ body { background: #050508; color: #f3f4f6; -webkit-tap-highlight-color: transpa
     </div>
   </section>
 
-  <!-- MÓDULO S-DIGITS PAD (BOTONES PRINCIPALES ARRIBA) -->
+  <!-- MÓDULO S-DIGITS PAD -->
   <section class="mt-4 rounded-[28px] border border-white/10 bg-panel p-5 shadow-2xl">
     <div class="flex justify-between items-center mb-3">
       <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider">Módulo S-Digits Pad (0-9 Constante)</span>
       <span class="text-[10px] font-mono text-zinc-500" x-text="userDigits.length + ' / ' + maxInputLen + ' fijos'"></span>
     </div>
 
-    <!-- Botones principales arriba (Izquierda: Capturar Bóveda | Derecha: Siguiente 1K) -->
     <div class="mb-3 grid grid-cols-2 gap-2.5">
       <button @click="registerCurrentCombo()" :disabled="isShuffling" class="kbtn h-12 rounded-[14px] border border-white/10 bg-white/5 text-white font-semibold text-xs tracking-wider disabled:opacity-25 hover:bg-white/10">CAPTURAR BÓVEDA</button>
       <button @click="triggerMatch()" :disabled="isShuffling" class="kbtn h-12 rounded-[14px] text-black font-extrabold text-xs tracking-wider disabled:opacity-25 transition-all shadow-lg" :style="'background: ' + activeColor + '; box-shadow: 0 4px 20px ' + activeColor + '4d'" x-text="isShuffling ? 'RODANDO...' : 'SIGUIENTE 1K'"></button>
     </div>
 
-    <!-- Teclado Numérico (0-9) -->
     <div class="grid grid-cols-3 gap-2.5">
       <template x-for="n in [7,8,9,4,5,6,1,2,3,0]">
         <button @click="pressNum(n)" :disabled="userDigits.length >= maxInputLen || isShuffling" class="kbtn h-12 rounded-[14px] border border-white/10 bg-cardBg text-base font-bold text-zinc-200 disabled:opacity-20 hover:border-white/30" x-text="n"></button>
@@ -151,9 +149,9 @@ body { background: #050508; color: #f3f4f6; -webkit-tap-highlight-color: transpa
       </h2>
       <button @click="clearLocalVault()" x-show="vaultHistory.length > 0" class="kbtn text-[10px] text-red-400 font-bold uppercase tracking-wider underline">Vaciar</button>
     </div>
-    <p class="text-[11px] leading-relaxed text-zinc-400 mb-4">Historial de series capturadas y validadas guardadas localmente.</p>
+    <p class="text-[11px] leading-relaxed text-zinc-400 mb-4">Historial personal de series guardadas en este dispositivo.</p>
     
-    <div class="space-y-2.5 max-h-[200px] overflow-y-auto pr-1">
+    <div class="space-y-2.5 max-h-[160px] overflow-y-auto pr-1">
       <template x-for="h in vaultHistory" :key="h.serial + h.date">
         <div class="rounded-[16px] border border-white/10 bg-cardBg p-3 flex justify-between items-center">
           <div>
@@ -163,28 +161,52 @@ body { background: #050508; color: #f3f4f6; -webkit-tap-highlight-color: transpa
           <span class="font-mono text-xs font-black" :style="'color: ' + activeColor" x-text="'$' + h.value"></span>
         </div>
       </template>
-      <div x-show="vaultHistory.length === 0" class="text-center py-5 text-xs text-zinc-600 font-mono">
-        [ Bóveda local vacía. Usa "Capturar Bóveda" para guardar. ]
+      <div x-show="vaultHistory.length === 0" class="text-center py-4 text-xs text-zinc-600 font-mono">
+        [ Bóveda local vacía. ]
       </div>
     </div>
   </section>
 
-  <!-- NUBE GLOBAL -->
+  <!-- VENTANA DESLIZANTE DE 1,000 SERIES -->
+  <section class="mt-5 rounded-[24px] border border-white/10 bg-panel p-5 shadow-2xl">
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="font-bold text-sm tracking-wider text-white flex items-center gap-2">
+        <span>📋 CICLO 1K (1,000 SERIES)</span>
+        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cardBg border border-white/10 text-violet-400">3 Columnas</span>
+      </h2>
+      <span class="text-[10px] text-zinc-400 font-mono">Toca para saltar</span>
+    </div>
+    <p class="text-[11px] leading-relaxed text-zinc-400 mb-3">Ventana deslizante con todas las combinaciones del ciclo actual.</p>
+    
+    <div class="max-h-[220px] overflow-y-auto pr-1 grid grid-cols-3 gap-1.5 font-mono text-[10px]">
+      <template x-for="i in 1000" :key="i">
+        <div @click="jumpToCombo(i-1)" 
+             class="kbtn p-2 rounded-[12px] border bg-cardBg flex flex-col justify-between cursor-pointer transition-all"
+             :class="comboIndex === (i-1) ? 'font-bold' : 'border-white/5 text-zinc-400 hover:border-white/20 hover:text-white'"
+             :style="comboIndex === (i-1) ? 'border-color: ' + activeColor + '; background: ' + activeColor + '20; color: ' + activeColor + '; box-shadow: 0 0 10px ' + activeColor + '33' : ''">
+          <span class="text-[9px] opacity-60" x-text="'#' + i"></span>
+          <span class="truncate mt-1" x-text="getMiniComboText(i-1)"></span>
+        </div>
+      </template>
+    </div>
+  </section>
+
+  <!-- NUBE GLOBAL SUPABASE -->
   <section class="mt-5 rounded-[24px] bg-panel p-5 shadow-2xl border transition-colors duration-300" :style="'border-color: ' + activeColor + '33'">
     <div class="flex items-center justify-between">
       <h2 class="font-bold text-sm tracking-wider" :style="'color: ' + activeColor">🌐 NUBE GLOBAL SUPABASE</h2>
       <span class="text-[9px] px-2.5 py-0.5 rounded-full font-mono" :style="'background: ' + activeColor + '1a; color: ' + activeColor + '; border: 1px solid ' + activeColor + '33'">SYNC OK</span>
     </div>
-    <p class="mt-2 text-[11px] leading-relaxed text-zinc-400">Consulta y comparte series validadas en la red institucional global.</p>
+    <p class="mt-2 text-[11px] leading-relaxed text-zinc-400">Publica tus billetes extraños encontrados para que otros coleccionistas los consulten y reclamen.</p>
     
     <div class="mt-4 flex gap-2">
-      <input x-model="cloudSearch" @input="searchCloudVault()" placeholder="Buscar serie, país o rareza..." class="flex-1 rounded-[14px] bg-black border border-white/10 px-3.5 py-3 text-xs text-white placeholder:text-zinc-600 outline-none transition-colors" :style="'border-color: ' + activeColor + '55'">
-      <button @click="saveToCloudManual()" class="kbtn rounded-[14px] px-4 py-3 text-xs font-black text-black shadow-lg" :style="'background: ' + activeColor">REGISTRAR</button>
+      <input x-model="cloudSearch" @input="searchCloudVault()" placeholder="Buscar serie, moneda o rareza..." class="flex-1 rounded-[14px] bg-black border border-white/10 px-3.5 py-3 text-xs text-white placeholder:text-zinc-600 outline-none transition-colors" :style="'border-color: ' + activeColor + '55'">
+      <button @click="saveToCloudManual()" class="kbtn rounded-[14px] px-4 py-3 text-xs font-black text-black shadow-lg" :style="'background: ' + activeColor">PUBLICAR</button>
     </div>
 
-    <div x-show="cloudLoading" class="text-center py-4 text-xs animate-pulse" :style="'color: ' + activeColor">Sincronizando con Supabase Vault...</div>
+    <div x-show="cloudLoading" class="text-center py-4 text-xs animate-pulse" :style="'color: ' + activeColor">Sincronizando con Supabase...</div>
     
-    <div class="mt-4 space-y-2.5 max-h-[250px] overflow-y-auto pr-1">
+    <div class="mt-4 space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
       <template x-for="item in cloudListings" :key="item.anon_id + item.updated_at">
         <div class="rounded-[16px] border border-white/10 bg-cardBg p-3.5 flex justify-between items-center gap-3">
           <div>
@@ -194,52 +216,142 @@ body { background: #050508; color: #f3f4f6; -webkit-tap-highlight-color: transpa
               <span class="text-[10px] text-zinc-400" x-text="'$' + item.value"></span>
             </div>
           </div>
-          <button @click="claimItem(item)" class="kbtn rounded-[12px] bg-white text-black px-3.5 py-2 text-[10px] font-extrabold shadow-md">RECLAMAR</button>
+          <button @click="claimItem(item)" class="kbtn rounded-[12px] bg-white text-black px-3.5 py-2 text-[10px] font-extrabold shadow-md">RECLAMAR ↗</button>
         </div>
       </template>
-      <div x-show="cloudListings.length===0 && !cloudLoading" class="text-center py-5 text-xs text-zinc-600">No hay registros globales activos.</div>
+      <div x-show="cloudListings.length===0 && !cloudLoading" class="text-center py-4 text-xs text-zinc-600 font-mono">No hay publicaciones globales activas.</div>
     </div>
   </section>
 
-  <!-- MODAL DE PAGO STRIPE (LÍMITE 40 INTENTOS) -->
+  <!-- MODAL DE PAGO STRIPE (LÍMITE 40 INTENTOS + REGLAS LEGALES EXACTAS) -->
   <div x-show="showStripeModal" x-cloak class="fixed inset-0 z-[1002] grid place-items-center bg-black/95 p-4 backdrop-blur-md">
-    <div class="w-full max-w-[380px] rounded-[28px] bg-panel p-6 border border-white/20 shadow-2xl space-y-5 text-center" x-transition>
-      <div class="w-12 h-12 mx-auto rounded-full grid place-items-center bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-lg">🔒</div>
-      <div>
-        <h3 class="font-bold text-base text-white tracking-wide">Límite de 40 Intentos Alcanzado</h3>
-        <p class="text-xs text-zinc-400 mt-1.5 leading-relaxed">Has completado el ciclo gratuito de prueba de la bóveda. Desbloquea el acceso ilimitado institucional.</p>
+    <div class="w-full max-w-[390px] rounded-[28px] bg-panel p-6 border border-white/20 shadow-2xl space-y-4 text-left max-h-[90vh] overflow-y-auto" x-transition>
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 mx-auto rounded-full grid place-items-center bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-lg">🔒</div>
+        <h3 class="font-bold text-base text-white tracking-wide">BÓVEDA BLOQUEADA</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">Has alcanzado el límite de <strong class="text-white">40 intentos</strong>. La bóveda se ha sellado por seguridad.</p>
+        <p class="text-[11px] text-zinc-400">Realiza el desbloqueo para continuar analizando series ilimitadas.</p>
       </div>
-      <div class="rounded-[18px] bg-cardBg border border-white/10 p-4 text-left font-mono text-xs space-y-2">
-        <div class="flex justify-between text-zinc-400"><span>Pase Ilimitado:</span> <span class="text-white font-bold">$15.00 USD</span></div>
-        <div class="flex justify-between text-zinc-400"><span>Motor 1K:</span> <span class="text-emerald-400 font-bold">Activo Permanente</span></div>
+
+      <!-- Caja de términos y descargo con checkbox -->
+      <div class="rounded-[18px] bg-cardBg border border-white/10 p-3.5 space-y-3 text-[11px] text-zinc-300">
+        <p class="font-bold text-amber-300">Términos de la Membresía y Descargo</p>
+        <p class="leading-relaxed text-zinc-400">
+          Al suscribirte a DOLLARDGT.COM, aceptas que esta plataforma es una <strong class="text-white">herramienta de simulación para fines de entretenimiento y educación</strong>. Los valores asignados a los billetes son estimaciones algorítmicas simuladas y no constituyen una tasación comercial, financiera, ni oficial del mercado de coleccionismo. El acceso a las funciones completas requiere una suscripción activa.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10">
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" x-model="acceptedTermsBox1" class="mt-0.5 rounded accent-amber-400">
+            <span class="text-[10px] text-zinc-300 leading-tight">
+              Acepto <button @click.prevent="openLegalModal('terms')" class="text-amber-400 underline">Términos y Condiciones</button>, <button @click.prevent="openLegalModal('privacy')" class="text-amber-400 underline">Privacidad</button> y <button @click.prevent="openLegalModal('descargo')" class="text-amber-400 underline">Descargo</button>
+            </span>
+          </label>
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" x-model="acceptedTermsBox2" class="mt-0.5 rounded accent-amber-400">
+            <span class="text-[10px] text-zinc-300 leading-tight">
+              Acepto <button @click.prevent="openLegalModal('refunds')" class="text-amber-400 underline">Política de Reembolsos</button> y ser mayor de 18 años
+            </span>
+          </label>
+        </div>
       </div>
-      <div class="space-y-2.5 pt-1">
-        <button @click="openStripeCheckout()" class="w-full kbtn rounded-[16px] bg-emerald-500 py-3.5 font-extrabold text-black text-xs shadow-lg uppercase tracking-wider">Pagar con Stripe ↗</button>
-        <button @click="simulateStripeSuccess()" class="w-full kbtn rounded-[16px] border border-white/10 bg-white/5 py-2.5 font-semibold text-xs text-zinc-400 hover:text-white">Ya realicé el pago (Simular)</button>
+
+      <div class="space-y-2 pt-1">
+        <button @click="openStripeCheckout()" :disabled="!acceptedTermsBox1 || !acceptedTermsBox2" class="w-full kbtn rounded-[16px] bg-amber-400 py-3.5 font-extrabold text-black text-xs shadow-lg uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed">DESBLOQUEAR BÓVEDA — $4.99 USD ➔</button>
+        <button @click="simulateStripeSuccess()" class="w-full kbtn rounded-[16px] border border-white/10 bg-white/5 py-2 font-semibold text-[11px] text-zinc-400 hover:text-white">Ya realicé el pago (Simular)</button>
+      </div>
+
+      <div class="text-center text-[9px] text-zinc-500 uppercase tracking-widest pt-1">
+        PAGO SEGURO PROCESADO POR STRIPE • ACCESO INMEDIATO
       </div>
     </div>
   </div>
 
-  <!-- MODAL DE RECLAMACIÓN -->
+  <!-- MODAL DE RECLAMACIÓN POR CORREO -->
   <div x-show="showClaimModal" x-cloak class="fixed inset-0 z-[1001] grid place-items-center bg-black/90 p-4 backdrop-blur-sm" @click.self="showClaimModal=false">
     <div class="w-full max-w-[400px] rounded-[24px] bg-panel p-6 border border-white/20 shadow-2xl space-y-4" x-transition>
       <div class="flex justify-between items-center">
-        <h4 class="font-bold text-sm tracking-wide text-emerald-400 flex items-center gap-2">📨 RECLAMACIÓN INSTITUCIONAL</h4>
+        <h4 class="font-bold text-sm tracking-wide text-emerald-400 flex items-center gap-2">📨 RECLAMACIÓN COLECCIONISTA</h4>
         <button @click="showClaimModal=false" class="text-zinc-400 hover:text-white text-xs">✕</button>
       </div>
-      <p class="text-[11px] text-zinc-300 leading-relaxed">Se generará una solicitud dirigida a <b class="text-white">dolladmatch@gmail.com</b> con los datos del registro.</p>
+      <p class="text-[11px] text-zinc-300 leading-relaxed">Se generará un correo directo a <b class="text-white">dolladmatch@gmail.com</b> con los datos del billete para establecer contacto.</p>
       <template x-if="currentClaimItem">
         <div class="rounded-[16px] bg-cardBg border border-white/10 p-4 space-y-2 font-mono text-xs">
           <div class="flex justify-between"><span class="text-zinc-400">Serie:</span> <span class="text-white font-bold" x-text="currentClaimItem.serial"></span></div>
           <div class="flex justify-between"><span class="text-zinc-400">Moneda:</span> <span class="text-white" x-text="currentClaimItem.currency || 'USD'"></span></div>
           <div class="flex justify-between"><span class="text-zinc-400">Rareza:</span> <span class="text-emerald-400 font-bold" x-text="currentClaimItem.rarity"></span></div>
-          <div class="flex justify-between"><span class="text-zinc-400">Valor:</span> <span class="text-amber-400 font-bold" x-text="'$' + currentClaimItem.value"></span></div>
+          <div class="flex justify-between"><span class="text-zinc-400">Valor DGT:</span> <span class="text-amber-400 font-bold" x-text="'$' + currentClaimItem.value"></span></div>
         </div>
       </template>
       <div class="flex gap-2 pt-2">
         <button @click="showClaimModal=false" class="flex-1 rounded-[14px] border border-white/10 bg-cardBg py-3 font-semibold text-xs text-zinc-300">Cancelar</button>
-        <button @click="sendClaimEmail()" class="flex-1 rounded-[14px] bg-emerald-500 py-3 font-extrabold text-black text-xs shadow-lg">Abrir Correo ↗</button>
+        <button @click="sendClaimEmail()" class="flex-1 rounded-[14px] bg-emerald-500 py-3 font-extrabold text-black text-xs shadow-lg">Enviar Correo ↗</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE TÉRMINOS INDIVIDUALES (Términos, Privacidad, Descargo, Reembolsos) -->
+  <div x-show="activeLegalModal !== null" x-cloak class="fixed inset-0 z-[1003] grid place-items-center bg-black/90 p-4 backdrop-blur-sm" @click.self="activeLegalModal = null">
+    <div class="w-full max-w-[400px] rounded-[24px] bg-panel p-6 border border-white/20 shadow-2xl space-y-4" x-transition>
+      
+      <!-- Términos -->
+      <template x-if="activeLegalModal === 'terms'">
+        <div>
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="font-bold text-sm tracking-wide text-white">Términos</h4>
+            <button @click="activeLegalModal = null" class="text-zinc-400 hover:text-white text-xs">✕</button>
+          </div>
+          <div class="text-[11px] text-zinc-300 leading-relaxed space-y-2 max-h-[250px] overflow-y-auto pr-1">
+            <p>1. DOLLARDGT.COM es una herramienta de simulación digital para entretenimiento y educación sobre numeración de billetes.</p>
+            <p>2. No es un casino, lotería, casa de apuestas ni servicio financiero.</p>
+            <p>3. No garantizamos valor comercial real. Los valores Mach son estimaciones algorítmicas con fines lúdicos.</p>
+            <p>4. La suscripción otorga acceso a funciones premium de la simulación.</p>
+            <p>5. Uso mayor de 18 años.</p>
+            <p>6. Nos reservamos derecho de modificar funciones.</p>
+          </div>
+        </div>
+      </template>
+
+      <!-- Privacidad -->
+      <template x-if="activeLegalModal === 'privacy'">
+        <div>
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="font-bold text-sm tracking-wide text-white">Privacidad</h4>
+            <button @click="activeLegalModal = null" class="text-zinc-400 hover:text-white text-xs">✕</button>
+          </div>
+          <div class="text-[11px] text-zinc-300 leading-relaxed">
+            <p>Recopilamos solo ID anónimo local y conteo de usos para funcionamiento. No vendemos datos. Pagos procesados por Stripe bajo su política. Puedes solicitar borrado escribiendo a dolladmach@gmail.com</p>
+          </div>
+        </div>
+      </template>
+
+      <!-- Descargo -->
+      <template x-if="activeLegalModal === 'descargo'">
+        <div>
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="font-bold text-sm tracking-wide text-white">Descargo</h4>
+            <button @click="activeLegalModal = null" class="text-zinc-400 hover:text-white text-xs">✕</button>
+          </div>
+          <div class="text-[11px] text-zinc-300 leading-relaxed">
+            <p>DOLLARDGT.COM no es un servicio de tasación oficial de la Reserva Federal ni de coleccionismo. Todo contenido es simulado. No debe usarse para decisiones financieras. No hay premios en dinero real ni obligación de pago por terceros.</p>
+          </div>
+        </div>
+      </template>
+
+      <!-- Reembolsos -->
+      <template x-if="activeLegalModal === 'refunds'">
+        <div>
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="font-bold text-sm tracking-wide text-white">Reembolsos</h4>
+            <button @click="activeLegalModal = null" class="text-zinc-400 hover:text-white text-xs">✕</button>
+          </div>
+          <div class="text-[11px] text-zinc-300 leading-relaxed">
+            <p>Suscripciones digitales: puedes cancelar en cualquier momento desde tu portal de Stripe. Reembolsos dentro de 7 días si no usaste funciones premium, escribiendo a dolladmach@gmail.com con tu ID.</p>
+          </div>
+        </div>
+      </template>
+
+      <button @click="activeLegalModal = null" class="w-full rounded-[14px] bg-white/10 py-3 font-semibold text-xs text-white hover:bg-white/20 mt-4">Cerrar</button>
     </div>
   </div>
 
@@ -247,8 +359,17 @@ body { background: #050508; color: #f3f4f6; -webkit-tap-highlight-color: transpa
     <div class="rounded-full px-4 py-2 text-xs font-bold shadow-2xl text-black" :style="'background: ' + activeColor" x-text="toast.message"></div>
   </div>
 
-  <footer class="mt-12 text-center text-[10px] text-zinc-500 space-y-2">
-    <p>© 2026 DGT WORLD • Constant Rolling Engine</p>
+  <footer class="mt-12 text-center text-[10px] text-zinc-500 space-y-2 pb-6">
+    <p>© 2026 DollarDgt.com • All Rights Reserved</p>
+    <div class="flex justify-center gap-4 text-zinc-400">
+      <button @click="openLegalModal('terms')" class="hover:text-white underline">Términos</button>
+      <span>•</span>
+      <button @click="openLegalModal('privacy')" class="hover:text-white underline">Privacidad</button>
+      <span>•</span>
+      <button @click="openLegalModal('descargo')" class="hover:text-white underline">Descargo</button>
+      <span>•</span>
+      <button @click="openLegalModal('refunds')" class="hover:text-white underline">Reembolsos</button>
+    </div>
   </footer>
 
 </main>
@@ -323,6 +444,9 @@ function dgtWorldApp() {
     isAdmin: new URLSearchParams(window.location.search).get('admin') === 'dgt2026' || localStorage.getItem('dgt_is_admin') === 'true',
     sessionAttempts: parseInt(localStorage.getItem('dgt_session_attempts') || '0'),
     showStripeModal: false,
+    activeLegalModal: null,
+    acceptedTermsBox1: false,
+    acceptedTermsBox2: false,
     
     prefixDisplay: '',
     suffixLetter: '',
@@ -335,14 +459,13 @@ function dgtWorldApp() {
     computedValue: 50,
     
     totalMatchCount: parseInt(localStorage.getItem('dgt_1k_matches') || '0'),
-    
     vaultHistory: JSON.parse(localStorage.getItem('dgt_1k_history') || '[]'),
-    showClaimModal: false,
-    currentClaimItem: null,
     
     cloudListings: [],
     cloudLoading: false,
     cloudSearch: '',
+    showClaimModal: false,
+    currentClaimItem: null,
     
     toast: { visible: false, message: '' },
 
@@ -505,6 +628,19 @@ function dgtWorldApp() {
       this.showToast('Secuencia Avanzada a #' + (this.comboIndex + 1));
     },
 
+    jumpToCombo(idx) {
+      this.comboIndex = idx;
+      localStorage.setItem('dgt_1k_index', this.comboIndex.toString());
+      this.applyEngineCombo();
+      this.showToast('Salto a serie #' + (idx + 1));
+    },
+
+    getMiniComboText(idx) {
+      const cfg = this.currencies[this.currentCurrency];
+      const combo = Engine.getControlledCombo(idx, cfg, this.targetAmount);
+      return `${combo.prefix}-${combo.fullTailStr.slice(0, 4)}..`;
+    },
+
     openStripeCheckout() {
       window.open('https://buy.stripe.com/your-payment-link', '_blank');
     },
@@ -514,6 +650,10 @@ function dgtWorldApp() {
       localStorage.setItem('dgt_is_admin', 'true');
       this.showStripeModal = false;
       this.showToast('¡Acceso ilimitado desbloqueado!');
+    },
+
+    openLegalModal(type) {
+      this.activeLegalModal = type;
     },
 
     clearLocalVault() {
@@ -583,8 +723,8 @@ function dgtWorldApp() {
     sendClaimEmail() {
       if(!this.currentClaimItem) return;
       const item = this.currentClaimItem;
-      const subject = encodeURIComponent(`Reclamación de Serie: ${item.serial} [${item.currency || 'USD'}]`);
-      const body = encodeURIComponent(`Hola, equipo de Dollardgt.\n\nDeseo reclamar / reportar el siguiente registro:\n\n- Serie: ${item.serial}\n- Moneda: ${item.currency || 'USD'}\n- Valor: $${item.value}\n- Rareza: ${item.rarity}\n- ID: ${item.anon_id}\n\nQuedo atento.`);
+      const subject = encodeURIComponent(`Reclamación de Serie / Hallazgo: ${item.serial} [${item.currency || 'USD'}]`);
+      const body = encodeURIComponent(`Hola, equipo de Dollardgt y coleccionistas.\n\nDeseo reclamar / reportar el siguiente billete:\n\n- Serie: ${item.serial}\n- Moneda: ${item.currency || 'USD'}\n- Valor DGT: $${item.value}\n- Rareza: ${item.rarity}\n- ID: ${item.anon_id}\n\nQuedo atento.`);
       window.location.href = `mailto:dolladmatch@gmail.com?subject=${subject}&body=${body}`;
       this.showClaimModal = false;
     },
