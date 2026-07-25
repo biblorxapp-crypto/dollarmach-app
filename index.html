@@ -1,602 +1,90 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#050508">
-<title>DGT WORLD • DollarDgt.com v6.2</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    darkMode: 'class',
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ['Inter', 'sans-serif'],
-          display: ['Fraunces', 'serif'],
-          mono: ['JetBrains Mono', 'monospace']
-        },
-        colors: {
-          obsidian: '#050508',
-          panel: '#0c0c12',
-          cardBg: '#13131c'
-        }
-      }
-    }
-  }
-</script>
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>En Construcción</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-[x-cloak] { display: none !important; }
-body { background: #050508; color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
-.kbtn { transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.12s ease; touch-action: manipulation; user-select: none; }
-.kbtn:active { transform: scale(0.96); filter: brightness(0.9); }
-.tail-running { animation: blurRun 0.08s infinite; }
-@keyframes blurRun { 0% { filter: blur(0); } 50% { filter: blur(0.6px) brightness(1.25); } 100% { filter: blur(0); } }
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #050508; }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#000}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:#000;color:#fff;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  body::before{
+    content:"";position:fixed;inset:-50%;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+    opacity:.35;pointer-events:none;
+    animation:grainMove 8s steps(10) infinite;
+  }
+  @keyframes grainMove{0%{transform:translate(0,0)}100%{transform:translate(5%,0)}}
+  .blob{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;opacity:.6}
+  .blob1{width:600px;height:600px;background:radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);top:-10%;left:-10%;animation:float1 22s ease-in-out infinite}
+  .blob2{width:800px;height:800px;background:radial-gradient(circle, rgba(255,255,255,0.06), transparent 70%);bottom:-20%;right:-15%;animation:float2 26s ease-in-out infinite}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,40px) scale(1.1)}}
+  @keyframes float2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,-30px) scale(1.08)}}
+  .wrap{position:relative;z-index:2;width:100%;max-width:720px;padding:32px 24px;display:flex;flex-direction:column;align-items:center;text-align:center}
+  .logo-box{position:relative;width:148px;height:148px;display:flex;align-items:center;justify-content:center;perspective:800px}
+  .logo-glow{position:absolute;width:100%;height:100%;border-radius:36px;background:radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%);filter:blur(18px);animation:glowPulse 3.2s ease-in-out infinite}
+  @keyframes glowPulse{0%,100%{transform:scale(0.9);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+  .logo{position:relative;width:96px;height:96px;background:#0a0a0a;border:1px solid rgba(255,255,255,0.08);border-radius:28px;box-shadow:0 0 0 1px rgba(255,255,255,0.06) inset, 0 20px 60px rgba(0,0,0,0.8), 0 0 80px rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;animation:logoFloat 5s ease-in-out infinite;transform-style:preserve-3d;transition:transform 0.2s ease-out}
+  @keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .logo svg{width:54px;height:54px;filter:drop-shadow(0 0 18px rgba(255,255,255,0.35))}
+  .shimmer{position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(100deg, transparent 20%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.85) 50%, transparent 80%);mix-blend-mode:soft-light;animation:shimmerSweep 3.2s ease-in-out infinite}
+  @keyframes shimmerSweep{0%{left:-100%}50%{left:120%}100%{left:120%}}
+  .kicker{margin-top:28px;font-size:10.5px;letter-spacing:0.42em;font-weight:300;color:rgba(255,255,255,0.5);text-transform:uppercase}
+  .title{margin-top:28px;font-family:'Instrument Serif', Georgia, serif;font-size:clamp(32px, 7vw, 56px);line-height:0.95;letter-spacing:-0.02em}
+  .title i{font-weight:300;color:rgba(255,255,255,0.9)}
+  .desc{margin-top:22px;max-width:400px;font-size:14.5px;font-weight:300;line-height:1.7;color:#8a8a8a}
+  .loader{margin-top:44px;display:flex;flex-direction:column;align-items:center;gap:18px}
+  .dots{display:flex;gap:9px}
+  .dot{width:4px;height:4px;border-radius:50%;background:#fff;animation:dotBounce 1.4s ease-in-out infinite}
+  .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+  @keyframes dotBounce{0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+  .bar{width:112px;height:1px;background:rgba(255,255,255,0.08);overflow:hidden;border-radius:99px;position:relative}
+  .bar-inner{position:absolute;left:0;top:0;width:56px;height:100%;background:#fff;animation:progress 1.8s cubic-bezier(0.4,0,0.2,1) infinite}
+  @keyframes progress{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+  .cta{margin-top:44px}
+  .btn{height:40px;padding:0 24px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.8);font-size:13px;backdrop-filter:blur(12px);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .3s}
+  .btn:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.14);color:#fff}
+  .notify{display:none;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:999px;padding:5px 5px 5px 20px;backdrop-filter:blur(18px)}
+  .notify.active{display:flex;animation:fadeUp .5s cubic-bezier(0.16,1,0.3,1)}
+  .notify input{background:transparent;border:0;outline:0;color:#fff;font-size:13.5px;width:200px}
+  .notify input::placeholder{color:rgba(255,255,255,0.3)}
+  .notify button{height:32px;padding:0 18px;border-radius:999px;background:#fff;color:#000;font-size:12.5px;font-weight:500;border:0;cursor:pointer}
+  footer{position:fixed;bottom:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:center;font-size:10.5px;letter-spacing:0.18em;color:rgba(255,255,255,0.18);font-weight:300;border-top:1px solid rgba(255,255,255,0.05)}
+  .toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(12px);background:#141414;border:1px solid rgba(255,255,255,0.1);border-radius:999px;padding:11px 20px;display:flex;align-items:center;gap:10px;font-size:12.5px;opacity:0;pointer-events:none;transition:all .5s}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
-<body class="min-h-screen antialiased flex justify-center px-4 py-8" x-data="dgtWorldApp()" x-init="initApp()">
-
-<div x-show="totalMatchCount >= 40 && !stripePaid && !isAdmin" x-cloak x-transition.opacity class="fixed inset-0 z-[999] bg-obsidian/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center overflow-y-auto">
-  <div class="w-full max-w-[440px] rounded-[28px] border bg-panel p-8 shadow-2xl" :style="'border-color: ' + activeColor + '4d; box-shadow: 0 0 30px -5px ' + activeColor + '33'">
-    <div class="text-5xl mb-3">🔒</div>
-    <h1 class="font-display font-bold text-3xl tracking-wide text-white">BÓVEDA <span :style="'color: ' + activeColor">BLOQUEADA</span></h1>
-    <p class="mt-3 text-xs leading-relaxed text-zinc-400">Límite institucional de <b class="text-white">40 intentos</b> alcanzado. Desbloquea el acceso ilimitado al motor multi-moneda.</p>
-    
-    <div class="mt-6 rounded-[20px] border border-white/10 bg-cardBg p-5 text-left">
-      <h3 class="font-bold text-xs uppercase tracking-widest" :style="'color: ' + activeColor">Protocolo de Términos Institucionales</h3>
-      <p class="mt-2 text-[11px] leading-relaxed text-zinc-300">Al adquirir la licencia de <b class="text-white">DollarDgt.com Engine</b>, aceptas que las tasaciones son estimaciones algorítmicas de simulación avanzada.</p>
-      
-      <div class="mt-4 space-y-2 text-[11px] text-zinc-300">
-        <label class="flex gap-2.5 items-start cursor-pointer"><input type="checkbox" x-model="legal1" class="mt-0.5 h-4 w-4 rounded" :style="'accent-color: ' + activeColor"> <span>Acepto <button type="button" @click.stop="showTerms=true" class="underline font-medium" :style="'color: ' + activeColor">Términos</button>, <button type="button" @click.stop="showPrivacy=true" class="underline font-medium" :style="'color: ' + activeColor">Privacidad</button> y <button type="button" @click.stop="showDisclaimer=true" class="underline font-medium" :style="'color: ' + activeColor">Descargo</button></span></label>
-        <label class="flex gap-2.5 items-start cursor-pointer"><input type="checkbox" x-model="legal2" class="mt-0.5 h-4 w-4 rounded" :style="'accent-color: ' + activeColor"> <span>Acepto <button type="button" @click.stop="showRefund=true" class="underline font-medium" :style="'color: ' + activeColor">Reembolsos</button> y declaro ser mayor de 18 años</span></label>
-      </div>
-
-      <button @click="goStripe()" :disabled="!(legal1 && legal2)" class="mt-5 w-full kbtn rounded-[16px] bg-white py-4 font-extrabold text-black text-xs tracking-widest uppercase disabled:opacity-25 disabled:cursor-not-allowed transition-all">DESBLOQUEAR LICENCIA — $4.99 USD →</button>
-      <div class="mt-3 text-[10px] text-center text-zinc-500 tracking-wider">Procesado de forma segura mediante Stripe</div>
+<body>
+<div class="wrap">
+  <div class="logo-box" id="logoBox">
+    <div class="logo-glow"></div>
+    <div class="logo" id="logo">
+      <div class="shimmer"></div>
+      <svg viewBox="0 0 100 128" fill="none"><path d="M 32 12 C 32 12, 68 12, 68 36 C 68 60, 32 60, 32 86 C 32 110, 68 110, 68 110" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><path d="M 50 4 L 50 20" stroke="white" stroke-width="14" stroke-linecap="round"/><path d="M 50 106 L 50 124" stroke="white" stroke-width="14" stroke-linecap="round"/></svg>
     </div>
-    
-    <div class="mt-4 flex justify-center gap-4 text-[10px] text-zinc-500 underline"><button type="button" @click.stop="showTerms=true">Términos</button><button type="button" @click.stop="showPrivacy=true">Privacidad</button><button type="button" @click.stop="showDisclaimer=true">Descargo</button><button type="button" @click.stop="showRefund=true">Reembolsos</button></div>
-  </div>
+  <div class="kicker">En construcción</div>
+  <h1 class="title">Estamos construyendo<br><i>algo grande.</i></h1>
+  <p class="desc">Estamos puliendo cada detalle para darte la mejor experiencia. Muy pronto estaremos en línea.</p>
+  <div class="loader"><div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><div class="bar"><div class="bar-inner"></div></div></div>
+  <div class="cta"><button class="btn" id="btnOpen">● Notificarme</button><div class="notify" id="notifyBox"><input type="email" id="emailInput" placeholder="tu@email.com"><button id="btnSend">Avisarme</button></div></div>
 </div>
-
-<main class="w-full max-w-[440px] flex flex-col pb-24">
-  
-  <header class="flex items-center justify-between border-b border-white/10 pb-5">
-    <div>
-      <h1 class="font-display font-bold text-2xl tracking-tight transition-colors duration-300" :style="'color: ' + activeColor" x-text="'DGT ' + currentCurrency"></h1>
-      <p class="text-[10px] tracking-[0.25em] text-zinc-400 uppercase mt-1" x-text="currencies[currentCurrency].name + ' • v6.2'"></p>
-    </div>
-    <div class="flex items-center gap-2">
-      <template x-if="isAdmin">
-        <span class="rounded-full px-2 py-0.5 text-[9px] font-mono font-bold" :style="'background: ' + activeColor + '20; color: ' + activeColor + '; border: 1px solid ' + activeColor + '40'">ADMIN</span>
-      </template>
-      <select x-model="currentCurrency" @change="changeCurrency(currentCurrency)" class="rounded-[14px] bg-cardBg border border-white/10 px-3 py-2 text-xs font-mono font-bold outline-none transition-colors" :style="'color: ' + activeColor + '; border-color: ' + activeColor + '40'">
-        <template x-for="(cfg, code) in currencies" :key="code">
-          <option :value="code" x-text="code + ' (' + cfg.symbol + ')'"></option>
-        </template>
-      </select>
-    </div>
-  </header>
-
-  <section class="mt-5 rounded-[24px] border border-white/10 bg-panel p-5 shadow-xl">
-    <div class="flex justify-between items-center text-xs font-semibold uppercase tracking-wider">
-      <span class="text-zinc-400">Monto Objetivo (Target)</span>
-      <span class="font-mono font-bold text-sm" :style="'color: ' + activeColor" x-text="currencies[currentCurrency].symbol + targetAmount.toFixed(2)"></span>
-    </div>
-    <div class="mt-3">
-      <input type="range" :min="currencies[currentCurrency].min" :max="currencies[currentCurrency].max" :step="currencies[currentCurrency].step" x-model.number="targetAmount" @input="onTargetChange()" class="w-full bg-cardBg h-2 rounded-lg cursor-pointer" :style="'accent-color: ' + activeColor">
-    </div>
-    
-    <div class="mt-4 grid grid-cols-5 gap-2">
-      <template x-for="p in currencies[currentCurrency].presets">
-        <button @click="setTargetPreset(p)" 
-          class="kbtn rounded-[14px] border py-3 px-1 text-xs font-mono font-black transition-all flex flex-col items-center justify-center shadow-lg"
-          :style="targetAmount === p ? 'background: ' + activeColor + '; color: #000000; border-color: ' + activeColor + '; box-shadow: 0 0 15px ' + activeColor + '66; transform: scale(1.05)' : 'background: #13131c; border-color: ' + activeColor + '4d; color: ' + activeColor">
-          <span class="text-[9px] uppercase tracking-tighter opacity-70">Meta</span>
-          <span class="text-xs sm:text-sm font-black" x-text="currencies[currentCurrency].symbol + p"></span>
-        </button>
-      </template>
-    </div>
-  </section>
-
-  <section class="mt-4 rounded-[26px] border bg-panel p-6 shadow-2xl relative overflow-hidden transition-all duration-300" :style="'border-color: ' + activeColor + '4d; box-shadow: 0 0 25px -5px ' + activeColor + '33'">
-    <div class="flex items-center justify-between text-xs font-semibold tracking-wider uppercase">
-      <span class="text-zinc-400" x-text="'Serie Nativa (' + currentCurrency + ')'"></span>
-      <span :class="isShuffling ? 'animate-pulse' : ''" :style="'color: ' + (isShuffling ? '#a855f7' : activeColor)" x-text="isShuffling ? 'ROTANDO MOTOR...' : 'ACTIVO'"></span>
-    </div>
-    
-    <div class="mt-4 font-mono font-bold tracking-widest text-3xl leading-none text-white flex justify-center items-center gap-2 text-center tabular-nums overflow-hidden">
-      <span :class="isShuffling ? 'animate-pulse text-violet-400' : ''" :style="!isShuffling ? 'color: ' + activeColor : ''" x-text="prefixDisplay"></span>
-      <span class="text-zinc-600">-</span>
-      <span :class="isShuffling ? 'tail-running text-violet-400' : 'text-zinc-200'" x-text="nativeSerialDisplay"></span>
-      <span class="text-zinc-600" x-show="suffixLetter" x-text="suffixLetter"></span>
-    </div>
-    
-    <div class="mt-3 flex justify-center items-center gap-2">
-      <span class="rounded-full px-3 py-0.5 text-[10px] font-extrabold tracking-widest border" :class="rarity.badgeClass" x-text="rarity.label"></span>
-      <span class="rounded-full px-3 py-0.5 text-[10px] font-mono font-bold border border-white/10 bg-cardBg text-zinc-400" x-text="'Entropía: ' + entropyScore + '%'"></span>
-    </div>
-  </section>
-
-  <section class="mt-4 grid grid-cols-3 gap-3">
-    <div class="rounded-[20px] border border-white/10 bg-cardBg p-3.5 text-center">
-      <div class="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">Año Est.</div>
-      <div class="mt-1.5 font-mono text-base font-bold" :class="isShuffling ? 'animate-pulse text-violet-400' : 'text-sky-300'" x-text="yearVal"></div>
-    </div>
-    <div class="rounded-[20px] border border-white/10 bg-cardBg p-3.5 text-center">
-      <div class="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">Tasa Rate</div>
-      <div class="mt-1.5 font-mono text-base font-bold text-amber-300" x-text="currencies[currentCurrency].rate"></div>
-    </div>
-    <div class="rounded-[20px] bg-cardBg p-3.5 text-center border transition-colors duration-300" :style="'border-color: ' + activeColor + '4d; background: ' + activeColor + '0d'">
-      <div class="text-[10px] font-bold tracking-wider uppercase opacity-80" :style="'color: ' + activeColor">Valor DGT</div>
-      <div class="mt-1.5 font-mono text-base font-black tabular-nums" :style="'color: ' + activeColor" x-text="currencies[currentCurrency].symbol + computedValue.toFixed(2)"></div>
-    </div>
-  </section>
-
-  <section class="mt-4 rounded-[28px] border border-white/10 bg-panel p-5 shadow-2xl">
-    <div class="flex justify-between items-center mb-3">
-      <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider">Módulo S-Digits Pad (0-9)</span>
-      <span class="text-[10px] font-mono text-zinc-500" x-text="userDigits.length + ' / ' + maxInputLen + ' dígitos'"></span>
-    </div>
-
-    <div class="grid grid-cols-3 gap-2.5">
-      <template x-for="n in [7,8,9,4,5,6,1,2,3,0]">
-        <button @click="pressNum(n)" :disabled="userDigits.length >= maxInputLen || isShuffling" class="kbtn h-12 rounded-[14px] border border-white/10 bg-cardBg text-base font-bold text-zinc-200 disabled:opacity-20 hover:border-white/30" x-text="n"></button>
-      </template>
-      <button @click="clearDigits()" class="kbtn h-12 rounded-[14px] border border-violet-500/30 bg-violet-500/10 text-violet-400 text-[11px] font-bold tracking-wider">CLR</button>
-      <button @click="deleteDigit()" class="kbtn h-12 rounded-[14px] border border-white/10 bg-cardBg text-base font-bold text-zinc-400">⌫</button>
-    </div>
-
-    <div class="mt-4 grid grid-cols-2 gap-2.5">
-      <button @click="triggerMatch()" :disabled="userDigits.length < maxInputLen || isShuffling" class="kbtn h-12 rounded-[14px] text-black font-extrabold text-xs tracking-wider disabled:opacity-20 transition-all shadow-lg" :style="'background: ' + activeColor + '; box-shadow: 0 4px 20px ' + activeColor + '4d'">VALIDAR MATCH</button>
-      <button @click="openVaultModal()" class="kbtn h-12 rounded-[14px] border border-white/10 bg-white/5 text-white font-semibold text-xs tracking-wider">INFO BÓVEDA</button>
-    </div>
-    <div class="mt-3 text-center text-[10px] text-zinc-500"><span x-text="matchAttemptsLeft"></span> intentos restantes • <span x-text="totalMatchCount"></span>/40 totales</div>
-  </section>
-
-  <section class="mt-5 rounded-[24px] border border-white/10 bg-panel p-5 shadow-2xl">
-    <div class="flex justify-between items-center mb-3">
-      <h2 class="font-bold text-sm tracking-wider text-white flex items-center gap-2">
-        <span>📦 BÓVEDA LOCAL</span>
-        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cardBg border border-white/10" :style="'color: ' + activeColor" x-text="vaultHistory.length + ' registros'"></span>
-      </h2>
-      <button @click="clearLocalVault()" x-show="vaultHistory.length > 0" class="kbtn text-[10px] text-red-400 font-bold uppercase tracking-wider underline">Vaciar</button>
-    </div>
-    <p class="text-[11px] leading-relaxed text-zinc-400 mb-4">Historial de series y validaciones institucionales guardadas localmente.</p>
-    
-    <div class="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
-      <template x-for="h in vaultHistory" :key="h.serial + h.date">
-        <div class="rounded-[16px] border border-white/10 bg-cardBg p-3 flex justify-between items-center">
-          <div>
-            <div class="font-mono text-xs font-bold text-white" x-text="h.serial"></div>
-            <div class="text-[10px] text-zinc-400 mt-0.5" x-text="h.date + ' • ' + h.currency + ' • ' + h.rarity"></div>
-          </div>
-          <span class="font-mono text-xs font-black" :style="'color: ' + activeColor" x-text="'$' + h.value"></span>
-        </div>
-      </template>
-      <div x-show="vaultHistory.length === 0" class="text-center py-6 text-xs text-zinc-600 font-mono">
-        [ Bóveda local vacía. Realiza un Match para registrar. ]
-      </div>
-    </div>
-  </section>
-
-  <section class="mt-5 rounded-[24px] bg-panel p-5 shadow-2xl border transition-colors duration-300" :style="'border-color: ' + activeColor + '33'">
-    <div class="flex items-center justify-between">
-      <h2 class="font-bold text-sm tracking-wider" :style="'color: ' + activeColor">🌐 NUBE GLOBAL SUPABASE</h2>
-      <span class="text-[9px] px-2.5 py-0.5 rounded-full font-mono" :style="'background: ' + activeColor + '1a; color: ' + activeColor + '; border: 1px solid ' + activeColor + '33'">SYNC OK</span>
-    </div>
-    <p class="mt-2 text-[11px] leading-relaxed text-zinc-400">Consulta y comparte series validadas en la red institucional global.</p>
-    
-    <div class="mt-4 flex gap-2">
-      <input x-model="cloudSearch" @input="searchCloudVault()" placeholder="Buscar serie, país o rareza..." class="flex-1 rounded-[14px] bg-black border border-white/10 px-3.5 py-3 text-xs text-white placeholder:text-zinc-600 outline-none transition-colors" :style="'border-color: ' + activeColor + '55'">
-      <button @click="saveToCloud()" class="kbtn rounded-[14px] px-4 py-3 text-xs font-black text-black shadow-lg" :style="'background: ' + activeColor">REGISTRAR</button>
-    </div>
-
-    <div x-show="cloudLoading" class="text-center py-4 text-xs animate-pulse" :style="'color: ' + activeColor">Sincronizando con Supabase Vault...</div>
-    
-    <div class="mt-4 space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
-      <template x-for="item in cloudListings" :key="item.anon_id + item.updated_at">
-        <div class="rounded-[16px] border border-white/10 bg-cardBg p-3.5 flex justify-between items-center gap-3">
-          <div>
-            <div class="font-mono text-xs font-bold text-white" x-text="item.serial + ' • ' + item.currency"></div>
-            <div class="mt-1 flex gap-2 items-center">
-              <span class="text-[9px] px-2 py-0.5 rounded-full font-mono border" :style="'background: ' + activeColor + '15; color: ' + activeColor + '; border-color: ' + activeColor + '33'" x-text="item.rarity"></span>
-              <span class="text-[10px] text-zinc-400" x-text="'$' + item.value"></span>
-            </div>
-          </div>
-          <button @click="claimItem(item)" class="kbtn rounded-[12px] bg-white text-black px-3.5 py-2 text-[10px] font-extrabold shadow-md">RECLAMAR</button>
-        </div>
-      </template>
-      <div x-show="cloudListings.length===0 && !cloudLoading" class="text-center py-6 text-xs text-zinc-600">No hay registros globales activos.</div>
-    </div>
-  </section>
-
-  <div x-show="showClaimModal" x-cloak class="fixed inset-0 z-[1001] grid place-items-center bg-black/90 p-4 backdrop-blur-sm" @click.self="showClaimModal=false">
-    <div class="w-full max-w-[400px] rounded-[24px] bg-panel p-6 border border-white/20 shadow-2xl space-y-4" x-transition>
-      <div class="flex justify-between items-center">
-        <h4 class="font-bold text-sm tracking-wide text-emerald-400 flex items-center gap-2">
-          📨 RECLAMACIÓN INSTITUCIONAL
-        </h4>
-        <button @click="showClaimModal=false" class="text-zinc-400 hover:text-white text-xs">✕</button>
-      </div>
-
-      <p class="text-[11px] text-zinc-300 leading-relaxed">
-        Se generará una solicitud de reclamación dirigida a <b class="text-white">dolladmatch@gmail.com</b> con los siguientes datos del registro:
-      </p>
-
-      <template x-if="currentClaimItem">
-        <div class="rounded-[16px] bg-cardBg border border-white/10 p-4 space-y-2 font-mono text-xs">
-          <div class="flex justify-between"><span class="text-zinc-400">Serie:</span> <span class="text-white font-bold" x-text="currentClaimItem.serial"></span></div>
-          <div class="flex justify-between"><span class="text-zinc-400">Moneda:</span> <span class="text-white" x-text="currentClaimItem.currency || 'USD'"></span></div>
-          <div class="flex justify-between"><span class="text-zinc-400">Rareza:</span> <span class="text-emerald-400 font-bold" x-text="currentClaimItem.rarity"></span></div>
-          <div class="flex justify-between"><span class="text-zinc-400">Valor Estimado:</span> <span class="text-amber-400 font-bold" x-text="'$' + currentClaimItem.value"></span></div>
-          <div class="pt-2 border-t border-white/10 text-[10px] text-zinc-500 truncate">
-            ID: <span x-text="currentClaimItem.anon_id"></span>
-          </div>
-        </div>
-      </template>
-
-      <div class="flex gap-2 pt-2">
-        <button @click="showClaimModal=false" class="flex-1 rounded-[14px] border border-white/10 bg-cardBg py-3 font-semibold text-xs text-zinc-300 hover:bg-white/5">Cancelar</button>
-        <button @click="sendClaimEmail()" class="flex-1 rounded-[14px] bg-emerald-500 py-3 font-extrabold text-black text-xs hover:bg-emerald-400 shadow-lg">Abrir Correo ↗</button>
-      </div>
-    </div>
-  </div>
-
-  <div x-show="showVaultModal" class="fixed inset-0 z-[1000] grid place-items-center bg-black/90 p-4 backdrop-blur-sm" @click.self="showVaultModal=false">
-    <div class="max-h-[80vh] w-full max-w-[420px] overflow-auto rounded-[24px] bg-panel p-6 border border-white/10">
-      <div class="flex justify-between items-center mb-4"><h4 class="font-bold text-base" :style="'color: ' + activeColor">Información Institucional Bóveda</h4></div>
-      <p class="text-xs text-zinc-300 leading-relaxed">Los registros se guardan permanentemente en tu dispositivo y se sincronizan de forma segura con la nube de Supabase Vault ante cada registro o validación.</p>
-      <button @click="showVaultModal=false" class="mt-5 w-full rounded-[14px] bg-white text-black py-3 font-bold text-xs">Cerrar</button>
-    </div>
-  </div>
-
-  <div x-show="showTerms" class="fixed inset-0 z-[1000] grid place-items-center bg-black/90 p-4 backdrop-blur-sm" @click.self="showTerms=false"><div class="max-h-[80vh] w-full max-w-[420px] overflow-auto rounded-[24px] bg-panel p-6 border border-white/10"><h4 class="font-bold text-lg" :style="'color: ' + activeColor">Términos y Condiciones</h4><p class="mt-3 whitespace-pre-line text-xs leading-relaxed text-zinc-300" x-text="termsText"></p><button @click="showTerms=false" class="mt-5 w-full rounded-[14px] bg-white text-black py-3 font-bold text-xs">Cerrar</button></div></div>
-  <div x-show="showPrivacy" class="fixed inset-0 z-[1000] grid place-items-center bg-black/90 p-4 backdrop-blur-sm" @click.self="showPrivacy=false"><div class="max-h-[80vh] w-full max-w-[420px] overflow-auto rounded-[24px] bg-panel p-6 border border-white/10"><h4 class="font-bold text-lg" :style="'color: ' + activeColor">Política de Privacidad</h4><p class="mt-3 whitespace-pre-line text-xs leading-relaxed text-zinc-300" x-text="privacyText"></p><button @click="showPrivacy=false" class="mt-5 w-full rounded-[14px] bg-white text-black py-3 font-bold text-xs">Cerrar</button></div></div>
-  <div x-show="showDisclaimer" class="fixed inset-0 z-[1000] grid place-items-center bg-black/90 p-4 backdrop-blur-sm" @click.self="showDisclaimer=false"><div class="max-h-[80vh] w-full max-w-[420px] overflow-auto rounded-[24px] bg-panel p-6 border border-white/10"><h4 class="font-bold text-lg" :style="'color: ' + activeColor">Descargo de Responsabilidad</h4><p class="mt-3 whitespace-pre-line text-xs leading-relaxed text-zinc-300" x-text="disclaimerText"></p><button @click="showDisclaimer=false" class="mt-5 w-full rounded-[14px] bg-white text-black py-3 font-bold text-xs">Cerrar</button></div></div>
-  <div x-show="showRefund" class="fixed inset-0 z-[1000] grid place-items-center bg-black/90 p-4 backdrop-blur-sm" @click.self="showRefund=false"><div class="max-h-[80vh] w-full max-w-[420px] overflow-auto rounded-[24px] bg-panel p-6 border border-white/10"><h4 class="font-bold text-lg" :style="'color: ' + activeColor">Política de Reembolsos</h4><p class="mt-3 whitespace-pre-line text-xs leading-relaxed text-zinc-300" x-text="refundText"></p><button @click="showRefund=false" class="mt-5 w-full rounded-[14px] bg-white text-black py-3 font-bold text-xs">Cerrar</button></div></div>
-
-  <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 pointer-events-none" :class="toast.visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'">
-    <div class="rounded-full px-4 py-2 text-xs font-bold shadow-2xl text-black" :style="'background: ' + activeColor" x-text="toast.message"></div>
-  </div>
-
-  <footer class="mt-12 text-center text-[10px] text-zinc-500 space-y-2">
-    <p>© 2026 DGT WORLD • DollarDgt.com v6.2</p>
-    <div class="flex justify-center gap-3 underline">
-      <button @click="showTerms=true">Términos</button>
-      <button @click="showPrivacy=true">Privacidad</button>
-      <button @click="showDisclaimer=true">Descargo</button>
-      <button @click="showRefund=true">Reembolsos</button>
-    </div>
-  </footer>
-
-</main>
-
+<footer>© 2026 — VOLVEMOS PRONTO</footer>
+<div class="toast" id="toast">✓ ¡Te avisaremos!</div>
 <script>
-const CURRENCY_CONFIGS = {
-  USD: { name: 'EEUU (USD)', symbol: '$', lettersCount: 3, digitsCount: 8, rate: 1.0, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XX XX XX XX', color: '#10b981' },
-  EUR: { name: 'UE (EUR)', symbol: '€', lettersCount: 1, digitsCount: 11, rate: 0.92, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'X XXX XXX XXX X', color: '#3b82f6' },
-  GBP: { name: 'UK (GBP)', symbol: '£', lettersCount: 4, digitsCount: 6, rate: 0.79, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XXXX XXXXXX', color: '#8b5cf6' },
-  CHF: { name: 'Suiza (CHF)', symbol: 'CHF', lettersCount: 2, digitsCount: 8, rate: 1.08, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XX XX XX XX', color: '#ef4444' },
-  CAD: { name: 'Canadá (CAD)', symbol: 'C$', lettersCount: 3, digitsCount: 7, rate: 0.73, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XXX XXXX', color: '#f97316' },
-  AUD: { name: 'Australia (AUD)', symbol: 'A$', lettersCount: 2, digitsCount: 9, rate: 0.65, min: 1, max: 1000, step: 1, presets: [10, 50, 100, 500, 1000], mask: 'XX XXXXXXX', color: '#eab308' }
-};
-
-const Engine = {
-  genLetters(count) {
-    const L = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-    const r = () => L[Math.floor(Math.random() * L.length)];
-    let res = [];
-    for (let i = 0; i < count; i++) res.push(r());
-    return res;
-  },
-  genYear() {
-    return Math.floor(Math.random() * (2000 - 1800 + 1)) + 1800;
-  },
-  genTailWithTarget(len, monto, rate) {
-    const seed = Math.sin(monto * rate * 100);
-    let tail = [];
-    for (let i = 0; i < len; i++) {
-      let val = Math.floor(Math.abs(Math.sin(seed + i) * 10));
-      tail.push(val);
-    }
-    return tail;
-  },
-  checkRarity(fullDigits) {
-    if (/(\d)\1{3}/.test(fullDigits)) return { type: 'quad', label: 'QUAD REPEAT', score: 90, badgeClass: 'border-violet-500 text-violet-400 bg-violet-500/10' };
-    if (fullDigits.slice(0, Math.floor(fullDigits.length / 2)) === fullDigits.slice(Math.floor(fullDigits.length / 2))) return { type: 'mirror', label: 'MIRROR MATCH', score: 70, badgeClass: 'border-sky-400 text-sky-300 bg-sky-500/10' };
-    return { type: 'common', label: 'COMÚN', score: 25, badgeClass: 'border-white/20 text-zinc-400 bg-white/5' };
-  }
-};
-
-const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_Lf1Bd6_mvlAlZCdcYBBR5A_fTjpEiyv';
-let supabaseClient = null;
-try { supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e){}
-
-const ANON_ID = localStorage.getItem('dgt_world_anon') || (() => {
-  const id = 'dgt_w_' + Math.random().toString(36).slice(2, 10);
-  localStorage.setItem('dgt_world_anon', id);
-  return id;
-})();
-
-function dgtWorldApp() {
-  return {
-    currencies: CURRENCY_CONFIGS,
-    currentCurrency: 'USD',
-    targetAmount: 50,
-    letters: [],
-    suffixLetter: '',
-    yearVal: 2021,
-    tailDigits: [],
-    userDigits: [],
-    maxInputLen: 4,
-    isShuffling: false,
-    animInterval: null,
-    rarity: { type: 'common', label: 'COMÚN', score: 25, badgeClass: '' },
-    entropyScore: 50,
-    computedValue: 50,
-    
-    matchAttemptsLeft: 40,
-    totalMatchCount: parseInt(localStorage.getItem('dgt_world_matches') || '0'),
-    stripePaid: localStorage.getItem('dgt_world_stripe') === 'true',
-    isAdmin: new URLSearchParams(location.search).get('admin') === 'dgt2026',
-    
-    vaultHistory: JSON.parse(localStorage.getItem('dgtworld_history_v54') || '[]'),
-    showVaultModal: false,
-    
-    // Control de Tarjeta Flotante / Modal de Reclamación
-    showClaimModal: false,
-    currentClaimItem: null,
-    
-    cloudListings: [],
-    cloudLoading: false,
-    cloudSearch: '',
-    
-    legal1: false, legal2: false,
-    showTerms: false, showPrivacy: false, showDisclaimer: false, showRefund: false,
-    toast: { visible: false, message: '' },
-    
-    termsText: "1. DollarDgt.com Engine v6.2 es una simulación analítica y educativa de numeración y validación numismática.\n2. No constituye un servicio financiero ni casa de apuestas.",
-    privacyText: "Se almacena un identificador anónimo local y conteo institucional para sincronización en Supabase Vault.",
-    disclaimerText: "Los valores generados son estimaciones algorítmicas con fines de entretenimiento y análisis coleccionista.",
-    refundText: "Suscripciones digitales: solicitudes de reembolso en los primeros 7 días mediante soporte institucional.",
-
-    initApp() {
-      const p = new URLSearchParams(location.search);
-      if(p.get('stripe_success') === '1') {
-        this.stripePaid = true;
-        localStorage.setItem('dgt_world_stripe', 'true');
-        this.showToast('Licencia institucional verificada con éxito');
-        history.replaceState({}, '', location.pathname);
-      }
-      this.resetEngine();
-      this.loadCloudVault();
-
-      window.addEventListener('keydown', (e) => {
-        if (e.key >= '0' && e.key <= '9') {
-          this.pressNum(parseInt(e.key));
-        } else if (e.key === 'Backspace') {
-          this.deleteDigit();
-        }
-      });
-    },
-
-    resetEngine() {
-      const cfg = this.currencies[this.currentCurrency];
-      const lArr = Engine.genLetters(cfg.lettersCount);
-      this.letters = lArr.slice(0, cfg.lettersCount - 1);
-      this.suffixLetter = lArr[cfg.lettersCount - 1] || '';
-      this.yearVal = Engine.genYear();
-      this.maxInputLen = Math.min(4, Math.floor(cfg.digitsCount / 2));
-      this.userDigits = [];
-      this.tailDigits = Engine.genTailWithTarget(cfg.digitsCount, this.targetAmount, cfg.rate);
-      this.updateCalculations();
-    },
-
-    changeCurrency(code) {
-      this.currentCurrency = code;
-      this.targetAmount = this.currencies[code].presets[1];
-      this.resetEngine();
-      this.showToast('Moneda cambiada a ' + code);
-    },
-
-    setTargetPreset(val) {
-      this.targetAmount = val;
-      this.onTargetChange();
-    },
-
-    onTargetChange() {
-      if(this.animInterval) clearInterval(this.animInterval);
-      this.isShuffling = true;
-      let ticks = 0;
-      const cfg = this.currencies[this.currentCurrency];
-      this.animInterval = setInterval(() => {
-        this.tailDigits = Engine.genTailWithTarget(cfg.digitsCount, this.targetAmount + ticks, cfg.rate);
-        ticks++;
-        if(ticks >= 6) {
-          clearInterval(this.animInterval);
-          this.isShuffling = false;
-          this.tailDigits = Engine.genTailWithTarget(cfg.digitsCount, this.targetAmount, cfg.rate);
-          this.updateCalculations();
-        }
-      }, 70);
-    },
-
-    pressNum(n) {
-      if(this.userDigits.length >= this.maxInputLen || this.isShuffling) return;
-      if(this.animInterval) clearInterval(this.animInterval);
-      this.isShuffling = true;
-      let ticks = 0;
-      const cfg = this.currencies[this.currentCurrency];
-
-      this.animInterval = setInterval(() => {
-        const tempLetters = Engine.genLetters(cfg.lettersCount);
-        this.letters = tempLetters.slice(0, cfg.lettersCount - 1);
-        this.suffixLetter = tempLetters[cfg.lettersCount - 1] || '';
-        this.yearVal = Engine.genYear();
-        this.tailDigits = Engine.genTailWithTarget(cfg.digitsCount, this.targetAmount + n + ticks, cfg.rate);
-        ticks++;
-        
-        if(ticks >= 5) {
-          clearInterval(this.animInterval);
-          this.isShuffling = false;
-          this.userDigits.push(n);
-          this.tailDigits = Engine.genTailWithTarget(cfg.digitsCount, this.targetAmount, cfg.rate);
-          this.updateCalculations();
-        }
-      }, 50);
-    },
-
-    deleteDigit() {
-      if(this.userDigits.length === 0 || this.isShuffling) return;
-      this.userDigits.pop();
-      this.updateCalculations();
-    },
-
-    clearDigits() {
-      if(this.isShuffling) return;
-      this.userDigits = [];
-      this.updateCalculations();
-    },
-
-    updateCalculations() {
-      const cfg = this.currencies[this.currentCurrency];
-      const fullStr = this.userDigits.join('') + this.tailDigits.join('').slice(this.userDigits.length);
-      this.rarity = Engine.checkRarity(fullStr);
-      this.entropyScore = Math.floor((fullStr.split('').reduce((a,b)=>a+parseInt(b),0) / (cfg.digitsCount * 9)) * 100);
-      this.computedValue = this.targetAmount * cfg.rate * (1 + this.rarity.score / 100);
-    },
-
-    triggerMatch() {
-      if(this.matchAttemptsLeft <= 0 && !this.isAdmin) return;
-      this.matchAttemptsLeft--;
-      this.totalMatchCount++;
-      localStorage.setItem('dgt_world_matches', this.totalMatchCount.toString());
-      
-      const cfg = this.currencies[this.currentCurrency];
-      const serialFull = `${this.prefixDisplay} ${this.nativeSerialDisplay} ${this.suffixLetter} [${this.yearVal}]`;
-      const entry = {
-        serial: serialFull,
-        currency: this.currentCurrency,
-        year: this.yearVal,
-        value: this.computedValue.toFixed(2),
-        rarity: this.rarity.label,
-        date: new Date().toLocaleString()
-      };
-      this.vaultHistory.push(entry);
-      localStorage.setItem('dgtworld_history_v54', JSON.stringify(this.vaultHistory));
-      this.showToast('¡Match Validado con Éxito!');
-      this.saveToCloud();
-    },
-
-    clearLocalVault() {
-      if(confirm('¿Vaciar historial local?')) {
-        this.vaultHistory = [];
-        localStorage.setItem('dgtworld_history_v54', '[]');
-      }
-    },
-
-    openVaultModal() { this.showVaultModal = true; },
-
-    async loadCloudVault(search = '') {
-      if(!supabaseClient) return;
-      this.cloudLoading = true;
-      try {
-        let query = supabaseClient.from('dgt_world_vault').select('*').order('updated_at', { ascending: false }).limit(30);
-        if(search) query = query.or(`serial.ilike.%${search}%,currency.ilike.%${search}%,rarity.ilike.%${search}%`);
-        const { data, error } = await query;
-        if(error) throw error;
-        if(data) {
-          this.cloudListings = data.map(d => ({
-            anon_id: d.anon_id,
-            serial: d.serial,
-            currency: d.currency,
-            value: d.value,
-            rarity: d.rarity,
-            updated_at: d.updated_at
-          }));
-        }
-      } catch(e) {
-        console.error("Supabase Load Error:", e);
-      }
-      this.cloudLoading = false;
-    },
-
-    searchCloudVault() { this.loadCloudVault(this.cloudSearch); },
-
-    async saveToCloud() {
-      if(!supabaseClient) {
-        this.showToast('Supabase no conectado');
-        return;
-      }
-      const serialFull = `${this.prefixDisplay} ${this.nativeSerialDisplay} ${this.suffixLetter} [${this.yearVal}]`;
-      const payload = {
-        anon_id: ANON_ID + '_' + Date.now(),
-        serial: serialFull,
-        currency: this.currentCurrency,
-        value: this.computedValue.toFixed(2),
-        rarity: this.rarity.label,
-        history: this.vaultHistory,
-        total_attempts: this.totalMatchCount,
-        updated_at: new Date()
-      };
-      try {
-        const { error } = await supabaseClient.from('dgt_world_vault').insert([payload]);
-        if(error) throw error;
-        this.showToast('Sincronizado en Supabase Vault ✓');
-        this.loadCloudVault();
-      } catch(e) {
-        console.error("Supabase Save Error:", e);
-        this.showToast('Error Cloud: ' + (e.message || 'Ver consola'));
-      }
-    },
-
-    // Abre la tarjeta flotante con los datos del item
-    claimItem(item) {
-      this.currentClaimItem = item;
-      this.showClaimModal = true;
-    },
-
-    // Dispara el cliente de correo con la información desde la tarjeta flotante
-    sendClaimEmail() {
-      if(!this.currentClaimItem) return;
-      const item = this.currentClaimItem;
-      const subject = encodeURIComponent(`Reclamación de Serie: ${item.serial} [${item.currency || 'USD'}]`);
-      const body = encodeURIComponent(`Hola, equipo de Dollardgt.\n\nDeseo reclamar / reportar el siguiente registro de la Nube Global:\n\n- Serie: ${item.serial}\n- Moneda: ${item.currency || 'USD'}\n- Valor: $${item.value}\n- Rareza: ${item.rarity}\n- ID de Registro: ${item.anon_id}\n\nQuedo atento a las instrucciones.`);
-      
-      window.location.href = `mailto:dolladmatch@gmail.com?subject=${subject}&body=${body}`;
-      this.showClaimModal = false;
-    },
-
-    goStripe() {
-      if(!(this.legal1 && this.legal2)) { this.showToast('Acepta los términos'); return; }
-      window.location.href = "https://buy.stripe.com/7sY9AU9Q1gSeaUi9vo7Vm0j?client_reference_id=" + ANON_ID;
-    },
-
-    showToast(m) {
-      this.toast.message = m;
-      this.toast.visible = true;
-      setTimeout(() => { this.toast.visible = false; }, 2400);
-    },
-
-    get prefixDisplay() { return this.letters.join(''); },
-    get nativeSerialDisplay() {
-      const cfg = this.currencies[this.currentCurrency];
-      let fullTail = this.userDigits.join('') + this.tailDigits.join('').slice(this.userDigits.length);
-      return fullTail;
-    },
-    get activeColor() {
-      return this.currencies[this.currentCurrency].color;
-    }
-  }
-}
+  const logo=document.getElementById('logo');
+  document.addEventListener('mousemove',e=>{
+    const x=(e.clientX/window.innerWidth-0.5)*20, y=(e.clientY/window.innerHeight-0.5)*-20;
+    logo.style.transform=`translateY(-4px) rotateY(${x}deg) rotateX(${y}deg)`;
+  });
+  const btnOpen=document.getElementById('btnOpen'), notifyBox=document.getElementById('notifyBox'), btnSend=document.getElementById('btnSend'), toast=document.getElementById('toast'), emailInput=document.getElementById('emailInput');
+  btnOpen.onclick=()=>{btnOpen.style.display='none';notifyBox.classList.add('active');emailInput.focus()};
+  btnSend.onclick=()=>{if(emailInput.value.includes('@')){toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),3000);notifyBox.classList.remove('active');btnOpen.style.display='inline-flex';emailInput.value=''}};
 </script>
 </body>
 </html>
