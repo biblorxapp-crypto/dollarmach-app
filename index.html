@@ -115,12 +115,20 @@ body { background: #050508; color: #f3f4f6; -webkit-tap-highlight-color: transpa
     </div>
   </section>
 
+  <!-- MÓDULO S-DIGITS PAD (BOTONES PRINCIPALES ARRIBA) -->
   <section class="mt-4 rounded-[28px] border border-white/10 bg-panel p-5 shadow-2xl">
     <div class="flex justify-between items-center mb-3">
       <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider">Módulo S-Digits Pad (0-9 Constante)</span>
       <span class="text-[10px] font-mono text-zinc-500" x-text="userDigits.length + ' / ' + maxInputLen + ' fijos'"></span>
     </div>
 
+    <!-- Botones principales arriba (Izquierda: Capturar Bóveda | Derecha: Siguiente 1K) -->
+    <div class="mb-3 grid grid-cols-2 gap-2.5">
+      <button @click="registerCurrentCombo()" :disabled="isShuffling" class="kbtn h-12 rounded-[14px] border border-white/10 bg-white/5 text-white font-semibold text-xs tracking-wider disabled:opacity-25 hover:bg-white/10">CAPTURAR BÓVEDA</button>
+      <button @click="triggerMatch()" :disabled="isShuffling" class="kbtn h-12 rounded-[14px] text-black font-extrabold text-xs tracking-wider disabled:opacity-25 transition-all shadow-lg" :style="'background: ' + activeColor + '; box-shadow: 0 4px 20px ' + activeColor + '4d'" x-text="isShuffling ? 'RODANDO...' : 'SIGUIENTE 1K'"></button>
+    </div>
+
+    <!-- Teclado Numérico (0-9) -->
     <div class="grid grid-cols-3 gap-2.5">
       <template x-for="n in [7,8,9,4,5,6,1,2,3,0]">
         <button @click="pressNum(n)" :disabled="userDigits.length >= maxInputLen || isShuffling" class="kbtn h-12 rounded-[14px] border border-white/10 bg-cardBg text-base font-bold text-zinc-200 disabled:opacity-20 hover:border-white/30" x-text="n"></button>
@@ -129,10 +137,6 @@ body { background: #050508; color: #f3f4f6; -webkit-tap-highlight-color: transpa
       <button @click="deleteDigit()" class="kbtn h-12 rounded-[14px] border border-white/10 bg-cardBg text-base font-bold text-zinc-400">⌫</button>
     </div>
 
-    <div class="mt-4 grid grid-cols-2 gap-2.5">
-      <button @click="triggerMatch()" :disabled="isShuffling" class="kbtn h-12 rounded-[14px] text-black font-extrabold text-xs tracking-wider disabled:opacity-25 transition-all shadow-lg" :style="'background: ' + activeColor + '; box-shadow: 0 4px 20px ' + activeColor + '4d'" x-text="isShuffling ? 'RODANDO...' : 'SIGUIENTE 1K'"></button>
-      <button @click="registerCurrentCombo()" :disabled="isShuffling" class="kbtn h-12 rounded-[14px] border border-white/10 bg-white/5 text-white font-semibold text-xs tracking-wider disabled:opacity-25 hover:bg-white/10">CAPTURAR BÓVEDA</button>
-    </div>
     <div class="mt-3 text-center text-[10px] text-zinc-500">
       <span x-text="isAdmin ? 'Modo Admin activo (Bypass 40 intentos)' : ('Intentos sesión: ' + sessionAttempts + '/40')"></span>
     </div>
@@ -316,7 +320,6 @@ function dgtWorldApp() {
     targetAmount: 50,
     comboIndex: parseInt(localStorage.getItem('dgt_1k_index') || '0'),
     
-    // Detección de Admin (Bypass 40 intentos)
     isAdmin: new URLSearchParams(window.location.search).get('admin') === 'dgt2026' || localStorage.getItem('dgt_is_admin') === 'true',
     sessionAttempts: parseInt(localStorage.getItem('dgt_session_attempts') || '0'),
     showStripeModal: false,
@@ -344,7 +347,6 @@ function dgtWorldApp() {
     toast: { visible: false, message: '' },
 
     initApp() {
-      // Si el parámetro admin viene en la URL, guardarlo en localStorage
       const urlParams = new URLSearchParams(window.location.search);
       if(urlParams.get('admin') === 'dgt2026') {
         localStorage.setItem('dgt_is_admin', 'true');
@@ -454,7 +456,6 @@ function dgtWorldApp() {
     async triggerMatch() {
       if(this.isShuffling) return;
       
-      // Control de límite de 40 intentos (Excepto si es Admin)
       if (!this.isAdmin) {
         if (this.sessionAttempts >= 40) {
           this.showStripeModal = true;
@@ -597,7 +598,7 @@ function dgtWorldApp() {
     get nativeSerialDisplay() {
       let tailCopy = [...this.tailDigits];
       for(let i=0; i<this.userDigits.length; i++) {
-        tailCopy[i] = this.userDigits.get ? this.userDigits[i] : this.userDigits[i];
+        tailCopy[i] = this.userDigits[i];
       }
       return tailCopy.join('');
     },
