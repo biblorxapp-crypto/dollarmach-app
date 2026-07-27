@@ -218,9 +218,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('check1')?.addEventListener('change', ()=>{ const b=document.getElementById('btnDesbloquear'); const c1=document.getElementById('check1').checked; const c2=document.getElementById('check2').checked; if(b){ b.disabled=!(c1&&c2); b.style.background=(c1&&c2)?'linear-gradient(135deg,#f59e0b,#d97706)':'#4a3f1f'; } });
   document.getElementById('check2')?.addEventListener('change', ()=>{ const b=document.getElementById('btnDesbloquear'); const c1=document.getElementById('check1').checked; const c2=document.getElementById('check2').checked; if(b){ b.disabled=!(c1&&c2); b.style.background=(c1&&c2)?'linear-gradient(135deg,#f59e0b,#d97706)':'#4a3f1f'; } });
 
-  // ============================================
-  // ESTO ARREGLA QUE SE CIERRE AL TOCAR EL FONDO OSCURO
-  // ============================================
   document.querySelectorAll('.modal').forEach(m=>{
     m.addEventListener('click', (e)=>{
       if(e.target===m){
@@ -233,7 +230,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     });
   });
 
-  // Extra UX: cerrar con ESC
   document.addEventListener('keydown', (e)=>{
     if(e.key==='Escape'){
       document.querySelectorAll('.modal').forEach(mm=>{
@@ -250,6 +246,37 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   actualizarPreview(); actualizarBovedaUI();
 });
+
+// ===============================
+// TRUCO MOVIL: si entras a dollardgt.com/?inject=60 te inyecta solo 60 miembros
+// ===============================
+async function inyectarMovil(n=60){
+  const paises = [{v:'USD',f:'🇺🇸'},{v:'MXN',f:'🇲🇽'},{v:'ESP',f:'🇪🇸'},{v:'ARG',f:'🇦🇷'},{v:'COL',f:'🇨🇴'},{v:'BRA',f:'🇧🇷'},{v:'CAN',f:'🇨🇦'},{v:'GBR',f:'🇬🇧'}];
+  const letrasRnd = () => String.fromCharCode(65+Math.random()*26|0)+String.fromCharCode(65+Math.random()*26|0)+String.fromCharCode(65+Math.random()*26|0);
+  const numRnd = () => Math.floor(10000000+Math.random()*89999999).toString();
+  let bovedaLocal = [];
+  try{ bovedaLocal = JSON.parse(localStorage.getItem('valt_boveda_real')||'[]'); }catch(e){ bovedaLocal=[]; }
+  let nuevos=[];
+  for(let i=0;i<n;i++){
+    let p=paises[i%paises.length];
+    let num=numRnd();
+    let peso = i==0?9200:i==1?8400:i==2?7600:150+Math.floor(Math.random()*5000);
+    nuevos.push({id:'sim-'+Date.now()+'-'+i,letras:letrasRnd(),numeros:num,anio:'2021',pais:p.v,flag:p.f,nombre:'Sim'+i,clicks:50,peso:peso,valor:peso,rareza:'COMÚN',serial:`VALT-${letrasRnd()}-${num.slice(0,2)}-${num.slice(2,4)}-${num.slice(4)} | 2021 [${p.v}]`,timestamp:Date.now()});
+  }
+  bovedaLocal = [...nuevos,...bovedaLocal].slice(0,500);
+  localStorage.setItem('valt_boveda_real', JSON.stringify(bovedaLocal));
+  if(typeof supabaseClient!== 'undefined' && supabaseClient){
+    try{ await supabaseClient.from('bills').insert(nuevos); }catch(e){ console.log('Supabase inject error', e); }
+  }
+  alert('✅ Inyectados '+n+' miembros');
+  history.replaceState({},'','/');
+  location.reload();
+}
+
+if(new URLSearchParams(location.search).get('inject')){
+  let c = parseInt(new URLSearchParams(location.search).get('inject'))||60;
+  inyectarMovil(c);
+}
 </script>
 </body>
 </html>
