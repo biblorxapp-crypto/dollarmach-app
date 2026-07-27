@@ -33,8 +33,8 @@ body{margin:0;padding:10px 8px;background:radial-gradient(circle at 40% 20%,#0f1
 .bill{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;cursor:pointer}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120px);background:#0f172a;border:1px solid var(--emerald);color:#fff;padding:12px 16px;border-radius:12px;font-family:'JetBrains Mono';font-size:11px;z-index:10005;transition:transform 0.3s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{transform:translateX(-50%) translateY(0)}
-.modal{position:fixed;inset:0;background:rgba(3,7,18,0.92);display:none;justify-content:center;align-items:center;padding:12px}
-.modal-box{width:100%;max-width:480px;background:#0f172a;border:1px solid #1e293b;border-radius:20px;padding:20px;max-height:85vh;overflow:auto}
+.modal{position:fixed;inset:0;background:rgba(3,7,18,0.92);display:none;justify-content:center;align-items:center;padding:12px;cursor:pointer}
+.modal-box{width:100%;max-width:480px;background:#0f172a;border:1px solid #1e293b;border-radius:20px;padding:20px;max-height:85vh;overflow:auto;cursor:default}
 .modal-box.policy{max-width:520px;background:#12121e;border:1px solid rgba(255,255,255,0.08)}
 .link-gold{color:#fbbf24;text-decoration:underline;cursor:pointer;font-weight:800}
 .boveda-locked{display:flex;flex-direction:column;align-items:center;text-align:center}
@@ -119,12 +119,12 @@ body{margin:0;padding:10px 8px;background:radial-gradient(circle at 40% 20%,#0f1
 <option value="TUR">🇹🇷 Turquía</option>
 </select></div><div><div class="input-label">NOMBRE</div><input id="in-nombre" class="input" placeholder="Orly1"></div></div>
 <div class="preview"><div id="previewSerial">VALT-___-__-__-____ | ____ [USD]</div><div id="previewBadge"></div><div id="previewValor" style="margin-top:6px;font-size:11px;color:#94a3b8">Peso inicial: --</div></div>
-<button type="button" class="btn btn-green" id="btnVerifica" onclick="verificarBillete()" style="margin-top:12px">✅ VERIFICAR BILLETE</button>
-<div id="noVipBox" style="margin-top:12px;background:rgba(245,158,11,0.12);border:1px solid #f59e0b;border-radius:10px;padding:10px;font-size:11px">🔒 Para nube necesitas ser miembro. <button type="button" class="btn btn-orange" id="btnActivarMiembro" onclick="abrirBovedaBloqueada()" style="margin-top:8px">🔓 ACTIVAR $4.99</button></div>
+<button type="button" class="btn btn-green" id="btnVerifica" style="margin-top:12px">✅ VERIFICAR BILLETE</button>
+<div id="noVipBox" style="margin-top:12px;background:rgba(245,158,11,0.12);border:1px solid #f59e0b;border-radius:10px;padding:10px;font-size:11px">🔒 Para nube necesitas ser miembro. <button type="button" class="btn btn-orange" id="btnActivarMiembro" style="margin-top:8px">🔓 ACTIVAR $4.99</button></div>
 <div id="vipBox" style="display:none;margin-top:12px;background:rgba(16,185,129,0.12);border:1px solid #10b981;border-radius:10px;padding:10px;font-size:11px">✅ Miembro VIP activo</div>
 </div>
-<div class="card" id="card-paso2" style="display:none"><div style="font-weight:800">2️⃣ Bóveda común</div><div class="leader"><div style="font-size:10px;color:#06b6d4">◆ LÍDER ACTUAL</div><div id="leaderSerial2" style="font-weight:800;margin-top:4px">Cargando...</div><div id="leaderOwner2" style="font-size:11px;color:#94a3b8"></div><div id="leaderPts2" style="font-size:11px;color:#6ee7b7"></div></div><button type="button" class="btn btn-blue" id="btnBajar" onclick="bajarABoveda()">⬇ BAJAR A BÓVEDA COMÚN</button><div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8"><span>📊 DÍGITOS 00-99</span><span id="bovedaCount2">0 billetes</span></div><div class="grid10" id="gridPaso2"></div></div><div id="listaBovedaPaso2" style="margin-top:10px;display:flex;flex-direction:column;gap:6px"></div><button type="button" class="btn btn-dark" id="btnIrJugar" onclick="irAPaso(3)" style="margin-top:10px">▶ IR A JUGAR 60s</button></div>
-<div class="card" id="card-paso3" style="display:none"><div style="font-weight:800">⏱️ Juega 60s — x2 Fundador</div><div class="leader"><div style="font-size:10px;color:#06b6d4">◆ LÍDER ACTUAL</div><div id="leaderSerialJuego" style="font-weight:800">Cargando...</div><div id="leaderOwnerJuego" style="font-size:11px;color:#94a3b8"></div><div id="leaderPtsJuego" style="font-size:11px;color:#6ee7b7"></div></div><div id="setupJuego" style="margin-top:10px"><button type="button" class="btn btn-orange" id="btnJugar" onclick="iniciarJuego()">▶ JUGAR 60 SEGUNDOS</button></div><div id="juegoActivo" style="display:none;margin-top:10px"><div style="display:flex;justify-content:space-between;background:#020617;border:1px solid #1e293b;border-radius:12px;padding:10px;margin-bottom:10px"><div><div style="font-size:10px;color:#64748b">TIEMPO</div><div class="timer" id="timerJuego">60.0</div></div><div><div style="font-size:10px;color:#64748b">IMPULSO</div><div style="font-size:20px;font-weight:800;color:#10b981" id="puntosJuego">0</div></div><div><div style="font-size:10px;color:#64748b">CLICKS</div><div id="clicksJuego">0</div></div></div><div class="lot-grid" id="lotGrid"></div><button type="button" class="btn btn-dark" id="btnParar" onclick="detenerJuego(false)" style="margin-top:10px">■ Parar</button></div></div>
+<div class="card" id="card-paso2" style="display:none"><div style="font-weight:800">2️⃣ Bóveda común</div><div class="leader"><div style="font-size:10px;color:#06b6d4">◆ LÍDER ACTUAL</div><div id="leaderSerial2" style="font-weight:800;margin-top:4px">Cargando...</div><div id="leaderOwner2" style="font-size:11px;color:#94a3b8"></div><div id="leaderPts2" style="font-size:11px;color:#6ee7b7"></div></div><button type="button" class="btn btn-blue" id="btnBajar">⬇ BAJAR A BÓVEDA COMÚN</button><div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8"><span>📊 DÍGITOS 00-99</span><span id="bovedaCount2">0 billetes</span></div><div class="grid10" id="gridPaso2"></div></div><div id="listaBovedaPaso2" style="margin-top:10px;display:flex;flex-direction:column;gap:6px"></div><button type="button" class="btn btn-dark" id="btnIrJugar" style="margin-top:10px">▶ IR A JUGAR 60s</button></div>
+<div class="card" id="card-paso3" style="display:none"><div style="font-weight:800">⏱️ Juega 60s — x2 Fundador</div><div class="leader"><div style="font-size:10px;color:#06b6d4">◆ LÍDER ACTUAL</div><div id="leaderSerialJuego" style="font-weight:800">Cargando...</div><div id="leaderOwnerJuego" style="font-size:11px;color:#94a3b8"></div><div id="leaderPtsJuego" style="font-size:11px;color:#6ee7b7"></div></div><div id="setupJuego" style="margin-top:10px"><button type="button" class="btn btn-orange" id="btnJugar">▶ JUGAR 60 SEGUNDOS</button></div><div id="juegoActivo" style="display:none;margin-top:10px"><div style="display:flex;justify-content:space-between;background:#020617;border:1px solid #1e293b;border-radius:12px;padding:10px;margin-bottom:10px"><div><div style="font-size:10px;color:#64748b">TIEMPO</div><div class="timer" id="timerJuego">60.0</div></div><div><div style="font-size:10px;color:#64748b">IMPULSO</div><div style="font-size:20px;font-weight:800;color:#10b981" id="puntosJuego">0</div></div><div><div style="font-size:10px;color:#64748b">CLICKS</div><div id="clicksJuego">0</div></div></div><div class="lot-grid" id="lotGrid"></div><button type="button" class="btn btn-dark" id="btnParar" style="margin-top:10px">■ Parar</button></div></div>
 <footer style="width:100%;margin-top:30px;background:linear-gradient(180deg, rgba(15,23,42,0.98), rgba(3,7,18,1));border:1px solid rgba(6,182,212,0.2);border-radius:20px;padding:24px 18px;text-align:center"><div style="font-family:'JetBrains Mono';font-size:12px;font-weight:800;color:#06b6d4;margin-bottom:8px">© 2026 DollarDgt.com • VALT REAL 360</div><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"><span style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#7dd3fc;font-family:'JetBrains Mono';cursor:pointer" onclick="abrirModal('terms')">TÉRMINOS</span><span style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#6ee7b7;font-family:'JetBrains Mono';cursor:pointer" onclick="abrirModal('privacy')">PRIVACIDAD</span><span style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#fbbf24;font-family:'JetBrains Mono';cursor:pointer" onclick="abrirModal('refunds')">REEMBOLSOS</span><span style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#c4b5fd;font-family:'JetBrains Mono';cursor:pointer" onclick="abrirModal('descargo')">DESCARGO</span></div></footer>
 <div style="height:80px"></div>
 </div>
@@ -135,8 +135,8 @@ body{margin:0;padding:10px 8px;background:radial-gradient(circle at 40% 20%,#0f1
 <div class="modal" id="modal-boveda-bloqueada" style="z-index:9998"><div class="modal-box" style="max-width:420px;background:#1a1a27;border:1px solid rgba(255,255,255,0.08)"><div class="boveda-locked"><div class="lock-icon">🔒</div><div style="font-size:18px;font-weight:800">BÓVEDA BLOQUEADA</div><div style="font-size:13px;color:#9ca3af;margin-top:8px">Has alcanzado el límite de <b style="color:#fff">40 intentos</b>.</div><div style="width:100%;background:#232330;border-radius:12px;padding:14px;margin-top:16px;text-align:left"><div style="color:#fbbf24;font-weight:700;font-size:12px;margin-bottom:8px">Descargo y Términos - VALT 2026</div><div style="font-size:11px;color:#9ca3af;line-height:1.5">Plataforma educativa y de entretenimiento digital. No oficial.<br><br><b>Programa:</b> Simulación $4.99=500 pts, Billete=150 pts, Impulso=10-35 pts x2<br><b>Regla:</b> Canjes y validaciones solo si LÍDER >10,000 pts.<br><b>Seguridad:</b> Procesado de pagos externo vía Stripe. Garantía de reembolso de 7 días.</div><div style="height:1px;background:rgba(255,255,255,0.08);margin:12px 0"></div>
 <div class="check-row"><input type="checkbox" id="check1"><span>Acepto <span class="link-gold" onclick="event.stopPropagation(); abrirModal('terms')">TÉRMINOS</span>, <span class="link-gold" onclick="event.stopPropagation(); abrirModal('privacy')">PRIVACIDAD</span> y <span class="link-gold" onclick="event.stopPropagation(); abrirModal('descargo')">DESCARGO</span></span></div>
 <div class="check-row"><input type="checkbox" id="check2"><span>Acepto <span class="link-gold" onclick="event.stopPropagation(); abrirModal('refunds')">REEMBOLSOS</span> y ser mayor de 18 años</span></div>
-</div><button type="button" class="btn btn-orange" id="btnDesbloquear" disabled style="margin-top:16px;background:#4a3f1f;color:#6b5d2e">DESBLOQUEAR BÓVEDA — $4.99 USD</button><button type="button" class="btn btn-dark" style="margin-top:8px" id="btnCerrarBloqueo" onclick="cerrarBovedaBloqueada()">Cerrar</button></div></div></div>
-<div class="modal" id="modalFin" style="z-index:10002"><div class="modal-box"><div style="font-weight:800">¡Bien jugado!</div><div style="margin-top:10px">Impulso: <span id="finPuntos">0</span> • Clicks: <span id="finClicks">0</span></div><div style="display:flex;gap:8px;margin-top:12px"><button type="button" class="btn btn-green" id="btnGuardar" onclick="guardarSesion()">💾 Guardar</button><button type="button" class="btn btn-dark" id="btnCerrarFin" onclick="cerrarFin()">Cerrar</button></div></div></div>
+</div><button type="button" class="btn btn-orange" id="btnDesbloquear" disabled style="margin-top:16px;background:#4a3f1f;color:#6b5d2e">DESBLOQUEAR BÓVEDA — $4.99 USD</button><button type="button" class="btn btn-dark" style="margin-top:8px" id="btnCerrarBloqueo">Cerrar</button></div></div></div>
+<div class="modal" id="modalFin" style="z-index:10002"><div class="modal-box"><div style="font-weight:800">¡Bien jugado!</div><div style="margin-top:10px">Impulso: <span id="finPuntos">0</span> • Clicks: <span id="finClicks">0</span></div><div style="display:flex;gap:8px;margin-top:12px"><button type="button" class="btn btn-green" id="btnGuardar">💾 Guardar</button><button type="button" class="btn btn-dark" id="btnCerrarFin">Cerrar</button></div></div></div>
 <div id="toast" class="toast"></div>
 <script>
 const SUPABASE_URL = "https://hvdaitsnvwigqbizirbi.supabase.co";
@@ -166,20 +166,28 @@ function clickBillete(b){ if(!juegoActivo) return; const peso=b.peso||150; const
 function iniciarJuego(){ try{ if(boveda.length<1){ toast('Necesitas 1 billete'); return; } juegoActivo=true; puntos=0; clicksSesion=0; tiempo=60; document.getElementById('setupJuego').style.display='none'; document.getElementById('juegoActivo').style.display='block'; const gen=()=>{ if(!juegoActivo) return; loteActual=generarLote(); renderLote(loteActual); }; gen(); juegoLot=setInterval(gen,4000); juegoTimer=setInterval(()=>{ tiempo-=0.1; if(tiempo<=0){ detenerJuego(true); return; } document.getElementById('timerJuego').innerText=tiempo.toFixed(1); },100); }catch(e){} }
 function detenerJuego(fin=false){ juegoActivo=false; clearInterval(juegoTimer); clearInterval(juegoLot); if(fin){ document.getElementById('finPuntos').innerText=puntos+' pts'; document.getElementById('finClicks').innerText=clicksSesion+' clicks'; document.getElementById('modalFin').style.display='flex'; } else { document.getElementById('setupJuego').style.display='block'; document.getElementById('juegoActivo').style.display='none'; } }
 function guardarSesion(){ try{ const nombre=document.getElementById('in-nombre').value.trim()||'Anónimo'; boveda.forEach((b,i)=>{ if(b.nombre===nombre) boveda[i].peso=(b.peso||150)+puntos; }); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); toast(`💾 +${puntos} pts`); cerrarFin(); document.getElementById('setupJuego').style.display='block'; document.getElementById('juegoActivo').style.display='none'; actualizarBovedaUI(); }catch(e){} }
-function cerrarFin(){ const m=document.getElementById('modalFin'); if(m) m.style.display='none'; }
+function cerrarFin(){
+  const m=document.getElementById('modalFin');
+  if(m) m.style.display='none';
+  juegoActivo=false;
+  clearInterval(juegoTimer);
+  clearInterval(juegoLot);
+  document.getElementById('setupJuego').style.display='block';
+  document.getElementById('juegoActivo').style.display='none';
+  actualizarBovedaUI();
+}
 function bajarABoveda(){ try{ if(!billeteActual){ toast('Primero verifica'); return; } boveda.unshift(billeteActual); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); recalcularFreq(); actualizarBovedaUI(); toast(`⬇ ${billeteActual.letras} a nube`); if(supabaseClient){ supabaseClient.from('bills').insert([billeteActual]).then(({error})=>{ if(error) toast('Nube: '+error.message); else toast('✅ En NUBE'); }); } }catch(e){ toast(e.message); } }
 function abrirBovedaBloqueada(){ const m=document.getElementById('modal-boveda-bloqueada'); if(m) m.style.display='flex'; }
 function cerrarBovedaBloqueada(){ const m=document.getElementById('modal-boveda-bloqueada'); if(m) m.style.display='none'; }
 function abrirModal(t){ const m=document.getElementById('modal-'+t); if(m){ m.style.display='flex'; m.style.zIndex='10002'; } }
 function cerrarModal(t){ const m=document.getElementById('modal-'+t); if(m) m.style.display='none'; }
+
 document.addEventListener('DOMContentLoaded', ()=>{
   const params = new URLSearchParams(window.location.search);
-  
-  // ESTO ES LO QUE ACTIVA EL VIP
-  if(params.get('stripe')==='success'){ 
+
+  if(params.get('stripe')==='success'){
     localStorage.setItem('valt_vip','true');
     toast('✅ Pago');
-    // limpia la URL para que se vea bonito
     history.replaceState({},'', '/');
   }
 
@@ -189,8 +197,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const vb=document.getElementById('vipBox');
     if(vb) vb.style.display='block';
   }
-  
-  // ... el resto de tu código
+
   document.getElementById('btnVerifica')?.addEventListener('click', verificarBillete);
   document.getElementById('btnBajar')?.addEventListener('click', bajarABoveda);
   document.getElementById('btnIrJugar')?.addEventListener('click', ()=>irAPaso(3));
@@ -210,6 +217,37 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('in-numeros')?.addEventListener('input', actualizarPreview);
   document.getElementById('check1')?.addEventListener('change', ()=>{ const b=document.getElementById('btnDesbloquear'); const c1=document.getElementById('check1').checked; const c2=document.getElementById('check2').checked; if(b){ b.disabled=!(c1&&c2); b.style.background=(c1&&c2)?'linear-gradient(135deg,#f59e0b,#d97706)':'#4a3f1f'; } });
   document.getElementById('check2')?.addEventListener('change', ()=>{ const b=document.getElementById('btnDesbloquear'); const c1=document.getElementById('check1').checked; const c2=document.getElementById('check2').checked; if(b){ b.disabled=!(c1&&c2); b.style.background=(c1&&c2)?'linear-gradient(135deg,#f59e0b,#d97706)':'#4a3f1f'; } });
+
+  // ============================================
+  // ESTO ARREGLA QUE SE CIERRE AL TOCAR EL FONDO OSCURO
+  // ============================================
+  document.querySelectorAll('.modal').forEach(m=>{
+    m.addEventListener('click', (e)=>{
+      if(e.target===m){
+        if(m.id==='modalFin'){
+          cerrarFin();
+        } else {
+          m.style.display='none';
+        }
+      }
+    });
+  });
+
+  // Extra UX: cerrar con ESC
+  document.addEventListener('keydown', (e)=>{
+    if(e.key==='Escape'){
+      document.querySelectorAll('.modal').forEach(mm=>{
+        if(mm.style.display==='flex'){
+          if(mm.id==='modalFin'){
+            cerrarFin();
+          } else {
+            mm.style.display='none';
+          }
+        }
+      });
+    }
+  });
+
   actualizarPreview(); actualizarBovedaUI();
 });
 </script>
