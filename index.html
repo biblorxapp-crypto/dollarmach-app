@@ -59,11 +59,23 @@ body{margin:0;padding:10px 8px;background:radial-gradient(circle at 40% 20%,#0f1
 .bar-track{flex:1;height:6px;background:#1e293b;border-radius:10px;overflow:hidden}
 .bar-fill{height:100%;border-radius:10px}
 .timer{font-family:'JetBrains Mono';font-size:28px;font-weight:900}
+.member-card{background:linear-gradient(135deg,rgba(15,23,42,0.9),rgba(2,6,23,0.8));border:1px solid #1e293b;border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
+.member-card.leader-card{border-color:#fbbf24; background:linear-gradient(135deg,rgba(251,191,36,0.12),rgba(15,23,42,0.9)); box-shadow:0 0 12px rgba(251,191,36,0.15)}
+.member-top{display:flex;justify-content:space-between;align-items:center}
+.member-left{display:flex;align-items:center;gap:8px}
+.rank-circle{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:'JetBrains Mono';font-size:11px;font-weight:800;color:#000;flex-shrink:0}
+.member-info{display:flex;flex-direction:column;line-height:1.2}
+.member-letras{font-weight:800;font-size:13px;letter-spacing:0.5px}
+.member-meta{font-size:9px;color:#64748b;font-family:'JetBrains Mono';display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.member-pts{font-weight:900;font-size:13px;color:#10b981;font-family:'JetBrains Mono'}
+.member-bar{height:4px;background:#1e293b;border-radius:10px;overflow:hidden;margin-top:2px}
+.member-bar-fill{height:100%;border-radius:10px;transition:width 0.4s}
+.badge-mini{font-size:7px;padding:2px 5px;border-radius:8px;font-weight:800;border:1px solid;font-family:'JetBrains Mono'}
 </style>
 </head>
 <body>
 <div class="main">
-<div class="vault-header"><span id="nubeStatus">● Nube...</span><span id="vaultMembers">0 billetes</span></div>
+<div class="vault-header"><span id="nubeStatus"><span class="live-dot"></span> Nube activa</span><span id="vaultMembers">0 billetes</span></div>
 <div class="founder-bar"><div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:11px;font-weight:800"><span style="color:#fbbf24">👑 FUNDADORES</span><span id="founderCount">9/1000</span></div><div class="progress-track"><div class="progress-fill" id="founderProgress" style="width:9%"></div></div><div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:11px;font-weight:800"><span>🔒 VALIDACIÓN: <span id="bovedaActivaCount">0/10,000 pts</span></span><span id="bovedaStatusText" style="color:#f59e0b">ACUMULACIÓN 🌱</span></div><div class="progress-track" style="height:8px"><div class="progress-fill cyan" id="bovedaProgress" style="width:5%"></div></div></div>
 <div class="siembra-box"><div style="font-weight:900">🌱📈 BÓVEDA VIVA</div><div style="margin-top:10px;background:#020617;border:1px solid #1e293b;border-radius:10px;padding:10px;text-align:left"><div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:10px"><span id="liderNombreViva">LÍDER: --</span><span id="liderPuntosViva" style="color:#06b6d4;font-weight:800">0 / 10,000</span></div><div class="progress-track" style="height:8px;margin-top:6px"><div class="progress-fill cyan" id="liderProgressViva" style="width:5%"></div></div><div style="font-family:'JetBrains Mono';font-size:9px;color:#64748b;margin-top:4px" id="faltanViva">Faltan 10,000 pts</div></div><div class="viva-grid"><div class="viva-card"><div class="viva-title">🔥 DÍGITOS</div><div id="vivaDigits"></div></div><div class="viva-card"><div class="viva-title">🌍 PAÍSES</div><div id="vivaPaises"></div></div></div><div style="margin-top:10px;font-family:'JetBrains Mono';font-size:11px;font-weight:900;color:#fbbf24" id="siembraAcumulado">🏆 TOTAL: 0 PUNTOS</div></div>
 <div class="steps"><div class="step active" id="step1" onclick="irAPaso(1)">1 • VERIFICA</div><div class="step" id="step2" onclick="irAPaso(2)">2 • BÓVEDA</div><div class="step" id="step3" onclick="irAPaso(3)">3 • JUEGA 60s</div></div>
@@ -137,7 +149,7 @@ body{margin:0;padding:10px 8px;background:radial-gradient(circle at 40% 20%,#0f1
 <div class="modal" id="modal-privacy" style="z-index:10002"><div class="modal-box policy"><div style="display:flex;justify-content:space-between"><div style="font-weight:800">POLÍTICA DE PRIVACIDAD</div><div onclick="cerrarModal('privacy')" style="cursor:pointer">✕</div></div><div style="font-size:12px;color:#9ca3af;margin-top:10px;line-height:1.5">En <b>DollarDgt.com</b> protegemos tu privacidad operando mediante identificadores anónimos de usuario y almacenamiento local (localStorage) para el progreso de la simulación. Las transacciones y pagos de la membresía VIP son procesados de forma externa y segura a través de <b>Stripe</b>, por lo que la plataforma no recopila ni almacena información financiera sensible ni datos bancarios de tarjetas.</div><button type="button" class="btn btn-dark" style="margin-top:12px" onclick="cerrarModal('privacy')">Cerrar</button></div></div>
 <div class="modal" id="modal-descargo" style="z-index:10002"><div class="modal-box policy"><div style="display:flex;justify-content:space-between"><div style="font-weight:800">DESCARGO DE RESPONSABILIDAD</div><div onclick="cerrarModal('descargo')" style="cursor:pointer">✕</div></div><div style="font-size:12px;color:#9ca3af;margin-top:10px;line-height:1.5"><b>VALT REAL 360</b> es una herramienta de pasatiempo interactivo. No constituye una tasación oficial numismática, tasación bancaria, vehículo de inversión ni sistema de apuestas con dinero real. Los puntajes y categorías asignadas obedecen a un modelo algorítmico recreativo sin respaldo de curso legal externo.</div><button type="button" class="btn btn-dark" style="margin-top:12px" onclick="cerrarModal('descargo')">Cerrar</button></div></div>
 <div class="modal" id="modal-refunds" style="z-index:10002"><div class="modal-box policy"><div style="display:flex;justify-content:space-between"><div style="font-weight:800">POLÍTICA DE REEMBOLSOS</div><div onclick="cerrarModal('refunds')" style="cursor:pointer">✕</div></div><div style="font-size:12px;color:#9ca3af;margin-top:10px;line-height:1.5">Las adquisiciones correspondientes a la membresía VIP se encuentran sujetas a la pasarela de pagos de <b>Stripe</b>, la cual contempla un periodo de garantía de hasta <b>7 días naturales</b> para gestionar solicitudes de reembolso de acuerdo con las políticas y directrices de revisión de dicha plataforma.</div><button type="button" class="btn btn-dark" style="margin-top:12px" onclick="cerrarModal('refunds')">Cerrar</button></div></div>
-<div class="modal" id="modal-boveda-bloqueada" style="z-index:9998"><div class="modal-box" style="max-width:420px;background:#1a1a27;border:1px solid rgba(255,255,255,0.08)"><div class="boveda-locked"><div class="lock-icon">🔒</div><div style="font-size:18px;font-weight:800">BÓVEDA BLOQUEADA</div><div style="font-size:13px;color:#9ca3af;margin-top:8px">Has alcanzado el límite de <b style="color:#fff">40 intentos</b>.</div><div style="width:100%;background:#232330;border-radius:12px;padding:14px;margin-top:16px;text-align:left"><div style="color:#fbbf24;font-weight:700;font-size:12px;margin-bottom:8px">Descargo y Términos - VALT 2026</div><div style="font-size:11px;color:#9ca3af;line-height:1.5">Plataforma educativa y de entretenimiento digital. No oficial.<br><br><b>Programa:</b> Simulación $4.99=500 pts, Billete=150 pts, Impulso=10-35 pts x2<br><b>Regla:</b> Canjes y validaciones solo si LÍDER >10,000 pts.<br><b>Seguridad:</b> Procesado de pagos externo vía Stripe. Garantía de reembolso de 7 días.</div><div style="height:1px;background:rgba(255,255,255,0.08);margin:12px 0"></div>
+<div class="modal" id="modal-boveda-bloqueada" style="z-index:9998"><div class="modal-box" style="max-width:420px;background:#1a1a27;border:1px solid rgba(255,255,255,0.08)"><div class="boveda-locked"><div class="lock-icon">🔒</div><div style="font-size:18px;font-weight:800">BÓVEDA BLOQUEADA</div><div style="font-size:13px;color:#9ca3af;margin-top:8px">Has alcanzado el límite de <b style="color:#fff">40 intentos</b>.</div><div style="width:100%;background:#232330;border-radius:12px;padding:14px;margin-top:16px;text-align:left"><div style="color:#fbbf24;font-weight:700;font-size:12px;margin-bottom:8px">Descargo y Términos - VALT 2026</div><div style="font-size:11px;color:#9ca3af;line-height:1.5">Plataforma educativa y de entretenimiento digital. No oficial.<br><b>Programa:</b> Simulación $4.99=500 pts, Billete=150 pts, Impulso=10-35 pts x2<br><b>Regla:</b> Canjes y validaciones solo si LÍDER >10,000 pts.<br><b>Seguridad:</b> Procesado de pagos externo vía Stripe. Garantía de reembolso de 7 días.</div><div style="height:1px;background:rgba(255,255,255,0.08);margin:12px 0"></div>
 <div class="check-row"><input type="checkbox" id="check1"><span>Acepto <span class="link-gold" onclick="event.stopPropagation(); abrirModal('terms')">TÉRMINOS</span>, <span class="link-gold" onclick="event.stopPropagation(); abrirModal('privacy')">PRIVACIDAD</span> y <span class="link-gold" onclick="event.stopPropagation(); abrirModal('descargo')">DESCARGO</span></span></div>
 <div class="check-row"><input type="checkbox" id="check2"><span>Acepto <span class="link-gold" onclick="event.stopPropagation(); abrirModal('refunds')">REEMBOLSOS</span> y ser mayor de 18 años</span></div>
 </div><button type="button" class="btn btn-orange" id="btnDesbloquear" disabled style="margin-top:16px;background:#4a3f1f;color:#6b5d2e">DESBLOQUEAR BÓVEDA — $4.99 USD</button><button type="button" class="btn btn-dark" style="margin-top:8px" id="btnCerrarBloqueo">Cerrar</button></div></div></div>
@@ -148,14 +160,18 @@ const SUPABASE_URL = "https://hvdaitsnvwigqbizirbi.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Lf1Bd6_mvlAlZCdcYBBR5A_fTjpEiyv";
 const STRIPE_LINK = "https://buy.stripe.com/7sY9AU9Q1gSeaUi9vo7Vm0j";
 const UMBRAL_VALIDACION = 10000;
+
 let supabaseClient = null; try{ supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }catch(e){}
 let boveda = []; try{ boveda = JSON.parse(localStorage.getItem('valt_boveda_real')||'[]'); }catch(e){ boveda=[]; }
 if(boveda.length===0){ boveda=[{id:'seed-1',letras:'KQX',numeros:'88421793',anio:'2021',pais:'USD',flag:'🇺🇸',nombre:'Juan',clicks:42,peso:180,valor:180,rareza:'COMÚN',serial:'VALT-KQX-88-42-1793 | 2021 [USD]',timestamp:Date.now()}]; }
+
 let digitFreq={}; for(let i=0;i<100;i++) digitFreq[String(i).padStart(2,'0')]=0;
 function recalcularFreq(){ for(let k in digitFreq) digitFreq[k]=0; boveda.forEach(b=>{ try{ (b.numeros.match(/.{2}/g)||[]).forEach(p=>{ if(digitFreq[p]!==undefined) digitFreq[p]+=Math.floor((b.clicks||1)/2); }); }catch(e){} }); }
 recalcularFreq();
+
 let juegoTimer=null,juegoLot=null,tiempo=60,puntos=0,clicksSesion=0,juegoActivo=false,loteActual=[],billeteActual=null;
 let audioCtx=null;
+
 function getAudioCtx(){
   try{
     if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -163,6 +179,7 @@ function getAudioCtx(){
     return audioCtx;
   }catch(e){ return null; }
 }
+
 function playClickSound(peso){
   try{
     const ctx=getAudioCtx(); if(!ctx) return;
@@ -188,6 +205,7 @@ function playClickSound(peso){
     osc2.start(now+0.06); osc2.stop(now+0.24);
   }catch(e){}
 }
+
 function playStartSound(){
   try{
     const ctx=getAudioCtx(); if(!ctx) return;
@@ -203,17 +221,147 @@ function playStartSound(){
     });
   }catch(e){}
 }
+
 function calcularRareza(s){ if(/^(.)\1+$/.test(s)) return {t:'SUPER RADAR',m:3.5}; if(/(.)\1{2,}/.test(s)) return {t:'POKER',m:3.0}; if(s===s.split('').reverse().join('')) return {t:'RADAR',m:2.0}; if(/(.)\1/.test(s)) return {t:'REPETICIÓN',m:1.5}; return {t:'COMÚN',m:1.0}; }
 function calcularValor(s){ const r=calcularRareza(s); return Math.floor(150*r.m + (parseInt(s.slice(-2)||'0')%50)); }
 function toast(msg){ const el=document.getElementById('toast'); if(!el) return; el.innerText=msg; el.className='toast show'; setTimeout(()=>el.classList.remove('show'),3000); }
 function actualizarPreview(){ try{ const letras=document.getElementById('in-letras').value||'___'; const numeros=document.getElementById('in-numeros').value||'________'; const anio=document.getElementById('in-anio').value||'____'; const pais=document.getElementById('in-pais').value||'USD'; document.getElementById('previewSerial').innerText=`VALT-${letras}-${numeros.substring(0,2)}-${numeros.substring(2,4)}-${numeros.substring(4)} | ${anio} [${pais}]`; if(numeros.length>=4){ const r=calcularRareza(numeros); const v=calcularValor(numeros); document.getElementById('previewBadge').innerHTML=`<span class="badge" style="background:rgba(16,185,129,0.15);border-color:#10b981;color:#6ee7b7">${r.t} x${r.m}</span>`; document.getElementById('previewValor').innerText=`Peso inicial: ${v} pts`; } }catch(e){} }
 function irAPaso(n){ try{ if(juegoActivo && n!==3){ toast('Para el juego primero'); return; } document.getElementById('card-paso1').style.display=n===1?'block':'none'; document.getElementById('card-paso2').style.display=n===2?'block':'none'; document.getElementById('card-paso3').style.display=n===3?'block':'none'; document.querySelectorAll('.step').forEach((el,i)=>el.classList.toggle('active',i+1===n)); if(n===2) actualizarBovedaUI(); if(n===3) actualizarJuegoUI(); }catch(e){} }
 function verificarBillete(){ try{ const letras=document.getElementById('in-letras').value.trim().toUpperCase(); const numeros=document.getElementById('in-numeros').value.trim(); const anio=document.getElementById('in-anio').value; const paisSel=document.getElementById('in-pais'); const pais=paisSel.value; const flag=paisSel.options[paisSel.selectedIndex].textContent.split(' ')[0]||'🏳️'; const nombre=document.getElementById('in-nombre').value.trim()||'Anónimo'; if(letras.length<2||numeros.length<6){ toast('⚠️ Letras y números'); return; } const r=calcularRareza(numeros); const v=calcularValor(numeros); billeteActual={id:'bill-'+Date.now(),letras,numeros,anio,pais,flag,nombre,clicks:0,peso:v,valor:v,rareza:r.t,serial:`VALT-${letras}-${numeros.substring(0,2)}-${numeros.substring(2,4)}-${numeros.substring(4)} | ${anio} [${pais}]`,timestamp:Date.now()}; toast(`✅ ${r.t} ${v} pts`); irAPaso(2); actualizarBovedaUI(); }catch(e){ toast(e.message); } }
-function calcularLiderReal(){ let top=[],mejor=null,max=-1; try{ top=Object.entries(digitFreq).sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]); boveda.forEach(b=>{ const p=b.peso||0; if(p>max){max=p;mejor=b;}}); }catch(e){} return {top,mejor}; }
-function actualizarGraficaViva(){ try{ const {top,mejor}=calcularLiderReal(); const pts=mejor?mejor.peso:0; const pct=Math.min(100,pts/UMBRAL_VALIDACION*100); document.getElementById('liderNombreViva').innerText=mejor?`LÍDER: ${mejor.flag} ${mejor.letras}`:'LÍDER: --'; document.getElementById('liderPuntosViva').innerText=`${pts.toLocaleString()} / 10,000`; document.getElementById('liderProgressViva').style.width=pct+'%'; document.getElementById('faltanViva').innerText=pts>=UMBRAL_VALIDACION?'✅ VALIDADA':'Faltan '+(10000-pts).toLocaleString()+' pts'; const sorted=Object.entries(digitFreq).sort((a,b)=>b[1]-a[1]).slice(0,5); const maxD=sorted[0]?sorted[0][1]:1; document.getElementById('vivaDigits').innerHTML=sorted.map(([d,c])=>`<div class="bar-row"><span style="width:22px">${d}</span><div class="bar-track"><div class="bar-fill" style="width:${(c/maxD*100).toFixed(0)}%;background:linear-gradient(90deg,#06b6d4,#10b981)"></div></div><span>${c}</span></div>`).join(''); const paisMap={}; boveda.forEach(b=>{paisMap[b.pais]=(paisMap[b.pais]||0)+1;}); const pS=Object.entries(paisMap).sort((a,b)=>b[1]-a[1]).slice(0,5); const maxP=pS[0]?pS[0][1]:1; document.getElementById('vivaPaises').innerHTML=pS.map(([p,c])=>`<div class="bar-row"><span style="width:40px">${p}</span><div class="bar-track"><div class="bar-fill" style="width:${(c/maxP*100).toFixed(0)}%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div><span>${c}</span></div>`).join(''); document.getElementById('siembraAcumulado').innerText=`🏆 TOTAL: ${boveda.reduce((a,b)=>a+(b.peso||0),0).toLocaleString()} PUNTOS`; }catch(e){} }
-function actualizarBovedaUI(){ try{ recalcularFreq(); const {top,mejor}=calcularLiderReal(); const pts=mejor?mejor.peso:0; const pct=Math.min(100,pts/10000*100); document.getElementById('founderCount').innerText=new Set(boveda.map(b=>b.nombre)).size+'/1000'; document.getElementById('founderProgress').style.width=Math.min(100,new Set(boveda.map(b=>b.nombre)).size/10)+'%'; document.getElementById('bovedaActivaCount').innerText=pts.toLocaleString()+' / 10,000 pts'; document.getElementById('bovedaProgress').style.width=pct+'%'; const bst=document.getElementById('bovedaStatusText'); if(bst){ bst.innerText=pts>=10000?'¡VALIDADA! ✅':'ACUMULACIÓN 🌱'; bst.style.color=pts>=10000?'#10b981':'#f59e0b'; } document.getElementById('leaderSerial2').innerText=mejor?mejor.serial:'Sin líder'; document.getElementById('leaderOwner2').innerText=mejor?`Líder: ${mejor.nombre} ${mejor.flag}`:''; document.getElementById('leaderPts2').innerText=mejor?`${pts.toLocaleString()} pts` :''; document.getElementById('bovedaCount2').innerText=boveda.length+' billetes'; document.getElementById('vaultMembers').innerText=boveda.length+' billetes'; const grid=document.getElementById('gridPaso2'); if(grid && grid.children.length===0){ for(let i=0;i<100;i++){ const d=document.createElement('div'); d.className='cell cold'; d.id='g2-'+i; d.innerText=String(i).padStart(2,'0'); grid.appendChild(d); } } for(let i=0;i<100;i++){ const k=String(i).padStart(2,'0'); const el=document.getElementById('g2-'+i); if(el) el.className='cell '+(top.includes(k)?'leader':(digitFreq[k]>0?'hot':'cold')); } const lista=document.getElementById('listaBovedaPaso2'); if(lista){ lista.innerHTML=''; boveda.slice(0,10).forEach(b=>{ const d=document.createElement('div'); d.style.cssText='background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:8px;display:flex;justify-content:space-between;font-size:11px'; d.innerHTML=`<span>${b.flag} ${b.letras}</span><span style="color:#10b981;font-weight:800">${(b.peso||0)} pts</span>`; lista.appendChild(d); }); } actualizarGraficaViva(); actualizarJuegoUI(); }catch(e){} }
-function actualizarJuegoUI(){ try{ const {top,mejor}=calcularLiderReal(); document.getElementById('leaderSerialJuego').innerText=mejor?mejor.serial:'Cargando...'; document.getElementById('leaderOwnerJuego').innerText=mejor?`${mejor.nombre} ${mejor.flag} • ${mejor.peso} pts`:''; }catch(e){} }
+
+function calcularLiderReal(){
+  if(!boveda || boveda.length===0) return {top:[], mejor:null};
+  const copia = [...boveda].sort((a,b)=>(b.peso||150)-(a.peso||150));
+  return {top: copia.slice(0,5), mejor: copia[0]};
+}
+
+function actualizarGraficaViva(){
+  try{
+    const grid = document.getElementById('gridPaso2');
+    if(!grid) return;
+    grid.innerHTML='';
+    for(let i=0; i<100; i++){
+      const k = String(i).padStart(2,'0');
+      const count = digitFreq[k] || 0;
+      const cell = document.createElement('div');
+      cell.className = 'cell ' + (count>0?'hot':'cold');
+      cell.innerText = k;
+      grid.appendChild(cell);
+    }
+  }catch(e){}
+}
+
+function actualizarBovedaUI(){
+  try{
+    const {top, mejor} = calcularLiderReal();
+    const countEl = document.getElementById('vaultMembers');
+    if(countEl) countEl.innerText = boveda.length + ' billetes';
+
+    const bovedaCount2 = document.getElementById('bovedaCount2');
+    if(bovedaCount2) bovedaCount2.innerText = boveda.length + ' billetes';
+
+    if(mejor){
+      const leaderSerial2 = document.getElementById('leaderSerial2');
+      if(leaderSerial2) leaderSerial2.innerText = mejor.serial;
+      const leaderOwner2 = document.getElementById('leaderOwner2');
+      if(leaderOwner2) leaderOwner2.innerText = `${mejor.nombre} ${mejor.flag} • ${mejor.peso} pts`;
+      const leaderPts2 = document.getElementById('leaderPts2');
+      if(leaderPts2) leaderPts2.innerText = `Rareza: ${mejor.rareza} (${mejor.peso} pts)`;
+    }
+
+    const lista = document.getElementById('listaBovedaPaso2');
+    if(lista){
+      lista.innerHTML='';
+      top.forEach((b, idx)=>{
+        const d = document.createElement('div');
+        d.className = 'member-card' + (idx===0?' leader-card':'');
+        d.innerHTML = `
+          <div class="member-top">
+            <div class="member-left">
+              <div class="rank-circle" style="background:${idx===0?'#fbbf24':'#334155'}">#${idx+1}</div>
+              <div class="member-info">
+                <div class="member-letras">${b.flag} ${b.letras} (${b.anio})</div>
+                <div class="member-meta"><span>${b.nombre}</span> • <span>${b.rareza}</span></div>
+              </div>
+            </div>
+            <div class="member-pts">${b.peso} pts</div>
+          </div>
+          <div class="member-bar"><div class="member-bar-fill" style="width:${Math.min(100, (b.peso/UMBRAL_VALIDACION)*100)}%;background:${idx===0?'#fbbf24':'#10b981'}"></div></div>
+        `;
+        lista.appendChild(d);
+      });
+    }
+
+    const fundadorCount = document.getElementById('founderCount');
+    if(founderCount) fundadorCount.innerText = Math.min(1000, 9 + boveda.length) + '/1000';
+    const founderProgress = document.getElementById('founderProgress');
+    if(founderProgress) founderProgress.style.width = Math.min(100, ((9 + boveda.length)/1000)*100) + '%';
+
+    const totalPts = boveda.reduce((acc, curr)=>acc+(curr.peso||150), 0);
+    const siembraAcumulado = document.getElementById('siembraAcumulado');
+    if(siembraAcumulado) siembraAcumulado.innerText = `🏆 TOTAL: ${totalPts.toLocaleString()} PUNTOS`;
+
+    const bovedaActivaCount = document.getElementById('bovedaActivaCount');
+    if(bovedaActivaCount) bovedaActivaCount.innerText = `${totalPts.toLocaleString()} / 10,000 pts`;
+    const bovedaProgress = document.getElementById('bovedaProgress');
+    if(bovedaProgress) bovedaProgress.style.width = Math.min(100, (totalPts/UMBRAL_VALIDACION)*100) + '%';
+
+    const bovedaStatusText = document.getElementById('bovedaStatusText');
+    if(bovedaStatusText){
+      if(totalPts >= UMBRAL_VALIDACION){
+        bovedaStatusText.innerText = 'VALIDADO 🌟';
+        bovedaStatusText.style.color = '#10b981';
+      } else {
+        bovedaStatusText.innerText = 'ACUMULACIÓN 🌱';
+        bovedaStatusText.style.color = '#f59e0b';
+      }
+    }
+
+    if(mejor){
+      const liderNombreViva = document.getElementById('liderNombreViva');
+      if(liderNombreViva) liderNombreViva.innerText = `LÍDER: ${mejor.nombre} (${mejor.letras})`;
+      const liderPuntosViva = document.getElementById('liderPuntosViva');
+      if(liderPuntosViva) liderPuntosViva.innerText = `${mejor.peso.toLocaleString()} / 10,000`;
+      const liderProgressViva = document.getElementById('liderProgressViva');
+      if(liderProgressViva) liderProgressViva.style.width = Math.min(100, (mejor.peso/UMBRAL_VALIDACION)*100) + '%';
+      const faltanViva = document.getElementById('faltanViva');
+      if(faltanViva){
+        const falta = Math.max(0, UMBRAL_VALIDACION - mejor.peso);
+        faltanViva.innerText = `Faltan ${falta.toLocaleString()} pts para validación`;
+      }
+    }
+
+    const vivaDigits = document.getElementById('vivaDigits');
+    if(vivaDigits){
+      const sortedDigits = Object.entries(digitFreq).sort((a,b)=>b[1]-a[1]).slice(0,3);
+      vivaDigits.innerHTML = sortedDigits.map(([dig, count])=>`<div class="bar-row"><span>#${dig}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, count*10)}%;background:var(--cyan)"></div></div><span>${count}</span></div>`).join('');
+    }
+
+    const vivaPaises = document.getElementById('vivaPaises');
+    if(vivaPaises){
+      const paisCounts = {};
+      boveda.forEach(b => { paisCounts[b.flag] = (paisCounts[b.flag]||0)+1; });
+      const sortedPais = Object.entries(paisCounts).sort((a,b)=>b[1]-a[1]).slice(0,3);
+      vivaPaises.innerHTML = sortedPais.map(([flag, count])=>`<div class="bar-row"><span>${flag}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, count*20)}%;background:var(--emerald)"></div></div><span>${count}</span></div>`).join('');
+    }
+
+    actualizarGraficaViva();
+    actualizarJuegoUI();
+  }catch(e){}
+}
+
+function actualizarJuegoUI(){ 
+  try{ 
+    const {mejor}=calcularLiderReal(); 
+    const lsj = document.getElementById('leaderSerialJuego');
+    const loj = document.getElementById('leaderOwnerJuego');
+    if(lsj) lsj.innerText = mejor?mejor.serial:'Cargando...'; 
+    if(loj) loj.innerText = mejor?`${mejor.nombre} ${mejor.flag} • ${mejor.peso} pts`:''; 
+  }catch(e){} 
+}
+
 function generarLote(){ return [...boveda].sort(()=>0.5-Math.random()).slice(0,6).map(b=>({...b})); }
+
 function renderLote(lote){
   const grid=document.getElementById('lotGrid'); if(!grid) return;
   grid.innerHTML='';
@@ -223,7 +371,7 @@ function renderLote(lote){
     const card=document.createElement('div');
     card.className='bill';
     card.innerHTML=`<div style="font-weight:800">${b.flag} ${b.letras}</div><div style="font-size:10px;color:#94a3b8">${b.nombre} • ${peso} pts</div><div style="color:#10b981;font-weight:800">+${valor*2} x2</div>`;
-    card.onclick=(ev)=>{
+    card.onclick=()=>{
       if(!card.classList.contains('popping')){
         card.classList.add('popping');
         const fl=document.createElement('div');
@@ -237,7 +385,8 @@ function renderLote(lote){
     grid.appendChild(card);
   });
 }
-function clickBillete(b, el){
+
+function clickBillete(b){
   if(!juegoActivo) return;
   const peso=b.peso||150;
   const valor=(Math.floor(peso/10)+5)*2;
@@ -257,9 +406,64 @@ function clickBillete(b, el){
   loteActual=loteActual.filter(x=>x.id!==b.id);
   setTimeout(()=>{ renderLote(loteActual); }, 180);
 }
-function iniciarJuego(){ try{ if(boveda.length<1){ toast('Necesitas 1 billete'); return; } getAudioCtx(); playStartSound(); juegoActivo=true; puntos=0; clicksSesion=0; tiempo=60; document.getElementById('setupJuego').style.display='none'; document.getElementById('juegoActivo').style.display='block'; const gen=()=>{ if(!juegoActivo) return; loteActual=generarLote(); renderLote(loteActual); }; gen(); juegoLot=setInterval(gen,4000); juegoTimer=setInterval(()=>{ tiempo-=0.1; if(tiempo<=0){ detenerJuego(true); return; } document.getElementById('timerJuego').innerText=tiempo.toFixed(1); },100); }catch(e){} }
-function detenerJuego(fin=false){ juegoActivo=false; clearInterval(juegoTimer); clearInterval(juegoLot); if(fin){ document.getElementById('finPuntos').innerText=puntos+' pts'; document.getElementById('finClicks').innerText=clicksSesion+' clicks'; document.getElementById('modalFin').style.display='flex'; } else { document.getElementById('setupJuego').style.display='block'; document.getElementById('juegoActivo').style.display='none'; } }
-function guardarSesion(){ try{ const nombre=document.getElementById('in-nombre').value.trim()||'Anónimo'; boveda.forEach((b,i)=>{ if(b.nombre===nombre) boveda[i].peso=(b.peso||150)+puntos; }); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); toast(`💾 +${puntos} pts`); cerrarFin(); document.getElementById('setupJuego').style.display='block'; document.getElementById('juegoActivo').style.display='none'; actualizarBovedaUI(); }catch(e){} }
+
+function iniciarJuego(){ 
+  try{ 
+    if(boveda.length<1){ toast('Necesitas 1 billete'); return; } 
+    getAudioCtx(); 
+    playStartSound(); 
+    juegoActivo=true; 
+    puntos=0; 
+    clicksSesion=0; 
+    tiempo=60; 
+    document.getElementById('setupJuego').style.display='none'; 
+    document.getElementById('juegoActivo').style.display='block'; 
+    const gen=()=>{ if(!juegoActivo) return; loteActual=generarLote(); renderLote(loteActual); }; 
+    gen(); 
+    juegoLot=setInterval(gen,4000); 
+    juegoTimer=setInterval(()=>{ 
+      tiempo-=0.1; 
+      if(tiempo<=0){ detenerJuego(true); return; } 
+      const tj = document.getElementById('timerJuego');
+      if(tj) tj.innerText=tiempo.toFixed(1); 
+    },100); 
+  }catch(e){} 
+}
+
+function detenerJuego(fin=false){ 
+  juegoActivo=false; 
+  clearInterval(juegoTimer); 
+  clearInterval(juegoLot); 
+  if(fin){ 
+    const fp = document.getElementById('finPuntos');
+    const fc = document.getElementById('finClicks');
+    const mf = document.getElementById('modalFin');
+    if(fp) fp.innerText=puntos+' pts'; 
+    if(fc) fc.innerText=clicksSesion+' clicks'; 
+    if(mf) mf.style.display='flex'; 
+  } else { 
+    const st = document.getElementById('setupJuego');
+    const ja = document.getElementById('juegoActivo');
+    if(st) st.style.display='block'; 
+    if(ja) ja.style.display='none'; 
+  } 
+}
+
+function guardarSesion(){ 
+  try{ 
+    const nombre=document.getElementById('in-nombre').value.trim()||'Anónimo'; 
+    boveda.forEach((b,i)=>{ if(b.nombre===nombre) boveda[i].peso=(b.peso||150)+puntos; }); 
+    localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); 
+    toast(`💾 +${puntos} pts`); 
+    cerrarFin(); 
+    const st = document.getElementById('setupJuego');
+    const ja = document.getElementById('juegoActivo');
+    if(st) st.style.display='block'; 
+    if(ja) ja.style.display='none'; 
+    actualizarBovedaUI(); 
+  }catch(e){} 
+}
+
 function cerrarFin(){
   const m=document.getElementById('modalFin');
   if(m) m.style.display='none';
@@ -272,7 +476,24 @@ function cerrarFin(){
   if(activo) activo.style.display='none';
   if(typeof actualizarBovedaUI==='function') actualizarBovedaUI();
 }
-function bajarABoveda(){ try{ if(!billeteActual){ toast('Primero verifica'); return; } boveda.unshift(billeteActual); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); recalcularFreq(); actualizarBovedaUI(); toast(`⬇ ${billeteActual.letras} a nube`); if(supabaseClient){ supabaseClient.from('bills').insert([billeteActual]).then(({error})=>{ if(error) toast('Nube: '+error.message); else toast('✅ En NUBE'); }); } }catch(e){ toast(e.message); } }
+
+function bajarABoveda(){ 
+  try{ 
+    if(!billeteActual){ toast('Primero verifica'); return; } 
+    boveda.unshift(billeteActual); 
+    localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); 
+    recalcularFreq(); 
+    actualizarBovedaUI(); 
+    toast(`⬇ ${billeteActual.letras} a nube`); 
+    if(supabaseClient){ 
+      supabaseClient.from('bills').insert([billeteActual]).then(({error})=>{ 
+        if(error) toast('Nube: '+error.message); 
+        else toast('✅ En NUBE'); 
+      }); 
+    } 
+  }catch(e){ toast(e.message); } 
+}
+
 function abrirBovedaBloqueada(){ const m=document.getElementById('modal-boveda-bloqueada'); if(m) m.style.display='flex'; }
 function cerrarBovedaBloqueada(){ const m=document.getElementById('modal-boveda-bloqueada'); if(m) m.style.display='none'; }
 function abrirModal(t){ const m=document.getElementById('modal-'+t); if(m){ m.style.display='flex'; m.style.zIndex='10002'; } }
@@ -314,7 +535,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('check1')?.addEventListener('change', ()=>{ const b=document.getElementById('btnDesbloquear'); const c1=document.getElementById('check1').checked; const c2=document.getElementById('check2').checked; if(b){ b.disabled=!(c1&&c2); b.style.background=(c1&&c2)?'linear-gradient(135deg,#f59e0b,#d97706)':'#4a3f1f'; } });
   document.getElementById('check2')?.addEventListener('change', ()=>{ const b=document.getElementById('btnDesbloquear'); const c1=document.getElementById('check1').checked; const c2=document.getElementById('check2').checked; if(b){ b.disabled=!(c1&&c2); b.style.background=(c1&&c2)?'linear-gradient(135deg,#f59e0b,#d97706)':'#4a3f1f'; } });
 
-  // ESTO ARREGLA QUE SE CIERRE AL TOCAR EL FONDO OSCURO
   document.querySelectorAll('.modal').forEach(m=>{
     m.addEventListener('click', (e)=>{
       if(e.target===m){
@@ -323,7 +543,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     });
   });
 
-  // Extra UX: cerrar con ESC
   document.addEventListener('keydown', (e)=>{
     if(e.key==='Escape'){
       document.querySelectorAll('.modal').forEach(mm=>{
@@ -334,7 +553,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   });
 
-  actualizarPreview(); actualizarBovedaUI();
+  actualizarPreview(); 
+  actualizarBovedaUI();
 });
 </script>
 </body>
