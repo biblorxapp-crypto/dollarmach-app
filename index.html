@@ -30,7 +30,12 @@ body{margin:0;padding:10px 8px;background:radial-gradient(circle at 40% 20%,#0f1
 .cell{width:100%;aspect-ratio:1;border-radius:4px;display:grid;place-items:center;font-family:'JetBrains Mono';font-size:9px;font-weight:700;border:1px solid #1e293b}
 .cell.cold{background:#0f172a;color:#475569}.cell.hot{background:rgba(16,185,129,0.25);color:#6ee7b7;border-color:#10b981}.cell.leader{background:var(--cyan)!important;color:#000!important}
 .lot-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
-.bill{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.bill{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;cursor:pointer;position:relative;overflow:hidden;transition:transform 0.12s ease, filter 0.12s ease;user-select:none;-webkit-tap-highlight-color:transparent}
+.bill:active{transform:scale(0.96)}
+.bill.popping{animation:popCard 0.28s ease forwards}
+@keyframes popCard{0%{transform:scale(1)}40%{transform:scale(1.12) rotate(1deg); filter:brightness(1.3)}100%{transform:scale(0.85); opacity:0.4}}
+@keyframes floatUp{0%{transform:translate(-50%,0) scale(1); opacity:1}100%{transform:translate(-50%,-50px) scale(1.4); opacity:0}}
+.float-score{position:absolute;left:50%;top:20%;transform:translateX(-50%);font-family:'JetBrains Mono';font-weight:900;font-size:18px;color:#10b981;text-shadow:0 2px 8px rgba(16,185,129,0.6);pointer-events:none;z-index:5;animation:floatUp 0.6s ease-out forwards}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120px);background:#0f172a;border:1px solid var(--emerald);color:#fff;padding:12px 16px;border-radius:12px;font-family:'JetBrains Mono';font-size:11px;z-index:10005;transition:transform 0.3s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .modal{position:fixed;inset:0;background:rgba(3,7,18,0.92);display:none;justify-content:center;align-items:center;padding:12px;cursor:pointer}
@@ -150,6 +155,55 @@ let digitFreq={}; for(let i=0;i<100;i++) digitFreq[String(i).padStart(2,'0')]=0;
 function recalcularFreq(){ for(let k in digitFreq) digitFreq[k]=0; boveda.forEach(b=>{ try{ (b.numeros.match(/.{2}/g)||[]).forEach(p=>{ if(digitFreq[p]!==undefined) digitFreq[p]+=Math.floor((b.clicks||1)/2); }); }catch(e){} }); }
 recalcularFreq();
 let juegoTimer=null,juegoLot=null,tiempo=60,puntos=0,clicksSesion=0,juegoActivo=false,loteActual=[],billeteActual=null;
+let audioCtx=null;
+function getAudioCtx(){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    return audioCtx;
+  }catch(e){ return null; }
+}
+function playClickSound(peso){
+  try{
+    const ctx=getAudioCtx(); if(!ctx) return;
+    const now=ctx.currentTime;
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    const base = 300 + (peso % 400);
+    osc.frequency.setValueAtTime(base, now);
+    osc.frequency.exponentialRampToValueAtTime(base*1.6, now+0.08);
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now+0.22);
+    osc.type='sine';
+    osc.start(now); osc.stop(now+0.22);
+    const osc2=ctx.createOscillator();
+    const gain2=ctx.createGain();
+    osc2.connect(gain2); gain2.connect(ctx.destination);
+    osc2.frequency.setValueAtTime(base*2, now+0.06);
+    osc2.frequency.exponentialRampToValueAtTime(base*2.8, now+0.18);
+    gain2.gain.setValueAtTime(0.2, now+0.06);
+    gain2.gain.exponentialRampToValueAtTime(0.01, now+0.24);
+    osc2.type='triangle';
+    osc2.start(now+0.06); osc2.stop(now+0.24);
+  }catch(e){}
+}
+function playStartSound(){
+  try{
+    const ctx=getAudioCtx(); if(!ctx) return;
+    const now=ctx.currentTime;
+    [440,554,659].forEach((f,i)=>{
+      const o=ctx.createOscillator(); const g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value=f; o.type='sine';
+      g.gain.setValueAtTime(0, now+i*0.08);
+      g.gain.linearRampToValueAtTime(0.25, now+i*0.08+0.02);
+      g.gain.exponentialRampToValueAtTime(0.01, now+i*0.08+0.3);
+      o.start(now+i*0.08); o.stop(now+i*0.08+0.3);
+    });
+  }catch(e){}
+}
+
 function calcularRareza(s){ if(/^(.)\1+$/.test(s)) return {t:'SUPER RADAR',m:3.5}; if(/(.)\1{2,}/.test(s)) return {t:'POKER',m:3.0}; if(s===s.split('').reverse().join('')) return {t:'RADAR',m:2.0}; if(/(.)\1/.test(s)) return {t:'REPETICIÓN',m:1.5}; return {t:'COMÚN',m:1.0}; }
 function calcularValor(s){ const r=calcularRareza(s); return Math.floor(150*r.m + (parseInt(s.slice(-2)||'0')%50)); }
 function toast(msg){ const el=document.getElementById('toast'); if(!el) return; el.innerText=msg; el.className='toast show'; setTimeout(()=>el.classList.remove('show'),3000); }
@@ -161,9 +215,50 @@ function actualizarGraficaViva(){ try{ const {top,mejor}=calcularLiderReal(); co
 function actualizarBovedaUI(){ try{ recalcularFreq(); const {top,mejor}=calcularLiderReal(); const pts=mejor?mejor.peso:0; const pct=Math.min(100,pts/10000*100); document.getElementById('founderCount').innerText=new Set(boveda.map(b=>b.nombre)).size+'/1000'; document.getElementById('founderProgress').style.width=Math.min(100,new Set(boveda.map(b=>b.nombre)).size/10)+'%'; document.getElementById('bovedaActivaCount').innerText=pts.toLocaleString()+' / 10,000 pts'; document.getElementById('bovedaProgress').style.width=pct+'%'; const bst=document.getElementById('bovedaStatusText'); if(bst){ bst.innerText=pts>=10000?'¡VALIDADA! ✅':'ACUMULACIÓN 🌱'; bst.style.color=pts>=10000?'#10b981':'#f59e0b'; } document.getElementById('leaderSerial2').innerText=mejor?mejor.serial:'Sin líder'; document.getElementById('leaderOwner2').innerText=mejor?`Líder: ${mejor.nombre} ${mejor.flag}`:''; document.getElementById('leaderPts2').innerText=mejor?`${pts.toLocaleString()} pts` :''; document.getElementById('bovedaCount2').innerText=boveda.length+' billetes'; document.getElementById('vaultMembers').innerText=boveda.length+' billetes'; const grid=document.getElementById('gridPaso2'); if(grid && grid.children.length===0){ for(let i=0;i<100;i++){ const d=document.createElement('div'); d.className='cell cold'; d.id='g2-'+i; d.innerText=String(i).padStart(2,'0'); grid.appendChild(d); } } for(let i=0;i<100;i++){ const k=String(i).padStart(2,'0'); const el=document.getElementById('g2-'+i); if(el) el.className='cell '+(top.includes(k)?'leader':(digitFreq[k]>0?'hot':'cold')); } const lista=document.getElementById('listaBovedaPaso2'); if(lista){ lista.innerHTML=''; boveda.slice(0,10).forEach(b=>{ const d=document.createElement('div'); d.style.cssText='background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:8px;display:flex;justify-content:space-between;font-size:11px'; d.innerHTML=`<span>${b.flag} ${b.letras}</span><span style="color:#10b981;font-weight:800">${(b.peso||0)} pts</span>`; lista.appendChild(d); }); } actualizarGraficaViva(); actualizarJuegoUI(); }catch(e){} }
 function actualizarJuegoUI(){ try{ const {top,mejor}=calcularLiderReal(); document.getElementById('leaderSerialJuego').innerText=mejor?mejor.serial:'Cargando...'; document.getElementById('leaderOwnerJuego').innerText=mejor?`${mejor.nombre} ${mejor.flag} • ${mejor.peso} pts`:''; }catch(e){} }
 function generarLote(){ return [...boveda].sort(()=>0.5-Math.random()).slice(0,6).map(b=>({...b})); }
-function renderLote(lote){ const grid=document.getElementById('lotGrid'); if(!grid) return; grid.innerHTML=''; lote.forEach(b=>{ const peso=b.peso||150; const valor=Math.floor(peso/10)+5; const card=document.createElement('div'); card.className='bill'; card.innerHTML=`<div style="font-weight:800">${b.flag} ${b.letras}</div><div style="font-size:10px;color:#94a3b8">${b.nombre} • ${peso} pts</div><div style="color:#10b981;font-weight:800">+${valor*2} x2</div>`; card.onclick=()=>clickBillete(b); grid.appendChild(card); }); }
-function clickBillete(b){ if(!juegoActivo) return; const peso=b.peso||150; const valor=(Math.floor(peso/10)+5)*2; puntos+=valor; clicksSesion++; const idx=boveda.findIndex(x=>x.id===b.id); if(idx>=0) boveda[idx].clicks++; (b.numeros.match(/.{2}/g)||[]).forEach(p=>{ if(digitFreq[p]!==undefined) digitFreq[p]+=1; }); document.getElementById('puntosJuego').innerText=puntos; document.getElementById('clicksJuego').innerText=clicksSesion; toast(`+${valor}`); loteActual=loteActual.filter(x=>x.id!==b.id); renderLote(loteActual); }
-function iniciarJuego(){ try{ if(boveda.length<1){ toast('Necesitas 1 billete'); return; } juegoActivo=true; puntos=0; clicksSesion=0; tiempo=60; document.getElementById('setupJuego').style.display='none'; document.getElementById('juegoActivo').style.display='block'; const gen=()=>{ if(!juegoActivo) return; loteActual=generarLote(); renderLote(loteActual); }; gen(); juegoLot=setInterval(gen,4000); juegoTimer=setInterval(()=>{ tiempo-=0.1; if(tiempo<=0){ detenerJuego(true); return; } document.getElementById('timerJuego').innerText=tiempo.toFixed(1); },100); }catch(e){} }
+function renderLote(lote){
+  const grid=document.getElementById('lotGrid'); if(!grid) return;
+  grid.innerHTML='';
+  lote.forEach(b=>{
+    const peso=b.peso||150;
+    const valor=Math.floor(peso/10)+5;
+    const card=document.createElement('div');
+    card.className='bill';
+    card.innerHTML=`<div style="font-weight:800">${b.flag} ${b.letras}</div><div style="font-size:10px;color:#94a3b8">${b.nombre} • ${peso} pts</div><div style="color:#10b981;font-weight:800">+${valor*2} x2</div>`;
+    card.onclick=(ev)=>{
+      if(!card.classList.contains('popping')){
+        card.classList.add('popping');
+        const fl=document.createElement('div');
+        fl.className='float-score';
+        fl.innerText='+'+(valor*2);
+        card.appendChild(fl);
+        setTimeout(()=>fl.remove(), 600);
+      }
+      clickBillete(b, card);
+    };
+    grid.appendChild(card);
+  });
+}
+function clickBillete(b, el){
+  if(!juegoActivo) return;
+  const peso=b.peso||150;
+  const valor=(Math.floor(peso/10)+5)*2;
+  playClickSound(peso);
+  try{ if(navigator.vibrate) navigator.vibrate(40); }catch(e){}
+  puntos+=valor;
+  clicksSesion++;
+  const idx=boveda.findIndex(x=>x.id===b.id);
+  if(idx>=0) boveda[idx].clicks++;
+  (b.numeros.match(/.{2}/g)||[]).forEach(p=>{ if(digitFreq[p]!==undefined) digitFreq[p]+=1; });
+  const pj=document.getElementById('puntosJuego');
+  const cj=document.getElementById('clicksJuego');
+  if(pj) pj.innerText=puntos;
+  if(cj) cj.innerText=clicksSesion;
+  if(pj){ pj.style.transform='scale(1.3)'; setTimeout(()=>pj.style.transform='scale(1)', 120); }
+  toast(`+${valor} x2`);
+  loteActual=loteActual.filter(x=>x.id!==b.id);
+  setTimeout(()=>{ renderLote(loteActual); }, 180);
+}
+function iniciarJuego(){ try{ if(boveda.length<1){ toast('Necesitas 1 billete'); return; } getAudioCtx(); playStartSound(); juegoActivo=true; puntos=0; clicksSesion=0; tiempo=60; document.getElementById('setupJuego').style.display='none'; document.getElementById('juegoActivo').style.display='block'; const gen=()=>{ if(!juegoActivo) return; loteActual=generarLote(); renderLote(loteActual); }; gen(); juegoLot=setInterval(gen,4000); juegoTimer=setInterval(()=>{ tiempo-=0.1; if(tiempo<=0){ detenerJuego(true); return; } document.getElementById('timerJuego').innerText=tiempo.toFixed(1); },100); }catch(e){} }
 function detenerJuego(fin=false){ juegoActivo=false; clearInterval(juegoTimer); clearInterval(juegoLot); if(fin){ document.getElementById('finPuntos').innerText=puntos+' pts'; document.getElementById('finClicks').innerText=clicksSesion+' clicks'; document.getElementById('modalFin').style.display='flex'; } else { document.getElementById('setupJuego').style.display='block'; document.getElementById('juegoActivo').style.display='none'; } }
 function guardarSesion(){ try{ const nombre=document.getElementById('in-nombre').value.trim()||'Anónimo'; boveda.forEach((b,i)=>{ if(b.nombre===nombre) boveda[i].peso=(b.peso||150)+puntos; }); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); toast(`💾 +${puntos} pts`); cerrarFin(); document.getElementById('setupJuego').style.display='block'; document.getElementById('juegoActivo').style.display='none'; actualizarBovedaUI(); }catch(e){} }
 function cerrarFin(){
@@ -172,9 +267,11 @@ function cerrarFin(){
   juegoActivo=false;
   clearInterval(juegoTimer);
   clearInterval(juegoLot);
-  document.getElementById('setupJuego').style.display='block';
-  document.getElementById('juegoActivo').style.display='none';
-  actualizarBovedaUI();
+  const setup=document.getElementById('setupJuego');
+  const activo=document.getElementById('juegoActivo');
+  if(setup) setup.style.display='block';
+  if(activo) activo.style.display='none';
+  if(typeof actualizarBovedaUI==='function') actualizarBovedaUI();
 }
 function bajarABoveda(){ try{ if(!billeteActual){ toast('Primero verifica'); return; } boveda.unshift(billeteActual); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); recalcularFreq(); actualizarBovedaUI(); toast(`⬇ ${billeteActual.letras} a nube`); if(supabaseClient){ supabaseClient.from('bills').insert([billeteActual]).then(({error})=>{ if(error) toast('Nube: '+error.message); else toast('✅ En NUBE'); }); } }catch(e){ toast(e.message); } }
 function abrirBovedaBloqueada(){ const m=document.getElementById('modal-boveda-bloqueada'); if(m) m.style.display='flex'; }
@@ -218,27 +315,21 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('check1')?.addEventListener('change', ()=>{ const b=document.getElementById('btnDesbloquear'); const c1=document.getElementById('check1').checked; const c2=document.getElementById('check2').checked; if(b){ b.disabled=!(c1&&c2); b.style.background=(c1&&c2)?'linear-gradient(135deg,#f59e0b,#d97706)':'#4a3f1f'; } });
   document.getElementById('check2')?.addEventListener('change', ()=>{ const b=document.getElementById('btnDesbloquear'); const c1=document.getElementById('check1').checked; const c2=document.getElementById('check2').checked; if(b){ b.disabled=!(c1&&c2); b.style.background=(c1&&c2)?'linear-gradient(135deg,#f59e0b,#d97706)':'#4a3f1f'; } });
 
+  // ESTO ARREGLA QUE SE CIERRE AL TOCAR EL FONDO OSCURO
   document.querySelectorAll('.modal').forEach(m=>{
     m.addEventListener('click', (e)=>{
       if(e.target===m){
-        if(m.id==='modalFin'){
-          cerrarFin();
-        } else {
-          m.style.display='none';
-        }
+        if(m.id==='modalFin'){ cerrarFin(); } else { m.style.display='none'; }
       }
     });
   });
 
+  // Extra UX: cerrar con ESC
   document.addEventListener('keydown', (e)=>{
     if(e.key==='Escape'){
       document.querySelectorAll('.modal').forEach(mm=>{
         if(mm.style.display==='flex'){
-          if(mm.id==='modalFin'){
-            cerrarFin();
-          } else {
-            mm.style.display='none';
-          }
+          if(mm.id==='modalFin'){ cerrarFin(); } else { mm.style.display='none'; }
         }
       });
     }
@@ -277,6 +368,7 @@ if(new URLSearchParams(location.search).get('inject')){
   let c = parseInt(new URLSearchParams(location.search).get('inject'))||60;
   inyectarMovil(c);
 }
+
 </script>
 </body>
 </html>
