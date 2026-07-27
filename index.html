@@ -203,7 +203,6 @@ function playStartSound(){
     });
   }catch(e){}
 }
-
 function calcularRareza(s){ if(/^(.)\1+$/.test(s)) return {t:'SUPER RADAR',m:3.5}; if(/(.)\1{2,}/.test(s)) return {t:'POKER',m:3.0}; if(s===s.split('').reverse().join('')) return {t:'RADAR',m:2.0}; if(/(.)\1/.test(s)) return {t:'REPETICIÓN',m:1.5}; return {t:'COMÚN',m:1.0}; }
 function calcularValor(s){ const r=calcularRareza(s); return Math.floor(150*r.m + (parseInt(s.slice(-2)||'0')%50)); }
 function toast(msg){ const el=document.getElementById('toast'); if(!el) return; el.innerText=msg; el.className='toast show'; setTimeout(()=>el.classList.remove('show'),3000); }
@@ -337,38 +336,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   actualizarPreview(); actualizarBovedaUI();
 });
-
-// ===============================
-// TRUCO MOVIL: si entras a dollardgt.com/?inject=60 te inyecta solo 60 miembros
-// ===============================
-async function inyectarMovil(n=60){
-  const paises = [{v:'USD',f:'🇺🇸'},{v:'MXN',f:'🇲🇽'},{v:'ESP',f:'🇪🇸'},{v:'ARG',f:'🇦🇷'},{v:'COL',f:'🇨🇴'},{v:'BRA',f:'🇧🇷'},{v:'CAN',f:'🇨🇦'},{v:'GBR',f:'🇬🇧'}];
-  const letrasRnd = () => String.fromCharCode(65+Math.random()*26|0)+String.fromCharCode(65+Math.random()*26|0)+String.fromCharCode(65+Math.random()*26|0);
-  const numRnd = () => Math.floor(10000000+Math.random()*89999999).toString();
-  let bovedaLocal = [];
-  try{ bovedaLocal = JSON.parse(localStorage.getItem('valt_boveda_real')||'[]'); }catch(e){ bovedaLocal=[]; }
-  let nuevos=[];
-  for(let i=0;i<n;i++){
-    let p=paises[i%paises.length];
-    let num=numRnd();
-    let peso = i==0?9200:i==1?8400:i==2?7600:150+Math.floor(Math.random()*5000);
-    nuevos.push({id:'sim-'+Date.now()+'-'+i,letras:letrasRnd(),numeros:num,anio:'2021',pais:p.v,flag:p.f,nombre:'Sim'+i,clicks:50,peso:peso,valor:peso,rareza:'COMÚN',serial:`VALT-${letrasRnd()}-${num.slice(0,2)}-${num.slice(2,4)}-${num.slice(4)} | 2021 [${p.v}]`,timestamp:Date.now()});
-  }
-  bovedaLocal = [...nuevos,...bovedaLocal].slice(0,500);
-  localStorage.setItem('valt_boveda_real', JSON.stringify(bovedaLocal));
-  if(typeof supabaseClient!== 'undefined' && supabaseClient){
-    try{ await supabaseClient.from('bills').insert(nuevos); }catch(e){ console.log('Supabase inject error', e); }
-  }
-  alert('✅ Inyectados '+n+' miembros');
-  history.replaceState({},'','/');
-  location.reload();
-}
-
-if(new URLSearchParams(location.search).get('inject')){
-  let c = parseInt(new URLSearchParams(location.search).get('inject'))||60;
-  inyectarMovil(c);
-}
-
 </script>
 </body>
 </html>
