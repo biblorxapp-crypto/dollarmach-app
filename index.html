@@ -3,13 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>VALT REAL 360 - PROGRAMA DE PUNTOS - 2026 DollarDgt.com</title>
+<meta name="theme-color" content="#030712">
+<title>VALT REAL 360 - DollarDgt.com</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#030712;--card:#0f172a;--cyan:#06b6d4;--emerald:#10b981;--magenta:#FF2A6D;--amber:#f59e0b;--border:rgba(6,182,212,0.25)}
-*{box-sizing:border-box} body{margin:0;padding:10px 8px;background:radial-gradient(circle at 40% 20%,#0f172a 0%,#030712 70%);color:#f8fafc;font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
-.mono{font-family:'JetBrains Mono',monospace}
+html{background:#030712;overscroll-behavior:none;height:100%}
+:root{--bg:#030712;--card:#0f172a;--cyan:#06b6d4;--emerald:#10b981;--amber:#f59e0b;--border:rgba(6,182,212,0.25)}
+*{box-sizing:border-box}
+body{margin:0;padding:10px 8px;background:radial-gradient(circle at 40% 20%,#0f172a 0%,#030712 70%);background-color:#030712;background-attachment:fixed;color:#f8fafc;font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;overscroll-behavior-y:none}
 .main{width:100%;max-width:760px}
 .vault-header{width:100%;background:linear-gradient(90deg,rgba(6,182,212,0.18),rgba(16,185,129,0.18));border:1px solid var(--cyan);border-radius:12px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono';font-size:11px}
 .steps{display:flex;gap:6px;margin-bottom:12px;width:100%}
@@ -22,8 +24,8 @@
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .preview{width:100%;background:linear-gradient(135deg,#020617,#0f172a);border:1px dashed #334155;border-radius:12px;padding:12px;margin-top:10px;font-family:'JetBrains Mono'}
 .badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;border:1px solid;margin-top:6px}
-.btn{width:100%;padding:16px 12px;border-radius:14px;border:1px solid rgba(255,255,255,0.15);font-weight:800;font-size:14px;cursor:pointer;text-transform:uppercase;font-family:'JetBrains Mono';color:#fff;display:flex;justify-content:center;align-items:center;gap:8px;transition:all 0.15s}
-.btn-green{background:linear-gradient(135deg,#10b981,#059669)}.btn-blue{background:linear-gradient(135deg,#0ea5e9,#0284c7)}.btn-orange{background:linear-gradient(135deg,#f59e0b,#d97706);color:#000}.btn-dark{background:#1e293b}.btn:active{transform:scale(0.97)}.btn:disabled{opacity:0.4;pointer-events:none}
+.btn{width:100%;padding:16px 12px;border-radius:14px;border:1px solid rgba(255,255,255,0.15);font-weight:800;font-size:14px;cursor:pointer;text-transform:uppercase;font-family:'JetBrains Mono';color:#fff;display:flex;justify-content:center;align-items:center;gap:8px}
+.btn-green{background:linear-gradient(135deg,#10b981,#059669)}.btn-blue{background:linear-gradient(135deg,#0ea5e9,#0284c7)}.btn-orange{background:linear-gradient(135deg,#f59e0b,#d97706);color:#000}.btn-dark{background:#1e293b}
 .leader{width:100%;background:linear-gradient(135deg,rgba(6,182,212,0.18),rgba(16,185,129,0.18));border:1px solid var(--cyan);border-left:5px solid var(--cyan);border-radius:14px;padding:12px 14px;margin-bottom:12px}
 .grid10{width:100%;display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:8px}
 .cell{width:100%;aspect-ratio:1;border-radius:4px;display:grid;place-items:center;font-family:'JetBrains Mono';font-size:9px;font-weight:700;border:1px solid #1e293b}
@@ -35,314 +37,126 @@
 .modal{position:fixed;inset:0;background:rgba(3,7,18,0.92);display:none;justify-content:center;align-items:center;z-index:9999;padding:12px}
 .modal-box{width:100%;max-width:480px;background:#0f172a;border:1px solid #1e293b;border-radius:20px;padding:20px;max-height:85vh;overflow:auto}
 .modal-box.policy{max-width:520px;background:#12121e;border:1px solid rgba(255,255,255,0.08)}
-.policy-title{font-size:18px;font-weight:800;margin-bottom:12px;letter-spacing:0.5px}
+.policy-title{font-size:18px;font-weight:800;margin-bottom:12px}
 .policy-text{font-size:13px;color:#9ca3af;line-height:1.6}
 .link-gold{color:#fbbf24;text-decoration:underline;cursor:pointer}
 .timer{font-family:'JetBrains Mono';font-size:28px;font-weight:900}
 .boveda-locked{display:flex;flex-direction:column;align-items:center;text-align:center}
 .lock-icon{width:68px;height:68px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #2a2a3a, #1a1a25);border:1px solid rgba(251,191,36,0.3);display:grid;place-items:center;font-size:28px;margin-bottom:12px}
 .check-row{display:flex;gap:10px;align-items:flex-start;margin-top:12px;text-align:left;font-size:12px;color:#cbd5e1}
-.check-row input{margin-top:2px}
 .founder-bar{width:100%;background:linear-gradient(90deg,#f59e0b22,#fbbf2422);border:1px solid #fbbf24;border-radius:12px;padding:10px 12px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px}
-.progress-track{width:100%;height:10px;background:#1e293b;border-radius:20px;overflow:hidden;display:flex;gap:2px}
+.progress-track{width:100%;height:10px;background:#1e293b;border-radius:20px;overflow:hidden}
 .progress-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:20px;transition:width 0.5s}
 .progress-fill.cyan{background:linear-gradient(90deg,#06b6d4,#10b981)}
-.founder-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;font-family:'JetBrains Mono';font-size:10px;font-weight:900;padding:3px 8px;border-radius:20px}
 .siembra-box{width:100%;background:radial-gradient(circle at 30% 30%, rgba(251,191,36,0.15), rgba(15,23,42,0.9));border:1px solid #fbbf24;border-radius:16px;padding:16px;text-align:center;margin-bottom:12px}
+.live-dot{width:8px;height:8px;background:#10b981;border-radius:50%;display:inline-block;animation:pulse 1.5s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,0.7)}70%{box-shadow:0 0 0 8px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+.viva-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;text-align:left}
+.viva-card{background:rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:10px}
+.viva-title{font-size:9px;color:#64748b;letter-spacing:0.8px;font-weight:800;font-family:'JetBrains Mono'}
+.bar-row{display:flex;align-items:center;gap:6px;margin-top:7px;font-family:'JetBrains Mono';font-size:10px}
+.bar-track{flex:1;height:6px;background:#1e293b;border-radius:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:10px}
 </style>
 </head>
 <body>
 <div class="main">
 <div class="vault-header"><span id="nubeStatus">● Conectando nube...</span><span id="vaultMembers">0 billetes</span></div>
-<div class="founder-bar" id="founderBar">
-  <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:11px;font-weight:800">
-    <span style="color:#fbbf24">👑 MODO FUNDADORES ACTIVO</span>
-    <span id="founderCount" style="color:#fbbf24">0/1000 FUNDADORES</span>
-  </div>
-  <div class="progress-track"><div class="progress-fill" id="founderProgress" style="width:5%"></div></div>
-  <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:10px;color:#94a3b8">
-    <span id="founderLeft">Quedan 1000 cupos a $4.99 • Luego $9.99</span>
-    <span id="founderPrice" style="color:#fbbf24;font-weight:800">$4.99 BLOQUEADO DE POR VIDA</span>
-  </div>
-  <div style="margin-top:6px;display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:11px;font-weight:800">
-    <span>🔒 BÓVEDA: <span id="bovedaActivaCount">0/100</span> PARA ACTIVAR</span>
-    <span id="bovedaStatusText" style="color:#f59e0b">EN ACUMULACIÓN 🌱</span>
-  </div>
-  <div class="progress-track" style="height:8px"><div class="progress-fill cyan" id="bovedaProgress" style="width:5%"></div></div>
-</div>
-<div class="siembra-box" id="siembraBox" style="display:none">
-  <div style="font-size:28px">🌱📈</div>
-  <div style="font-weight:900;font-size:14px;margin-top:6px">BÓVEDA EN FASE DE ACUMULACIÓN</div>
-  <div style="font-family:'JetBrains Mono';font-size:11px;color:#cbd5e1;margin-top:6px" id="siembraText">Acumulando puntos... No hay líder con recompensa aún. Faltan 77 miembros para activar la explosión. Tu ventaja FUNDADOR x2 puntos activa.</div>
-  <div style="margin-top:10px;font-family:'JetBrains Mono';font-size:12px;font-weight:900;color:#fbbf24" id="siembraAcumulado">🏆 RECOMPENSAS ACUMULADAS: 12,470 PUNTOS (creciendo)</div>
-</div>
-<div class="steps"><div class="step active" id="step1" onclick="irAPaso(1)">1 • VERIFICA</div><div class="step" id="step2" onclick="irAPaso(2)">2 • BÓVEDA</div><div class="step" id="step3" onclick="irAPaso(3)">3 • JUEGA 60s</div></div>
+<div class="founder-bar"><div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:11px;font-weight:800"><span style="color:#fbbf24">👑 MODO FUNDADORES ACTIVO</span><span id="founderCount" style="color:#fbbf24">9/1000</span></div><div class="progress-track"><div class="progress-fill" id="founderProgress" style="width:9%"></div></div><div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:10px;color:#94a3b8"><span id="founderLeft">Quedan 991 cupos a $4.99</span><span style="color:#fbbf24;font-weight:800">$4.99 BLOQUEADO</span></div><div style="margin-top:6px;display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:11px;font-weight:800"><span>🔒 VALIDACIÓN: <span id="bovedaActivaCount">0/10,000 pts</span></span><span id="bovedaStatusText" style="color:#f59e0b">ACUMULACIÓN 🌱</span></div><div class="progress-track" style="height:8px"><div class="progress-fill cyan" id="bovedaProgress" style="width:5%"></div></div></div>
+<div class="siembra-box" id="siembraBox"><div style="font-size:22px">🌱📈 <span style="font-size:10px;color:#10b981;font-family:'JetBrains Mono'"><span class="live-dot"></span> VIVA</span></div><div style="font-weight:900;font-size:14px;margin-top:6px">BÓVEDA EN FASE DE ACUMULACIÓN</div><div style="font-family:'JetBrains Mono';font-size:11px;color:#cbd5e1;margin-top:6px" id="siembraText">Transacciones válidas solo cuando LÍDER > 10,000 pts. x2 Fundador.</div><div style="margin-top:10px;background:#020617;border:1px solid #1e293b;border-radius:10px;padding:10px;text-align:left"><div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:10px"><span id="liderNombreViva">LÍDER: --</span><span id="liderPuntosViva" style="color:#06b6d4;font-weight:800">0 / 10,000</span></div><div class="progress-track" style="height:8px;margin-top:6px"><div class="progress-fill cyan" id="liderProgressViva" style="width:5%"></div></div><div style="font-family:'JetBrains Mono';font-size:9px;color:#64748b;margin-top:4px" id="faltanViva">Faltan 10,000 pts</div></div><div class="viva-grid"><div class="viva-card"><div class="viva-title">🔥 DÍGITOS CALIENTES</div><div id="vivaDigits"></div></div><div class="viva-card"><div class="viva-title">🌍 PAÍSES ACTIVOS</div><div id="vivaPaises"></div></div></div><div style="margin-top:10px;font-family:'JetBrains Mono';font-size:11px;font-weight:900;color:#fbbf24" id="siembraAcumulado">🏆 RECOMPENSAS: 0 PUNTOS</div></div>
+<div class="steps"><div class="step active" id="step1">1 • VERIFICA</div><div class="step" id="step2">2 • BÓVEDA</div><div class="step" id="step3">3 • JUEGA 60s</div></div>
+
 <div class="card" id="card-paso1">
 <div style="font-weight:800">1️⃣ Verifica tu billete $1</div>
-<div class="row2" style="margin-top:10px"><div class="input-group"><div class="input-label">LETRAS (3)</div><input id="in-letras" class="input" maxlength="3" placeholder="AVD" oninput="actualizarPreview()"></div><div class="input-group"><div class="input-label">AÑO</div><select id="in-anio" class="input"><option>2021</option><option>2024</option><option>2023</option><option>2020</option><option>2018</option></select></div></div>
-<div class="input-group"><div class="input-label">NÚMEROS (libre) - 8 a 12 dígitos</div><input id="in-numeros" class="input" maxlength="20" placeholder="ej: 12131415 o 1234567890 para EUR" oninput="actualizarPreview()"></div>
-<div class="row2"><div class="input-group"><div class="input-label">PAÍS</div><select id="in-pais" class="input">
-<option value="USD">🇺🇸 USA - USD</option>
-<option value="EUR">🇪🇺 Europa - EUR - 10 dígitos</option>
-<option value="MXN">🇲🇽 México - MXN - 11 dígitos</option>
-<option value="GBP">🇬🇧 Reino Unido - GBP</option>
-<option value="JPY">🇯🇵 Japón - JPY</option>
-<option value="ARS">🇦🇷 Argentina - ARS</option>
-<option value="COP">🇨🇴 Colombia - COP</option>
-<option value="CAD">🇨🇦 Canadá - CAD</option>
-<option value="AUD">🇦🇺 Australia - AUD</option>
-<option value="CNY">🇨🇳 China - CNY</option>
-<option value="BRL">🇧🇷 Brasil - BRL</option>
-<option value="CLP">🇨🇱 Chile - CLP</option>
-<option value="PEN">🇵🇪 Perú - PEN</option>
-<option value="INR">🇮🇳 India - INR</option>
-<option value="ZAR">🇿🇦 Sudáfrica - ZAR</option>
-<option value="RUB">🇷🇺 Rusia - RUB</option>
-<option value="KRW">🇰🇷 Corea del Sur - KRW</option>
-<option value="SGD">🇸🇬 Singapur - SGD</option>
-<option value="NZD">🇳🇿 Nueva Zelanda - NZD</option>
-<option value="NOK">🇳🇴 Noruega - NOK</option>
-<option value="SEK">🇸🇪 Suecia - SEK</option>
-<option value="DKK">🇩🇰 Dinamarca - DKK</option>
-<option value="TRY">🇹🇷 Turquía - TRY</option>
-<option value="SAR">🇸🇦 Arabia Saudita - SAR</option>
-<option value="AED">🇦🇪 Emiratos Árabes - AED</option>
-<option value="EGP">🇪🇬 Egipto - EGP</option>
-<option value="MAD">🇲🇦 Marruecos - MAD</option>
-<option value="UYU">🇺🇾 Uruguay - UYU</option>
-<option value="PYG">🇵🇾 Paraguay - PYG</option>
-<option value="BOB">🇧🇴 Bolivia - BOB</option>
-<option value="CRC">🇨🇷 Costa Rica - CRC</option>
-<option value="DOP">🇩🇴 Rep. Dominicana - DOP</option>
-<option value="GTQ">🇬🇹 Guatemala - GTQ</option>
-<option value="HNL">🇭🇳 Honduras - HNL</option>
-<option value="NIO">🇳🇮 Nicaragua - NIO</option>
-<option value="PAB">🇵🇦 Panamá - PAB</option>
-<option value="ECS">🇪🇨 Ecuador - USD</option>
-<option value="IDR">🇮🇩 Indonesia - IDR</option>
-<option value="MYR">🇲🇾 Malasia - MYR</option>
-<option value="THB">🇹🇭 Tailandia - THB</option>
-<option value="PHP">🇵🇭 Filipinas - PHP</option>
-<option value="VND">🇻🇳 Vietnam - VND</option>
-<option value="ILS">🇮🇱 Israel - ILS</option>
-<option value="JOD">🇯🇴 Jordania - JOD</option>
-<option value="QAR">🇶🇦 Qatar - QAR</option>
-<option value="ISK">🇮🇸 Islandia - ISK</option>
-</select></div><div class="input-group"><div class="input-label">TU NOMBRE</div><input id="in-nombre" class="input" placeholder="Orly1"></div></div>
+<div class="row2" style="margin-top:10px"><div class="input-group"><div class="input-label">LETRAS (3)</div><input id="in-letras" class="input" maxlength="3" placeholder="AVD"></div><div class="input-group"><div class="input-label">AÑO</div><select id="in-anio" class="input"><option>2021</option><option>2024</option><option>2023</option></select></div></div>
+<div class="input-group"><div class="input-label">NÚMEROS</div><input id="in-numeros" class="input" maxlength="20" placeholder="12131415"></div>
+<div class="row2"><div class="input-group"><div class="input-label">PAÍS</div><select id="in-pais" class="input"><option value="USD">🇺🇸 USA - USD</option><option value="EUR">🇪🇺 Europa</option><option value="MXN">🇲🇽 México</option></select></div><div class="input-group"><div class="input-label">TU NOMBRE</div><input id="in-nombre" class="input" placeholder="Orly1"></div></div>
 <div class="preview"><div id="previewSerial">VALT-___-__-__-____ | ____ [USD]</div><div id="previewBadge"></div><div id="previewValor" style="margin-top:6px;font-size:11px;color:#94a3b8">Peso inicial: --</div></div>
-<button class="btn btn-green" style="margin-top:12px" onclick="verificarBillete()">✅ VERIFICAR BILLETE</button>
-<div id="noVipBox" style="margin-top:12px;background:rgba(245,158,11,0.12);border:1px solid #f59e0b;border-radius:10px;padding:10px;font-size:11px">🔒 Para guardar en NUBE GLOBAL necesitas ser miembro. <button class="btn btn-orange" style="margin-top:8px" onclick="abrirBovedaBloqueada()">🔓 ACTIVAR MIEMBRO $4.99 USD</button></div>
-<div id="vipBox" style="display:none;margin-top:12px;background:rgba(16,185,129,0.12);border:1px solid #10b981;border-radius:10px;padding:10px;font-size:11px">✅ Miembro VIP activo - Nube lista - Intentos ilimitados</div>
+<button type="button" class="btn btn-green" id="btnVerifica" style="margin-top:12px">✅ VERIFICAR BILLETE</button>
+<div id="noVipBox" style="margin-top:12px;background:rgba(245,158,11,0.12);border:1px solid #f59e0b;border-radius:10px;padding:10px;font-size:11px">🔒 Para nube necesitas ser miembro. <button type="button" class="btn btn-orange" id="btnActivarMiembro" style="margin-top:8px">🔓 ACTIVAR MIEMBRO $4.99 USD</button></div>
+<div id="vipBox" style="display:none;margin-top:12px;background:rgba(16,185,129,0.12);border:1px solid #10b981;border-radius:10px;padding:10px;font-size:11px">✅ Miembro VIP activo</div>
 </div>
-<div class="card" id="card-paso2" style="display:none">
-<div style="font-weight:800">2️⃣ Bóveda común</div>
-<div class="leader" style="margin-top:10px"><div style="font-size:10px;color:#06b6d4">◆ LÍDER ACTUAL</div><div id="leaderSerial2" style="font-weight:800;margin-top:4px">Cargando...</div><div id="leaderOwner2" style="font-size:11px;color:#94a3b8"></div><div id="leaderPts2" style="font-size:11px;color:#6ee7b7"></div></div>
-<button class="btn btn-blue" onclick="bajarABoveda()">⬇ BAJAR MI BILLETE A LA BÓVEDA COMÚN</button>
-<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8"><span>📊 DÍGITOS 00-99</span><span id="bovedaCount2">0 billetes</span></div><div class="grid10" id="gridPaso2"></div></div>
-<div id="listaBovedaPaso2" style="margin-top:10px;display:flex;flex-direction:column;gap:6px"></div>
-<button class="btn btn-dark" style="margin-top:10px" onclick="irAPaso(3)">▶ IR A JUGAR 60s</button>
-</div>
-<div class="card" id="card-paso3" style="display:none">
-<div style="font-weight:800">⏱️ Juega 60s — Gana IMPULSO</div>
-<div class="leader" style="margin-top:10px"><div style="font-size:10px;color:#06b6d4">◆ LÍDER ACTUAL</div><div id="leaderSerialJuego" style="font-weight:800">Cargando...</div><div id="leaderOwnerJuego" style="font-size:11px;color:#94a3b8"></div><div id="leaderPtsJuego" style="font-size:11px;color:#6ee7b7"></div></div>
-<div id="setupJuego" style="margin-top:10px"><button class="btn btn-orange" onclick="iniciarJuego()">▶ JUGAR 60 SEGUNDOS</button><div style="text-align:center;margin-top:8px;font-size:11px;color:#94a3b8">Bóveda: <span id="totalBovedaJuego">0</span> • Clicks: <span id="clicksTotales">0</span></div></div>
-<div id="juegoActivo" style="display:none;margin-top:10px">
-<div style="display:flex;justify-content:space-between;background:#020617;border:1px solid #1e293b;border-radius:12px;padding:10px;margin-bottom:10px"><div><div style="font-size:10px;color:#64748b">TIEMPO</div><div class="timer" id="timerJuego">60.0</div></div><div><div style="font-size:10px;color:#64748b">IMPULSO</div><div style="font-size:20px;font-weight:800;color:#10b981" id="puntosJuego">0</div></div><div><div style="font-size:10px;color:#64748b">CLICKS</div><div id="clicksJuego">0</div></div></div>
-<div class="lot-grid" id="lotGrid"></div>
-<button class="btn btn-dark" style="margin-top:10px" onclick="detenerJuego()">■ Parar</button>
-</div>
-<div style="margin-top:10px"><div style="font-size:10px;color:#94a3b8">📊 DÍGITOS 00-99 • <span id="clicksInfo">0 clicks</span></div><div class="grid10" id="gridJuego"></div></div>
-</div>
-<footer style="width:100%;margin-top:30px;background:linear-gradient(180deg, rgba(15,23,42,0.98), rgba(3,7,18,1));border:1px solid rgba(6,182,212,0.2);border-radius:20px;padding:24px 18px;text-align:center;box-sizing:border-box">
-  <div style="font-family:'JetBrains Mono';font-size:12px;font-weight:800;color:#06b6d4;letter-spacing:1px;margin-bottom:8px">© 2026 DollarDgt.com • VALT REAL 360</div>
-  <div style="font-size:11px;color:#94a3b8;line-height:1.6;max-width:600px;margin:0 auto 16px auto">Plataforma global de bóveda común • 360 ganadores al año • Ranking diario • Sin apuestas • Nube Supabase</div>
-  <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px">
-    <span style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#7dd3fc;font-family:'JetBrains Mono'" onclick="abrirModal('terms')">TÉRMINOS</span>
-    <span style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#6ee7b7;font-family:'JetBrains Mono'" onclick="abrirModal('privacy')">PRIVACIDAD</span>
-    <span style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#fbbf24;font-family:'JetBrains Mono'" onclick="abrirModal('refunds')">REEMBOLSOS</span>
-    <span style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#c4b5fd;font-family:'JetBrains Mono'" onclick="abrirModal('descargo')">DESCARGO</span>
-  </div>
-  <div style="margin-top:12px;padding:12px;background:rgba(2,6,23,0.6);border-radius:12px;border:1px solid #1e293b"><div style="font-size:9px;color:#475569;font-family:'JetBrains Mono';line-height:1.4">⚖️ DOLLARDGT.COM no es tasación oficial. Todo simulado. No decisiones financieras. Pagos por Stripe. Contacto: dolladmach@gmail.com • 2026 DollarDgt.com</div></div>
-</footer>
+
+<div class="card" id="card-paso2" style="display:none"><div style="font-weight:800">2️⃣ Bóveda común</div><div class="leader"><div style="font-size:10px;color:#06b6d4">◆ LÍDER ACTUAL</div><div id="leaderSerial2" style="font-weight:800;margin-top:4px">Cargando...</div><div id="leaderOwner2" style="font-size:11px;color:#94a3b8"></div><div id="leaderPts2" style="font-size:11px;color:#6ee7b7"></div></div><button type="button" class="btn btn-blue" id="btnBajar">⬇ BAJAR MI BILLETE A LA BÓVEDA COMÚN</button><div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8"><span>📊 DÍGITOS 00-99</span><span id="bovedaCount2">0 billetes</span></div><div class="grid10" id="gridPaso2"></div></div><div id="listaBovedaPaso2" style="margin-top:10px;display:flex;flex-direction:column;gap:6px"></div><button type="button" class="btn btn-dark" id="btnIrJugar" style="margin-top:10px">▶ IR A JUGAR 60s</button></div>
+
+<div class="card" id="card-paso3" style="display:none"><div style="font-weight:800">⏱️ Juega 60s — x2 Fundador</div><div class="leader"><div style="font-size:10px;color:#06b6d4">◆ LÍDER ACTUAL</div><div id="leaderSerialJuego" style="font-weight:800">Cargando...</div><div id="leaderOwnerJuego" style="font-size:11px;color:#94a3b8"></div><div id="leaderPtsJuego" style="font-size:11px;color:#6ee7b7"></div></div><div id="setupJuego" style="margin-top:10px"><button type="button" class="btn btn-orange" id="btnJugar">▶ JUGAR 60 SEGUNDOS</button><div style="text-align:center;margin-top:8px;font-size:11px;color:#94a3b8">Bóveda: <span id="totalBovedaJuego">0</span> • Clicks: <span id="clicksTotales">0</span></div></div><div id="juegoActivo" style="display:none;margin-top:10px"><div style="display:flex;justify-content:space-between;background:#020617;border:1px solid #1e293b;border-radius:12px;padding:10px;margin-bottom:10px"><div><div style="font-size:10px;color:#64748b">TIEMPO</div><div class="timer" id="timerJuego">60.0</div></div><div><div style="font-size:10px;color:#64748b">IMPULSO</div><div style="font-size:20px;font-weight:800;color:#10b981" id="puntosJuego">0</div></div><div><div style="font-size:10px;color:#64748b">CLICKS</div><div id="clicksJuego">0</div></div></div><div class="lot-grid" id="lotGrid"></div><button type="button" class="btn btn-dark" id="btnParar" style="margin-top:10px">■ Parar</button></div><div style="margin-top:10px"><div style="font-size:10px;color:#94a3b8">📊 DÍGITOS 00-99 • <span id="clicksInfo">0 clicks</span></div><div class="grid10" id="gridJuego"></div></div></div>
+
+<footer style="width:100%;margin-top:30px;background:linear-gradient(180deg, rgba(15,23,42,0.98), rgba(3,7,18,1));border:1px solid rgba(6,182,212,0.2);border-radius:20px;padding:24px 18px;text-align:center"><div style="font-family:'JetBrains Mono';font-size:12px;font-weight:800;color:#06b6d4;margin-bottom:8px">© 2026 DollarDgt.com • VALT REAL 360</div><div style="font-size:11px;color:#94a3b8;margin-bottom:16px">Plataforma global • 360 ganadores • Sin apuestas • Nube Supabase</div><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px"><span style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#7dd3fc;font-family:'JetBrains Mono';cursor:pointer" onclick="abrirModal('terms')">TÉRMINOS</span><span style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#6ee7b7;font-family:'JetBrains Mono';cursor:pointer" onclick="abrirModal('privacy')">PRIVACIDAD</span><span style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#fbbf24;font-family:'JetBrains Mono';cursor:pointer" onclick="abrirModal('refunds')">REEMBOLSOS</span><span style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);border-radius:20px;padding:6px 12px;font-size:10px;color:#c4b5fd;font-family:'JetBrains Mono';cursor:pointer" onclick="abrirModal('descargo')">DESCARGO</span></div><div style="padding:12px;background:rgba(2,6,23,0.6);border-radius:12px;border:1px solid #1e293b"><div style="font-size:9px;color:#475569;font-family:'JetBrains Mono'">⚖️ DOLLARDGT.COM no es tasación oficial. Todo simulado. dolladmach@gmail.com</div></div></footer>
 <div style="height:80px"></div>
 </div>
-<div class="modal" id="modal-terms"><div class="modal-box policy"><div style="display:flex;justify-content:space-between"><div class="policy-title">TERMS</div><div onclick="cerrarModal('terms')" style="cursor:pointer">✕</div></div><div class="policy-text">1. DOLLARDGT.COM es una herramienta de simulación digital para entretenimiento y educación sobre numeración de billetes.<br><br>2. No es un casino, lotería, casa de apuestas ni servicio financiero.<br><br>3. Los valores asignados son estimaciones algorítmicas con fines lúdicos sin valor comercial oficial.<br><br>4. Membresía $4.99 USD desbloquea intentos ilimitados y guardado en nube global.</div><button class="btn btn-dark" style="margin-top:16px" onclick="cerrarModal('terms')">Cerrar</button></div></div>
-<div class="modal" id="modal-privacy"><div class="modal-box policy"><div style="display:flex;justify-content:space-between"><div class="policy-title">PRIVACY</div><div onclick="cerrarModal('privacy')" style="cursor:pointer">✕</div></div><div class="policy-text">Recopilamos solo ID anónimo local y conteo de usos para funcionamiento. No vendemos datos. Pagos procesados por Stripe. Los billetes se guardan en Supabase con nombre anónimo opcional. No recopilamos datos bancarios, todo pago pasa por Stripe.<br><br>Contacto: dolladmach@gmail.com</div><button class="btn btn-dark" style="margin-top:16px" onclick="cerrarModal('privacy')">Cerrar</button></div></div>
-<div class="modal" id="modal-descargo"><div class="modal-box policy"><div style="display:flex;justify-content:space-between"><div class="policy-title">DESCARGO</div><div onclick="cerrarModal('descargo')" style="cursor:pointer">✕</div></div><div class="policy-text">DOLLARDGT.COM no es un servicio de tasación oficial. Todo contenido es simulado. No debe usarse para decisiones financieras. Plataforma de simulación interactiva con fines educativos y de entretenimiento. Los valores asignados son estimaciones algorítmicas simuladas sin valor comercial oficial.</div><button class="btn btn-dark" style="margin-top:16px" onclick="cerrarModal('descargo')">Cerrar</button></div></div>
-<div class="modal" id="modal-refunds"><div class="modal-box policy"><div style="display:flex;justify-content:space-between"><div class="policy-title">REFUNDS</div><div onclick="cerrarModal('refunds')" style="cursor:pointer">✕</div></div><div class="policy-text">Suscripciones digitales: cancela en cualquier momento desde tu portal de Stripe. Reembolsos dentro de 7 días escribiendo a dolladmach@gmail.com.<br><br>No reembolso después de 7 días si ya usaste la bóveda ilimitada. Cancela antes del próximo cobro para evitar cargos.<br><br>Email: dolladmach@gmail.com</div><button class="btn btn-dark" style="margin-top:16px" onclick="cerrarModal('refunds')">Cerrar</button></div></div>
-<div class="modal" id="modal-boveda-bloqueada"><div class="modal-box" style="max-width:420px;background:#1a1a27;border:1px solid rgba(255,255,255,0.08)">
-<div class="boveda-locked">
-<div class="lock-icon">🔒</div>
-<div style="font-size:18px;font-weight:800">BÓVEDA BLOQUEADA</div>
-<div style="font-size:13px;color:#9ca3af;margin-top:8px">Has alcanzado el límite de <b style="color:#fff">40 intentos</b>. Desbloquea acceso ilimitado.</div>
-<div style="width:100%;background:#232330;border-radius:12px;padding:14px;margin-top:16px;text-align:left">
-<div style="color:#fbbf24;font-weight:700;font-size:12px;margin-bottom:8px">Descargo y Términos</div>
-<div style="font-size:11px;color:#9ca3af;line-height:1.5">Plataforma de simulación interactiva con fines educativos y de entretenimiento. Los valores asignados son estimaciones algorítmicas simuladas sin valor comercial oficial.</div>
-<div style="height:1px;background:rgba(255,255,255,0.08);margin:12px 0"></div>
-<label class="check-row"><input type="checkbox" id="check1" onchange="validarChecks()"><span>Acepto <span class="link-gold" onclick="abrirModal('terms')">Términos</span>, <span class="link-gold" onclick="abrirModal('privacy')">Privacidad</span> y <span class="link-gold" onclick="abrirModal('descargo')">Descargo</span></span></label>
-<label class="check-row"><input type="checkbox" id="check2" onchange="validarChecks()"><span>Acepto <span class="link-gold" onclick="abrirModal('refunds')">Reembolsos</span> y ser mayor de 18 años</span></label>
-</div>
-<button class="btn btn-orange" id="btnDesbloquear" disabled style="margin-top:16px;background:#4a3f1f;color:#6b5d2e" onclick="pagarStripe()">DESBLOQUEAR BÓVEDA — $4.99 USD</button>
-<button class="btn btn-dark" style="margin-top:8px" onclick="cerrarBovedaBloqueada()">Cerrar</button>
-<div style="font-size:10px;color:#6b7280;margin-top:10px">Pagos procesados por Stripe • Seguro • Cancela cuando quieras</div>
-</div>
-</div></div>
-<div class="modal" id="modalFin"><div class="modal-box"><div style="font-weight:800">¡Bien jugado!</div><div style="margin-top:10px">Impulso: <span id="finPuntos">0</span> • Clicks: <span id="finClicks">0</span></div><div id="finLider" style="margin-top:10px;font-size:11px"></div><div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-green" onclick="guardarSesion()">💾 Guardar 24H</button><button class="btn btn-dark" onclick="cerrarFin()">Cerrar</button></div></div></div>
+
+<div class="modal" id="modal-terms"><div class="modal-box policy"><div style="display:flex;justify-content:space-between"><div class="policy-title">TÉRMINOS</div><div onclick="cerrarModal('terms')" style="cursor:pointer">✕</div></div><div class="policy-text">Simulación. Transacciones válidas solo si líder >10,000 pts.</div><button type="button" class="btn btn-dark" onclick="cerrarModal('terms')">Cerrar</button></div></div>
+<div class="modal" id="modal-privacy"><div class="modal-box policy"><div style="display:flex;justify-content:space-between"><div class="policy-title">PRIVACIDAD</div><div onclick="cerrarModal('privacy')" style="cursor:pointer">✕</div></div><div class="policy-text">No vendemos datos. Stripe.</div><button type="button" class="btn btn-dark" onclick="cerrarModal('privacy')">Cerrar</button></div></div>
+<div class="modal" id="modal-descargo"><div class="modal-box policy"><div style="display:flex;justify-content:space-between"><div class="policy-title">DESCARGO</div><div onclick="cerrarModal('descargo')" style="cursor:pointer">✕</div></div><div class="policy-text">Solo entretenimiento.</div><button type="button" class="btn btn-dark" onclick="cerrarModal('descargo')">Cerrar</button></div></div>
+<div class="modal" id="modal-refunds"><div class="modal-box policy"><div style="display:flex;justify-content:space-between"><div class="policy-title">REEMBOLSOS</div><div onclick="cerrarModal('refunds')" style="cursor:pointer">✕</div></div><div class="policy-text">Reembolsos 7 días.</div><button type="button" class="btn btn-dark" onclick="cerrarModal('refunds')">Cerrar</button></div></div>
+<div class="modal" id="modal-boveda-bloqueada"><div class="modal-box"><div class="boveda-locked"><div class="lock-icon">🔒</div><div style="font-size:18px;font-weight:800">BÓVEDA BLOQUEADA</div><div style="width:100%;background:#232330;border-radius:12px;padding:14px;margin-top:16px;text-align:left"><label class="check-row"><input type="checkbox" id="check1"><span>Acepto Términos</span></label><label class="check-row"><input type="checkbox" id="check2"><span>Acepto Reembolsos y 18+</span></label></div><button type="button" class="btn btn-orange" id="btnDesbloquear" disabled style="margin-top:16px;background:#4a3f1f;color:#6b5d2e">DESBLOQUEAR $4.99</button><button type="button" class="btn btn-dark" style="margin-top:8px" id="btnCerrarBloqueo">Cerrar</button></div></div></div>
+<div class="modal" id="modalFin"><div class="modal-box"><div style="font-weight:800">¡Bien jugado!</div><div style="margin-top:10px">Impulso: <span id="finPuntos">0</span> • Clicks: <span id="finClicks">0</span></div><div id="finLider" style="margin-top:10px;font-size:11px"></div><div style="display:flex;gap:8px;margin-top:12px"><button type="button" class="btn btn-green" id="btnGuardar">💾 Guardar</button><button type="button" class="btn btn-dark" id="btnCerrarFin">Cerrar</button></div></div></div>
 <div id="toast" class="toast"></div>
+
 <script>
 const SUPABASE_URL = "https://hvdaitsnvwigqbizirbi.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Lf1Bd6_mvlAlZCdcYBBR5A_fTjpEiyv";
 const STRIPE_LINK = "https://buy.stripe.com/7sY9AU9Q1gSeaUi9vo7Vm0j";
+const UMBRAL_VALIDACION = 10000;
 let supabaseClient = null;
 try{ supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }catch(e){}
-let isVip = localStorage.getItem('valt_vip')==='true';
-let intentos = parseInt(localStorage.getItem('valt_intentos')||'0');
-let billeteActual = null;
-let boveda = [];
-try{ boveda = JSON.parse(localStorage.getItem('valt_boveda_real')||'[]'); }catch(e){ boveda=[]; }
-if(boveda.length===0){ boveda = [{id:'seed-1', letras:'KQX', numeros:'88421793', anio:'2021', pais:'USD', flag:'🇺🇸', nombre:'Juan', clicks:42, peso:180, valor:180, rareza:'COMÚN', serial:'VALT-KQX-88-42-1793 | 2021 [USD]', timestamp:Date.now()}]; }
+let boveda = []; try{ boveda = JSON.parse(localStorage.getItem('valt_boveda_real')||'[]'); }catch(e){ boveda=[]; }
+if(boveda.length===0){ boveda=[{id:'seed-1',letras:'KQX',numeros:'88421793',anio:'2021',pais:'USD',flag:'🇺🇸',nombre:'Juan',clicks:42,peso:180,valor:180,rareza:'COMÚN',serial:'VALT-KQX-88-42-1793 | 2021 [USD]',timestamp:Date.now()}]; }
 let digitFreq={}; for(let i=0;i<100;i++) digitFreq[String(i).padStart(2,'0')]=0;
-function recalcularFreq(){ for(let k in digitFreq) digitFreq[k]=0; boveda.forEach(b=>{ (b.numeros.match(/.{2}/g)||[]).forEach(p=>{ if(digitFreq[p]!==undefined) digitFreq[p]+=Math.floor((b.clicks||1)/2); }); }); }
+function recalcularFreq(){ for(let k in digitFreq) digitFreq[k]=0; boveda.forEach(b=>{ try{ (b.numeros.match(/.{2}/g)||[]).forEach(p=>{ if(digitFreq[p]!==undefined) digitFreq[p]+=Math.floor((b.clicks||1)/2); }); }catch(e){} }); }
 recalcularFreq();
-let totalClicks = boveda.reduce((a,b)=>a+b.clicks,0);
-let juegoTimer=null, juegoLot=null, tiempo=60, puntos=0, clicksSesion=0, juegoActivo=false; let loteActual=[];
-function calcularRareza(s){ if(/^(.)\1+$/.test(s)) return {t:'SUPER RADAR', m:3.5}; if(/(.)\1{2,}/.test(s)) return {t:'POKER', m:3.0}; if(s===s.split('').reverse().join('')) return {t:'RADAR', m:2.0}; if(/(.)\1/.test(s)) return {t:'REPETICIÓN', m:1.5}; return {t:'COMÚN', m:1.0}; }
-function calcularValor(s){ const r=calcularRareza(s); return Math.floor(150*r.m + (parseInt(s.slice(-2))%50)); }
-function toast(msg){ const el=document.getElementById('toast'); el.innerText=msg; el.className='toast show'; setTimeout(()=>el.classList.remove('show'),3000); }
-function actualizarPreview(){
-  const letras=document.getElementById('in-letras').value||'___';
-  const numeros=document.getElementById('in-numeros').value||'________';
-  const anio=document.getElementById('in-anio').value||'____';
-  const pais=document.getElementById('in-pais').value;
-  document.getElementById('previewSerial').innerText=`VALT-${letras}-${numeros.substring(0,2)}-${numeros.substring(2,4)}-${numeros.substring(4)} | ${anio} [${pais}]`;
-  if(numeros.length>=4){ const r=calcularRareza(numeros); const v=calcularValor(numeros); document.getElementById('previewBadge').innerHTML=`<span class="badge" style="background:rgba(16,185,129,0.15);border-color:#10b981;color:#6ee7b7">${r.t} x${r.m}</span>`; document.getElementById('previewValor').innerText=`Peso inicial: ${v} pts • ${r.t}`; }
-}
-function checkLimite(){ if(!isVip && intentos>=40){ abrirBovedaBloqueada(); return true; } return false; }
-function verificarBillete(){
-  if(checkLimite()) return;
-  const letras=document.getElementById('in-letras').value.trim().toUpperCase();
-  const numeros=document.getElementById('in-numeros').value.trim();
-  const anio=document.getElementById('in-anio').value;
-  const paisSel=document.getElementById('in-pais'); const pais=paisSel.value; const flag=paisSel.options[paisSel.selectedIndex].textContent.split(' ')[0];
-  const nombre=document.getElementById('in-nombre').value.trim()||'Anónimo';
-  if(letras.length<2 || numeros.length<6){ toast('⚠️ Escribe letras y números'); return; }
-  const r=calcularRareza(numeros); const v=calcularValor(numeros);
-  billeteActual={id:'bill-'+Date.now(), letras, numeros, anio, pais, flag, nombre, clicks:0, peso:v, valor:v, rareza:r.t, serial:`VALT-${letras}-${numeros.substring(0,2)}-${numeros.substring(2,4)}-${numeros.substring(4)} | ${anio} [${pais}]`, timestamp:Date.now()};
-  intentos++; localStorage.setItem('valt_intentos', intentos);
-  toast(`✅ ${r.t} ${v} pts • Intento ${intentos}/40`); irAPaso(2); actualizarBovedaUI();
-}
-function hacerMiembro(){ abrirBovedaBloqueada(); }
-function abrirBovedaBloqueada(){ document.getElementById('modal-boveda-bloqueada').style.display='flex'; validarChecks(); }
-function cerrarBovedaBloqueada(){ document.getElementById('modal-boveda-bloqueada').style.display='none'; }
-function validarChecks(){
-  const c1=document.getElementById('check1').checked; const c2=document.getElementById('check2').checked; const btn=document.getElementById('btnDesbloquear');
-  if(c1&&c2){ btn.disabled=false; btn.style.background='linear-gradient(135deg,#f59e0b,#d97706)'; btn.style.color='#000'; }
-  else{ btn.disabled=true; btn.style.background='#4a3f1f'; btn.style.color='#6b5d2e'; }
-}
-function pagarStripe(){
-  if(!document.getElementById('check1').checked ||!document.getElementById('check2').checked){ toast('Acepta términos'); return; }
-  toast('Redirigiendo a Stripe $4.99...'); window.open(STRIPE_LINK, '_blank');
-  setTimeout(()=>{ isVip=true; localStorage.setItem('valt_vip','true'); localStorage.setItem('valt_intentos','0'); document.getElementById('noVipBox').style.display='none'; document.getElementById('vipBox').style.display='block'; cerrarBovedaBloqueada(); }, 1500);
-}
-function abrirModal(t){ document.getElementById('modal-'+t).style.display='flex'; }
-function cerrarModal(t){ document.getElementById('modal-'+t).style.display='none'; }
-async function bajarABoveda(){
-  if(!billeteActual){ toast('Primero verifica'); return; }
-  if(boveda.some(b=>b.numeros===billeteActual.numeros && b.letras===billeteActual.letras)){ toast('⚠️ Ya está en bóveda'); return; }
-  boveda.unshift(billeteActual); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); recalcularFreq(); actualizarBovedaUI();
-  toast(`⬇ Bajando ${billeteActual.letras} a nube...`);
-  if(supabaseClient){
-    try{
-      const payload = { id: billeteActual.id, letras: billeteActual.letras, numeros: billeteActual.numeros, anio: billeteActual.anio, pais: billeteActual.pais, flag: billeteActual.flag, nombre: billeteActual.nombre, clicks: billeteActual.clicks||0, peso: billeteActual.peso||150, valor: billeteActual.valor||150, serial: billeteActual.serial, rareza: billeteActual.rareza, timestamp: billeteActual.timestamp, impulso_expira: null };
-      const {data, error} = await supabaseClient.from('bills').insert([payload]).select();
-      if(error){ toast('❌ Error nube: '+error.message); } else { toast(`✅ ¡En NUBE GLOBAL! ${billeteActual.letras}`); document.getElementById('nubeStatus').innerText = `● NUBE GLOBAL (${boveda.length} billetes) ✅`; }
-    }catch(e){ toast('❌ Falló: '+e.message); }
-  }
-}
-function calcularLiderReal(){ const top = Object.entries(digitFreq).sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]); let mejor=null, max=-1; boveda.forEach(b=>{ const p=b.peso||b.valor||150; if(p>max){ max=p; mejor=b; } }); return {top, mejor}; }
-function actualizarVaultHeader(){ document.getElementById('vaultMembers').innerText=boveda.length+' billetes'; }
-function actualizarBovedaUI(){
-  recalcularFreq(); const {top, mejor} = calcularLiderReal();
-  document.getElementById('leaderSerial2').innerText= mejor? mejor.serial : 'Sin líder aún';
-  document.getElementById('leaderOwner2').innerText= mejor? `Líder: ${mejor.nombre} ${mejor.flag}` : `${boveda.length} billetes`;
-  document.getElementById('leaderPts2').innerText= mejor? `VALOR: ${(mejor.peso||150).toFixed(0)} pts` : '';
-  document.getElementById('bovedaCount2').innerText=boveda.length+' billetes'; document.getElementById('totalBovedaJuego').innerText=boveda.length; document.getElementById('clicksTotales').innerText=totalClicks;
-  const grid=document.getElementById('gridPaso2'); if(grid.children.length===0){ for(let i=0;i<100;i++){ const d=document.createElement('div'); d.className='cell cold'; d.id='g2-'+i; d.innerText=String(i).padStart(2,'0'); grid.appendChild(d); } }
-  for(let i=0;i<100;i++){ const k=String(i).padStart(2,'0'); const el=document.getElementById('g2-'+i); if(!el) continue; el.className='cell '+(top.includes(k)?'leader': (digitFreq[k]>0?'hot':'cold')); }
-  const lista=document.getElementById('listaBovedaPaso2'); lista.innerHTML=''; boveda.slice(0,10).forEach(b=>{ const d=document.createElement('div'); d.style.cssText='background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:8px;display:flex;justify-content:space-between;font-size:11px'; d.innerHTML=`<span>${b.flag} ${b.letras}-${b.numeros.slice(0,4)} • ${b.nombre}</span><span style="color:#10b981;font-weight:800">${(b.peso||150).toFixed(0)} pts</span>`; lista.appendChild(d); });
-  actualizarVaultHeader(); actualizarJuegoUI();
-}
-function actualizarJuegoUI(){
-  const {top, mejor} = calcularLiderReal();
-  document.getElementById('leaderSerialJuego').innerText= mejor? mejor.serial : 'Cargando... líder es el de mayor peso';
-  document.getElementById('leaderOwnerJuego').innerText= mejor? `${mejor.nombre} ${mejor.flag} • ${mejor.peso} pts` : 'Juega para ser líder';
-  document.getElementById('leaderPtsJuego').innerText= mejor? `Líder: ${mejor.letras} - ${mejor.peso} pts` : '';
-  document.getElementById('totalBovedaJuego').innerText=boveda.length;
-  const grid=document.getElementById('gridJuego'); if(grid.children.length===0){ for(let i=0;i<100;i++){ const d=document.createElement('div'); d.className='cell cold'; d.id='gj-'+i; d.innerText=String(i).padStart(2,'0'); grid.appendChild(d); } }
-  for(let i=0;i<100;i++){ const k=String(i).padStart(2,'0'); const el=document.getElementById('gj-'+i); if(!el) continue; el.className='cell '+(top.includes(k)?'leader': (digitFreq[k]>0?'hot':'cold')); }
-  document.getElementById('clicksInfo').innerText=totalClicks+' clicks';
-}
-function generarLote(){ if(boveda.length===0) return []; return [...boveda].sort(()=>0.5-Math.random()).slice(0,6).map(b=>({...b})); }
-function renderLote(lote){ const grid=document.getElementById('lotGrid'); grid.innerHTML=''; lote.forEach(b=>{ const peso = b.peso||150; const valorClick = Math.floor(peso/10)+5; const card=document.createElement('div'); card.className='bill'; card.innerHTML=`<div style="font-weight:800;font-size:13px">${b.flag} ${b.letras}</div><div style="font-size:10px;color:#94a3b8">${b.nombre} • ${peso} pts</div><div style="color:#10b981;font-weight:800">+${valorClick} impulso</div>`; card.onclick=()=> clickBillete(b); grid.appendChild(card); }); }
-function clickBillete(b){ if(!juegoActivo) return; const peso = b.peso||150; const valorClick = Math.floor(peso/10)+5; puntos+=valorClick; clicksSesion++; totalClicks++; const idx=boveda.findIndex(x=>x.id===b.id); if(idx>=0){ boveda[idx].clicks++; } (b.numeros.match(/.{2}/g)||[]).forEach(p=>{ if(digitFreq[p]!==undefined) digitFreq[p]+=1; }); document.getElementById('puntosJuego').innerText=puntos; document.getElementById('clicksJuego').innerText=clicksSesion; toast(`+${valorClick} IMPULSO`); loteActual=loteActual.filter(x=>x.id!==b.id); renderLote(loteActual); actualizarJuegoUI(); }
-function iniciarJuego(){ if(boveda.length<2){ toast('Necesitas al menos 2 billetes'); return; } juegoActivo=true; puntos=0; clicksSesion=0; tiempo=60; document.getElementById('setupJuego').style.display='none'; document.getElementById('juegoActivo').style.display='block'; const gen=()=>{ if(!juegoActivo) return; loteActual=generarLote(); renderLote(loteActual); }; gen(); juegoLot=setInterval(gen,4000); juegoTimer=setInterval(()=>{ tiempo-=0.1; if(tiempo<=0){ detenerJuego(true); return; } document.getElementById('timerJuego').innerText=tiempo.toFixed(1); },100); }
-const originalIniciarJuego = iniciarJuego;
-iniciarJuego = function(){ const total = getTotalMiembros(); if(total < 100){ toast('🌱 BÓVEDA EN ACUMULACIÓN - Faltan ' + (100-total) + ' miembros para activar juego real. Sigue acumulando x2 como FUNDADOR!'); } originalIniciarJuego(); }
-function irAPaso(n){ if(juegoActivo && n!==3){ toast('Para el juego primero'); return; } document.getElementById('card-paso1').style.display = n===1? 'block' : 'none'; document.getElementById('card-paso2').style.display = n===2? 'block' : 'none'; document.getElementById('card-paso3').style.display = n===3? 'block' : 'none'; document.querySelectorAll('.step').forEach((el,i)=>{ el.classList.remove('active'); if(i+1===n) el.classList.add('active'); }); if(n===2) actualizarBovedaUI(); if(n===3) actualizarJuegoUI(); }
-function detenerJuego(fin=false){ juegoActivo=false; clearInterval(juegoTimer); clearInterval(juegoLot); if(fin){ document.getElementById('finPuntos').innerText=puntos+' pts'; document.getElementById('finClicks').innerText=clicksSesion+' clicks'; const {mejor} = calcularLiderReal(); document.getElementById('finLider').innerText= mejor? `Líder: ${mejor.serial}` : 'Sigue jugando'; document.getElementById('modalFin').style.display='flex'; } else { document.getElementById('setupJuego').style.display='block'; document.getElementById('juegoActivo').style.display='none'; } }
-async function guardarSesion(){ const nombreActual = (document.getElementById('in-nombre').value.trim()||'Anónimo'); boveda.forEach((b,i)=>{ if(b.nombre===nombreActual){ boveda[i].peso = (b.peso||150) + puntos; boveda[i].clicks += Math.floor(puntos/10); } }); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); if(supabaseClient){ try{ for(let b of boveda.filter(x=>x.nombre===nombreActual)){ await supabaseClient.from('bills').update({peso:b.peso, clicks:b.clicks}).eq('id', b.id); } }catch(e){} } toast(`💾 +${puntos} pts guardado`); cerrarFin(); document.getElementById('setupJuego').style.display='block'; document.getElementById('juegoActivo').style.display='none'; actualizarBovedaUI(); }
-function cerrarFin(){ document.getElementById('modalFin').style.display='none'; }
-const ACTIVACION_BOVEDA = 100;
-const LIMITE_FUNDADORES = 1000;
-const PRECIO_FUNDADOR = 4.99;
-const PRECIO_FUTURO = 9.99;
-function getTotalMiembros(){ const nombres = new Set(boveda.map(b=>b.nombre)); const baseDemo = boveda.length===0? 23 : 0; return nombres.size + baseDemo; }
-function getTotalFundadores(){ return Math.min(getTotalMiembros(), LIMITE_FUNDADORES); }
-function esFundador(nombre){ return getTotalMiembros() <= LIMITE_FUNDADORES; }
-function actualizarFounderBar(){
-  const total = getTotalMiembros(); const fundadores = getTotalFundadores(); const faltanBoveda = Math.max(0, ACTIVACION_BOVEDA - total);
-  const pctFounder = Math.min(100, (fundadores / LIMITE_FUNDADORES)*100); const pctBoveda = Math.min(100, (total / ACTIVACION_BOVEDA)*100);
-  const fc = document.getElementById('founderCount'); const fp = document.getElementById('founderProgress'); const fl = document.getElementById('founderLeft');
-  const bac = document.getElementById('bovedaActivaCount'); const bp = document.getElementById('bovedaProgress'); const bst = document.getElementById('bovedaStatusText');
-  const siembraBox = document.getElementById('siembraBox'); const siembraText = document.getElementById('siembraText'); const siembraAcum = document.getElementById('siembraAcumulado');
-  if(fc) fc.innerText = fundadores + '/' + LIMITE_FUNDADORES + ' FUNDADORES'; if(fp) fp.style.width = pctFounder + '%';
-  if(fl) fl.innerText = 'Quedan ' + (LIMITE_FUNDADORES - fundadores) + ' cupos a $' + PRECIO_FUNDADOR + ' • Luego $' + PRECIO_FUTURO;
-  if(bac) bac.innerText = total + '/' + ACTIVACION_BOVEDA; if(bp) bp.style.width = pctBoveda + '%';
-  const premioAcumulado = (total * 3.5 + 247).toFixed(0);
-  if(total < ACTIVACION_BOVEDA){ if(bst){ bst.innerText = 'EN ACUMULACIÓN 🌱 (' + faltanBoveda + ' faltan)'; bst.style.color='#f59e0b'; } if(siembraBox) siembraBox.style.display='block'; if(siembraText) siembraText.innerText = 'Acumulando puntos... No hay líder con recompensa aún. Faltan ' + faltanBoveda + ' miembros para activar la fase de canje. Entraste como FUNDADOR con x2 puntos de por vida. Cuando lleguemos a 100, se activa el canje de recompensas acumuladas.'; if(siembraAcum) siembraAcum.innerText = '💰 RECOMPENSAS ACUMULADAS: $' + premioAcumulado + ' (creciendo cada miembro)'; } else { if(bst){ bst.innerText = '¡BÓVEDA ACTIVA! 🔥'; bst.style.color='#10b981'; } if(siembraBox) siembraBox.style.display='none'; }
-}
-function actualizarVaultHeader(){ const total = getTotalMiembros(); const el = document.getElementById('vaultMembers'); if(el){ if(total < ACTIVACION_BOVEDA){ el.innerText = total + '/100 miembros • ' + boveda.length + ' billetes • SIEMBRA'; } else { el.innerText = total + ' miembros • ' + boveda.length + ' billetes • ACTIVA 🔥'; } } actualizarFounderBar(); }
-window.addEventListener('DOMContentLoaded',async ()=>{
-  actualizarPreview(); if(isVip){ document.getElementById('noVipBox').style.display='none'; document.getElementById('vipBox').style.display='block'; }
-  document.getElementById('vaultMembers').innerText = intentos + '/40 intentos • ' + boveda.length + ' billetes';
-  if(supabaseClient){
-    try{
-      const {data} = await supabaseClient.from('bills').select('*').order('timestamp',{ascending:false}).limit(200);
-      const el = document.getElementById('nubeStatus'); if(el) el.innerText = data? `● NUBE GLOBAL (${data.length} billetes) ✅` : '● NUBE GLOBAL (0)';
-      if(data && data.length>0){ const ids = new Set(boveda.map(b=>b.id)); data.forEach(d=>{ if(!ids.has(d.id)){ boveda.push({id:d.id, letras:d.letras, numeros:d.numeros, anio:d.anio, pais:d.pais, flag:d.flag, nombre:d.nombre, clicks:d.clicks||0, peso:d.peso||150, valor:d.valor||150, rareza:d.rareza, serial:d.serial, timestamp:d.timestamp}); } }); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); recalcularFreq(); }
-    }catch(e){ document.getElementById('nubeStatus').innerText='● ERROR NUBE'; }
-  }
+let totalClicks = boveda.reduce((a,b)=>a+(b.clicks||0),0);
+let juegoTimer=null,juegoLot=null,tiempo=60,puntos=0,clicksSesion=0,juegoActivo=false,loteActual=[],billeteActual=null;
+function calcularRareza(s){ if(/^(.)\1+$/.test(s)) return {t:'SUPER RADAR',m:3.5}; if(/(.)\1{2,}/.test(s)) return {t:'POKER',m:3.0}; if(s===s.split('').reverse().join('')) return {t:'RADAR',m:2.0}; if(/(.)\1/.test(s)) return {t:'REPETICIÓN',m:1.5}; return {t:'COMÚN',m:1.0}; }
+function calcularValor(s){ const r=calcularRareza(s); return Math.floor(150*r.m + (parseInt(s.slice(-2)||'0')%50)); }
+function toast(msg){ const el=document.getElementById('toast'); if(!el) return; el.innerText=msg; el.className='toast show'; setTimeout(()=>el.classList.remove('show'),3000); }
+window.onerror = function(m,u,l){ toast('ERROR: '+m+' L'+l); };
+function actualizarPreview(){ try{ const letras=document.getElementById('in-letras').value||'___'; const numeros=document.getElementById('in-numeros').value||'________'; const anio=document.getElementById('in-anio').value||'____'; const pais=document.getElementById('in-pais').value||'USD'; const ps=document.getElementById('previewSerial'); if(ps) ps.innerText=`VALT-${letras}-${numeros.substring(0,2)}-${numeros.substring(2,4)}-${numeros.substring(4)} | ${anio} [${pais}]`; if(numeros.length>=4){ const r=calcularRareza(numeros); const v=calcularValor(numeros); const pb=document.getElementById('previewBadge'); if(pb) pb.innerHTML=`<span class="badge" style="background:rgba(16,185,129,0.15);border-color:#10b981;color:#6ee7b7">${r.t} x${r.m}</span>`; const pv=document.getElementById('previewValor'); if(pv) pv.innerText=`Peso inicial: ${v} pts • ${r.t}`; } }catch(e){} }
+function irAPaso(n){ try{ if(juegoActivo && n!==3){ toast('Para el juego primero'); return; } const c1=document.getElementById('card-paso1'),c2=document.getElementById('card-paso2'),c3=document.getElementById('card-paso3'); if(c1) c1.style.display=n===1?'block':'none'; if(c2) c2.style.display=n===2?'block':'none'; if(c3) c3.style.display=n===3?'block':'none'; document.querySelectorAll('.step').forEach((el,i)=>el.classList.toggle('active',i+1===n)); if(n===2) actualizarBovedaUI(); if(n===3) actualizarJuegoUI(); }catch(e){ toast('irAPaso '+e.message); } }
+function verificarBillete(){ try{ const letrasEl=document.getElementById('in-letras'); const numerosEl=document.getElementById('in-numeros'); if(!letrasEl||!numerosEl){ toast('Faltan inputs'); return; } const letras=letrasEl.value.trim().toUpperCase(); const numeros=numerosEl.value.trim(); const anio=document.getElementById('in-anio').value; const paisSel=document.getElementById('in-pais'); const pais=paisSel.value; const flag=paisSel.options[paisSel.selectedIndex].textContent.split(' ')[0]||'🏳️'; const nombre=document.getElementById('in-nombre').value.trim()||'Anónimo'; if(letras.length<2||numeros.length<6){ toast('⚠️ Escribe letras y números'); return; } const r=calcularRareza(numeros); const v=calcularValor(numeros); billeteActual={id:'bill-'+Date.now(),letras,numeros,anio,pais,flag,nombre,clicks:0,peso:v,valor:v,rareza:r.t,serial:`VALT-${letras}-${numeros.substring(0,2)}-${numeros.substring(2,4)}-${numeros.substring(4)} | ${anio} [${pais}]`,timestamp:Date.now()}; toast(`✅ ${r.t} ${v} pts x2 FUNDADOR`); irAPaso(2); actualizarBovedaUI(); }catch(e){ toast('verificar '+e.message); } }
+function calcularLiderReal(){ let top=[],mejor=null,max=-1; try{ top=Object.entries(digitFreq).sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]); boveda.forEach(b=>{ const p=b.peso||0; if(p>max){max=p;mejor=b;}}); }catch(e){} return {top,mejor}; }
+function actualizarGraficaViva(){ try{ const {top,mejor}=calcularLiderReal(); const pts=mejor?mejor.peso:0; const pct=Math.min(100,pts/UMBRAL_VALIDACION*100); const nEl=document.getElementById('liderNombreViva'); if(nEl) nEl.innerText=mejor?`LÍDER: ${mejor.flag} ${mejor.letras}`:'LÍDER: --'; const pEl=document.getElementById('liderPuntosViva'); if(pEl) pEl.innerText=`${pts.toLocaleString()} / 10,000`; const bEl=document.getElementById('liderProgressViva'); if(bEl) bEl.style.width=pct+'%'; const fEl=document.getElementById('faltanViva'); if(fEl) fEl.innerText=pts>=UMBRAL_VALIDACION?'✅ VALIDADA':'Faltan '+(10000-pts).toLocaleString()+' pts'; const sorted=Object.entries(digitFreq).sort((a,b)=>b[1]-a[1]).slice(0,5); const maxD=sorted[0]?sorted[0][1]:1; const dEl=document.getElementById('vivaDigits'); if(dEl) dEl.innerHTML=sorted.map(([d,c])=>`<div class="bar-row"><span style="width:22px;font-weight:800">${d}</span><div class="bar-track"><div class="bar-fill" style="width:${(c/maxD*100).toFixed(0)}%;background:linear-gradient(90deg,#06b6d4,#10b981)"></div></div><span style="color:#64748b">${c}</span></div>`).join(''); const paisMap={}; boveda.forEach(b=>{paisMap[b.pais]=(paisMap[b.pais]||0)+1;}); const pS=Object.entries(paisMap).sort((a,b)=>b[1]-a[1]).slice(0,5); const maxP=pS[0]?pS[0][1]:1; const pEl2=document.getElementById('vivaPaises'); if(pEl2) pEl2.innerHTML=pS.map(([p,c])=>`<div class="bar-row"><span style="width:40px">${p}</span><div class="bar-track"><div class="bar-fill" style="width:${(c/maxP*100).toFixed(0)}%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div><span>${c}</span></div>`).join(''); const tot=boveda.reduce((a,b)=>a+(b.peso||0),0); const ac=document.getElementById('siembraAcumulado'); if(ac) ac.innerText=`🏆 TOTAL: ${tot.toLocaleString()} PUNTOS`; }catch(e){} }
+function actualizarBovedaUI(){ try{ recalcularFreq(); const {top,mejor}=calcularLiderReal(); const pts=mejor?mejor.peso:0; const pct=Math.min(100,pts/10000*100); const fc=document.getElementById('founderCount'); if(fc) fc.innerText=new Set(boveda.map(b=>b.nombre)).size+'/1000'; const fp=document.getElementById('founderProgress'); if(fp) fp.style.width=Math.min(100,new Set(boveda.map(b=>b.nombre)).size/10)+'%'; const bac=document.getElementById('bovedaActivaCount'); if(bac) bac.innerText=pts.toLocaleString()+' / 10,000 pts'; const bp=document.getElementById('bovedaProgress'); if(bp) bp.style.width=pct+'%'; const bst=document.getElementById('bovedaStatusText'); if(bst){ bst.innerText=pts>=10000?'¡VALIDADA! ✅':'ACUMULACIÓN 🌱'; bst.style.color=pts>=10000?'#10b981':'#f59e0b'; } const s2=document.getElementById('leaderSerial2'); if(s2) s2.innerText=mejor?mejor.serial:'Sin líder'; const o2=document.getElementById('leaderOwner2'); if(o2) o2.innerText=mejor?`Líder: ${mejor.nombre} ${mejor.flag}`:''; const p2=document.getElementById('leaderPts2'); if(p2) p2.innerText=mejor?`${pts.toLocaleString()} pts ${pts>=10000?'✅ VÁLIDA':'🌱 No válida'}`:''; const bc2=document.getElementById('bovedaCount2'); if(bc2) bc2.innerText=boveda.length+' billetes'; const vm=document.getElementById('vaultMembers'); if(vm) vm.innerText=boveda.length+' billetes'; const grid=document.getElementById('gridPaso2'); if(grid && grid.children.length===0){ for(let i=0;i<100;i++){ const d=document.createElement('div'); d.className='cell cold'; d.id='g2-'+i; d.innerText=String(i).padStart(2,'0'); grid.appendChild(d); } } for(let i=0;i<100;i++){ const k=String(i).padStart(2,'0'); const el=document.getElementById('g2-'+i); if(el) el.className='cell '+(top.includes(k)?'leader':(digitFreq[k]>0?'hot':'cold')); } const lista=document.getElementById('listaBovedaPaso2'); if(lista){ lista.innerHTML=''; boveda.slice(0,10).forEach(b=>{ const d=document.createElement('div'); d.style.cssText='background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:8px;display:flex;justify-content:space-between;font-size:11px'; d.innerHTML=`<span>${b.flag} ${b.letras}</span><span style="color:#10b981;font-weight:800">${(b.peso||0)} pts</span>`; lista.appendChild(d); }); } actualizarGraficaViva(); actualizarJuegoUI(); }catch(e){ toast('boveda '+e.message); } }
+function actualizarJuegoUI(){ try{ const {top,mejor}=calcularLiderReal(); const el1=document.getElementById('leaderSerialJuego'); if(el1) el1.innerText=mejor?mejor.serial:'Cargando...'; const el2=document.getElementById('leaderOwnerJuego'); if(el2) el2.innerText=mejor?`${mejor.nombre} ${mejor.flag} • ${mejor.peso} pts`:''; const grid=document.getElementById('gridJuego'); if(grid && grid.children.length===0){ for(let i=0;i<100;i++){ const d=document.createElement('div'); d.className='cell cold'; d.id='gj-'+i; d.innerText=String(i).padStart(2,'0'); grid.appendChild(d); } } for(let i=0;i<100;i++){ const k=String(i).padStart(2,'0'); const el=document.getElementById('gj-'+i); if(el) el.className='cell '+(top.includes(k)?'leader':(digitFreq[k]>0?'hot':'cold')); } }catch(e){} }
+function generarLote(){ return [...boveda].sort(()=>0.5-Math.random()).slice(0,6).map(b=>({...b})); }
+function renderLote(lote){ const grid=document.getElementById('lotGrid'); if(!grid) return; grid.innerHTML=''; lote.forEach(b=>{ const peso=b.peso||150; const valor=Math.floor(peso/10)+5; const card=document.createElement('div'); card.className='bill'; card.innerHTML=`<div style="font-weight:800">${b.flag} ${b.letras}</div><div style="font-size:10px;color:#94a3b8">${b.nombre} • ${peso} pts</div><div style="color:#10b981;font-weight:800">+${valor*2} x2</div>`; card.onclick=()=>clickBillete(b); grid.appendChild(card); }); }
+function clickBillete(b){ if(!juegoActivo) return; const peso=b.peso||150; const valor=(Math.floor(peso/10)+5)*2; puntos+=valor; clicksSesion++; totalClicks++; const idx=boveda.findIndex(x=>x.id===b.id); if(idx>=0) boveda[idx].clicks++; (b.numeros.match(/.{2}/g)||[]).forEach(p=>{ if(digitFreq[p]!==undefined) digitFreq[p]+=1; }); document.getElementById('puntosJuego').innerText=puntos; document.getElementById('clicksJuego').innerText=clicksSesion; toast(`+${valor}`); loteActual=loteActual.filter(x=>x.id!==b.id); renderLote(loteActual); }
+function iniciarJuego(){ try{ if(boveda.length<1){ toast('Necesitas 1 billete'); return; } const {mejor}=calcularLiderReal(); const pts=mejor?mejor.peso:0; if(pts<UMBRAL_VALIDACION) toast(`🌱 Líder ${pts} / 10000 - x2 activo`); juegoActivo=true; puntos=0; clicksSesion=0; tiempo=60; document.getElementById('setupJuego').style.display='none'; document.getElementById('juegoActivo').style.display='block'; const gen=()=>{ if(!juegoActivo) return; loteActual=generarLote(); renderLote(loteActual); }; gen(); juegoLot=setInterval(gen,4000); juegoTimer=setInterval(()=>{ tiempo-=0.1; if(tiempo<=0){ detenerJuego(true); return; } document.getElementById('timerJuego').innerText=tiempo.toFixed(1); },100); }catch(e){ toast('juego '+e.message); } }
+function detenerJuego(fin=false){ juegoActivo=false; clearInterval(juegoTimer); clearInterval(juegoLot); if(fin){ document.getElementById('finPuntos').innerText=puntos+' pts'; document.getElementById('finClicks').innerText=clicksSesion+' clicks'; document.getElementById('modalFin').style.display='flex'; } else { document.getElementById('setupJuego').style.display='block'; document.getElementById('juegoActivo').style.display='none'; } }
+function guardarSesion(){ try{ const nombre=document.getElementById('in-nombre').value.trim()||'Anónimo'; boveda.forEach((b,i)=>{ if(b.nombre===nombre) boveda[i].peso=(b.peso||150)+puntos; }); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); toast(`💾 +${puntos} pts`); cerrarFin(); document.getElementById('setupJuego').style.display='block'; document.getElementById('juegoActivo').style.display='none'; actualizarBovedaUI(); }catch(e){ toast(e.message); } }
+function cerrarFin(){ const m=document.getElementById('modalFin'); if(m) m.style.display='none'; }
+function bajarABoveda(){ try{ if(!billeteActual){ toast('Primero verifica'); return; } if(boveda.some(b=>b.numeros===billeteActual.numeros && b.letras===billeteActual.letras)){ toast('⚠️ Ya está'); return; } boveda.unshift(billeteActual); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); recalcularFreq(); actualizarBovedaUI(); toast(`⬇ ${billeteActual.letras} a nube`); if(supabaseClient){ supabaseClient.from('bills').insert([billeteActual]).then(({error})=>{ if(error) toast('Nube: '+error.message); else toast('✅ En NUBE GLOBAL'); }); } }catch(e){ toast('bajar '+e.message); } }
+function abrirBovedaBloqueada(){ const m=document.getElementById('modal-boveda-bloqueada'); if(m) m.style.display='flex'; }
+function cerrarBovedaBloqueada(){ const m=document.getElementById('modal-boveda-bloqueada'); if(m) m.style.display='none'; }
+function abrirModal(t){ const m=document.getElementById('modal-'+t); if(m) m.style.display='flex'; }
+function cerrarModal(t){ const m=document.getElementById('modal-'+t); if(m) m.style.display='none'; }
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('step1')?.addEventListener('click', ()=>irAPaso(1));
+  document.getElementById('step2')?.addEventListener('click', ()=>irAPaso(2));
+  document.getElementById('step3')?.addEventListener('click', ()=>irAPaso(3));
+  document.getElementById('btnVerifica')?.addEventListener('click', verificarBillete);
+  document.getElementById('btnBajar')?.addEventListener('click', bajarABoveda);
+  document.getElementById('btnIrJugar')?.addEventListener('click', ()=>irAPaso(3));
+  document.getElementById('btnJugar')?.addEventListener('click', iniciarJuego);
+  document.getElementById('btnParar')?.addEventListener('click', ()=>detenerJuego(false));
+  document.getElementById('btnActivarMiembro')?.addEventListener('click', abrirBovedaBloqueada);
+  document.getElementById('btnCerrarBloqueo')?.addEventListener('click', cerrarBovedaBloqueada);
+  document.getElementById('btnDesbloquear')?.addEventListener('click', ()=>{ window.open(STRIPE_LINK,'_blank'); localStorage.setItem('valt_vip','true'); document.getElementById('noVipBox').style.display='none'; document.getElementById('vipBox').style.display='block'; cerrarBovedaBloqueada(); });
+  document.getElementById('btnGuardar')?.addEventListener('click', guardarSesion);
+  document.getElementById('btnCerrarFin')?.addEventListener('click', cerrarFin);
+  document.getElementById('in-letras')?.addEventListener('input', actualizarPreview);
+  document.getElementById('in-numeros')?.addEventListener('input', actualizarPreview);
+  document.getElementById('check1')?.addEventListener('change', ()=>{ const c1=document.getElementById('check1').checked; const c2=document.getElementById('check2').checked; const b=document.getElementById('btnDesbloquear'); b.disabled=!(c1&&c2); });
+  document.getElementById('check2')?.addEventListener('change', ()=>{ const c1=document.getElementById('check1').checked; const c2=document.getElementById('check2').checked; const b=document.getElementById('btnDesbloquear'); b.disabled=!(c1&&c2); b.style.background=(c1&&c2)?'linear-gradient(135deg,#f59e0b,#d97706)':'#4a3f1f'; });
+  actualizarPreview();
   actualizarBovedaUI();
+  if(supabaseClient){
+    supabaseClient.from('bills').select('*').order('timestamp',{ascending:false}).limit(200).then(({data})=>{
+      if(data && data.length>0){ const ids=new Set(boveda.map(b=>b.id)); data.forEach(d=>{ if(!ids.has(d.id)) boveda.push(d); }); localStorage.setItem('valt_boveda_real', JSON.stringify(boveda.slice(0,500))); recalcularFreq(); document.getElementById('nubeStatus').innerText=`● NUBE GLOBAL (${data.length} billetes) ✅`; actualizarBovedaUI(); }
+    });
+  }
 });
 </script>
-<div style="width:100%;max-width:760px;margin-top:14px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;font-family:'JetBrains Mono';font-size:10px;color:#94a3b8;line-height:1.5">
-<div style="font-weight:800;color:#cbd5e1;margin-bottom:6px">PROGRAMA DE LEALTAD POR ACUMULACIÓN DE PUNTOS - 100% LEGAL</div>
-• Este NO es un juego de azar, lotería o sorteo. Es un programa de acumulación directa de puntos por participación activa.<br>
-• <b>Equivalencia fija:</b> Membresía $4.99 = 500 Puntos Base | Cada billete verificado = 150 Puntos | Cada impulso en bóveda = +10 a 35 Puntos<br>
-• <b>Canje:</b> Los puntos acumulados son canjeables por recompensas digitales, descuentos y beneficios del catálogo visible en tu bóveda. El líder por acumulación tiene prioridad de canje.<br>
-• <b>Vigencia:</b> Puntos vigentes mientras la membresía esté activa. No se cancelan arbitrariamente.<br>
-• <b>Transparencia:</b> Reglas no se modifican sin previo aviso de 15 días. <span class="link-gold" onclick="document.getElementById('modalTerminos').style.display='flex'">Ver Términos y Condiciones completos</span><br>
-• Privacidad y datos protegidos según leyes aplicables.
-</div>
-<div class="modal" id="modalTerminos"><div class="modal-box policy"><div class="policy-title">Términos y Condiciones - VALT Puntos 2026</div><div class="policy-text">
-<b>1. Naturaleza del programa:</b> VALT es un programa de lealtad por acumulación directa de puntos. No hay azar. Los puntos se obtienen por acción verificable: verificación de billete, impulsos en bóveda y participación en juego de habilidad de 60s.<br><br>
-<b>2. Equivalencia fija:</b> $4.99 = 500 puntos base. Billete verificado = 150 puntos. Impulso = 10-35 puntos según rareza. Fundadores (primeros 1000) x2 puntos de por vida.<br><br>
-<b>3. Catálogo de recompensas:</b> Los puntos son canjeables por recompensas canjeables publicadas en la bóveda. El inventario y valor en puntos es visible antes de canjear.<br><br>
-<b>4. Acumulación:</b> Fase de Acumulación inicial requiere 100 miembros activos para activar canje completo. Durante esta fase, los puntos se acumulan y crecen. No hay ganadores por azar.<br><br>
-<b>5. Vigencia y transparencia:</b> Puntos vigentes mientras membresía activa. Cualquier cambio de reglas se avisa con 15 días. No se cancelan puntos arbitrariamente.<br><br>
-<b>6. Sin lotería:</b> Al no haber compra para participar en azar, sino acumulación directa por participación, no se clasifica como lotería no autorizada. Si se incluye algún beneficio aleatorio futuro, se registrará con autoridad local.<br><br>
-<b>7. Datos e impuestos:</b> Datos protegidos. Recompensas de alto valor pueden estar sujetas a impuestos locales que debe asumir el beneficiario.<br><br>
-<span class="link-gold" onclick="document.getElementById('modalTerminos').style.display='none'">Cerrar</span>
-</div></div></div>
 </body>
 </html>
