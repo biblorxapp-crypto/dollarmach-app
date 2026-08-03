@@ -1,183 +1,181 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>DollarDgT.com</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f5f5f7;
-      color: #111827;
-    }
-
-    .wrapper {
-      text-align: center;
-      padding: 1rem;
-    }
-
-    .brand {
-      font-size: 1.4rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 1.5rem;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 360px;
-      background: #ffffff;
-      border-radius: 18px;
-      padding: 1.8rem 1.6rem;
-      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      text-align: left;
-    }
-
-    .card-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .card-subtitle {
-      font-size: 0.85rem;
-      color: #6b7280;
-      margin-bottom: 1.4rem;
-    }
-
-    .field {
-      margin-bottom: 1rem;
-    }
-
-    .field label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: #4b5563;
-      margin-bottom: 0.35rem;
-    }
-
-    .field input {
-      width: 100%;
-      padding: 0.6rem 0.7rem;
-      border-radius: 10px;
-      border: 1px solid #d1d5db;
-      font-size: 0.9rem;
-      outline: none;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease;
-      background: #f9fafb;
-    }
-
-    .field input:focus {
-      border-color: #111827;
-      box-shadow: 0 0 0 1px #11182715;
-      background: #ffffff;
-    }
-
-    .btn {
-      width: 100%;
-      margin-top: 0.4rem;
-      padding: 0.7rem 0.9rem;
-      border-radius: 999px;
-      border: none;
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      cursor: pointer;
-      background: #111827;
-      color: #f9fafb;
-      transition: background 0.18s ease, transform 0.08s ease, box-shadow 0.18s ease;
-    }
-
-    .btn:hover {
-      background: #020617;
-      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
-      transform: translateY(-1px);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
-    }
-
-    .message {
-      margin-top: 1rem;
-      font-size: 0.8rem;
-      color: #16a34a;
-      min-height: 1em;
-    }
-
-    .footer-note {
-      margin-top: 1.2rem;
-      font-size: 0.75rem;
-      color: #9ca3af;
-      text-align: center;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#030712">
+<title>VALT REAL 360 - PROGRAMA DE PUNTOS - 2026 DollarDgt.com</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#030712;--card:#0f172a;--cyan:#06b6d4;--emerald:#10b981;--magenta:#FF2A6D;--amber:#f59e0b;--border:rgba(6,182,212,0.25);--gold:#ffd700}
+*{box-sizing:border-box} body{margin:0;padding:10px 8px;background:radial-gradient(circle at 40% 20%,#0f172a 0%,#030712 70%);color:#f8fafc;font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.container{max-width:1000px;width:100%}
+.app-header{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);padding:12px 16px;border-radius:14px;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.status-dot{width:10px;height:10px;background:var(--emerald);border-radius:50%;box-shadow:0 0 8px var(--emerald);animation:pulse 2s infinite} @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.btn-gold{background:linear-gradient(135deg,var(--gold) 0%,#b8860b 100%);color:#0b0f19;border:none;font-weight:800;border-radius:24px;padding:10px 22px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 15px rgba(255,215,0,.3);transition:all .2s}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,215,0,.5)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 10px 25px -5px rgba(0,0,0,.5)}
+.card-pizarra{border-color:var(--cyan);background:linear-gradient(180deg,#0f172a 0%,#020617 100%)}
+.card-fondo{border-color:var(--amber);background:linear-gradient(180deg,#0f172a 0%,#1a1405 100%)}
+.card-rare{border-color:var(--gold);background:linear-gradient(180deg,#0f172a 0%,#1f1a05 100%)}
+.card-boost{border-color:#a855f7;background:linear-gradient(180deg,#0f172a 0%,#150e2a 100%)}
+.pizarra-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:12px}
+.p-metric{background:#020617;border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.p-title{font-size:.7rem;color:#94a3b8;text-transform:uppercase;margin-bottom:4px}
+.p-value{font-size:1.1rem;font-weight:800;color:var(--cyan);font-family:'JetBrains Mono',monospace}
+.single-serial-input{font-family:'JetBrains Mono',monospace;font-size:1.1rem;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--cyan);color:var(--emerald);background:#020617;width:100%;padding:12px;border-radius:8px;margin:6px 0}
+.candado-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.candado-card{background:#020617;border:1px solid var(--border);border-radius:10px;padding:10px}
+.candado-ok{border-color:var(--emerald);background:rgba(16,185,129,.07)}
+.candado-no{border-color:#ef4444;background:rgba(239,68,68,.07)}
+.serial-display{font-family:'JetBrains Mono',monospace;font-size:1.3rem;background:#020617;padding:14px;border-radius:8px;text-align:center;border:1px dashed var(--amber);letter-spacing:2px;margin:12px 0;color:var(--amber)}
+.timer-badge{background:rgba(245,158,11,.15);border:1px solid var(--amber);color:var(--amber);padding:6px 12px;border-radius:20px;font-size:.8rem;font-weight:bold}
+.pool-dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.pool-card{background:#020617;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.pool-progress-bar{width:100%;height:10px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden;margin:10px 0}
+.pool-progress-fill{height:100%;background:linear-gradient(90deg,var(--amber) 0%,var(--emerald) 100%);width:0%;transition:width .4s}
+button{cursor:pointer;font-weight:bold;padding:12px;border-radius:8px;border:1px solid var(--border);background:#020617;color:#f8fafc;width:100%;box-sizing:border-box}
+.btn-primary{background:var(--cyan);color:#030712;border:none}.btn-success{background:var(--emerald);color:#fff;border:none}.btn-purple{background:#a855f7;color:#fff;border:none}.btn-warning{background:var(--amber);color:#030712;border:none}
+.app-footer{margin-top:30px;padding:20px;text-align:center;font-size:.8rem;color:#64748b;border-top:1px solid var(--border);width:100%}
+.toast-container{position:fixed;bottom:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--card);border-left:4px solid var(--cyan);color:#f8fafc;padding:12px 16px;border-radius:8px;box-shadow:0 10px 25px rgba(0,0,0,.6);font-size:.85rem;min-width:260px}
+</style>
 </head>
 <body>
-  <div class="wrapper">
-    <div class="brand">DollarDgT.com</div>
+<div class="toast-container" id="toast-container"></div>
+<div class="container">
+<div class="app-header">
+<div style="display:flex;align-items:center;gap:10px"><span class="status-dot"></span><div style="font-weight:800;color:var(--cyan)">VALT REAL 360</div><div style="font-size:.7rem;color:#64748b">2026 DollarDgt.com v10.2</div></div>
+<div style="display:flex;gap:10px;align-items:center">
+<span style="font-size:.8rem">Pts: <strong id="user-pts-balance" style="color:var(--amber)">10,000</strong></span>
+<button onclick="openStripeGate()" class="btn-gold">💳 $4.99/mes</button>
+</div>
+</div>
 
-    <div class="card">
-      <div class="card-title">Mactch Your Currency.</div>
-      <div class="card-subtitle"></div>
+<!-- PIZARRA -->
+<div class="card card-pizarra">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+<h3 style="margin:0;color:var(--cyan)">📊 Pizarra del Miembro</h3>
+<span style="font-size:.7rem;background:rgba(6,182,212,.15);border:1px solid var(--cyan);color:var(--cyan);padding:4px 10px;border-radius:20px" id="auth-label">Local - Supabase Listo</span>
+</div>
+<div class="pizarra-grid">
+<div class="p-metric"><div class="p-title">Guardados</div><div class="p-value" id="pizarra-user-guardados">0</div></div>
+<div class="p-metric"><div class="p-title">Raros</div><div class="p-value" style="color:var(--gold)" id="pizarra-user-raros">0</div></div>
+<div class="p-metric"><div class="p-title">Puntos</div><div class="p-value" style="color:var(--emerald)" id="pizarra-user-puntos">0 PTS</div></div>
+<div class="p-metric"><div class="p-title">Aporte Pozo</div><div class="p-value" style="color:var(--amber)" id="pizarra-user-aporte">0 PTS</div></div>
+</div>
+<div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<input type="text" id="member-name" placeholder="Alias" value="Jugador Estelar" oninput="actualizarPizarraUI()" class="single-serial-input" style="font-size:.9rem">
+<select id="country-select" onchange="actualizarTarjetaImpulso()" style="background:#020617;border:1px solid var(--border);color:#f8fafc;padding:12px;border-radius:8px"></select>
+</div>
+<input type="text" id="serie-personal" class="single-serial-input" placeholder="Serie Manual Ej: G12345678A" oninput="validarEntradaPersonal()">
+<button id="btn-registrar" class="btn-success" disabled onclick="guardarEnBovedaPersonal()">📥 Bajar a Bóveda - Sin Foto 100% Legal</button>
+</div>
 
-      <form id="dollar-form">
-        <div class="field">
-          <label for="email">Email</label>
-          <input id="email" type="email" placeholder="tu@correo.com" />
-        </div>
+<!-- FONDO 4 CANDADOS -->
+<div class="card card-fondo">
+<h3 style="color:var(--amber);margin:0 0 6px">🏦 Fondo Adquisición Coleccionista 60% - $4.99/mes</h3>
+<div style="font-size:.75rem;color:#94a3b8;margin-bottom:10px">Link Stripe activo: buy.stripe.com/5kQ8wQ0frfOa7I6dLE7Vm0l - 60% va al fondo - No negociable</div>
+<div class="pool-dashboard">
+<div class="pool-card"><div style="font-size:.65rem;color:#94a3b8">FONDO ACUMULADO</div><div style="font-size:1.2rem;font-weight:800;color:var(--amber);font-family:'JetBrains Mono'" id="fondo-acumulado">$0.00</div><div style="font-size:.7rem;color:#94a3b8" id="fondo-meta">Meta: $500</div></div>
+<div class="pool-card"><div style="font-size:.65rem;color:#94a3b8">MIEMBROS PAGOS</div><div style="font-size:1.2rem;font-weight:800" id="miembros-pagos">0 / 500</div><div style="font-size:.7rem;color:#94a3b8">Fase Siembra 90d</div></div>
+<div class="pool-card"><div style="font-size:.65rem;color:#94a3b8">COLCHÓN</div><div style="font-size:1.2rem;font-weight:800;color:var(--emerald)">$250</div><div style="font-size:.7rem;color:#94a3b8">Protegido</div></div>
+</div>
+<div class="pool-progress-bar"><div id="fondo-progress" class="pool-progress-fill" style="width:0%"></div></div>
+<div class="candado-grid" id="candados-grid"></div>
+<div style="background:#020617;border:1px dashed var(--amber);border-radius:8px;padding:10px;margin-top:10px">
+<div style="font-size:.8rem;font-weight:800;color:var(--amber)" id="elegibilidad-titulo">🔒 NO ELEGIBLE</div>
+<div style="font-size:.75rem;color:#94a3b8;margin-top:3px" id="elegibilidad-desc">Faltan candados</div>
+</div>
+<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+<button style="width:auto;font-size:.7rem;padding:8px 10px" class="btn-warning" onclick="simularMembresia()">+10 Membresías Stripe (+$29.94 fondo)</button>
+<button style="width:auto;font-size:.7rem;padding:8px 10px" onclick="simularDias(10)">+10 Días</button>
+<button style="width:auto;font-size:.7rem;padding:8px 10px" onclick="verificarSupabaseStripe()">🔍 Verificar Supabase+Stripe</button>
+<button style="width:auto;font-size:.7rem;padding:8px 10px;background:#10b981;color:#fff;border:none" onclick="probarOferta()">🔓 Probar 4 Candados</button>
+</div>
+</div>
 
-        <div class="field">
-          <label for="password">Clave Dollar</label>
-          <input id="password" type="password" placeholder="••••••••" />
-        </div>
+<!-- BOTE + RESTO -->
+<div class="card" style="border-color:var(--amber)">
+<div style="display:flex;justify-content:space-between;align-items:center"><h3 style="color:var(--amber);margin:0">🔥 Bote Puntos 60 min</h3><div class="timer-badge">⏳ <span id="cron-timer">60:00</span></div></div>
+<div id="daily-leader-display" class="serial-display">🌟 CALCULANDO...</div>
+<div class="pool-dashboard">
+<div class="pool-card"><div style="font-size:.65rem;color:#94a3b8">BÓVEDA PTS</div><div style="font-weight:800" id="leader-vault-pts">0</div></div>
+<div class="pool-card"><div style="font-size:.65rem;color:#94a3b8">BOTE TOTAL</div><div style="font-weight:800;color:var(--amber)" id="pool-total-pts">10,000</div></div>
+<div class="pool-card"><div style="font-size:.65rem;color:#94a3b8">TU %</div><div style="font-weight:800;color:var(--emerald)" id="user-ownership-pct">0%</div></div>
+</div>
+<div style="display:flex;gap:8px"><input type="number" id="invest-pts-input" placeholder="100" min="100" style="background:#020617;border:1px solid var(--border);color:#fff;padding:12px;border-radius:8px;flex:1"><button style="width:auto" class="btn-warning" onclick="ejecutarInversionPool()">⚡ Aportar</button></div>
+</div>
 
-        <button type="submit" class="btn">Probar suerte</button>
-      </form>
+<div class="card"><h3 style="font-size:.9rem">📈 Frecuencias</h3><div style="height:220px"><canvas id="probabilidadChart"></canvas></div></div>
+<div class="card"><h3 style="font-size:.9rem">🏛️ Bóveda (sin fotos)</h3><ul id="vault-list" style="list-style:none;padding:0;margin:0;max-height:200px;overflow-y:auto"></ul></div>
 
-      <div id="message" class="message"></div>
+</div>
 
-      <div class="footer-note">
-        DollarDgT · Juego conceptual en fase inicial.
-      </div>
-    </div>
-  </div>
+<!-- BLOQUE 1: Stripe Gate Modal -->
+<div id="stripe-gate" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:9999;padding:20px;align-items:center;justify-content:center;">
+<div style="background:#0f172a;border:1px solid #ffd700;border-radius:16px;max-width:500px;margin:40px auto;padding:24px">
+<h2 style="color:#ffd700;margin-top:0">💳 $4.99/mes</h2>
+<label style="display:flex;gap:10px;margin-bottom:10px;font-size:.85rem"><input type="checkbox" id="chk-terms" onchange="checkGate()"> Acepto <a href="#" onclick="openLegal('terms');return false" style="color:#06b6d4">Términos</a></label>
+<label style="display:flex;gap:10px;margin-bottom:10px;font-size:.85rem"><input type="checkbox" id="chk-privacy" onchange="checkGate()"> Acepto <a href="#" onclick="openLegal('privacy');return false" style="color:#06b6d4">Privacidad</a></label>
+<label style="display:flex;gap:10px;margin-bottom:10px;font-size:.85rem"><input type="checkbox" id="chk-refund" onchange="checkGate()"> Acepto <a href="#" onclick="openLegal('refund');return false" style="color:#06b6d4">Reembolso 7 días</a></label>
+<div style="display:flex;gap:8px;margin-top:12px"><button onclick="closeStripeGate()" style="width:auto;background:#334155">Cancelar</button><button id="btn-ir-stripe" onclick="irAStripe()" disabled style="width:auto;background:linear-gradient(135deg,#ffd700,#b8860b);color:#000;font-weight:800;opacity:.5">Acepto y pagar $4.99 →</button></div>
+</div></div>
 
-  <script>
-    const form = document.getElementById('dollar-form');
-    const messageEl = document.getElementById('message');
+<!-- BLOQUE 2: Legal Modal & Footer -->
+<div id="legal-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:10001;padding:20px;align-items:center;justify-content:center;"><div style="background:#0f172a;border-radius:16px;max-width:700px;margin:20px auto;padding:24px;position:relative"><button onclick="closeLegal()" style="position:absolute;top:10px;right:10px;width:32px;height:32px;background:#ef4444;border:none;border-radius:50%;color:#fff;cursor:pointer">X</button><div id="legal-content" style="font-size:.85rem;color:#cbd5e1"></div></div></div>
+<footer style="margin-top:30px;padding:20px;text-align:center;font-size:.8rem;color:#64748b;border-top:1px solid rgba(6,182,212,.25);width:100%"><div>© 2026 DollarDgt.com</div><div style="display:flex;gap:12px;justify-content:center;margin-top:8px"><a href="#" onclick="openLegal('terms');return false" style="color:#94a3b8">Términos</a><a href="#" onclick="openLegal('privacy');return false" style="color:#94a3b8">Privacidad</a><a href="#" onclick="openLegal('refund');return false" style="color:#94a3b8">Reembolsos</a><a href="#" onclick="openLegal('legal');return false" style="color:#94a3b8">Aviso</a></div></footer>
 
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
+<script>
+const CONFIG={VERSION:"v10.2-STRIPE-INTEGRADO",STRIPE_LINK:"https://buy.stripe.com/5kQ8wQ0frfOa7I6dLE7Vm0l",FONDO_MINIMO_APERTURA:500,FONDO_COLCHON_MINIMO:250,PORCENTAJE_FONDO:0.60,PRECIO_MEMBRESIA:4.99,MIEMBROS_MINIMOS:500,DIAS_SIEMBRA:90,VECES_LIDER_MIN:3,DIAS_BOVEDA_MIN:30};
+function escapeHTML(s){return (s||'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;}[c]));}
+function safeParse(k,f){try{const v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch{return f;}}
+function mostrarToast(m,t='info'){const c=document.getElementById('toast-container');const d=document.createElement('div');d.className='toast';d.style.borderLeftColor=t==='success'?'#10b981':t==='warning'?'#f59e0b':t==='danger'?'#ef4444':'#06b6d4';d.textContent=m;c.appendChild(d);setTimeout(()=>d.remove(),4000);}
+const FORMATOS={USD_1_2:{region:"América",pais:"🇺🇸 USA $1-$2",codigo:"USD",formato:"L 00000000 L"},USD_MODERNO:{region:"América",pais:"🇺🇸 USA $5-$100",codigo:"USD",formato:"LL 00000000 L"},CAD:{region:"América",pais:"🇨🇦 Canadá",codigo:"CAD",formato:"LLL-0000000"},MXN:{region:"América",pais:"🇲🇽 México",codigo:"MXN",formato:"LL0000000"},EUR_EUROPA:{region:"Europa",pais:"🇪🇺 Euro",codigo:"EUR",formato:"LL0000000000"},GBP:{region:"Europa",pais:"🇬🇧 UK",codigo:"GBP",formato:"LL00 000000"},JPY:{region:"Asia",pais:"🇯🇵 Japón",codigo:"JPY",formato:"LL 000000 LL"},BRL:{region:"América",pais:"🇧🇷 Brasil",codigo:"BRL",formato:"L000000000L"},AUD:{region:"Asia",pais:"🇦🇺 Australia",codigo:"AUD",formato:"LL 00 000000"}};
+let bovedaBilletes=safeParse('dgt_boveda_billetes',[]);let seriesSet=new Set(safeParse('dgt_series_set',[]));let poolData=safeParse('dgt_pool',{userBalancePts:10000,userInvestedPts:0,poolTotalPts:10000});let userBalancePts=poolData.userBalancePts,userInvestedPts=poolData.userInvestedPts,poolTotalPts=poolData.poolTotalPts;let puntosTotalesBoveda=safeParse('dgt_boveda_pts',0);let fondoAcumulado=safeParse('dgt_fondo_adquisicion',0);let miembrosPagos=safeParse('dgt_miembros_pagos',0);let diasDesdeLanzamiento=safeParse('dgt_dias_lanzamiento',0);let leaderStats=safeParse('dgt_leader_stats',{serie_maestra:'CALCULANDO',vecesLider30d:0});let chart=null,cronSecs=3600;
+function guardarTodo(){localStorage.setItem('dgt_boveda_billetes',JSON.stringify(bovedaBilletes));localStorage.setItem('dgt_series_set',JSON.stringify([...seriesSet]));localStorage.setItem('dgt_pool',JSON.stringify({userBalancePts,userInvestedPts,poolTotalPts}));localStorage.setItem('dgt_boveda_pts',JSON.stringify(puntosTotalesBoveda));localStorage.setItem('dgt_fondo_adquisicion',JSON.stringify(fondoAcumulado));localStorage.setItem('dgt_miembros_pagos',JSON.stringify(miembrosPagos));localStorage.setItem('dgt_dias_lanzamiento',JSON.stringify(diasDesdeLanzamiento));localStorage.setItem('dgt_leader_stats',JSON.stringify(leaderStats));}
+function normalizar(s){return (s||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();}
+function esDuplicada(s){return seriesSet.has(normalizar(s));}
+function registrar(s){const c=normalizar(s);if(c)seriesSet.add(c);}
+function generarRaw(info){const l="ABCDEFGHIJKLMNOPQRSTUVWXYZ";let r="";for(let i=0;i<info.formato.length;i++){const c=info.formato[i];if(c==='0')r+=Math.floor(Math.random()*10);else if(c==='L')r+=l[Math.floor(Math.random()*l.length)];else r+=c;}return r;}
+function actualizarPizarraUI(){const n=(document.getElementById('member-name').value.trim()||'Jugador Estelar').toLowerCase();const mis=bovedaBilletes.filter(b=>b.miembro.toLowerCase()===n);const pts=mis.reduce((a,c)=>a+c.puntos,0);document.getElementById('pizarra-user-guardados').textContent=mis.length;document.getElementById('pizarra-user-raros').textContent=0;document.getElementById('pizarra-user-puntos').textContent=`${pts.toLocaleString()} PTS`;document.getElementById('pizarra-user-aporte').textContent=`${userInvestedPts.toLocaleString()} PTS`;}
+function init(){const sel=document.getElementById('country-select');for(const [k,v] of Object.entries(FORMATOS)){const o=document.createElement('option');o.value=k;o.textContent=`${v.pais}`;sel.appendChild(o);}initChart();if(bovedaBilletes.length===0){['USD_MODERNO','EUR_EUROPA'].forEach((pk,i)=>{let s=generarRaw(FORMATOS[pk]);while(esDuplicada(s))s=generarRaw(FORMATOS[pk]);registrar(s);puntosTotalesBoveda+=250;bovedaBilletes.push({miembro:['Carlos','Jugador Estelar'][i],pais:FORMATOS[pk].pais,codigo:FORMATOS[pk].codigo,serie:s,puntos:250,created_at:Date.now()- (i*35*86400000)});});guardarTodo();}actualizarBovedaUI();actualizarPizarraUI();actualizarFondoUI();procesarCerebro();iniciarCron();actualizarDashboardPoolUI();}
+function actualizarFondoUI(){const pct=Math.min((fondoAcumulado/CONFIG.FONDO_MINIMO_APERTURA)*100,100);document.getElementById('fondo-acumulado').textContent=`$${fondoAcumulado.toFixed(2)}`;document.getElementById('fondo-progress').style.width=`${pct}%`;document.getElementById('fondo-meta').textContent=`Meta: $${CONFIG.FONDO_MINIMO_APERTURA} - ${fondoAcumulado>=CONFIG.FONDO_MINIMO_APERTURA?'✅':'⏳'}`;document.getElementById('miembros-pagos').textContent=`${miembrosPagos} / ${CONFIG.MIEMBROS_MINIMOS}`;const eleg=esElegibleParaOferta();const grid=document.getElementById('candados-grid');grid.innerHTML=`<div class="candado-card ${eleg.detalle.c1.ok?'candado-ok':'candado-no'}"><div style="font-size:.75rem;font-weight:800">${eleg.detalle.c1.ok?'✅':'🔒'} C1 Fondo $${CONFIG.FONDO_MINIMO_APERTURA}</div><div style="font-size:.7rem;color:#94a3b8">${eleg.detalle.c1.msg}</div></div><div class="candado-card ${eleg.detalle.c2.ok?'candado-ok':'candado-no'}"><div style="font-size:.75rem;font-weight:800">${eleg.detalle.c2.ok?'✅':'🔒'} C2 Líder ${CONFIG.VECES_LIDER_MIN}x</div><div style="font-size:.7rem;color:#94a3b8">${eleg.detalle.c2.msg}</div></div><div class="candado-card ${eleg.detalle.c3.ok?'candado-ok':'candado-no'}"><div style="font-size:.75rem;font-weight:800">${eleg.detalle.c3.ok?'✅':'🔒'} C3 Billete 30d</div><div style="font-size:.7rem;color:#94a3b8">${eleg.detalle.c3.msg}</div></div><div class="candado-card ${eleg.detalle.c4.ok?'candado-ok':'candado-no'}"><div style="font-size:.75rem;font-weight:800">${eleg.detalle.c4.ok?'✅':'🔒'} C4 90d+500</div><div style="font-size:.7rem;color:#94a3b8">${eleg.detalle.c4.msg}</div></div>`;document.getElementById('elegibilidad-titulo').textContent=eleg.elegible?'✅ ELEGIBLE - Ofertable':'🔒 NO ELEGIBLE';document.getElementById('elegibilidad-desc').textContent=eleg.mensaje;document.getElementById('elegibilidad-titulo').style.color=eleg.elegible?'#10b981':'#f59e0b';}
+function esElegibleParaOferta(){const c1Ok=fondoAcumulado>=CONFIG.FONDO_MINIMO_APERTURA&&(fondoAcumulado-100)>=CONFIG.FONDO_COLCHON_MINIMO;const c2Ok=leaderStats.vecesLider30d>=CONFIG.VECES_LIDER_MIN;const viejos=bovedaBilletes.filter(b=> (Date.now()-(b.created_at||Date.now()))>=CONFIG.DIAS_BOVEDA_MIN*86400000).length;const c3Ok=viejos>0;const c4Ok=diasDesdeLanzamiento>=CONFIG.DIAS_SIEMBRA&&miembrosPagos>=CONFIG.MIEMBROS_MINIMOS;const eleg=c1Ok&&c2Ok&&c3Ok&&c4Ok;return {elegible:eleg,mensaje:eleg?`Fondo $${fondoAcumulado.toFixed(2)} listo. 1 compra/semana max.`: `Faltan: ${[!c1Ok&&'Fondo',!c2Ok&&'Líder',!c3Ok&&'Billete30d',!c4Ok&&'Comunidad'].filter(Boolean).join(', ')}`,detalle:{c1:{ok:c1Ok,msg:c1Ok?`$${fondoAcumulado.toFixed(2)} OK`:`Falta $${(CONFIG.FONDO_MINIMO_APERTURA-fondoAcumulado).toFixed(2)}`},c2:{ok:c2Ok,msg:`${leaderStats.vecesLider30d}/${CONFIG.VECES_LIDER_MIN}`},c3:{ok:c3Ok,msg:`${viejos} viejos`},c4:{ok:c4Ok,msg:`${diasDesdeLanzamiento}d ${miembrosPagos}m`}}}};
+function simularMembresia(){const ap=10*CONFIG.PRECIO_MEMBRESIA*CONFIG.PORCENTAJE_FONDO;fondoAcumulado+=ap;miembrosPagos+=10;guardarTodo();actualizarFondoUI();mostrarToast(`Stripe: 10x $4.99 = +$${ap.toFixed(2)} fondo`,`success`);}
+function simularDias(n){diasDesdeLanzamiento+=n;leaderStats.vecesLider30d+=1;guardarTodo();actualizarFondoUI();procesarCerebro();mostrarToast(`+${n} días`,'warning');}
+function verificarSupabaseStripe(){mostrarToast('Verificando... Supabase URL? Tablas? Webhook? Mándame screenshot de Supabase > Table Editor','warning');}
+function validarEntradaPersonal(){document.getElementById('btn-registrar').disabled=document.getElementById('serie-personal').value.trim().length<5;}
+function actualizarTarjetaImpulso(){}
+function guardarEnBovedaPersonal(){const serie=document.getElementById('serie-personal').value.trim().toUpperCase();if(esDuplicada(serie)){mostrarToast('Duplicado','danger');return;}const m=document.getElementById('member-name').value.trim()||'Jugador';const info=FORMATOS[document.getElementById('country-select').value];registrar(serie);bovedaBilletes.push({miembro:m,pais:info.pais,codigo:info.codigo,serie,puntos:250,created_at:Date.now()});puntosTotalesBoveda+=250;guardarTodo();actualizarBovedaUI();actualizarPizarraUI();actualizarFondoUI();mostrarToast('Guardado sin foto','success');document.getElementById('serie-personal').value='';document.getElementById('btn-registrar').disabled=true;}
+function actualizarBovedaUI(){const l=document.getElementById('vault-list');l.innerHTML='';bovedaBilletes.slice(-10).reverse().forEach(b=>{const li=document.createElement('li');li.style.cssText='background:#020617;padding:8px 10px;border-radius:6px;margin-bottom:6px;display:flex;justify-content:space-between;font-size:.8rem;border:1px solid var(--border)';li.innerHTML=`<span><strong>${escapeHTML(b.miembro)}</strong> ${escapeHTML(b.serie)} <small style="color:#64748b">(${Math.floor((Date.now()-b.created_at)/86400000)}d)</small></span><span>+${b.puntos}</span>`;l.appendChild(li);});}
+function actualizarDashboardPoolUI(){document.getElementById('user-pts-balance').textContent=`${userBalancePts.toLocaleString()} PTS`;document.getElementById('leader-vault-pts').textContent=`${puntosTotalesBoveda.toLocaleString()}`;document.getElementById('pool-total-pts').textContent=`${poolTotalPts.toLocaleString()}`;document.getElementById('user-ownership-pct').textContent=`${poolTotalPts>0?((userInvestedPts/poolTotalPts)*100).toFixed(2):0}%`;}
+function ejecutarInversionPool(){const v=parseInt(document.getElementById('invest-pts-input').value,10);if(isNaN(v)||v<100)return;if(v>userBalancePts){mostrarToast('Sin balance','danger');return;}userBalancePts-=v;userInvestedPts+=v;poolTotalPts+=v;guardarTodo();actualizarDashboardPoolUI();actualizarPizarraUI();mostrarToast(`Aporte ${v}`,'success');}
+function initChart(){const ctx=document.getElementById('probabilidadChart').getContext('2d');chart=new Chart(ctx,{type:'bar',data:{labels:['Pos1','Pos2','Pos3'],datasets:[{label:'%',data:[30,50,20],backgroundColor:'#06b6d488'}]},options:{responsive:true,maintainAspectRatio:false}});}
+function procesarCerebro(){if(bovedaBilletes.length===0)return;let frec={};bovedaBilletes.forEach(r=>{const lim=normalizar(r.serie);for(let i=0;i<lim.length&&i<10;i++){if(!frec[i])frec[i]={};frec[i][lim[i]]=(frec[i][lim[i]]||0)+1;}});let serie='';for(let i=0;i<Object.keys(frec).length;i++){if(frec[i])serie+=Object.keys(frec[i]).reduce((a,b)=>frec[i][a]>frec[i][b]?a:b);}leaderStats.serie_maestra=serie;document.getElementById('daily-leader-display').textContent=`🌟 ${escapeHTML(serie)}`;guardarTodo();actualizarFondoUI();}
+function iniciarCron(){setInterval(()=>{cronSecs--;if(cronSecs<=0){cronSecs=3600;leaderStats.vecesLider30d++;procesarCerebro();}const m=Math.floor(cronSecs/60),s=cronSecs%60;document.getElementById('cron-timer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;},1000);}
 
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
+const STRIPE_LINK="https://buy.stripe.com/5kQ8wQ0frfOa7I6dLE7Vm0l";
+function openStripeGate(){document.getElementById('stripe-gate').style.display='flex';}
+function closeStripeGate(){document.getElementById('stripe-gate').style.display='none';}
+function checkGate(){const ok=document.getElementById('chk-terms').checked&&document.getElementById('chk-privacy').checked&&document.getElementById('chk-refund').checked;const b=document.getElementById('btn-ir-stripe');b.disabled=!ok;b.style.opacity=ok?'1':'.5';}
+function irAStripe(){if(checkGate){localStorage.setItem('dgt_terms',new Date().toISOString());window.open(STRIPE_LINK,'_blank');closeStripeGate();}}
+const LEGAL={terms:"<h2>Términos</h2><p>$4.99/mes via Stripe "+STRIPE_LINK+" - 60% al fondo. Programa puntos coleccionistas, sin fotos, puntos no son dinero. Fondo $500 meta, colchón $250. 1 compra/semana máx.</p>",privacy:"<h2>Privacidad</h2><p>Solo alias y series. Pagos Stripe. No vemos tarjeta. Borrado soporte@dollardgt.com</p>",refund:"<h2>Reembolso</h2><p>7 días primer cobro. 60% aportado no reembolsable. Cancela cuando quieras. Portal Stripe: "+STRIPE_LINK+"</p>",legal:"<h2>Aviso</h2><p>NO lotería/apuesta. SÍ puntos coleccionistas. Sin fotos 100% legal.</p>"};
+function openLegal(k){document.getElementById('legal-content').innerHTML=LEGAL[k];document.getElementById('legal-modal').style.display='flex';}
+function closeLegal(){document.getElementById('legal-modal').style.display='none';}
 
-      // Mensaje del “juego de Dollar”
-      if (!email || !password) {
-        messageEl.textContent = 'Para jugar al Dollar, primero escribe algo en ambos campos.';
-        messageEl.style.color = '#dc2626';
-      } else {
-        messageEl.textContent = 'El Dollar no se gana con claves. Se gana con visión. Sigue construyendo.';
-        messageEl.style.color = '#16a34a';
-      }
-    });
-  </script>
+function probarOferta(){
+  const eleg = esElegibleParaOferta();
+  if(eleg.elegible){
+    mostrarToast('✅ 4 CANDADOS ABIERTOS - Fondo ofetable','success');
+  } else {
+    mostrarToast('🔒 '+eleg.mensaje,'warning');
+  }
+}
+
+window.onload=init;
+</script>
 </body>
 </html>
