@@ -271,6 +271,19 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
         }
  let misBilletes = bovedaBilletes.filter(b => b.miembro.toLowerCase() === nombreActual.toLowerCase()); let misRaros = bovedaRaros.filter(b => b.miembro.toLowerCase() === nombreActual.toLowerCase()); let misPuntosTotales = misBilletes.reduce((acc, curr) => acc + curr.puntos, 0); document.getElementById("pizarra-user-guardados").textContent = misBilletes.length; document.getElementById("pizarra-user-raros").textContent = misRaros.length; document.getElementById("pizarra-user-puntos").textContent = `${misPuntosTotales.toLocaleString()} PTS`; document.getElementById("pizarra-user-aporte").textContent = `${userInvestedPts.toLocaleString()} PTS`; }
     async function initSistema() {
+        // FIX: Forzar reset de membresia - no confiar en localStorage viejo
+        fondoData.membresiaActiva = false;
+        localStorage.removeItem('membresia_activa');
+        localStorage.removeItem('dgt_membresia_supabase');
+        // Si hay datos viejos en localStorage con membresia true, borrarlos
+        try{
+            const saved = localStorage.getItem('dgt_estado_completo');
+            if(saved){
+                const obj = JSON.parse(saved);
+                if(obj && obj.fondoData){ obj.fondoData.membresiaActiva = false; obj.fondoData.ofertaForzada = false; localStorage.setItem('dgt_estado_completo', JSON.stringify(obj)); }
+            }
+        }catch(e){}
+
         const select = document.getElementById("country-select"); if (!select) return; select.innerHTML = "";
         let currentRegion = ""; let optgroup = null;
         for (const [key, val] of Object.entries(FORMATOS_MONEDA_MUNDIAL_48)) { if (val.region !== currentRegion) { currentRegion = val.region; optgroup = document.createElement("optgroup"); optgroup.label = `--- ${currentRegion.toUpperCase()} ---`; select.appendChild(optgroup); } let option = document.createElement("option"); option.value = key; option.textContent = `${val.pais} (${val.codigo}) - ${val.formato}`; if (optgroup) { optgroup.appendChild(option); } else { select.appendChild(option); } }
@@ -336,22 +349,20 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
     }
     function actualizarCandadoUI(id, estado, texto) { const el = document.getElementById(id); if (!el) return; if (estado) { el.className = "candado-item unlocked"; el.innerHTML = `🔓 ${escapeHTML(texto)}`; } else { el.className = "candado-item locked"; el.innerHTML = `🔒 ${escapeHTML(texto)}`; } }
     async function esMembresiaActiva() { 
-        if(fondoData.ofertaForzada) return true;
-        // CANDADO REAL: Solo si Supabase dice is_member=true
+        // ofertaForzada desactivada para pruebas
+        // if(fondoData.ofertaForzada) return true;
+        if(false && fondoData.ofertaForzada) return true;
+        // FIX: Solo si Supabase is_member=true
         try{
             if(supabaseClient && usuarioActual && usuarioActual.email){
                 const {data} = await supabaseClient.from('usuarios').select('is_member').eq('email', usuarioActual.email.toLowerCase().trim()).single();
-                if(data && data.is_member===true){
-                    fondoData.membresiaActiva = true;
-                    return true;
-                }
+                if(data && data.is_member===true){ fondoData.membresiaActiva=true; return true; }
             }
         }catch(e){}
-        fondoData.membresiaActiva = false;
+        fondoData.membresiaActiva=false;
         return false;
     }
-    function esMembresiaActivaOLD(){ return fondoData.membresiaActiva || fondoData.ofertaForzada; }
-    async function esElegibleParaOferta() { if (fondoData.ofertaForzada) return true; return ( (await esMembresiaActiva()) && fondoData.diasDesdeLanzamiento >= CONFIG.DIAS_SIEMBRA && fondoData.leaderStats >= CONFIG.VECES_LIDER_MIN && fondoData.diasBoveda >= CONFIG.DIAS_BOVEDA_MIN ); }
+    function esElegibleParaOferta() { if (fondoData.ofertaForzada) return true; return ( esMembresiaActiva() && fondoData.diasDesdeLanzamiento >= CONFIG.DIAS_SIEMBRA && fondoData.leaderStats >= CONFIG.VECES_LIDER_MIN && fondoData.diasBoveda >= CONFIG.DIAS_BOVEDA_MIN ); }
     function openStripeGate() { document.getElementById("chk-terms").checked = false; document.getElementById("chk-privacy").checked = false; document.getElementById("chk-refund").checked = false; document.getElementById("btn-ir-stripe").disabled = true; document.getElementById("stripe-gate").classList.add("active"); }
     function closeStripeGate() { document.getElementById("stripe-gate").classList.remove("active"); }
     function checkGate() { const t = document.getElementById("chk-terms").checked; const p = document.getElementById("chk-privacy").checked; const r = document.getElementById("chk-refund").checked; document.getElementById("btn-ir-stripe").disabled = !(t && p && r); }
@@ -359,9 +370,9 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
         const fechaActual = new Date().toISOString(); 
         localStorage.setItem("dgt_terms_accepted", fechaActual); 
         fondoData.fechaSuscripcion = fechaActual; 
-        // FIX: NO activar membresia aqui, solo cuando Supabase confirme pago real
-        // fondoData.membresiaActiva = true; DESACTIVADO
-        // fondoData.miembrosPagos++ DESACTIVADO hasta webhook 
+        // FIX DEFINITIVO: No activar membresia aqui
+        // fondoData.membresiaActiva = true; // BLOQUEADO
+        // fondoData.miembrosPagos++ BLOQUEADO hasta webhook Stripe 
         guardarEstadoCompleto(); 
         closeStripeGate(); 
         let stripeUrl = CONFIG.STRIPE_LINK;
@@ -378,6 +389,7 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
     }
     function openLegal(k) { const modal = document.getElementById("legal-modal"); const titleEl = document.getElementById("legal-title"); const contentEl = document.getElementById("legal-content"); let titulo = "Información Legal"; let texto = ""; if (k === 'terms') { titulo = "Términos y Condiciones"; texto = "DollarDgt.com es una plataforma de análisis numismático y simulación recreativa. Las membresías de $4.99/mes otorgan acceso exclusivo a las herramientas avanzadas y un 60% se destina al Fondo de Adquisición Coleccionista."; } else if (k === 'privacy') { titulo = "Política de Privacidad"; texto = "Tus datos se almacenan de manera local (LocalStorage) y se sincronizan de forma segura con Supabase. No compartimos información personal con terceros."; } else if (k === 'refund') { titulo = "Política de Reembolsos"; texto = "Garantía de reembolso de 7 días aplicable para nuevas suscripciones si no se han utilizado las funciones exclusivas del fondo."; } else { titulo = "Aviso Legal"; texto = "Todas las transacciones de pago son procesadas de forma segura a través de Stripe. DollarDgt.com no almacena credenciales bancarias."; } titleEl.textContent = titulo; contentEl.innerHTML = `<p>${texto}</p>`; modal.classList.add("active"); }
     function closeLegal() { document.getElementById("legal-modal").classList.remove("active"); }
+    function resetPruebas(){ localStorage.clear(); sessionStorage.clear(); alert('Memoria borrada - ahora prueba como usuario nuevo'); location.reload(); }
     window.onload = initSistema;
 </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
