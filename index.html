@@ -105,17 +105,186 @@
     </style>
 </head>
 <body>
+
+<style>
+/* V23 HEADER PRO */
+.top-header-pro{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(10,15,10,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(34,197,94,0.2);
+  padding: 10px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.top-header-pro .logo{
+  font-weight: 900;
+  font-size: 18px;
+  color: #22c55e;
+  letter-spacing: -0.5px;
+}
+.top-header-pro .logo span{ color: #f59e0b; }
+.btn-suscribete-top{
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
+  font-weight: 800;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(245,158,11,0.3);
+  transition: all 0.2s;
+}
+.btn-suscribete-top:hover{ transform: translateY(-1px) scale(1.03); box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
+.btn-suscribete-top.pulse{ animation: pulseGold 2s infinite; }
+@keyframes pulseGold{ 0%,100%{ box-shadow: 0 0 0 0 rgba(245,158,11,0.4);} 50%{ box-shadow: 0 0 0 10px rgba(245,158,11,0);} }
+.main-container{ padding-top: 60px !important; }
+
+/* Modal Suscribete PRO */
+#modal-suscribete-pro{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+}
+#modal-suscribete-pro.active{ display: flex; }
+.card-suscribete{
+  background: linear-gradient(180deg, #1a2a1a 0%, #0f1a0f 100%);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 20px;
+  max-width: 440px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  animation: slideUp 0.35s ease;
+}
+@keyframes slideUp{ from{ transform: translateY(30px); opacity:0;} to{ transform: translateY(0); opacity:1; } }
+.card-suscribete-header{
+  background: linear-gradient(135deg, #f59e0b22, #22c55e22);
+  padding: 22px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.card-suscribete-header h2{ margin:0; font-size:22px; color:#fbbf24; }
+.card-suscribete-header p{ margin:6px 0 0; color:#9ca3af; font-size:13px; }
+.card-suscribete-body{ padding: 20px; }
+.benefit-list{ list-style:none; padding:0; margin:0 0 18px; }
+.benefit-list li{ display:flex; gap:10px; margin:10px 0; font-size:13.5px; color:#d1d5db; line-height:1.4; }
+.benefit-list li b{ color:#fff; }
+.badge-dot{ width:22px; height:22px; background:#22c55e22; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px; }
+.warning-box{
+  background: #ef444411;
+  border: 1px solid #ef444433;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 12.5px;
+  color: #fca5a5;
+  margin-bottom: 18px;
+  line-height: 1.4;
+}
+.cta-row{ display:flex; gap:10px; }
+.btn-cta-gold{
+  flex:1;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color:#000;
+  font-weight:800;
+  border:none;
+  padding:12px;
+  border-radius:12px;
+  cursor:pointer;
+}
+.btn-cta-ghost{
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  color:#9ca3af;
+  padding:12px;
+  border-radius:12px;
+  cursor:pointer;
+}
+</style>
+
+<div class="top-header-pro">
+  <div class="logo">Dollar<span>DgT</span> 360</div>
+  <button class="btn-suscribete-top pulse" onclick="openSuscribetePro()">⭐ SUSCRÍBETE</button>
+</div>
+
+<div id="modal-suscribete-pro">
+  <div class="card-suscribete">
+    <div class="card-suscribete-header">
+      <div style="font-size:32px;">💎</div>
+      <h2>Protege tu Bóveda</h2>
+      <p>Suscripción Coleccionista Profesional</p>
+    </div>
+    <div class="card-suscribete-body">
+      <ul class="benefit-list">
+        <li><span class="badge-dot">☁️</span><span><b>Respaldo en la Nube:</b> Tus billetes nunca se pierden aunque cambies de teléfono</span></li>
+        <li><span class="badge-dot">🏆</span><span><b>Reclamo de Serie Líder:</b> Acceso exclusivo a reclamar número ganador</span></li>
+        <li><span class="badge-dot">🔒</span><span><b>Datos Blindados:</b> Tu colección vinculada a tu email SOY YO</span></li>
+        <li><span class="badge-dot">⚡</span><span><b>Soporte Prioritario:</b> Fondo de adquisición 60% activado</span></li>
+      </ul>
+      <div class="warning-box">
+        ⚠️ <b>Sin suscripción:</b> Tus datos solo viven en este navegador. Si borras caché, cambias de móvil o se rompe el teléfono, <b>pierdes tu bóveda para siempre</b>. Es tu responsabilidad suscribirte.
+      </div>
+      <div class="cta-row">
+        <button class="btn-cta-ghost" onclick="closeSuscribetePro()">Más tarde</button>
+        <button class="btn-cta-gold" onclick="closeSuscribetePro(); setTimeout(()=> openStripeGate(), 300);">Suscribirme $4.99/mes →</button>
+      </div>
+      <div style="text-align:center; margin-top:12px; font-size:11px; color:#6b7280;">Cancela cuando quieras • Pago seguro con Stripe</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// V23 LOGICA SUSCRIBETE PRO
+function openSuscribetePro(){
+  document.getElementById('modal-suscribete-pro').classList.add('active');
+}
+function closeSuscribetePro(){
+  document.getElementById('modal-suscribete-pro').classList.remove('active');
+}
+// Popup automatico 4 segundos despues de entrar, solo 1 vez por sesion
+setTimeout(()=>{
+  if(!localStorage.getItem('dgt_suscribete_seen') && !fondoData.membresiaActiva){
+    openSuscribetePro();
+    localStorage.setItem('dgt_suscribete_seen', '1');
+  }
+}, 4000);
+// Si pierde data detection
+window.addEventListener('load', ()=>{
+  const hasData = (bovedaBilletes && bovedaBilletes.length > 0);
+  const hasVault = !!localStorage.getItem('dgt_boveda_billetes');
+  if(!hasData && !hasVault && !localStorage.getItem('dgt_suscribete_seen_welcome')){
+    setTimeout(()=>{
+      openSuscribetePro();
+      localStorage.setItem('dgt_suscribete_seen_welcome','1');
+    }, 6000);
+  }
+});
+</script>
+
 <div class="toast-container" id="toast-container"></div>
-<div class="container">
+<div class="container main-container">
     <div class="app-header">
         <div style="font-weight: bold; color: var(--accent);">💵 DollarDgT 360 C/Master <span id="vault-owner-name" style="font-size:0.8rem;color:var(--gold);margin-left:8px;"></span> <span id="env-badge" style="font-size: 0.7rem; background: var(--border); padding: 2px 6px; border-radius: 4px; color: var(--warning);">Modo: LocalStorage</span></div>
         <div class="user-status" style="display: flex; align-items: center; gap: 15px;"><button onclick="openStripeGate()" class="btn-gold" style="width: auto; padding: 6px 14px; font-size: 0.85rem;">💳 $4.99/mes</button><div style="display: flex; align-items: center; gap: 10px;"><span class="status-dot"></span><span>Puntos: <strong id="user-pts-balance" style="color: var(--warning);">10,000 PTS</strong></span></div></div>
     </div>
-    <div class="card card-pizarra"><h2>Match SD</h2><p class="info-tag">Panel de control personal y estadísticas en la bóveda.</p><div class="pizarra-grid"><div class="pizarra-metric-card"><div class="pizarra-metric-title">Guardados</div><div class="pizarra-metric-value" id="pizarra-user-guardados">0</div></div><div class="pizarra-metric-card"><div class="pizarra-metric-title">Raros</div><div class="pizarra-metric-value" style="color: var(--gold);" id="pizarra-user-raros">0</div></div><div class="pizarra-metric-card"><div class="pizarra-metric-title">Puntos</div><div class="pizarra-metric-value" style="color: var(--success);" id="pizarra-user-puntos">0 PTS</div></div><div class="pizarra-metric-card"><div class="pizarra-metric-title">Aporte Pozo</div><div class="pizarra-metric-value" style="color: var(--warning);" id="pizarra-user-aporte">0 PTS</div></div></div><div style="margin-top: 20px;"><div class="form-group"><label for="member-name">Su Alias / Nombre:</label><input type="text" id="member-name" placeholder="🔒 OBLIGATORIO: Pon tu ID SOY YO (Ej: Ohdiaz)" value="" required oninput="actualizarPizarraUI()" style="border-color: var(--warning);"></div><div class="form-group"><label for="country-select">Selecciona el País / Divisa (48 Disponibles):</label><select id="country-select" onchange="actualizarTarjetaImpulso()"></select></div><div class="form-group"><label for="serie-personal">Número de Serie Completo:</label><input type="text" id="serie-personal" class="single-serial-input" placeholder="Ej. AB12345678C" oninput="validarEntradaPersonal()"></div><div class="btn-row"><button id="btn-registrar" class="btn-success" disabled onclick="guardarEnBovedaPersonal()">📥 Bajar a La Bóveda</button></div></div></div>
+    <div class="card card-pizarra"><h2>Introduce Tu Billete Aqui - Sdt</h2><p class="info-tag">Panel de control personal y estadísticas en la bóveda.</p><div class="pizarra-grid"><div class="pizarra-metric-card"><div class="pizarra-metric-title">Guardados</div><div class="pizarra-metric-value" id="pizarra-user-guardados">0</div></div><div class="pizarra-metric-card"><div class="pizarra-metric-title">Raros</div><div class="pizarra-metric-value" style="color: var(--gold);" id="pizarra-user-raros">0</div></div><div class="pizarra-metric-card"><div class="pizarra-metric-title">Puntos</div><div class="pizarra-metric-value" style="color: var(--success);" id="pizarra-user-puntos">0 PTS</div></div><div class="pizarra-metric-card"><div class="pizarra-metric-title">Aporte Pozo</div><div class="pizarra-metric-value" style="color: var(--warning);" id="pizarra-user-aporte">0 PTS</div></div></div><div style="margin-top: 20px;"><div class="form-group"><label for="member-name">Su Alias / Nombre:</label><input type="text" id="member-name" placeholder="🔒 OBLIGATORIO: Pon tu ID SOY YO (Ej: Ohdiaz)" value="" required oninput="actualizarPizarraUI()" style="border-color: var(--warning);"></div><div class="form-group"><label for="country-select">Selecciona el País / Divisa (48 Disponibles):</label><select id="country-select" onchange="actualizarTarjetaImpulso()"></select></div><div class="form-group"><label for="serie-personal">Número de Serie Completo:</label><input type="text" id="serie-personal" class="single-serial-input" placeholder="Ej. AB12345678C" oninput="validarEntradaPersonal()"></div><div class="btn-row"><button id="btn-registrar" class="btn-success" disabled onclick="guardarEnBovedaPersonal()">📥 Bajar a La Bóveda</button></div></div></div>
     <div class="card card-fondo" id="card-fondo"><h2 style="color: var(--amber);">🏦 Fondo Adquisición Coleccionista 60% - $4.99/mes</h2><div class="pool-dashboard"><div class="pool-card"><div class="metric-title">Fondo Acumulado</div><div class="metric-value" style="color: var(--success);" id="fondo-acumulado">$0.00</div></div><div class="pool-card"><div class="metric-title">Miembros Pagos</div><div class="metric-value" style="color: var(--accent);" id="miembros-pagos">0/500</div></div><div class="pool-card"><div class="metric-title">Colchón Mínimo</div><div class="metric-value" style="color: var(--warning);" id="colchon-val">$250</div></div></div><div class="pool-progress-bar"><div id="fondo-progress" class="pool-progress-fill" style="width: 0%;"></div></div><div class="candados-grid" id="candados-grid"><div class="candado-item locked" id="candado-1">🔒 1. Membresía Activa</div><div class="candado-item locked" id="candado-2">🔒 2. Días Siembra (90d)</div><div class="candado-item locked" id="candado-3">🔒 3. Veces Líder (3x)</div><div class="candado-item locked" id="candado-4">🔒 4. Días Bóveda (30d)</div></div><div class="elegibilidad-box" id="elegibilidad-box"><div class="elegibilidad-titulo" id="elegibilidad-titulo" style="color: var(--danger);">❌ No Elegible para la Oferta</div><div class="elegibilidad-desc" id="elegibilidad-desc">Cumple con los 4 candados de seguridad y participación para desbloquear.</div></div></div>
     <div class="card card-rare"><h2 style="color: var(--gold);">⭐ Registro de Números de Serie Raros</h2><div class="form-group"><label for="rare-type-select">Tipo de Rareza Numismática:</label><select id="rare-type-select"><option value="Escalera Ascendente (12345678)">📈 Escalera Ascendente</option><option value="Escalera Descendente (87654321)">📉 Escalera Descendente</option><option value="Radar / Palíndromo (12344321)">🔄 Radar / Palíndromo</option><option value="Repetidor / Repeater (12341234)">🔁 Repetidor</option><option value="Sólido / Digito Único (77777777)">💎 Sólido</option><option value="Billete Estrella / Star Note (*)">🌟 Billete Estrella</option></select></div><div class="form-group"><label for="rare-serial-input">Número de Serie Raro:</label><input type="text" id="rare-serial-input" class="single-serial-input" style="border-color: var(--gold); color: var(--gold);" placeholder="Ej. A00000001B" oninput="validarEntradaRara()"></div><div class="btn-row"><button id="btn-coleccionar-raro" class="btn-gold" disabled onclick="guardarSerieRara()">⭐ Colecciona Raros</button></div></div>
     <div class="card card-boost"><h2 style="color: var(--purple);">🚀 Tarjeta de Impulso - Serie Generada</h2><div id="boost-country-info" class="info-tag" style="color: var(--text-main); font-weight: bold; margin-bottom: 8px;">País Seleccionado</div><div id="generated-serial-box" class="generated-serial-display">--- PRESIONE GENERAR ---</div><div class="btn-row"><button id="btn-roll" class="btn-purple" onclick="generarSerieImpulsoConRoll()">🎲 Generar Combinación (Roll)</button><button id="btn-guardar-impulso" class="btn-success" disabled onclick="guardarImpulsoEnBoveda()">📥 Guardar en Bóveda</button></div></div>
-    <div class="card leader-box"><div class="leader-header-flex"><h3 style="color: var(--warning); margin: 0; text-align: left;">🔥 Bote Comunitario de Puntos</h3><div class="timer-badge">⏳ Próximo Recálculo: <span id="cron-timer">--:--</span></div></div><div id="daily-leader-display" class="serial-display">🌟 CALCULANDO...</div><div class="pool-dashboard"><div class="pool-card"><div class="metric-title">Puntos Bóveda</div><div class="metric-value" style="color: var(--text-main);" id="leader-vault-pts">0 PTS</div></div><div class="pool-card"><div class="metric-title">Bote Total Pozo</div><div class="metric-value" style="color: var(--warning);" id="pool-total-pts">10,000 PTS</div></div><div class="pool-card"><div class="metric-title">Tu Aporte (%)</div><div class="metric-value" style="color: var(--success);" id="user-ownership-pct">0.00 %</div></div></div><div class="pool-progress-bar"><div id="pool-progress-fill" class="pool-progress-fill"></div></div><div style="background: #0b0f19; padding: 15px; border-radius: 10px; border: 1px solid var(--border); margin-top: 15px;"><label style="text-align: left; margin-bottom: 8px;">⚡ Aportar Puntos (Mínimo 100 PTS):</label><div class="investment-input-group"><input type="number" id="invest-pts-input" placeholder="Monto (Mínimo 100)" min="100" step="100"><button class="btn-warning" style="width: auto; padding: 0 25px;" onclick="ejecutarInversionPool()">⚡ Aportar</button></div></div><div class="btn-row" style="margin-top: 15px;"><button class="btn-warning" onclick="abrirModalCanjear()">🏆 Reclamar Número Ganador</button><button class="btn-primary" onclick="verHistorialLideres()">📜 Ver Historial</button></div></div>
+    <div class="card leader-box"><div class="leader-header-flex"><h3 style="color: var(--warning); margin: 0; text-align: left;">🔥 Bote Comunitario de Puntos</h3><div class="timer-badge">⏳ Próximo Recálculo: <span id="cron-timer">--:--</span></div></div><div id="daily-leader-display" class="serial-display">🌟 CALCULANDO...</div><div class="pool-dashboard"><div class="pool-card"><div class="metric-title">Puntos Bóveda</div><div class="metric-value" style="color: var(--text-main);" id="leader-vault-pts">0 PTS</div></div><div class="pool-card"><div class="metric-title">Bote Total Pozo</div><div class="metric-value" style="color: var(--warning);" id="pool-total-pts">10,000 PTS</div></div><div class="pool-card"><div class="metric-title">Tu Aporte (%)</div><div class="metric-value" style="color: var(--success);" id="user-ownership-pct">0.00 %</div></div></div><div class="pool-progress-bar"><div id="pool-progress-fill" class="pool-progress-fill"></div></div><div style="background: #0b0f19; padding: 15px; border-radius: 10px; border: 1px solid var(--border); margin-top: 15px;"><label style="text-align: left; margin-bottom: 8px;">⚡ Aportar Puntos (Mínimo 100 PTS):</label><div class="investment-input-group"><input type="number" id="invest-pts-input" placeholder="Monto (Mínimo 100)" min="100" step="100"><button class="btn-warning" style="width: auto; padding: 0 25px;" onclick="ejecutarInversionPool()">⚡ Aportar</button></div></div><div class="btn-row" style="margin-top: 15px;"><button id="btn-canjear" class="btn-warning" onclick="abrirModalCanjear()">🏆 Reclamar Número Ganador</button><button class="btn-primary" onclick="verHistorialLideres()">📜 Ver Historial</button></div></div>
     <div class="card"><h3 style="color: var(--gold);">🏆 Vitrina de Colección de Billetes Raros</h3><ul id="rare-vault-list" class="rare-list"></ul></div>
     <div class="card"><h3>📈 Monitoreo de Frecuencias de Números (%)</h3><div class="chart-container"><canvas id="probabilidadChart"></canvas></div><div class="chart-footer-metrics"><div class="metric-card"><div class="metric-title">🔥 Patrón Frecuente</div><div class="metric-value" id="metric-top-pos">Sin datos</div></div><div class="metric-card"><div class="metric-title">🎯 Coincidencia Global</div><div class="metric-value" id="metric-certainty" style="color: var(--success);">0%</div></div><div class="metric-card"><div class="metric-title">📊 Muestreo Total</div><div class="metric-value" id="metric-total-samples" style="color: var(--purple);">0 Billetes</div></div></div></div>
     <div class="card"><h3>🏛️ Bóveda Interna (Registro General)</h3><ul id="vault-list" class="vault-list"></ul></div>
@@ -242,7 +411,7 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
         localStorage.setItem('dgt_lider_cache', JSON.stringify(liderActualCache));
         localStorage.setItem('dgt_next_recalc', JSON.stringify(nextRecalcAt));
         localStorage.setItem('dgt_fondo_adquisicion', JSON.stringify(fondoData));
-        if (supabaseClient && nuevoRegistro) { try { const { error } = await supabaseClient.from('boveda').insert([{ miembro: nuevoRegistro.miembro, pais: nuevoRegistro.pais, codigo: nuevoRegistro.codigo, serie: nuevoRegistro.serie, puntos: nuevoRegistro.puntos, rareza: nuevoRegistro.rareza || null, created_at: new Date().toISOString() }]); if (error) console.error("Error guardando en Supabase:", error); } catch (err) { console.warn("Excepción de conexión con Supabase:", err); } }
+        if (supabaseClient && nuevoRegistro) { try { const { error } = await supabaseClient.from('boveda').insert([{ user_email: nuevoRegistro.user_email || nuevoRegistro.miembro, pais: nuevoRegistro.pais, codigo: nuevoRegistro.codigo, serie: nuevoRegistro.serie, puntos: nuevoRegistro.puntos, rareza: nuevoRegistro.rareza || null, created_at: new Date().toISOString() }]); if (error) console.error("Error guardando en Supabase:", error); } catch (err) { console.warn("Excepción de conexión con Supabase:", err); } }
     }
     function normalizarSerie(serie) { if (!serie) return ""; return serie.toString().replace(/[^A-Z0-9]/gi, '').toUpperCase(); }
     function esSerieDuplicada(serie) { return seriesSet.has(normalizarSerie(serie)); }
@@ -275,11 +444,11 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
         let currentRegion = ""; let optgroup = null;
         for (const [key, val] of Object.entries(FORMATOS_MONEDA_MUNDIAL_48)) { if (val.region !== currentRegion) { currentRegion = val.region; optgroup = document.createElement("optgroup"); optgroup.label = `--- ${currentRegion.toUpperCase()} ---`; select.appendChild(optgroup); } let option = document.createElement("option"); option.value = key; option.textContent = `${val.pais} (${val.codigo}) - ${val.formato}`; if (optgroup) { optgroup.appendChild(option); } else { select.appendChild(option); } }
         initChart(); actualizarTarjetaImpulso();
-        if (supabaseClient) { try { const { data, error } = await supabaseClient.from('boveda').select('*').order('created_at', { ascending: false }); if (!error && data && data.length > 0) { bovedaBilletes = data.map(item => ({ miembro: item.miembro, pais: item.pais, codigo: item.codigo, serie: item.serie, puntos: item.puntos, fecha: new Date(item.created_at).toLocaleTimeString(), raro: !!item.rareza, rareza: item.rareza })); bovedaRaros = bovedaBilletes.filter(b => b.raro); data.forEach(item => seriesSet.add(normalizarSerie(item.serie))); } } catch (err) { console.warn("Error cargando Supabase, utilizando LocalStorage:", err); } }
+        if (supabaseClient) { try { const { data, error } = await supabaseClient.from('boveda').select('*').order('created_at', { ascending: false }); if (!error && data && data.length > 0) { bovedaBilletes = data.map(item => ({ miembro: item.user_email || item.miembro || 'anon', user_email: item.user_email, pais: item.pais, codigo: item.codigo || item.pais, serie: item.serie, puntos: item.puntos, fecha: new Date(item.created_at).toLocaleTimeString(), raro: !!item.rareza, rareza: item.rareza })); bovedaRaros = bovedaBilletes.filter(b => b.raro); data.forEach(item => seriesSet.add(normalizarSerie(item.serie))); } } catch (err) { console.warn("Error cargando Supabase, utilizando LocalStorage:", err); } }
         if (bovedaBilletes.length === 0) { inicializarBaseDeDatosInicial(); } else { actualizarBovedaUI(); actualizarVitrinaRarosUI(); }
         iniciarRelojCronPersistido(); actualizarDashboardPoolUI(); actualizarPizarraUI(); procesarCerebroSistema(); actualizarGraficoProbabilidad(); actualizarFondoUI(); initSoyYo();
     }
-    function inicializarBaseDeDatosInicial() { const demo = [{ nombre: "Carlos Mendoza", paisKey: "USD_MODERNO" }, { nombre: "Ana Sofía Rossi", paisKey: "EUR_EUROPA" }, { nombre: "Jugador Estelar", paisKey: "USD_1_2" }]; demo.forEach(m => { const info = FORMATOS_MONEDA_MUNDIAL_48[m.paisKey]; let serie = generarCombinacionRaw(info); while (esSerieDuplicada(serie)) serie = generarCombinacionRaw(info); registrarSerieEnSet(serie); const pts = calcularPuntajeBackend(); puntosTotalesBoveda += pts; const reg = { miembro: m.nombre, pais: info.pais, codigo: info.codigo, serie: serie, puntos: pts, fecha: new Date().toLocaleTimeString(), raro: false }; bovedaBilletes.push(reg); guardarEstadoCompleto(reg); }); actualizarBovedaUI(); actualizarPizarraUI(); }
+    function inicializarBaseDeDatosInicial() { const demo = [{ nombre: "Carlos Mendoza", paisKey: "USD_MODERNO" }, { nombre: "Ana Sofía Rossi", paisKey: "EUR_EUROPA" }, { nombre: "Jugador Estelar", paisKey: "USD_1_2" }]; demo.forEach(m => { const info = FORMATOS_MONEDA_MUNDIAL_48[m.paisKey]; let serie = generarCombinacionRaw(info); while (esSerieDuplicada(serie)) serie = generarCombinacionRaw(info); registrarSerieEnSet(serie); const pts = calcularPuntajeBackend(); puntosTotalesBoveda += pts; const reg = { user_email: 'demo@dollardgt.com', miembro: m.nombre, pais: info.pais, codigo: info.codigo, serie: serie, puntos: pts, fecha: new Date().toLocaleTimeString(), raro: false }; bovedaBilletes.push(reg); guardarEstadoCompleto(reg); }); actualizarBovedaUI(); actualizarPizarraUI(); }
     function iniciarRelojCronPersistido() { setInterval(() => { const ahora = Date.now(); let restanteSecs = Math.floor((nextRecalcAt - ahora) / 1000); if (restanteSecs <= 0) { procesarCerebroSistema(); nextRecalcAt = Date.now() + (CONFIG.CRON_INTERVALO_SEGS * 1000); guardarEstadoCompleto(); mostrarToast("⏰ ¡Cierre de Ronda Horaria Automático!", "warning"); restanteSecs = CONFIG.CRON_INTERVALO_SEGS; } let mins = Math.floor(restanteSecs / 60); let secs = restanteSecs % 60; document.getElementById("cron-timer").textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; }, 1000); }
     function procesarCerebroSistema() { if (bovedaBilletes.length === 0) return; let frecuencias = {}; bovedaBilletes.forEach(reg => { let limpio = normalizarSerie(reg.serie); for (let i = 0; i < limpio.length && i < 12; i++) { if (!frecuencias[i]) frecuencias[i] = {}; let char = limpio[i]; frecuencias[i][char] = (frecuencias[i][char] || 0) + 1; } }); let serieMaestra = ""; for (let i = 0; i < Object.keys(frecuencias).length; i++) { if (frecuencias[i]) { let mejorChar = Object.keys(frecuencias[i]).reduce((a, b) => frecuencias[i][a] > frecuencias[i][b] ? a : b); serieMaestra += mejorChar; } } let ultimoReg = bovedaBilletes[bovedaBilletes.length - 1]; liderActualCache = { serie: serieMaestra, pais: ultimoReg ? ultimoReg.pais : "Global", puntos: puntosTotalesBoveda }; guardarEstadoCompleto(); document.getElementById("daily-leader-display").textContent = `🌟 ${serieMaestra}`; }
     function ejecutarInversionPool() { const input = document.getElementById("invest-pts-input"); const ptsAInvertir = parseInt(input.value, 10); if (isNaN(ptsAInvertir) || ptsAInvertir < 100) { mostrarToast("⚠️ Aporte mínimo: 100 PTS.", "warning"); return; } if (ptsAInvertir > userBalancePts) { mostrarToast("⚠️ Puntos insuficientes en tu balance.", "danger"); return; } userBalancePts -= ptsAInvertir; userInvestedPts += ptsAInvertir; poolTotalPts += ptsAInvertir; guardarEstadoCompleto(); actualizarDashboardPoolUI(); actualizarPizarraUI(); input.value = ""; mostrarToast(`⚡ ¡Aporte exitoso de +${ptsAInvertir.toLocaleString()} PTS!`, "success"); }
@@ -292,7 +461,31 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
     function validarEntradaRara() { document.getElementById("btn-coleccionar-raro").disabled = document.getElementById("rare-serial-input").value.trim().length < 4; }
     function actualizarTarjetaImpulso() { const countryKey = document.getElementById("country-select").value; const paisInfo = FORMATOS_MONEDA_MUNDIAL_48[countryKey]; if (paisInfo) { document.getElementById("boost-country-info").textContent = `País Seleccionado: ${paisInfo.pais} (${paisInfo.codigo})`; } }
     function generarCombinacionRaw(info) { if (!info) return "AB12345678C"; const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; let res = ""; for (let i = 0; i < info.formato.length; i++) { let char = info.formato[i]; if (char === '0') res += Math.floor(Math.random() * 10); else if (char === 'L') res += letras.charAt(Math.floor(Math.random() * letras.length)); else res += char; } return res; }
-    function generarSerieImpulsoConRoll() { if (isRolling) return; isRolling = true; const display = document.getElementById("generated-serial-box"); const info = FORMATOS_MONEDA_MUNDIAL_48[document.getElementById("country-select").value]; display.classList.add("rolling"); let iter = 0; const interval = setInterval(() => { display.textContent = generarCombinacionRaw(info); if (++iter >= 15) { clearInterval(interval); serieImpulsoActual = generarCombinacionRaw(info); display.textContent = serieImpulsoActual; display.classList.remove("rolling"); isRolling = false; document.getElementById("btn-guardar-impulso").disabled = false; } }, 60); }
+    function generarSerieImpulsoConRoll() { 
+        if (isRolling) return; 
+        let alias = document.getElementById("member-name").value.trim();
+        if(!alias || alias.toLowerCase()==="jugador estelar" || alias.length<2){
+            mostrarToast("🔒 Primero pon tu ID SOY YO arriba (Ej: Ohdiaz)","danger");
+            document.getElementById("member-name").focus();
+            return;
+        }
+        isRolling = true; 
+        const display = document.getElementById("generated-serial-box"); 
+        const info = FORMATOS_MONEDA_MUNDIAL_48[document.getElementById("country-select").value]; 
+        display.classList.add("rolling"); 
+        let iter = 0; 
+        const interval = setInterval(() => { 
+            display.textContent = generarCombinacionRaw(info); 
+            if (++iter >= 15) { 
+                clearInterval(interval); 
+                serieImpulsoActual = generarCombinacionRaw(info); 
+                display.textContent = serieImpulsoActual; 
+                display.classList.remove("rolling"); 
+                isRolling = false; 
+                document.getElementById("btn-guardar-impulso").disabled = false; 
+            } 
+        }, 60); 
+    }
     function guardarEnBovedaPersonal() { 
         const aliasInput = document.getElementById("member-name").value.trim();
         if(!aliasInput || aliasInput.length < 2 || aliasInput.toLowerCase() === "jugador estelar"){
@@ -308,51 +501,166 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
         }
         const serie = document.getElementById("serie-personal").value.trim().toUpperCase(); 
         if (esSerieDuplicada(serie)) { mostrarToast(`⚠️ El número "${serie}" ya existe en la Bóveda.`, "danger"); return; } 
-        const miembro = aliasInput; const info = FORMATOS_MONEDA_MUNDIAL_48[document.getElementById("country-select").value]; const pts = calcularPuntajeBackend(); puntosTotalesBoveda += pts; registrarSerieEnSet(serie); const reg = { miembro, pais: info.pais, codigo: info.codigo, serie, puntos: pts, fecha: new Date().toLocaleTimeString(), raro: false }; bovedaBilletes.push(reg); guardarEstadoCompleto(reg); actualizarBovedaUI(); actualizarPizarraUI(); procesarCerebroSistema(); actualizarGraficoProbabilidad(); document.getElementById("serie-personal").value = ""; document.getElementById("btn-registrar").disabled = true; mostrarToast(`✅ Billete ingresado a la Bóveda.`, "success"); }
+        const miembro = aliasInput; const info = FORMATOS_MONEDA_MUNDIAL_48[document.getElementById("country-select").value]; const pts = calcularPuntajeBackend(); puntosTotalesBoveda += pts; registrarSerieEnSet(serie); const reg = { user_email: usuarioActual?.email || miembro, miembro, pais: info.pais, codigo: info.codigo, serie, puntos: pts, fecha: new Date().toLocaleTimeString(), raro: false }; bovedaBilletes.push(reg); guardarEstadoCompleto(reg); actualizarBovedaUI(); actualizarPizarraUI(); procesarCerebroSistema(); 
+        console.log('[VAULT] Nuevo total', bovedaBilletes.length, 'serie', serie);
+        setTimeout(()=>{ try{ actualizarGraficoProbabilidad(); console.log('[GRAFICO] Actualizado'); }catch(e){ console.error(e); } }, 300);
+ document.getElementById("serie-personal").value = ""; document.getElementById("btn-registrar").disabled = true; mostrarToast(`✅ Billete ingresado a la Bóveda.`, "success"); }
     function guardarSerieRara() { const serie = document.getElementById("rare-serial-input").value.trim().toUpperCase(); if (esSerieDuplicada(serie)) { mostrarToast(`⚠️ El número raro "${serie}" ya existe.`, "danger"); return; } let miembroTmp = document.getElementById("member-name").value.trim(); if(!miembroTmp || miembroTmp.toLowerCase()==="jugador estelar" || miembroTmp.toLowerCase()==="coleccionista"){ mostrarToast("🔒 Pon tu ID SOY YO obligatorio (Ej: Ohdiaz)","danger"); document.getElementById("member-name").focus(); return; } const miembro = miembroTmp; const tipoRareza = document.getElementById("rare-type-select").value; const info = FORMATOS_MONEDA_MUNDIAL_48[document.getElementById("country-select").value]; const pts = calcularPuntajeBackend(tipoRareza); puntosTotalesBoveda += pts; registrarSerieEnSet(serie); const reg = { miembro, pais: info.pais, codigo: info.codigo, serie, puntos: pts, rareza: tipoRareza, fecha: new Date().toLocaleTimeString(), raro: true }; bovedaBilletes.push(reg); bovedaRaros.push(reg); guardarEstadoCompleto(reg); actualizarBovedaUI(); actualizarVitrinaRarosUI(); actualizarPizarraUI(); procesarCerebroSistema(); actualizarGraficoProbabilidad(); document.getElementById("rare-serial-input").value = ""; document.getElementById("btn-coleccionar-raro").disabled = true; mostrarToast(`⭐ Billete Raro guardado (+${pts} PTS).`, "success"); }
-    function guardarImpulsoEnBoveda() { if (!serieImpulsoActual || esSerieDuplicada(serieImpulsoActual)) return; const miembro = document.getElementById("member-name").value.trim() || "Jugador Estelar"; const info = FORMATOS_MONEDA_MUNDIAL_48[document.getElementById("country-select").value]; const pts = calcularPuntajeBackend(); puntosTotalesBoveda += pts; registrarSerieEnSet(serieImpulsoActual); const reg = { miembro, pais: info.pais, codigo: info.codigo, serie: serieImpulsoActual, puntos: pts, fecha: new Date().toLocaleTimeString(), raro: false }; bovedaBilletes.push(reg); guardarEstadoCompleto(reg); actualizarBovedaUI(); actualizarPizarraUI(); procesarCerebroSistema(); actualizarGraficoProbabilidad(); document.getElementById("btn-guardar-impulso").disabled = true; document.getElementById("generated-serial-box").textContent = `✅ GUARDADO: ${serieImpulsoActual}`; serieImpulsoActual = ""; mostrarToast(`📥 Serie de impulso guardada.`, "success"); }
-    function actualizarBovedaUI() { const lista = document.getElementById("vault-list"); lista.innerHTML = ""; bovedaBilletes.slice(-10).reverse().forEach(item => { const li = document.createElement("li"); li.className = "vault-item"; li.innerHTML = `<span><strong>${escapeHTML(item.miembro)}</strong> (${escapeHTML(item.pais)}): <code>${escapeHTML(item.serie)}</code> ${item.raro ? '<span class="badge-rare">⭐ RAREZA</span>' : ''}</span><span style="color: var(--success);">+${item.puntos} pts</span>`; lista.appendChild(li); }); }
-    function actualizarVitrinaRarosUI() { const lista = document.getElementById("rare-vault-list"); lista.innerHTML = ""; if (bovedaRaros.length === 0) { lista.innerHTML = `<li class="rare-item" style="justify-content: center; color: var(--text-muted);">Sin billetes raros aún.</li>`; return; } bovedaRaros.slice().reverse().forEach(item => { const li = document.createElement("li"); li.className = "rare-item"; li.innerHTML = `<div><strong>${escapeHTML(item.miembro)}</strong> (${escapeHTML(item.pais)})<div class="info-tag" style="color: var(--gold);">🏷️ ${escapeHTML(item.rareza)}</div><code>${escapeHTML(item.serie)}</code></div><div style="text-align: right;"><span style="color: var(--gold); font-weight: bold;">+${item.puntos} PTS</span><div class="info-tag">${escapeHTML(item.fecha)}</div></div>`; lista.appendChild(li); }); }
-    function initChart() { const ctx = document.getElementById('probabilidadChart').getContext('2d'); chartProbabilidad = new Chart(ctx, { type: 'bar', data: { labels: [], datasets: [{ label: 'Frecuencia Dominante (%)', data: [], backgroundColor: '#22c55e88', borderColor: '#22c55e', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } } }); }
-    function actualizarGraficoProbabilidad() { if (bovedaBilletes.length === 0) return; let total = bovedaBilletes.length; let frecuencias = {}; bovedaBilletes.forEach(reg => { let limpio = normalizarSerie(reg.serie); for (let i = 0; i < limpio.length && i < 10; i++) { if (!frecuencias[i]) frecuencias[i] = {}; let char = limpio[i]; frecuencias[i][char] = (frecuencias[i][char] || 0) + 1; } }); let porcentajes = [], etiquetas = []; for (let i = 0; i < 10; i++) { etiquetas.push(`Pos ${i + 1}`); if (frecuencias[i]) { let max = Math.max(...Object.values(frecuencias[i])); porcentajes.push(parseFloat(((max / total) * 100).toFixed(1))); } else { porcentajes.push(0); } } chartProbabilidad.data.labels = etiquetas; chartProbabilidad.data.datasets[0].data = porcentajes; chartProbabilidad.update(); document.getElementById("metric-total-samples").textContent = `${total} Billetes`; document.getElementById("metric-certainty").textContent = `${(porcentajes.reduce((a,b)=>a+b,0)/porcentajes.length).toFixed(1)}%`; }
-    async function abrirModalCanjear() { 
-        console.log('[CLAIM] Verificando membresia para', usuarioActual?.email);
-        // BORRAR MEMBRESIA VIEJA
-        try{
-            const saved = localStorage.getItem('dgt_estado_completo');
-            if(saved){
-                const obj = JSON.parse(saved);
-                if(obj?.fondoData?.membresiaActiva && !obj.fondoData._verificado){
-                    obj.fondoData.membresiaActiva = false;
-                    localStorage.setItem('dgt_estado_completo', JSON.stringify(obj));
-                }
-            }
-        }catch(e){}
-        
-        // VERIFICAR SUPABASE REAL
-        let esMiembroReal = false;
-        try{
-            if(supabaseClient && usuarioActual && usuarioActual.email){
-                const {data} = await supabaseClient.from('usuarios').select('is_member').eq('email', usuarioActual.email.toLowerCase().trim()).single();
-                if(data && data.is_member === true){
-                    esMiembroReal = true;
-                    fondoData.membresiaActiva = true;
-                } else {
-                    fondoData.membresiaActiva = false;
-                }
-            }
-        }catch(e){ console.log('Error check', e); fondoData.membresiaActiva = false; }
-        
-        if(!esMiembroReal){
-            mostrarToast("🔒 BLOQUEADO: " + (usuarioActual?.email||'sin email') + " NO es miembro. Debes pagar $4.99", "warning");
-            openStripeGate();
+    function guardarImpulsoEnBoveda() { 
+        if (!serieImpulsoActual){
+            mostrarToast("⚠️ Primero genera una serie","warning");
             return;
         }
+        if(esSerieDuplicada(serieImpulsoActual)){
+            mostrarToast(`⚠️ El número "${serieImpulsoActual}" ya existe en la Bóveda.`, "danger");
+            return;
+        }
+        const aliasInput = document.getElementById("member-name").value.trim();
+        if(!aliasInput || aliasInput.length < 2 || aliasInput.toLowerCase() === "jugador estelar"){
+            mostrarToast("🔒 Pon tu ID SOY YO obligatorio (Ej: Ohdiaz)","danger");
+            document.getElementById("member-name").focus();
+            return;
+        }
+        const miembro = aliasInput; 
+        const info = FORMATOS_MONEDA_MUNDIAL_48[document.getElementById("country-select").value]; 
+        const pts = calcularPuntajeBackend(); 
+        puntosTotalesBoveda += pts; 
+        registrarSerieEnSet(serieImpulsoActual); 
+        const reg = { user_email: usuarioActual?.email || miembro, miembro, pais: info.pais, codigo: info.codigo, serie: serieImpulsoActual, puntos: pts, fecha: new Date().toLocaleTimeString(), raro: false }; 
+        bovedaBilletes.push(reg); 
+        guardarEstadoCompleto(reg); 
+        actualizarBovedaUI(); 
+        actualizarPizarraUI(); 
+        procesarCerebroSistema(); 
+        actualizarGraficoProbabilidad();
+        const serieGuardada = serieImpulsoActual;
+        document.getElementById("btn-guardar-impulso").disabled = true; 
+        document.getElementById("generated-serial-box").textContent = `✅ GUARDADO: ${serieGuardada}`; 
+        serieImpulsoActual = ""; 
+        mostrarToast(`📥 Serie de impulso guardada (+${pts} PTS).`, "success"); 
+    }
+    function actualizarBovedaUI() {
+        try{ actualizarGraficoProbabilidad(); }catch(e){} const lista = document.getElementById("vault-list"); lista.innerHTML = ""; bovedaBilletes.slice(-10).reverse().forEach(item => { const li = document.createElement("li"); li.className = "vault-item"; li.innerHTML = `<span><strong>${escapeHTML(item.miembro)}</strong> (${escapeHTML(item.pais)}): <code>${escapeHTML(item.serie)}</code> ${item.raro ? '<span class="badge-rare">⭐ RAREZA</span>' : ''}</span><span style="color: var(--success);">+${item.puntos} pts</span>`; lista.appendChild(li); }); }
+    function actualizarVitrinaRarosUI() { const lista = document.getElementById("rare-vault-list"); lista.innerHTML = ""; if (bovedaRaros.length === 0) { lista.innerHTML = `<li class="rare-item" style="justify-content: center; color: var(--text-muted);">Sin billetes raros aún.</li>`; return; } bovedaRaros.slice().reverse().forEach(item => { const li = document.createElement("li"); li.className = "rare-item"; li.innerHTML = `<div><strong>${escapeHTML(item.miembro)}</strong> (${escapeHTML(item.pais)})<div class="info-tag" style="color: var(--gold);">🏷️ ${escapeHTML(item.rareza)}</div><code>${escapeHTML(item.serie)}</code></div><div style="text-align: right;"><span style="color: var(--gold); font-weight: bold;">+${item.puntos} PTS</span><div class="info-tag">${escapeHTML(item.fecha)}</div></div>`; lista.appendChild(li); }); }
+    function initChart() { 
+        try{
+            const canvas = document.getElementById('probabilidadChart');
+            if(!canvas){ console.warn('Canvas no encontrado'); return; }
+            const ctx = canvas.getContext('2d'); 
+            chartProbabilidad = new Chart(ctx, { type: 'bar', data: { labels: [], datasets: [{ label: 'Frecuencia Dominante (%)', data: [], backgroundColor: '#22c55e88', borderColor: '#22c55e', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } } });
+            console.log('Chart iniciado');
+        }catch(e){ console.error('Error initChart', e); }
+    }
+    function actualizarGraficoProbabilidad() { 
+        const totalEl = document.getElementById("metric-total-samples");
+        const certEl = document.getElementById("metric-certainty");
+        const topEl = document.getElementById("metric-top-pos");
+        if (bovedaBilletes.length === 0) { 
+            if(totalEl) totalEl.textContent = "0 Billetes"; 
+            if(certEl) certEl.textContent = "0%"; 
+            if(topEl) topEl.textContent = "Sin datos";
+            return; 
+        } 
+        let total = bovedaBilletes.length; 
+        let frecuencias = {}; 
+        bovedaBilletes.forEach(reg => { 
+            let limpio = normalizarSerie(reg.serie); 
+            // Detectar solo digitos y letras
+            for (let i = 0; i < limpio.length && i < 10; i++) { 
+                if (!frecuencias[i]) frecuencias[i] = {}; 
+                let char = limpio[i]; 
+                // Contar cualquier caracter (digito o letra)
+                frecuencias[i][char] = (frecuencias[i][char] || 0) + 1; 
+            } 
+        }); 
+        let porcentajes = [], etiquetas = []; 
+        let topPattern = ""; let maxTopPct = 0;
+        for (let i = 0; i < 10; i++) { 
+            etiquetas.push(`Pos ${i + 1}`); 
+            if (frecuencias[i]) { 
+                let max = Math.max(...Object.values(frecuencias[i])); 
+                let pct = parseFloat(((max / total) * 100).toFixed(1));
+                porcentajes.push(pct);
+                // Encontrar patron frecuente
+                let charTop = Object.keys(frecuencias[i]).find(k => frecuencias[i][k] === max);
+                if(pct > maxTopPct){ maxTopPct = pct; topPattern = `Pos ${i+1}: ${charTop} (${pct}%)`; }
+            } else { 
+                porcentajes.push(0); 
+            } 
+        } 
+        if(chartProbabilidad){
+            chartProbabilidad.data.labels = etiquetas; 
+            chartProbabilidad.data.datasets[0].data = porcentajes; 
+            chartProbabilidad.update(); 
+        }
+        if(totalEl) totalEl.textContent = `${total} Billetes`; 
+        if(certEl) certEl.textContent = `${(porcentajes.reduce((a,b)=>a+b,0)/porcentajes.length).toFixed(1)}%`;
+        if(topEl) topEl.textContent = topPattern || "Calculando...";
+        console.log('[Frecuencias] Total:', total, 'Porcentajes:', porcentajes);
+    }
+        async function abrirModalCanjear() { 
+        const btn = document.getElementById('btn-canjear');
+        const originalText = btn ? btn.textContent : '';
+        if(btn){ btn.disabled = true; btn.innerHTML = '⏳ Verificando...'; }
         
-        if (!liderActualCache) return; 
-        document.getElementById("modal-serial-code").textContent = liderActualCache.serie; 
-        document.getElementById("modal-serial-meta").textContent = `País: ${liderActualCache.pais} | Puntos Totales: ${puntosTotalesBoveda.toLocaleString()} PTS`; 
-        document.getElementById("modal-canjear").classList.add("active"); 
+        mostrarToast("🔍 Verificando elegibilidad...", "warning");
+        
+        const delay = 1200 + Math.floor(Math.random() * 1600);
+        await new Promise(r => setTimeout(r, delay));
+        
+        try{
+            try{
+                const saved = localStorage.getItem('dgt_estado_completo');
+                if(saved){
+                    const obj = JSON.parse(saved);
+                    if(obj?.fondoData?.membresiaActiva && !obj.fondoData._verificado){
+                        obj.fondoData.membresiaActiva = false;
+                        localStorage.setItem('dgt_estado_completo', JSON.stringify(obj));
+                    }
+                }
+            }catch(e){}
+            
+            let esMiembroReal = false;
+            if(supabaseClient && usuarioActual && usuarioActual.email){
+                const emailClean = usuarioActual.email.toLowerCase().trim();
+                try{
+                    const {data, error} = await supabaseClient.rpc('es_miembro_activo', {email_input: emailClean});
+                    if(!error && data === true){
+                        esMiembroReal = true;
+                        fondoData.membresiaActiva = true;
+                        fondoData._verificado = true;
+                    }
+                }catch(e){}
+                if(!esMiembroReal){
+                    try{
+                        const {data: direct} = await supabaseClient.from('usuarios').select('is_member').eq('email', emailClean).single();
+                        if(direct && direct.is_member===true) esMiembroReal = true;
+                    }catch(e){}
+                }
+            }
+            
+            if(btn){ btn.disabled = false; btn.textContent = originalText || '🏆 Reclamar Número Ganador'; }
+            
+            if(!esMiembroReal){
+                await new Promise(r => setTimeout(r, 600));
+                mostrarToast("🔒 Acceso restringido a miembros activos", "warning");
+                setTimeout(()=> openStripeGate(), 800);
+                return;
+            }
+            
+            if (!liderActualCache) {
+                mostrarToast("⏳ No hay serie lider aun","warning");
+                return;
+            }
+            
+            document.getElementById("modal-serial-code").textContent = liderActualCache.serie; 
+            document.getElementById("modal-serial-meta").textContent = `País: ${liderActualCache.pais} | Puntos: ${puntosTotalesBoveda.toLocaleString()} PTS`; 
+            document.getElementById("modal-canjear").classList.add("active"); 
+            
+        }catch(e){
+            if(btn){ btn.disabled = false; btn.textContent = '🏆 Reclamar Número Ganador'; }
+            mostrarToast("⚠️ Error de verificacion","danger");
+        }
     }
     function cerrarModalCanjear() { document.getElementById("modal-canjear").classList.remove("active"); }
     function confirmarCanje(event) { event.preventDefault(); 
@@ -379,17 +687,24 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
         const elegible = esElegibleParaOferta(); const elTitulo = document.getElementById("elegibilidad-titulo"); const elDesc = document.getElementById("elegibilidad-desc"); if (elegible) { elTitulo.textContent = "✅ ¡Elegible para la Oferta del Fondo!"; elTitulo.style.color = "var(--success)"; elDesc.textContent = "Has cumplido todos los requisitos y candados de seguridad."; } else { elTitulo.textContent = "❌ No Elegible para la Oferta"; elTitulo.style.color = "var(--danger)"; elDesc.textContent = "Cumple con los 4 candados de seguridad y participación para desbloquear."; }
     }
     function actualizarCandadoUI(id, estado, texto) { const el = document.getElementById(id); if (!el) return; if (estado) { el.className = "candado-item unlocked"; el.innerHTML = `🔓 ${escapeHTML(texto)}`; } else { el.className = "candado-item locked"; el.innerHTML = `🔒 ${escapeHTML(texto)}`; } }
+    
     async function esMembresiaActiva() { 
-        // ofertaForzada desactivada para produccion
-        // if(fondoData.ofertaForzada) return true;
-        if(false && fondoData.ofertaForzada) return true;
-        // FIX: Solo si Supabase is_member=true
+        if(fondoData.ofertaForzada) return true;
         try{
             if(supabaseClient && usuarioActual && usuarioActual.email){
-                const {data} = await supabaseClient.from('usuarios').select('is_member').eq('email', usuarioActual.email.toLowerCase().trim()).single();
-                if(data && data.is_member===true){ fondoData.membresiaActiva=true; return true; }
+                // FIX SEGURO V20: Usar RPC que solo service_role puede burlar
+                const {data, error} = await supabaseClient.rpc('es_miembro_activo', {email_input: usuarioActual.email.toLowerCase().trim()});
+                console.log('[SECURITY] es_miembro_activo RPC:', usuarioActual.email, '=>', data, error);
+                if(!error && data === true){ 
+                    fondoData.membresiaActiva=true; 
+                    fondoData._verificado=true;
+                    return true; 
+                }
+                // Fallback directo si RPC no existe aun
+                const {data: direct} = await supabaseClient.from('usuarios').select('is_member').eq('email', usuarioActual.email.toLowerCase().trim()).single();
+                if(direct && direct.is_member===true){ fondoData.membresiaActiva=true; return true; }
             }
-        }catch(e){}
+        }catch(e){ console.error('Error membresia', e); }
         fondoData.membresiaActiva=false;
         return false;
     }
@@ -397,28 +712,44 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
     function openStripeGate() { document.getElementById("chk-terms").checked = false; document.getElementById("chk-privacy").checked = false; document.getElementById("chk-refund").checked = false; document.getElementById("btn-ir-stripe").disabled = true; document.getElementById("stripe-gate").classList.add("active"); }
     function closeStripeGate() { document.getElementById("stripe-gate").classList.remove("active"); }
     function checkGate() { const t = document.getElementById("chk-terms").checked; const p = document.getElementById("chk-privacy").checked; const r = document.getElementById("chk-refund").checked; document.getElementById("btn-ir-stripe").disabled = !(t && p && r); }
-    async function irAStripe() { 
+    
+        async function irAStripe() { 
         const fechaActual = new Date().toISOString(); 
         localStorage.setItem("dgt_terms_accepted", fechaActual); 
         fondoData.fechaSuscripcion = fechaActual; 
-        // FIX DEFINITIVO: No activar membresia aqui
-        // fondoData.membresiaActiva = true; // BLOQUEADO
-        // fondoData.miembrosPagos++ BLOQUEADO hasta webhook Stripe 
         guardarEstadoCompleto(); 
         closeStripeGate(); 
+        try{
+          if(supabaseClient && usuarioActual && usuarioActual.email){
+            const emailValid = usuarioActual.email.toLowerCase().trim();
+            const aliasValid = (usuarioActual.nombre_vault || document.getElementById("member-name").value || 'Usuario').trim();
+            if(!emailValid.includes('@') || !emailValid.includes('.') || emailValid.length < 5){
+              mostrarToast("❌ Email invalido","danger"); return;
+            }
+            try{
+                const {data, error} = await supabaseClient.functions.invoke('create-checkout', {
+                  body: { email: emailValid, nombre_vault: aliasValid }
+                });
+                if(!error && data && data.url){
+                  window.open(data.url, "_blank");
+                  await supabaseClient.from('usuarios').upsert({email: emailValid, nombre_vault: aliasValid, is_member: false},{onConflict:'email'});
+                  return;
+                }
+            }catch(e){}
+          }
+        }catch(e){}
         let stripeUrl = CONFIG.STRIPE_LINK;
         if(usuarioActual && usuarioActual.email){
           stripeUrl += `?prefilled_email=${encodeURIComponent(usuarioActual.email)}&client_reference_id=${encodeURIComponent(usuarioActual.email)}`;
         }
         window.open(stripeUrl, "_blank"); 
-        // Guardar en Supabase que intentó pagar
         try{
           if(supabaseClient && usuarioActual){
-            await supabaseClient.from('usuarios').upsert({email: usuarioActual.email, nombre_vault: usuarioActual.nombre_vault, stripe_customer_id: 'pending_'+Date.now()},{onConflict:'email'});
+            await supabaseClient.from('usuarios').upsert({email: usuarioActual.email, nombre_vault: usuarioActual.nombre_vault, is_member: false},{onConflict:'email'});
           }
         }catch(e){}
     }
-    function openLegal(k) { const modal = document.getElementById("legal-modal"); const titleEl = document.getElementById("legal-title"); const contentEl = document.getElementById("legal-content"); let titulo = "Información Legal"; let texto = ""; if (k === 'terms') { titulo = "Términos y Condiciones"; texto = " Descargo Legal: DollarDgt.com es exclusivo para simulación recreativa e información numismática; no constituye asesoría de inversión. La membresía se renueva automáticamente a $4.99/mes hasta su cancelación. El destino del 60% al Fondo es una iniciativa interna y no otorga al usuario propiedad, acciones ni derechos sobre ningún activo. Nulo donde lo prohíba la ley."; } else if (k === 'privacy') { titulo = "Política de Privacidad"; texto = "Privacidad de Datos: Sus datos se guardan localmente (LocalStorage) y se sincronizan de forma cifrada con Supabase como proveedor de infraestructura. DollarDgt.com no vende, renta ni comparte su Información de Identificación Personal (PII) con terceros ajenos a la operación técnica esencial del sitio."; } else if (k === 'refund') { titulo = "Política de Reembolsos"; texto = "Garantía de reembolso de 7 días aplicable para nuevas suscripciones si no se han utilizado las funciones exclusivas del fondo."; } else { titulo = "Aviso Legal"; texto = "Procesamiento de Pagos: Todos los pagos se procesan de forma externa a través de Stripe. DollarDgt.com no recopila ni almacena credenciales financieras. El usuario exime a la plataforma de toda responsabilidad por transacciones gestionadas por dicho proveedor bajo el estándar PCI-DSS."; } titleEl.textContent = titulo; contentEl.innerHTML = `<p>${texto}</p>`; modal.classList.add("active"); }
+    function openLegal(k) { const modal = document.getElementById("legal-modal"); const titleEl = document.getElementById("legal-title"); const contentEl = document.getElementById("legal-content"); let titulo = "Información Legal"; let texto = ""; if (k === 'terms') { titulo = "Términos y Condiciones"; texto = "DollarDgt.com es una plataforma de análisis numismático y simulación recreativa. Las membresías de $4.99/mes otorgan acceso exclusivo a las herramientas avanzadas y un 60% se destina al Fondo de Adquisición Coleccionista."; } else if (k === 'privacy') { titulo = "Política de Privacidad"; texto = "Tus datos se almacenan de manera local (LocalStorage) y se sincronizan de forma segura con Supabase. No compartimos información personal con terceros."; } else if (k === 'refund') { titulo = "Política de Reembolsos"; texto = "Garantía de reembolso de 7 días aplicable para nuevas suscripciones si no se han utilizado las funciones exclusivas del fondo."; } else { titulo = "Aviso Legal"; texto = "Todas las transacciones de pago son procesadas de forma segura a través de Stripe. DollarDgt.com no almacena credenciales bancarias."; } titleEl.textContent = titulo; contentEl.innerHTML = `<p>${texto}</p>`; modal.classList.add("active"); }
     function closeLegal() { document.getElementById("legal-modal").classList.remove("active"); }
     function resetPruebas(){ localStorage.clear(); sessionStorage.clear(); alert('Memoria borrada - ahora prueba como usuario nuevo'); location.reload(); }
     window.onload = initSistema;
