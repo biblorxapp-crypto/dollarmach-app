@@ -315,11 +315,11 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
     function actualizarVitrinaRarosUI() { const lista = document.getElementById("rare-vault-list"); lista.innerHTML = ""; if (bovedaRaros.length === 0) { lista.innerHTML = `<li class="rare-item" style="justify-content: center; color: var(--text-muted);">Sin billetes raros aún.</li>`; return; } bovedaRaros.slice().reverse().forEach(item => { const li = document.createElement("li"); li.className = "rare-item"; li.innerHTML = `<div><strong>${escapeHTML(item.miembro)}</strong> (${escapeHTML(item.pais)})<div class="info-tag" style="color: var(--gold);">🏷️ ${escapeHTML(item.rareza)}</div><code>${escapeHTML(item.serie)}</code></div><div style="text-align: right;"><span style="color: var(--gold); font-weight: bold;">+${item.puntos} PTS</span><div class="info-tag">${escapeHTML(item.fecha)}</div></div>`; lista.appendChild(li); }); }
     function initChart() { const ctx = document.getElementById('probabilidadChart').getContext('2d'); chartProbabilidad = new Chart(ctx, { type: 'bar', data: { labels: [], datasets: [{ label: 'Frecuencia Dominante (%)', data: [], backgroundColor: '#22c55e88', borderColor: '#22c55e', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } } }); }
     function actualizarGraficoProbabilidad() { if (bovedaBilletes.length === 0) return; let total = bovedaBilletes.length; let frecuencias = {}; bovedaBilletes.forEach(reg => { let limpio = normalizarSerie(reg.serie); for (let i = 0; i < limpio.length && i < 10; i++) { if (!frecuencias[i]) frecuencias[i] = {}; let char = limpio[i]; frecuencias[i][char] = (frecuencias[i][char] || 0) + 1; } }); let porcentajes = [], etiquetas = []; for (let i = 0; i < 10; i++) { etiquetas.push(`Pos ${i + 1}`); if (frecuencias[i]) { let max = Math.max(...Object.values(frecuencias[i])); porcentajes.push(parseFloat(((max / total) * 100).toFixed(1))); } else { porcentajes.push(0); } } chartProbabilidad.data.labels = etiquetas; chartProbabilidad.data.datasets[0].data = porcentajes; chartProbabilidad.update(); document.getElementById("metric-total-samples").textContent = `${total} Billetes`; document.getElementById("metric-certainty").textContent = `${(porcentajes.reduce((a,b)=>a+b,0)/porcentajes.length).toFixed(1)}%`; }
-    function abrirModalCanjear() { if (!liderActualCache) return; document.getElementById("modal-serial-code").textContent = liderActualCache.serie; document.getElementById("modal-serial-meta").textContent = `País: ${liderActualCache.pais} | Puntos Totales: ${puntosTotalesBoveda.toLocaleString()} PTS`; document.getElementById("modal-canjear").classList.add("active"); }
+    async function abrirModalCanjear() { if (!liderActualCache) return; document.getElementById("modal-serial-code").textContent = liderActualCache.serie; document.getElementById("modal-serial-meta").textContent = `País: ${liderActualCache.pais} | Puntos Totales: ${puntosTotalesBoveda.toLocaleString()} PTS`; document.getElementById("modal-canjear").classList.add("active"); }
     function cerrarModalCanjear() { document.getElementById("modal-canjear").classList.remove("active"); }
     function confirmarCanje(event) { event.preventDefault(); const nombre = escapeHTML(document.getElementById("claim-name").value.trim()); historialLideres.push({ ...liderActualCache, reclamadoPor: nombre, fechaCanje: new Date().toLocaleTimeString() }); guardarEstadoCompleto(); mostrarToast(`🎉 Reclamo registrado para ${nombre}!`, "success"); cerrarModalCanjear(); }
     function verHistorialLideres() { const card = document.getElementById("history-card"); card.style.display = card.style.display === "none" ? "block" : "none"; const lista = document.getElementById("history-list"); lista.innerHTML = ""; historialLideres.forEach((item, idx) => { const li = document.createElement("li"); li.className = "history-item"; li.innerHTML = `<span><strong>#${idx+1}</strong> <code>${escapeHTML(item.serie)}</code> | Jugador: <strong>${escapeHTML(item.reclamadoPor)}</strong></span><span style="color: var(--warning);">${item.puntos.toLocaleString()} pts</span>`; lista.appendChild(li); }); }
-    function actualizarFondoUI() {
+    async function actualizarFondoUI() {
         const fa = Number(fondoData.fondoAcumulado) || 0;
         const mp = Number(fondoData.miembrosPagos) || 0;
         const dd = Number(fondoData.diasDesdeLanzamiento) || 0;
@@ -330,23 +330,28 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
         document.getElementById("colchon-val").textContent = `$${CONFIG.FONDO_COLCHON_MINIMO}`;
         const progPct = Math.min((fa / CONFIG.FONDO_MINIMO_APERTURA) * 100, 100);
         document.getElementById("fondo-progress").style.width = `${progPct}%`;
-        const cand1 = esMembresiaActiva(); const cand2 = dd >= CONFIG.DIAS_SIEMBRA; const cand3 = ls >= CONFIG.VECES_LIDER_MIN; const cand4 = db >= CONFIG.DIAS_BOVEDA_MIN;
+        const cand1 = await esMembresiaActiva(); const cand2 = dd >= CONFIG.DIAS_SIEMBRA; const cand3 = ls >= CONFIG.VECES_LIDER_MIN; const cand4 = db >= CONFIG.DIAS_BOVEDA_MIN;
         actualizarCandadoUI('candado-1', cand1, '1. Membresía Activa'); actualizarCandadoUI('candado-2', cand2, `2. Días Siembra (${dd}/${CONFIG.DIAS_SIEMBRA}d)`); actualizarCandadoUI('candado-3', cand3, `3. Veces Líder (${ls}/${CONFIG.VECES_LIDER_MIN}x)`); actualizarCandadoUI('candado-4', cand4, `4. Días Bóveda (${db}/${CONFIG.DIAS_BOVEDA_MIN}d)`);
         const elegible = esElegibleParaOferta(); const elTitulo = document.getElementById("elegibilidad-titulo"); const elDesc = document.getElementById("elegibilidad-desc"); if (elegible) { elTitulo.textContent = "✅ ¡Elegible para la Oferta del Fondo!"; elTitulo.style.color = "var(--success)"; elDesc.textContent = "Has cumplido todos los requisitos y candados de seguridad."; } else { elTitulo.textContent = "❌ No Elegible para la Oferta"; elTitulo.style.color = "var(--danger)"; elDesc.textContent = "Cumple con los 4 candados de seguridad y participación para desbloquear."; }
     }
     function actualizarCandadoUI(id, estado, texto) { const el = document.getElementById(id); if (!el) return; if (estado) { el.className = "candado-item unlocked"; el.innerHTML = `🔓 ${escapeHTML(texto)}`; } else { el.className = "candado-item locked"; el.innerHTML = `🔒 ${escapeHTML(texto)}`; } }
-    function esMembresiaActiva() { 
-        // FIX CRITICO CLAIM SIN PAGAR: Solo si Supabase usuarios.is_member = true
-        // Limpiar trampa localStorage
-        localStorage.removeItem('membresia_activa');
-        const supabaseMember = localStorage.getItem('dgt_membresia_supabase') === 'true';
+    async function esMembresiaActiva() { 
         if(fondoData.ofertaForzada) return true;
-        // Ahora fondoData.membresiaActiva solo será true si viene de Supabase check
-        if(!supabaseMember) return false;
-        return fondoData.membresiaActiva || supabaseMember;
+        // CANDADO REAL: Solo si Supabase dice is_member=true
+        try{
+            if(supabaseClient && usuarioActual && usuarioActual.email){
+                const {data} = await supabaseClient.from('usuarios').select('is_member').eq('email', usuarioActual.email.toLowerCase().trim()).single();
+                if(data && data.is_member===true){
+                    fondoData.membresiaActiva = true;
+                    return true;
+                }
+            }
+        }catch(e){}
+        fondoData.membresiaActiva = false;
+        return false;
     }
-    function esMembresiaActivaOLD(){ return false; }
-    function esElegibleParaOferta() { if (fondoData.ofertaForzada) return true; return ( esMembresiaActiva() && fondoData.diasDesdeLanzamiento >= CONFIG.DIAS_SIEMBRA && fondoData.leaderStats >= CONFIG.VECES_LIDER_MIN && fondoData.diasBoveda >= CONFIG.DIAS_BOVEDA_MIN ); }
+    function esMembresiaActivaOLD(){ return fondoData.membresiaActiva || fondoData.ofertaForzada; }
+    async function esElegibleParaOferta() { if (fondoData.ofertaForzada) return true; return ( (await esMembresiaActiva()) && fondoData.diasDesdeLanzamiento >= CONFIG.DIAS_SIEMBRA && fondoData.leaderStats >= CONFIG.VECES_LIDER_MIN && fondoData.diasBoveda >= CONFIG.DIAS_BOVEDA_MIN ); }
     function openStripeGate() { document.getElementById("chk-terms").checked = false; document.getElementById("chk-privacy").checked = false; document.getElementById("chk-refund").checked = false; document.getElementById("btn-ir-stripe").disabled = true; document.getElementById("stripe-gate").classList.add("active"); }
     function closeStripeGate() { document.getElementById("stripe-gate").classList.remove("active"); }
     function checkGate() { const t = document.getElementById("chk-terms").checked; const p = document.getElementById("chk-privacy").checked; const r = document.getElementById("chk-refund").checked; document.getElementById("btn-ir-stripe").disabled = !(t && p && r); }
@@ -354,10 +359,9 @@ const irAStripeOriginal = typeof irAStripe !== 'undefined' ? irAStripe : null;
         const fechaActual = new Date().toISOString(); 
         localStorage.setItem("dgt_terms_accepted", fechaActual); 
         fondoData.fechaSuscripcion = fechaActual; 
-        // FIX CRITICO: No activar hasta que Stripe confirme en Supabase is_member=true
-        // fondoData.membresiaActiva = true; // <-- BLOQUEADO 
-        fondoData.miembrosPagos = Math.min(fondoData.miembrosPagos + 1, CONFIG.MIEMBROS_MINIMOS); 
-        fondoData.fondoAcumulado += CONFIG.PRECIO_MEMBRESIA * CONFIG.PORCENTAJE_FONDO; 
+        // FIX: NO activar membresia aqui, solo cuando Supabase confirme pago real
+        // fondoData.membresiaActiva = true; DESACTIVADO
+        // fondoData.miembrosPagos++ DESACTIVADO hasta webhook 
         guardarEstadoCompleto(); 
         closeStripeGate(); 
         let stripeUrl = CONFIG.STRIPE_LINK;
