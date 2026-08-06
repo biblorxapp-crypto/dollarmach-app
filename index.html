@@ -438,14 +438,19 @@
 
     <script>
       
-        const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
-        
-        // Instanciación única global segura
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL = 'https://hvdaitsnwvigqbizirbi.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
 
-        const STRIPE_PUBLIC_KEY = 'pk_live_51U0o31IPKX7lMjR6jorRtUXLX4QbhnVkrZaSnBVFioWRhiTZKAu8p4OR0WyPWOLiTrH0toQGzrShEoVmwW82El7w00l2e179li';
-        const stripe = Stripe(STRIPE_PUBLIC_KEY);
+    // Inicialización segura para evitar el error de redeclaración
+    if (!window.supabaseClientInstance) {
+        window.supabaseClientInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+    const supabase = window.supabaseClientInstance;
+
+    const STRIPE_PUBLIC_KEY = 'pk_live_51U0o31IPKX7lMjR6jorRtUXLX4QbhnVkrZaSnBVFioWRhiTZKAu8p40R0WyPW0LiTrH0toQgzrShEoVmwW82El7w00l2e179li';
+    const stripe = Stripe(STRIPE_PUBLIC_KEY);
+</script>
+
 
         const FORMATOS_MONEDA_MUNDIAL_48 = {
             USD_1_2: { pais: "Estados Unidos ($1-$2)", codigo: "USD", digitos: 8, letras: 2, formato: "L 00000000 L" },
