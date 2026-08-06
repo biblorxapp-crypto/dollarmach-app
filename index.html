@@ -560,37 +560,35 @@
         }
 
         async function procesarPagoStripeNativo() {
-            showToast('🛡️ Conectando con Supabase para crear sesión de pago...');
-            
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                
-                if (!session) {
-                    showToast('⚠️ Debes iniciar sesión para suscribirte.');
-                    closeStripeModal();
-                    return;
-                }
+  showToast('🛡️ Conectando con Supabase...');
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      showToast('⚠️ Debes iniciar sesión');
+      return;
+    }
 
-                // NOTA: Asegúrate de desplegar una Edge Function llamada 'create-checkout-session' 
-                // en tu panel de Supabase para evitar el error de conexión.
-                const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', {
-                    body: {}
-                });
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ email: session.user.email })
+    });
 
-                if (error) throw error;
-                if (!data || !data.sessionId) throw new Error('No se pudo obtener el ID de la sesión de pago.');
+    const data = await res.json();
+    console.log('Stripe data:', data);
+    if (!res.ok) throw new Error(data.error || 'Error en función');
 
-                const result = await stripe.redirectToCheckout({ sessionId: data.sessionId });
-                
-                if (result.error) {
-                    showToast('⚠️ ' + result.error.message);
-                }
+    window.location.href = data.url; // redirige a Stripe Checkout
 
-            } catch (err) {
-                console.error('Error en el pago:', err.message);
-                showToast('⚠️ Error al procesar el pago: ' + err.message);
-            }
-        }
+  } catch (err) {
+    console.error(err);
+    showToast('⚠️ Error al procesar el pago: ' + err.message);
+  }
+}
 
         async function verificarSesionSupabase() {
             try {
