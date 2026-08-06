@@ -437,9 +437,7 @@
     <div id="toast-container"></div>
 
     <script>
-        // ==========================================
-        // CONEXIÓN OFICIAL SUPABASE & STRIPE LIVE PK
-        // ==========================================
+      
         const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
         
@@ -558,9 +556,7 @@
             return currentUserEmail || 'Invitado Anonimo';
         }
 
-        // ==========================================
-        // AUTENTICACIÓN SUPABASE AUTH
-        // ==========================================
+
         async function verificarSesionActual() {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
@@ -612,9 +608,7 @@
             showToast('🔒 Sesión cerrada.');
         }
 
-        // ==========================================
-        // SINCRONIZACIÓN Y CARGA DESDE SUPABASE
-        // ==========================================
+      
         async function cargarBovedaDesdeSupabase() {
             const list = document.getElementById('vault-list-container');
             try {
