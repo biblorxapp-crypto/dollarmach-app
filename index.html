@@ -448,7 +448,7 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const STRIPE_PUBLIC_KEY = 'pk_live_51U0o31IPKX7lMjR6jorRtUXLX4QbhnVkrZaSnBVFioWRhiTZKAu8p4OR0WyPWOLiTrH0toQGzrShEoVmwW82El7w00l2e179li';
-        const STRIPE_PRICE_ID = 'Price_1U0oTxIPKX7lMjR6Ke1JV7kW';
+        const stripe = Stripe(STRIPE_PUBLIC_KEY);
 
         const FORMATOS_MONEDA_MUNDIAL_48 = {
             USD_1_2: { pais: "Estados Unidos ($1-$2)", codigo: "USD", digitos: 8, letras: 2, formato: "L 00000000 L" },
@@ -559,7 +559,7 @@
             return currentUserEmail || 'Invitado Anonimo';
         }
 
-                async function procesarPagoStripeNativo() {
+        async function procesarPagoStripeNativo() {
             showToast('🛡️ Conectando con Supabase para crear sesión de pago...');
             
             try {
@@ -571,7 +571,8 @@
                     return;
                 }
 
-                // Llamada limpia sin pasar el priceId, ya que la Edge Function lo tiene interno
+                // NOTA: Asegúrate de desplegar una Edge Function llamada 'create-checkout-session' 
+                // en tu panel de Supabase para evitar el error de conexión.
                 const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', {
                     body: {}
                 });
@@ -590,9 +591,6 @@
                 showToast('⚠️ Error al procesar el pago: ' + err.message);
             }
         }
-
-
-
 
         async function verificarSesionSupabase() {
             try {
@@ -923,7 +921,6 @@
 
         function openStripeModal() { document.getElementById('stripe-modal').classList.add('active'); }
         function closeStripeModal() { document.getElementById('stripe-modal').classList.remove('active'); }
-
 
         function evaluateLocks() {
             const l1 = userSecurityState.membershipActive;
