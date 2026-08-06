@@ -6,8 +6,7 @@
     <title>DollarDgT 360 - Bóveda e Ingeniería de Frecuencias Pro (Supabase Live)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
-    <!-- Importar Supabase JS Client desde CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
         :root {
             --bg-color: #070a13;
@@ -23,233 +22,121 @@
             --text-muted: #94a3b8;
             --input-bg: #0b0f19;
             --danger-red: #ef4444;
-            
             --color-segment-letters: #00f2fe;
             --color-segment-part1: #f8fafc;
             --color-segment-part2: #f59e0b;
             --color-segment-part3: #a78bfa;
             --color-segment-year: #34d399;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { overflow-x: hidden; width: 100%; }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            min-height: 100vh;
-            padding-top: 75px;
-            padding-bottom: 50px;
-        }
-
-        .top-header-pro {
-            background: rgba(15, 23, 42, 0.92);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--card-border);
-            position: fixed; top: 0; left: 0; z-index: 1000;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 16px; flex-wrap: wrap; gap: 10px; width: 100%;
-        }
-
-        .brand-logo {
-            display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.5px;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-
-        .header-stats-mini { display: flex; gap: 12px; align-items: center; font-size: 0.75rem; flex-wrap: wrap; }
-        .header-stat-item { display: flex; flex-direction: column; align-items: flex-end; }
-        .header-stat-label { color: var(--text-muted); font-size: 0.6rem; text-transform: uppercase; }
-        .header-stat-val { font-family: monospace; font-weight: 700; color: var(--accent-cyan); }
-
-        .floating-pro-badge {
-            position: fixed; bottom: 20px; left: 20px;
-            background: linear-gradient(135deg, #d97706, #f59e0b); color: #070a13;
-            padding: 10px 16px; border-radius: 30px; font-weight: 800; font-size: 0.8rem;
-            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); cursor: pointer; z-index: 1500;
-            display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.2s ease;
-        }
-        .floating-pro-badge:hover { transform: translateY(-3px); }
-
-        .main-container {
-            max-width: 1200px; margin: 20px auto; padding: 0 12px;
-            display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%;
-        }
-
-        @media (min-width: 900px) {
-            .main-container { grid-template-columns: repeat(2, 1fr); padding: 0 16px; }
-            .full-width { grid-column: span 2; }
-            .top-header-pro { padding: 12px 24px; }
-            body { padding-top: 85px; }
-            .brand-logo { font-size: 1.05rem; }
-            .header-stats-mini { gap: 20px; font-size: 0.8rem; }
-        }
-
-        .card {
-            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
-            padding: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); position: relative; overflow: hidden;
-            transition: border-color 0.3s; width: 100%;
-        }
-        .card:hover { border-color: var(--card-border-hover); }
-        .card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
-        }
-        .card.card-rare::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .card.card-boost::before { background: linear-gradient(90deg, var(--accent-purple), #a78bfa); }
-        .card.card-fondo::before { background: linear-gradient(90deg, var(--accent-green), #34d399); }
-
-        .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
-        .card-title { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
-        .badge-fintech { font-size: 0.65rem; padding: 3px 8px; border-radius: 20px; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); background: rgba(0, 242, 254, 0.05); }
-
-        .app-status-bar {
-            display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center;
-            background: var(--input-bg); border: 1px solid var(--card-border); padding: 12px 16px; border-radius: 12px; margin-bottom: 16px;
-        }
-        .status-item { display: flex; flex-direction: column; gap: 2px; }
-        .status-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
-        .status-value { font-weight: 700; font-size: 0.9rem; color: var(--text-main); }
-        .identity-btn { background: rgba(0, 242, 254, 0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; font-weight: 600; }
-        .danger-btn { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger-red); color: var(--danger-red); }
-
-        .input-group { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; width: 100%; }
-        .input-label { display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; font-weight: 600; }
-        .crypto-input, select.crypto-input { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1rem; font-family: monospace; outline: none; }
+        body { background-color: var(--bg-color); color: var(--text-main); font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; min-height: 100vh; padding-top: 75px; padding-bottom: 50px; }
+       .top-header-pro { background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--card-border); position: fixed; top: 0; left: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; flex-wrap: wrap; gap: 10px; width: 100%; }
+       .brand-logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.5px; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+       .header-stats-mini { display: flex; gap: 12px; align-items: center; font-size: 0.75rem; flex-wrap: wrap; }
+       .header-stat-item { display: flex; flex-direction: column; align-items: flex-end; }
+       .header-stat-label { color: var(--text-muted); font-size: 0.6rem; text-transform: uppercase; }
+       .header-stat-val { font-family: monospace; font-weight: 700; color: var(--accent-cyan); }
+       .floating-pro-badge { position: fixed; bottom: 20px; left: 20px; background: linear-gradient(135deg, #d97706, #f59e0b); color: #070a13; padding: 10px 16px; border-radius: 30px; font-weight: 800; font-size: 0.8rem; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); cursor: pointer; z-index: 1500; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 255, 255, 0.2); transition: transform 0.2s ease; }
+       .floating-pro-badge:hover { transform: translateY(-3px); }
+       .main-container { max-width: 1200px; margin: 20px auto; padding: 0 12px; display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; }
+        @media (min-width: 900px) {.main-container { grid-template-columns: repeat(2, 1fr); padding: 0 16px; }.full-width { grid-column: span 2; }.top-header-pro { padding: 12px 24px; } body { padding-top: 85px; }.brand-logo { font-size: 1.05rem; }.header-stats-mini { gap: 20px; font-size: 0.8rem; } }
+       .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); position: relative; overflow: hidden; transition: border-color 0.3s; width: 100%; }
+       .card:hover { border-color: var(--card-border-hover); }
+       .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
+       .card.card-rare::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+       .card.card-boost::before { background: linear-gradient(90deg, var(--accent-purple), #a78bfa); }
+       .card.card-fondo::before { background: linear-gradient(90deg, var(--accent-green), #34d399); }
+       .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+       .card-title { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+       .badge-fintech { font-size: 0.65rem; padding: 3px 8px; border-radius: 20px; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); background: rgba(0, 242, 254, 0.05); }
+       .app-status-bar { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; background: var(--input-bg); border: 1px solid var(--card-border); padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; }
+       .status-item { display: flex; flex-direction: column; gap: 2px; }
+       .status-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
+       .status-value { font-weight: 700; font-size: 0.9rem; color: var(--text-main); }
+       .identity-btn { background: rgba(0, 242, 254, 0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; font-weight: 600; }
+       .danger-btn { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger-red); color: var(--danger-red); }
+       .input-group { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; width: 100%; }
+       .input-label { display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; font-weight: 600; }
+       .crypto-input, select.crypto-input { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1rem; font-family: monospace; outline: none; }
         select.crypto-input option { background: var(--card-bg); color: var(--text-main); }
-
-        .row-inputs { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        @media(min-width: 500px) { .row-inputs { grid-template-columns: 1fr 1fr; } }
-
-        .btn-action {
-            width: 100%; background: linear-gradient(135deg, #059669 0%, var(--accent-green) 100%);
-            color: white; border: none; border-radius: 12px; padding: 12px; font-weight: bold; font-size: 0.9rem; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); margin-top: 4px; transition: transform 0.1s;
-        }
-        .btn-action:hover { opacity: 0.95; transform: translateY(-1px); }
-        .btn-secondary { background: linear-gradient(135deg, #4f46e5 0%, var(--accent-purple) 100%); }
-        .btn-gold { background: linear-gradient(135deg, #d97706 0%, var(--accent-gold) 100%); }
-
-        .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
-        .metric-box { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px; text-align: center; }
-        .metric-number { font-family: monospace; font-size: 1.2rem; font-weight: 700; color: var(--accent-cyan); margin-top: 2px; }
-
-        .roll-box { background: var(--input-bg); border: 1px dashed var(--accent-purple); border-radius: 12px; padding: 14px; text-align: center; font-family: monospace; font-size: 1.15rem; font-weight: bold; color: #a78bfa; margin-bottom: 10px; letter-spacing: 1px; word-break: break-all; }
-
-        .locks-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 12px 0; }
-        @media(min-width: 550px) { .locks-grid { grid-template-columns: repeat(2, 1fr); } }
-        .lock-item { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .lock-item.locked { border-color: rgba(239, 68, 68, 0.4); color: var(--text-muted); }
-        .lock-item.unlocked { border-color: var(--accent-green); color: var(--accent-green); background: rgba(16, 185, 129, 0.05); }
-
-        .eligibility-banner { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 12px; }
-        .eligibility-banner.no-eligible { border-color: rgba(239, 68, 68, 0.3); }
-        .eligibility-banner.eligible { border-color: var(--accent-green); background: rgba(16, 185, 129, 0.05); }
-
-        .leader-serial-prominent-box {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(15, 23, 42, 0.9));
-            border: 2px solid var(--accent-gold); border-radius: 14px; padding: 14px; margin-bottom: 14px;
-        }
-        .leader-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px; }
-        
-        .leader-serial-display {
-            font-family: monospace; font-size: 1.15rem; font-weight: 800; letter-spacing: 1px;
-            display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
-            background: rgba(0, 0, 0, 0.3); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(245, 158, 11, 0.3);
-            word-break: break-all; max-width: 100%;
-        }
-        .seg-letters { color: var(--color-segment-letters); }
-        .seg-part1   { color: var(--color-segment-part1); }
-        .seg-part2   { color: var(--color-segment-part2); }
-        .seg-part3   { color: var(--color-segment-part3); }
-        .seg-year    { color: var(--color-segment-year); background: rgba(52, 211, 153, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px dashed var(--color-segment-year); }
-        .seg-pais    { font-size: 0.7rem; color: var(--text-muted); background: var(--input-bg); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--card-border); }
-
-        .copy-serial-btn { background: rgba(245, 158, 11, 0.2); border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; font-weight: 700; width: 100%; }
-        @media(min-width: 500px) { .copy-serial-btn { width: auto; } }
-
-        .vault-list { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-        .vault-item { background: var(--input-bg); border: 1px solid var(--card-border); padding: 10px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; flex-wrap: wrap; gap: 6px; }
-        .vault-item span.serial { font-family: monospace; font-weight: bold; color: var(--accent-cyan); word-break: break-all; }
-        .vault-meta { font-size: 0.7rem; color: var(--text-muted); display: block; margin-top: 2px; }
-
-        .progress-bar-container { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; height: 12px; width: 100%; overflow: hidden; margin: 10px 0; }
-        .progress-bar-fill { background: linear-gradient(90deg, var(--accent-green), #34d399); height: 100%; width: 1.19%; transition: width 0.5s ease; }
-
-        .check-row { display: flex; gap: 8px; align-items: flex-start; background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: 0.75rem; }
-        .check-row a { color: var(--accent-cyan); text-decoration: underline; }
-
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 10, 19, 0.85); backdrop-filter: blur(8px);
-            display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 12px;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; width: 100%; max-width: 420px; padding: 20px; max-height: 90vh; overflow-y: auto; }
-        .modal-title { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; color: var(--accent-gold); }
-        .close-modal { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
-
-        .badge-rareza { font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid transparent; }
-        .badge-rareza.comun, .rare-result-container.comun { border-color: var(--card-border); color: var(--text-muted); }
-        .badge-rareza.poco-comun, .rare-result-container.poco-comun { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(79, 172, 254, 0.08); }
-        .badge-rareza.raro, .rare-result-container.raro { border-color: var(--accent-purple); color: #a78bfa; background: rgba(139, 92, 246, 0.08); }
-        .badge-rareza.muy-raro, .rare-result-container.muy-raro { border-color: var(--accent-green); color: var(--accent-green); background: rgba(16, 185, 129, 0.08); }
-        .badge-rareza.ultra-raro, .rare-result-container.ultra-raro { border-color: var(--accent-gold); color: var(--accent-gold); background: rgba(245, 158, 11, 0.12); box-shadow: 0 0 12px rgba(245, 158, 11, 0.2); }
-
+       .row-inputs { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        @media(min-width: 500px) {.row-inputs { grid-template-columns: 1fr 1fr; } }
+       .btn-action { width: 100%; background: linear-gradient(135deg, #059669 0%, var(--accent-green) 100%); color: white; border: none; border-radius: 12px; padding: 12px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); margin-top: 4px; transition: transform 0.1s; }
+       .btn-action:hover { opacity: 0.95; transform: translateY(-1px); }
+       .btn-secondary { background: linear-gradient(135deg, #4f46e5 0%, var(--accent-purple) 100%); }
+       .btn-gold { background: linear-gradient(135deg, #d97706 0%, var(--accent-gold) 100%); }
+       .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+       .metric-box { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px; text-align: center; }
+       .metric-number { font-family: monospace; font-size: 1.2rem; font-weight: 700; color: var(--accent-cyan); margin-top: 2px; }
+       .roll-box { background: var(--input-bg); border: 1px dashed var(--accent-purple); border-radius: 12px; padding: 14px; text-align: center; font-family: monospace; font-size: 1.15rem; font-weight: bold; color: #a78bfa; margin-bottom: 10px; letter-spacing: 1px; word-break: break-all; }
+       .locks-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 12px 0; }
+        @media(min-width: 550px) {.locks-grid { grid-template-columns: repeat(2, 1fr); } }
+       .lock-item { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+       .lock-item.locked { border-color: rgba(239, 68, 68, 0.4); color: var(--text-muted); }
+       .lock-item.unlocked { border-color: var(--accent-green); color: var(--accent-green); background: rgba(16, 185, 129, 0.05); }
+       .eligibility-banner { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 12px; }
+       .eligibility-banner.no-eligible { border-color: rgba(239, 68, 68, 0.3); }
+       .eligibility-banner.eligible { border-color: var(--accent-green); background: rgba(16, 185, 129, 0.05); }
+       .leader-serial-prominent-box { background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(15, 23, 42, 0.9)); border: 2px solid var(--accent-gold); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+       .leader-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px; }
+       .leader-serial-display { font-family: monospace; font-size: 1.15rem; font-weight: 800; letter-spacing: 1px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; background: rgba(0, 0, 0, 0.3); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(245, 158, 11, 0.3); word-break: break-all; max-width: 100%; }
+       .seg-letters { color: var(--color-segment-letters); }
+       .seg-part1 { color: var(--color-segment-part1); }
+       .seg-part2 { color: var(--color-segment-part2); }
+       .seg-part3 { color: var(--color-segment-part3); }
+       .seg-year { color: var(--color-segment-year); background: rgba(52, 211, 153, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px dashed var(--color-segment-year); }
+       .seg-pais { font-size: 0.7rem; color: var(--text-muted); background: var(--input-bg); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--card-border); }
+       .copy-serial-btn { background: rgba(245, 158, 11, 0.2); border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; font-weight: 700; width: 100%; }
+        @media(min-width: 500px) {.copy-serial-btn { width: auto; } }
+       .vault-list { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+       .vault-item { background: var(--input-bg); border: 1px solid var(--card-border); padding: 10px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; flex-wrap: wrap; gap: 6px; }
+       .vault-item span.serial { font-family: monospace; font-weight: bold; color: var(--accent-cyan); word-break: break-all; }
+       .vault-meta { font-size: 0.7rem; color: var(--text-muted); display: block; margin-top: 2px; }
+       .progress-bar-container { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; height: 12px; width: 100%; overflow: hidden; margin: 10px 0; }
+       .progress-bar-fill { background: linear-gradient(90deg, var(--accent-green), #34d399); height: 100%; width: 1.19%; transition: width 0.5s ease; }
+       .check-row { display: flex; gap: 8px; align-items: flex-start; background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: 0.75rem; }
+       .check-row a { color: var(--accent-cyan); text-decoration: underline; }
+       .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 10, 19, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 12px; }
+       .modal-overlay.active { opacity: 1; pointer-events: auto; }
+       .modal-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; width: 100%; max-width: 420px; padding: 20px; max-height: 90vh; overflow-y: auto; }
+       .modal-title { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; color: var(--accent-gold); }
+       .close-modal { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+       .badge-rareza { font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid transparent; }
+       .badge-rareza.comun,.rare-result-container.comun { border-color: var(--card-border); color: var(--text-muted); }
+       .badge-rareza.poco-comun,.rare-result-container.poco-comun { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(79, 172, 254, 0.08); }
+       .badge-rareza.raro,.rare-result-container.raro { border-color: var(--accent-purple); color: #a78bfa; background: rgba(139, 92, 246, 0.08); }
+       .badge-rareza.muy-raro,.rare-result-container.muy-raro { border-color: var(--accent-green); color: var(--accent-green); background: rgba(16, 185, 129, 0.08); }
+       .badge-rareza.ultra-raro,.rare-result-container.ultra-raro { border-color: var(--accent-gold); color: var(--accent-gold); background: rgba(245, 158, 11, 0.12); box-shadow: 0 0 12px rgba(245, 158, 11, 0.2); }
         #toast-container { position: fixed; bottom: 20px; right: 16px; left: 16px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; max-width: 380px; margin-left: auto; }
-        .toast { background: var(--card-bg); border: 1px solid var(--accent-cyan); color: var(--text-main); padding: 10px 16px; border-radius: 10px; font-size: 0.85rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+       .toast { background: var(--card-bg); border: 1px solid var(--accent-cyan); color: var(--text-main); padding: 10px 16px; border-radius: 10px; font-size: 0.85rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         footer { text-align: center; color: var(--text-muted); font-size: 0.75rem; margin-top: 30px; border-top: 1px solid var(--card-border); padding-top: 16px; padding-left: 12px; padding-right: 12px; }
     </style>
 </head>
 <body>
-
-    <div class="floating-pro-badge" onclick="openStripeModal()">
-        <span>⭐</span> Suscríbete Pro ($4.99)
-    </div>
-
+    <div class="floating-pro-badge" onclick="openStripeModal()"><span>⭐</span> Suscríbete Pro ($4.99)</div>
     <header class="top-header-pro">
         <div class="brand-logo"><span>🛡️</span> DOLLARDGT 360</div>
         <div class="header-stats-mini">
-            <div class="header-stat-item">
-                <span class="header-stat-label">Bóveda Supabase</span>
-                <span class="header-stat-val" id="header-stat-vault">0 Registros</span>
-            </div>
-            <div class="header-stat-item">
-                <span class="header-stat-label">Rarezas Detectadas</span>
-                <span class="header-stat-val" id="header-stat-rares" style="color: var(--accent-gold);">0 Activas</span>
-            </div>
-            <div class="header-stat-item">
-                <span class="header-stat-label">Sincronización</span>
-                <span class="header-stat-val" style="color: var(--accent-green);">● Supabase Live</span>
-            </div>
+            <div class="header-stat-item"><span class="header-stat-label">Bóveda Supabase</span><span class="header-stat-val" id="header-stat-vault">0 Registros</span></div>
+            <div class="header-stat-item"><span class="header-stat-label">Rarezas Detectadas</span><span class="header-stat-val" id="header-stat-rares" style="color: var(--accent-gold);">0 Activas</span></div>
+            <div class="header-stat-item"><span class="header-stat-label">Sincronización</span><span class="header-stat-val" style="color: var(--accent-green);">● Supabase Live</span></div>
         </div>
     </header>
-
     <main class="main-container">
-        <!-- PANEL DE USUARIO SUPABASE AUTH -->
         <div class="card full-width">
-            <div class="card-header-flex">
-                <div class="card-title"><span>👤</span> Autenticación y Perfil de Coleccionista</div>
-                <div class="badge-fintech">● SUPABASE CLOUD ACTIVE</div>
-            </div>
+            <div class="card-header-flex"><div class="card-title"><span>👤</span> Autenticación y Perfil de Coleccionista</div><div class="badge-fintech">● SUPABASE CLOUD ACTIVE</div></div>
             <div class="app-status-bar" id="auth-panel-logged-in" style="display: none;">
                 <div class="status-item"><span class="status-label">Usuario Conectado</span><span class="status-value" id="display-user-email">cargando...</span></div>
                 <div class="status-item"><span class="status-label">Estatus Bóveda</span><span class="status-value" style="color: var(--accent-green);">Nube Segura</span></div>
                 <div class="status-item"><span class="status-label">Puntos Acumulados</span><span class="status-value" id="display-points" style="color: var(--accent-gold);">1,450 PTS</span></div>
                 <button class="identity-btn danger-btn" onclick="cerrarSesionSupabase()">Cerrar Sesión</button>
             </div>
-
             <div id="auth-panel-logged-out" style="display: block;">
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Inicia sesión o regístrate en Supabase para sincronizar tus billetes en tiempo real.</p>
                 <div class="row-inputs">
-                    <div class="input-group" style="margin-bottom: 0;">
-                        <label class="input-label" for="auth-email">Correo Electrónico</label>
-                        <input type="email" id="auth-email" class="crypto-input" placeholder="coleccionista@email.com">
-                    </div>
-                    <div class="input-group" style="margin-bottom: 0;">
-                        <label class="input-label" for="auth-password">Contraseña</label>
-                        <input type="password" id="auth-password" class="crypto-input" placeholder="••••••••">
-                    </div>
+                    <div class="input-group" style="margin-bottom: 0;"><label class="input-label" for="auth-email">Correo Electrónico</label><input type="email" id="auth-email" class="crypto-input" placeholder="coleccionista@email.com"></div>
+                    <div class="input-group" style="margin-bottom: 0;"><label class="input-label" for="auth-password">Contraseña</label><input type="password" id="auth-password" class="crypto-input" placeholder="••••••••"></div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
                     <button type="button" class="btn-action" onclick="iniciarSesionSupabase()">Iniciar Sesión</button>
@@ -257,196 +144,75 @@
                 </div>
             </div>
         </div>
-
-        <!-- REGISTRO MANUAL MULTI-PAÍS -->
         <div class="card">
-            <div class="card-header-flex">
-                <div class="card-title"><span>📝</span> Registro Manual Multi-País</div>
-                <div class="badge-fintech">SUPABASE INSERT</div>
-            </div>
-
-            <div class="metrics-grid">
-                <div class="metric-box"><span class="status-label">Guardados</span><div class="metric-number" id="metric-saved">0</div></div>
-                <div class="metric-box"><span class="status-label">Raros Detectados</span><div class="metric-number" id="metric-rare" style="color: var(--accent-gold);">0</div></div>
-            </div>
-
+            <div class="card-header-flex"><div class="card-title"><span>📝</span> Registro Manual Multi-País</div><div class="badge-fintech">SUPABASE INSERT</div></div>
+            <div class="metrics-grid"><div class="metric-box"><span class="status-label">Guardados</span><div class="metric-number" id="metric-saved">0</div></div><div class="metric-box"><span class="status-label">Raros Detectados</span><div class="metric-number" id="metric-rare" style="color: var(--accent-gold);">0</div></div></div>
             <form id="manual-form" onsubmit="handleManualSubmit(event)">
                 <div class="row-inputs">
-                    <div class="input-group">
-                        <label class="input-label" for="manual-letras">Letras (1 - 3)</label>
-                        <input type="text" id="manual-letras" class="crypto-input" maxlength="3" placeholder="Ej: AB" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '')">
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label" for="manual-digitos">Dígitos (6 - 11)</label>
-                        <input type="text" id="manual-digitos" class="crypto-input" minlength="6" maxlength="11" placeholder="Ej: 12345678" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                    </div>
+                    <div class="input-group"><label class="input-label" for="manual-letras">Letras (1 - 3)</label><input type="text" id="manual-letras" class="crypto-input" maxlength="3" placeholder="Ej: AB" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '')"></div>
+                    <div class="input-group"><label class="input-label" for="manual-digitos">Dígitos (6 - 11)</label><input type="text" id="manual-digitos" class="crypto-input" minlength="6" maxlength="11" placeholder="Ej: 12345678" required oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
                 </div>
-                <div class="input-group">
-                    <label class="input-label" for="manual-anio">Año de Serie</label>
-                    <select id="manual-anio" class="crypto-input"></select>
-                </div>
+                <div class="input-group"><label class="input-label" for="manual-anio">Año de Serie</label><select id="manual-anio" class="crypto-input"></select></div>
                 <button type="submit" id="btn-submit-manual" class="btn-action">Registrar en Supabase</button>
             </form>
         </div>
-
-        <!-- GENERADOR ROLL ALEATORIO CON 48 PAÍSES -->
         <div class="card card-boost">
-            <div class="card-header-flex">
-                <div class="card-title"><span>🎲</span> Generador Roll Aleatorio</div>
-                <div class="badge-fintech">48 PAÍSES</div>
-            </div>
+            <div class="card-header-flex"><div class="card-title"><span>🎲</span> Generador Roll Aleatorio</div><div class="badge-fintech">48 PAÍSES</div></div>
             <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Selecciona un país u organismo para estructurar la serie bajo normativa exacta.</p>
-
-            <div class="input-group" style="margin-bottom: 10px;">
-                <label class="input-label" for="select-pais-generador">País / Patrón Monetario</label>
-                <select id="select-pais-generador" class="crypto-input" onchange="actualizarInfoFormatoPais()"></select>
-            </div>
-
+            <div class="input-group" style="margin-bottom: 10px;"><label class="input-label" for="select-pais-generador">País / Patrón Monetario</label><select id="select-pais-generador" class="crypto-input" onchange="actualizarInfoFormatoPais()"></select></div>
             <div style="font-size: 0.7rem; color: var(--accent-cyan); margin-bottom: 8px; font-family: monospace; word-break: break-all;" id="info-formato-activo">Formato: L 00000000 L</div>
-
             <div class="roll-box" id="generated-serial-box">A 12345678 A</div>
             <button type="button" class="btn-action btn-secondary" onclick="generarRollAleatorioReal()">⚡ GENERAR SEGÚN PAÍS</button>
             <button type="button" id="btn-save-generated" class="btn-action" style="margin-top: 8px;" onclick="saveGeneratedSerial()">📥 GUARDAR GENERADO</button>
         </div>
-
-        <!-- IDENTIFICADOR DE RAREZAS -->
         <div class="card card-rare" id="card-rareza">
-            <div class="card-header-flex">
-                <div class="card-title"><span>⭐</span> Identificador de Rarezas</div>
-                <div class="badge-fintech">EN TIEMPO REAL</div>
-            </div>
-
+            <div class="card-header-flex"><div class="card-title"><span>⭐</span> Identificador de Rarezas</div><div class="badge-fintech">EN TIEMPO REAL</div></div>
             <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Escribe la serie completa y el año para auditar patrones matemáticos.</p>
-
             <div class="row-inputs">
-                <div class="input-group">
-                    <label class="input-label" for="rare-serial-input">Número de Serie Completo</label>
-                    <input type="text" id="rare-serial-input" class="crypto-input" placeholder="Ej: A12344321B" style="color: var(--accent-gold);" oninput="ejecutarAnalisisEnTiempoReal()">
-                </div>
-                <div class="input-group">
-                    <label class="input-label" for="rare-year-input">Año de Emisión</label>
-                    <input type="number" id="rare-year-input" class="crypto-input" placeholder="Ej: 1957" min="1800" max="2026" oninput="ejecutarAnalisisEnTiempoReal()">
-                </div>
+                <div class="input-group"><label class="input-label" for="rare-serial-input">Número de Serie Completo</label><input type="text" id="rare-serial-input" class="crypto-input" placeholder="Ej: A12344321B" style="color: var(--accent-gold);" oninput="ejecutarAnalisisEnTiempoReal()"></div>
+                <div class="input-group"><label class="input-label" for="rare-year-input">Año de Emisión</label><input type="number" id="rare-year-input" class="crypto-input" placeholder="Ej: 1957" min="1800" max="2026" oninput="ejecutarAnalisisEnTiempoReal()"></div>
             </div>
-
             <div id="rare-result-box" class="rare-result-container comun" style="display: none; padding: 12px; border-radius: 10px; border: 1px solid var(--card-border); background: var(--input-bg); margin-bottom: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Nivel Detectado:</span>
-                    <span id="rare-tag-display" class="badge-rareza comun">Común</span>
-                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;"><span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Nivel Detectado:</span><span id="rare-tag-display" class="badge-rareza comun">Común</span></div>
                 <div style="font-size: 0.8rem; color: var(--text-main); font-weight: 600;" id="rare-motivos-display">Esperando análisis...</div>
             </div>
-
             <button type="button" id="btn-certificar" class="btn-action btn-gold" onclick="certificarYGuardarRareza()">💎 CERTIFICAR Y GUARDAR RAREZA</button>
         </div>
-
-        <!-- FONDO DE ADQUISICIÓN Y LÍDER -->
         <div class="card card-fondo full-width">
-            <div class="card-header-flex">
-                <div class="card-title"><span>🏛️</span> Fondo Adquisición & Líder de Frecuencia</div>
-                <div class="badge-fintech">POSICIONAL</div>
-            </div>
-
-            <div class="metrics-grid">
-                <div class="metric-box"><span class="status-label">Fondo Operativo</span><div class="metric-number" style="color: var(--accent-green);" id="community-pool-balance">$2.99</div></div>
-                <div class="metric-box"><span class="status-label">Miembros Pro</span><div class="metric-number" id="community-members-count">1/500</div></div>
-            </div>
-
+            <div class="card-header-flex"><div class="card-title"><span>🏛️</span> Fondo Adquisición & Líder de Frecuencia</div><div class="badge-fintech">POSICIONAL</div></div>
+            <div class="metrics-grid"><div class="metric-box"><span class="status-label">Fondo Operativo</span><div class="metric-number" style="color: var(--accent-green);" id="community-pool-balance">$2.99</div></div><div class="metric-box"><span class="status-label">Miembros Pro</span><div class="metric-number" id="community-members-count">1/500</div></div></div>
             <span class="status-label">Progreso hacia la Meta Operativa del Fondo</span>
             <div class="progress-bar-container"><div class="progress-bar-fill" id="pool-progress-bar" style="width: 1.19%;"></div></div>
-
             <div class="leader-serial-prominent-box">
-                <div class="leader-header-row">
-                    <span class="status-label" style="color: var(--accent-gold); font-weight: 800;">⭐ NÚMERO LÍDER GLOBAL</span>
-                    <span class="seg-pais" id="leader-pais-badge">Supabase Live</span>
-                </div>
+                <div class="leader-header-row"><span class="status-label" style="color: var(--accent-gold); font-weight: 800;">⭐ NÚMERO LÍDER GLOBAL</span><span class="seg-pais" id="leader-pais-badge">Supabase Live</span></div>
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div class="leader-serial-display" id="display-leader-serial">
-                        <span class="seg-letters">AB</span>
-                        <span class="seg-part1">89402192</span>
-                        <span class="seg-year">(2020)</span>
-                    </div>
+                    <div class="leader-serial-display" id="display-leader-serial"><span class="seg-letters">AB</span><span class="seg-part1">89402192</span><span class="seg-year">(2020)</span></div>
                     <button type="button" class="copy-serial-btn" onclick="copyLeaderSerial()">📋 Copiar Serie</button>
                 </div>
             </div>
-
             <div class="locks-grid">
                 <div class="lock-item locked" id="lock-1"><span>🔒</span> 1. Membresía Pro Activa</div>
                 <div class="lock-item locked" id="lock-2"><span>🔒</span> 2. Antigüedad Cuenta (90d)</div>
                 <div class="lock-item locked" id="lock-3"><span>🔒</span> 3. Participación Histórica</div>
                 <div class="lock-item locked" id="lock-4"><span>🔒</span> 4. Ventana Bóveda (30d)</div>
             </div>
-
-            <div class="eligibility-banner no-eligible" id="eligibility-banner">
-                <div style="font-weight: 700; color: var(--danger-red); margin-bottom: 2px;" id="eligibility-title">❌ Candados de Elegibilidad Pendientes</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);" id="eligibility-desc">Cumple con las normativas de tiempo y estatus para habilitar los beneficios del sistema.</div>
-            </div>
-
+            <div class="eligibility-banner no-eligible" id="eligibility-banner"><div style="font-weight: 700; color: var(--danger-red); margin-bottom: 2px;" id="eligibility-title">❌ Candados de Elegibilidad Pendientes</div><div style="font-size: 0.75rem; color: var(--text-muted);" id="eligibility-desc">Cumple con las normativas de tiempo y estatus para habilitar los beneficios del sistema.</div></div>
             <div style="display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 12px;">
                 <button type="button" class="btn-action btn-gold" id="btn-reclamar-puntos" onclick="reclamarPuntosLider()" disabled>🔢 Reclamar +150 Puntos (Automático)</button>
                 <button type="button" class="btn-action btn-secondary" id="btn-solicitar-oferta" onclick="solicitarEvaluacionComercial()" disabled>💼 Solicitar Oferta de Compra (Discrecional)</button>
             </div>
         </div>
-
-        <!-- FRECUENCIAS POR POSICIÓN -->
-        <div class="card">
-            <div class="card-header-flex">
-                <div class="card-title"><span>📊</span> Frecuencias por Posición</div>
-                <div class="badge-fintech">CHART.JS</div>
-            </div>
-            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">Monitoriza los dígitos ganadores y pasa el cursor para ver el desglose exacto de modas.</p>
-            <div style="position: relative; height: 200px; width: 100%;">
-                <canvas id="probabilidadChart"></canvas>
-            </div>
-        </div>
-
-        <!-- BÓVEDA INTERNA DE BILLETES -->
-        <div class="card">
-            <div class="card-header-flex">
-                <div class="card-title"><span>🗄️</span> Bóveda Interna de Billetes</div>
-                <div class="badge-fintech">SUPABASE CLOUD</div>
-            </div>
-            <div class="vault-list" id="vault-list-container">
-                <div class="vault-item"><div><span>Sincronizando con Supabase...</span></div></div>
-            </div>
-        </div>
+        <div class="card"><div class="card-header-flex"><div class="card-title"><span>📊</span> Frecuencias por Posición</div><div class="badge-fintech">CHART.JS</div></div><p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">Monitoriza los dígitos ganadores y pasa el cursor para ver el desglose exacto de modas.</p><div style="position: relative; height: 200px; width: 100%;"><canvas id="probabilidadChart"></canvas></div></div>
+        <div class="card"><div class="card-header-flex"><div class="card-title"><span>🗄️</span> Bóveda Interna de Billetes</div><div class="badge-fintech">SUPABASE CLOUD</div></div><div class="vault-list" id="vault-list-container"><div class="vault-item"><div><span>Sincronizando con Supabase...</span></div></div></div></div>
     </main>
-
     <footer>DollarDgT 360 &bull; Sistema Multi-País Global Numismático &bull; Todos los derechos reservados.</footer>
-
-    <!-- MODAL STRIPE PAGO NATIVO -->
-    <div class="modal-overlay" id="stripe-modal">
-        <div class="modal-card">
-            <div class="modal-title"><span>🛡️ Suscripción Stripe ($4.99/mes)</span><button class="close-modal" onclick="closeStripeModal()">&times;</button></div>
-            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">Procesa tu suscripción segura de forma nativa con Stripe.</p>
-            <div class="check-row"><input type="checkbox" id="chk1" checked><label for="chk1">Acepto Términos y Condiciones (Sección X.4)</label></div>
-            <div class="check-row"><input type="checkbox" id="chk2" checked><label for="chk2">Acepto Política de Privacidad</label></div>
-            <div class="check-row"><input type="checkbox" id="chk3" checked><label for="chk3">Acepto Política de Reembolsos</label></div>
-            <button type="button" class="btn-action btn-gold" id="btn-pagar-stripe" onclick="procesarPagoStripeNativo()" style="margin-top: 12px;">Pagar $4.99 con Stripe Pro ↗</button>
-        </div>
-    </div>
-
-    <!-- MODAL TASACIÓN -->
-    <div class="modal-overlay" id="commercial-offer-modal">
-        <div class="modal-card">
-            <div class="modal-title"><span>💼 Evaluación Comercial Privada</span><button class="close-modal" onclick="closeCommercialModal()">&times;</button></div>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Has vinculado un billete coincidente con el Líder del Día. Conforme a la <strong>Sección X.4</strong>, DollarDgT evaluará de forma discrecional la adquisición del activo.</p>
-            <div style="background: var(--input-bg); border: 1px solid var(--card-border); padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 0.75rem; font-family: monospace; color: var(--accent-gold); word-break: break-all;">
-                Serie Evaluada: <span id="modal-eval-serial">AB 89402192 (2020)</span>
-            </div>
-            <button type="button" class="btn-action btn-gold" onclick="enviarSolicitudTasacionPrivada()">Enviar a Tasación Comercial</button>
-        </div>
-    </div>
-
+    <div class="modal-overlay" id="stripe-modal"><div class="modal-card"><div class="modal-title"><span>🛡️ Suscripción Stripe ($4.99/mes)</span><button class="close-modal" onclick="closeStripeModal()">&times;</button></div><p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">Procesa tu suscripción segura de forma nativa con Stripe.</p><div class="check-row"><input type="checkbox" id="chk1" checked><label for="chk1">Acepto Términos y Condiciones (Sección X.4)</label></div><div class="check-row"><input type="checkbox" id="chk2" checked><label for="chk2">Acepto Política de Privacidad</label></div><div class="check-row"><input type="checkbox" id="chk3" checked><label for="chk3">Acepto Política de Reembolsos</label></div><button type="button" class="btn-action btn-gold" id="btn-pagar-stripe" onclick="procesarPagoStripeNativo()" style="margin-top: 12px;">Pagar $4.99 con Stripe Pro ↗</button></div></div>
+    <div class="modal-overlay" id="commercial-offer-modal"><div class="modal-card"><div class="modal-title"><span>💼 Evaluación Comercial Privada</span><button class="close-modal" onclick="closeCommercialModal()">&times;</button></div><p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Has vinculado un billete coincidente con el Líder del Día. Conforme a la <strong>Sección X.4</strong>, DollarDgT evaluará de forma discrecional la adquisición del activo.</p><div style="background: var(--input-bg); border: 1px solid var(--card-border); padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 0.75rem; font-family: monospace; color: var(--accent-gold); word-break: break-all;">Serie Evaluada: <span id="modal-eval-serial">AB 89402192 (2020)</span></div><button type="button" class="btn-action btn-gold" onclick="enviarSolicitudTasacionPrivada()">Enviar a Tasación Comercial</button></div></div>
     <div id="toast-container"></div>
-
-    <script>
-
-        const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co'; 
+<script>
+        const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
-        
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         const STRIPE_PUBLIC_KEY = 'pk_live_51U0o31IPKX7lMjR6jorRtUXLX4QbhnVkrZaSnBVFioWRhiTZKAu8p4OR0WyPWOLiTrH0toQGzrShEoVmwW82El7w00l2e179li';
         const stripe = Stripe(STRIPE_PUBLIC_KEY);
 
@@ -559,36 +325,33 @@
             return currentUserEmail || 'Invitado Anonimo';
         }
 
+        // FUNCION GLOBAL SEGURA - ANONIMIZA EMAILS
+        function crearAliasSeguro(email) {
+            if (!email || email.toLowerCase().includes('anonimo')) return 'Invitado Anónimo';
+            if (!email.includes('@')) return email;
+            const parte = email.split('@')[0].slice(0,3);
+            const num = Math.floor(1000 + Math.random()*9000);
+            return `${parte}***#${num}`;
+        }
+
         async function procesarPagoStripeNativo() {
-  showToast('🛡️ Conectando con Supabase...');
-  try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) {
-      showToast('⚠️ Debes iniciar sesión');
-      return;
-    }
-
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-        'apikey': SUPABASE_ANON_KEY
-      },
-      body: JSON.stringify({ email: session.user.email })
-    });
-
-    const data = await res.json();
-    console.log('Stripe data:', data);
-    if (!res.ok) throw new Error(data.error || 'Error en función');
-
-    window.location.href = data.url; // redirige a Stripe Checkout
-
-  } catch (err) {
-    console.error(err);
-    showToast('⚠️ Error al procesar el pago: ' + err.message);
-  }
-}
+            showToast('🛡️ Conectando con Supabase...');
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) { showToast('⚠️ Debes iniciar sesión'); return; }
+                const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
+                    body: JSON.stringify({ email: session.user.email })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Error en función');
+                window.location.href = data.url;
+            } catch (err) {
+                console.error(err);
+                showToast('⚠️ Error al procesar el pago: ' + err.message);
+            }
+        }
 
         async function verificarSesionSupabase() {
             try {
@@ -603,39 +366,31 @@
                     document.getElementById('auth-panel-logged-in').style.display = 'none';
                     document.getElementById('auth-panel-logged-out').style.display = 'block';
                 }
-            } catch (err) {
-                console.error("Error al verificar sesión:", err.message);
-            }
+            } catch (err) { console.error("Error al verificar sesión:", err.message); }
         }
 
         async function registrarUsuarioSupabase() {
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value.trim();
-            if(!email || !password) { showToast('⚠️ Ingresa correo y contraseña.'); return; }
-            
+            if(!email ||!password) { showToast('⚠️ Ingresa correo y contraseña.'); return; }
             try {
                 const { data, error } = await supabaseClient.auth.signUp({ email, password });
                 if (error) throw error;
                 showToast('✅ ¡Registro exitoso! Revisa tu correo o inicia sesión.');
-            } catch (err) {
-                showToast('⚠️ Error en registro: ' + err.message);
-            }
+            } catch (err) { showToast('⚠️ Error en registro: ' + err.message); }
         }
 
         async function iniciarSesionSupabase() {
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value.trim();
-            if(!email || !password) { showToast('⚠️ Ingresa correo y contraseña.'); return; }
-            
+            if(!email ||!password) { showToast('⚠️ Ingresa correo y contraseña.'); return; }
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 showToast('⭐ ¡Sesión iniciada correctamente en Supabase!');
                 await verificarSesionSupabase();
                 await cargarBovedaDesdeSupabase();
-            } catch (err) {
-                showToast('⚠️ Error al iniciar sesión: ' + err.message);
-            }
+            } catch (err) { showToast('⚠️ Error al iniciar sesión: ' + err.message); }
         }
 
         async function cerrarSesionSupabase() {
@@ -646,37 +401,27 @@
                 document.getElementById('auth-panel-logged-out').style.display = 'block';
                 showToast('🔒 Sesión cerrada.');
                 await cargarBovedaDesdeSupabase();
-            } catch (err) {
-                console.error("Error al cerrar sesión:", err.message);
-            }
+            } catch (err) { console.error("Error al cerrar sesión:", err.message); }
         }
 
         async function cargarBovedaDesdeSupabase() {
             const list = document.getElementById('vault-list-container');
             list.innerHTML = '<div class="vault-item"><div><span>Sincronizando con Supabase...</span></div></div>';
-
             try {
-                const { data: registros, error } = await supabaseClient
-                    .from('boveda_billetes')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
+                const { data: registros, error } = await supabaseClient.from('boveda_billetes').select('*').order('created_at', { ascending: false });
                 if (error) throw error;
-
                 list.innerHTML = '';
                 savedCount = 0;
                 rareCount = 0;
                 let frecuenciasPosiciones = [0, 0, 0, 0, 0, 0, 0, 0];
-
                 if (!registros || registros.length === 0) {
                     list.innerHTML = '<div class="vault-item"><div><span>Bóveda vacía en Supabase. ¡Registra el primer billete!</span></div></div>';
+                    actualizarHeaderStats();
                     return;
                 }
-
                 registros.forEach(item => {
                     savedCount++;
-                    if (item.rarity_level !== 'Común') rareCount++;
-
+                    if (item.rarity_level!== 'Común') rareCount++;
                     const digitosMatch = String(item.serial_number).match(/\d+/);
                     if (digitosMatch) {
                         const digs = digitosMatch[0];
@@ -684,27 +429,20 @@
                             frecuenciasPosiciones[i] += parseInt(digs.charAt(i)) || 1;
                         }
                     }
-
                     const el = document.createElement('div');
                     el.className = 'vault-item';
-                    const etiquetaTexto = `${item.serial_number} ${item.issue_year ? '(' + item.issue_year + ')' : ''}`;
-                    el.innerHTML = `
-                        <div><span>${item.entry_type} - <span class="serial">${etiquetaTexto}</span></span><span class="vault-meta">Usuario: ${item.user_alias}</span></div>
-                        <span class="badge-rareza ${obtenerClaseRarezaCSS(item.rarity_level)}">${item.rarity_level}</span>
-                    `;
+                    const etiquetaTexto = `${item.serial_number} ${item.issue_year? '(' + item.issue_year + ')' : ''}`;
+                    el.innerHTML = `<div><span>${item.entry_type} - <span class="serial">${etiquetaTexto}</span></span><span class="vault-meta">Usuario: ${item.user_alias}</span></div><span class="badge-rareza ${obtenerClaseRarezaCSS(item.rarity_level)}">${item.rarity_level}</span>`;
                     list.appendChild(el);
                 });
-
                 actualizarHeaderStats();
-
                 if (probabilidadChartInstance) {
                     probabilidadChartInstance.data.datasets[0].data = frecuenciasPosiciones;
                     probabilidadChartInstance.update();
                 }
-
             } catch (err) {
                 console.error("Error al cargar la bóveda:", err.message);
-                list.innerHTML = `<div class="vault-item"><div><span style="color: var(--danger-red);">Error al conectar con Supabase: ${err.message}</span></div></div>`;
+                list.innerHTML = `<div class="vault-item"><div><span style="color: var(--danger-red);">Error: ${err.message}</span></div></div>`;
             }
         }
 
@@ -720,18 +458,13 @@
             const serieLimpia = String(numeroSerie).trim().toUpperCase();
             const anio = parseInt(anioSerie) || null;
             const coincidenciaNumeros = serieLimpia.match(/\d+/);
-            const digitos = coincidenciaNumeros ? coincidenciaNumeros[0] : "";
-            
-            let rareza = "Común";
-            let claseCSS = "comun";
-            let motivos = [];
-
+            const digitos = coincidenciaNumeros? coincidenciaNumeros[0] : "";
+            let rareza = "Común"; let claseCSS = "comun"; let motivos = [];
             if (anio) {
                 if (anio < 1928) { rareza = "Ultra Raro"; claseCSS = "ultra-raro"; motivos.push("Emisión histórica antigua (<1928)"); }
                 else if (anio < 1963) { rareza = "Raro"; claseCSS = "raro"; motivos.push(`Serie clásica (${anio})`); }
                 else if (anio < 1990) { rareza = "Poco Común"; claseCSS = "poco-comun"; motivos.push(`Edición Vintage (${anio})`); }
             }
-
             if (digitos.length >= 6) {
                 const digitosUnicos = new Set(digitos).size;
                 const reverso = digitos.split('').reverse().join('');
@@ -739,11 +472,7 @@
                 else if (parseInt(digitos) <= 100) { rareza = "Ultra Raro"; claseCSS = "ultra-raro"; motivos.push("Serie Súper Baja"); }
                 else if (digitos === reverso) { rareza = "Muy Raro"; claseCSS = "muy-raro"; motivos.push("Número Radar"); }
             }
-
-            if (serieLimpia.includes('*')) {
-                rareza = "Ultra Raro"; claseCSS = "ultra-raro"; motivos.push("Nota Estrella (*)");
-            }
-
+            if (serieLimpia.includes('*')) { rareza = "Ultra Raro"; claseCSS = "ultra-raro"; motivos.push("Nota Estrella (*)"); }
             if (motivos.length === 0) motivos.push("Sin patrones especiales");
             return { rareza, claseCSS, digitos, detalles: motivos.join(" + ") };
         }
@@ -753,7 +482,6 @@
             const anio = document.getElementById('rare-year-input').value;
             const resultBox = document.getElementById('rare-result-box');
             if (!serie.trim()) { resultBox.style.display = 'none'; return; }
-
             const analisis = evaluarRarezaBillete(serie, anio);
             resultBox.style.display = 'block';
             resultBox.className = `rare-result-container ${analisis.claseCSS}`;
@@ -767,44 +495,21 @@
             const anio = document.getElementById('rare-year-input').value.trim();
             const miembroActual = obtenerMiembroActivo();
             const boton = document.getElementById('btn-certificar');
-
             if (!serie) { showToast('⚠️ Introduce un número de serie.'); return; }
             const analisis = evaluarRarezaBillete(serie, anio);
-
-            let pts = analisis.rareza === "Ultra Raro" ? 500 : 150;
+            let pts = analisis.rareza === "Ultra Raro"? 500 : 150;
             userPoints += pts;
             document.getElementById('display-points').innerText = userPoints.toLocaleString() + " PTS";
-
-            boton.disabled = true;
-            boton.innerText = "Guardando en Supabase...";
-
+            boton.disabled = true; boton.innerText = "Guardando en Supabase...";
             try {
-                const { error } = await supabaseClient
-                    .from('boveda_billetes')
-                    .insert([{
-                        user_alias: miembroActual,
-                        serial_number: serie,
-                        country_code: 'USD',
-                        issue_year: anio ? parseInt(anio) : null,
-                        rarity_level: analisis.rareza,
-                        entry_type: 'Certificado'
-                    }]);
-
+                const { error } = await supabaseClient.from('boveda_billetes').insert([{ user_alias: crearAliasSeguro(miembroActual), serial_number: serie, country_code: 'USD', issue_year: anio? parseInt(anio) : null, rarity_level: analisis.rareza, entry_type: 'Certificado' }]);
                 if (error) throw error;
-
                 showToast(`💎 Rareza "${analisis.rareza}" guardada en Supabase (+${pts} PTS).`);
                 document.getElementById('rare-serial-input').value = '';
                 document.getElementById('rare-year-input').value = '';
                 document.getElementById('rare-result-box').style.display = 'none';
-
                 await cargarBovedaDesdeSupabase();
-            } catch (err) {
-                console.error("Error Supabase:", err.message);
-                showToast(`⚠️ Error al guardar: ${err.message}`);
-            } finally {
-                boton.disabled = false;
-                boton.innerText = "💎 CERTIFICAR Y GUARDAR RAREZA";
-            }
+            } catch (err) { showToast(`⚠️ Error al guardar: ${err.message}`); } finally { boton.disabled = false; boton.innerText = "💎 CERTIFICAR Y GUARDAR RAREZA"; }
         }
 
         async function handleManualSubmit(event) {
@@ -814,69 +519,34 @@
             const anio = document.getElementById('manual-anio').value;
             const miembroActual = obtenerMiembroActivo();
             const botonSubmit = document.getElementById('btn-submit-manual');
-
-            if (digitos.length < 6 || digitos.length > 11) {
-                showToast('⚠️ Los dígitos deben estar entre 6 y 11 caracteres.');
-                return;
-            }
-
-            const serieCompleta = `${letras ? letras + ' ' : ''}${digitos}`.trim();
+            if (digitos.length < 6 || digitos.length > 11) { showToast('⚠️ Los dígitos deben estar entre 6 y 11 caracteres.'); return; }
+            const serieCompleta = `${letras? letras + ' ' : ''}${digitos}`.trim();
             userPoints += 50;
             document.getElementById('display-points').innerText = userPoints.toLocaleString() + " PTS";
-
-            botonSubmit.disabled = true;
-            botonSubmit.innerText = "Guardando en Supabase...";
-
+            botonSubmit.disabled = true; botonSubmit.innerText = "Guardando en Supabase...";
             try {
-                const { error } = await supabaseClient
-                    .from('boveda_billetes')
-                    .insert([{
-                        user_alias: miembroActual,
-                        serial_number: serieCompleta,
-                        country_code: 'USD',
-                        issue_year: parseInt(anio),
-                        rarity_level: 'Común',
-                        entry_type: 'Manual'
-                    }]);
-
+                const { error } = await supabaseClient.from('boveda_billetes').insert([{ user_alias: crearAliasSeguro(miembroActual), serial_number: serieCompleta, country_code: 'USD', issue_year: parseInt(anio), rarity_level: 'Común', entry_type: 'Manual' }]);
                 if (error) throw error;
-
                 showToast(`✅ Serie "${serieCompleta} (${anio})" guardada en Supabase.`);
                 document.getElementById('manual-letras').value = '';
                 document.getElementById('manual-digitos').value = '';
-
                 await cargarBovedaDesdeSupabase();
-            } catch (err) {
-                console.error("Error Supabase:", err.message);
-                showToast(`⚠️ Error al insertar: ${err.message}`);
-            } finally {
-                botonSubmit.disabled = false;
-                botonSubmit.innerText = "Registrar en Supabase";
-            }
+            } catch (err) { showToast(`⚠️ Error al insertar: ${err.message}`); } finally { botonSubmit.disabled = false; botonSubmit.innerText = "Registrar en Supabase"; }
         }
 
         function generarRollAleatorioReal() {
             const paisKey = document.getElementById('select-pais-generador').value;
             const cfg = FORMATOS_MONEDA_MUNDIAL_48[paisKey];
             if (!cfg) return;
-
-            const L = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const D = "0123456789";
+            const L = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; const D = "0123456789";
             const rLet = (n) => Array.from({length: n}, () => L.charAt(Math.floor(Math.random() * L.length))).join('');
             const rNum = (n) => Array.from({length: n}, () => D.charAt(Math.floor(Math.random() * D.length))).join('');
-
-            let serieSimulada = "";
-            let anio = Math.floor(Math.random() * (2026 - 1980 + 1)) + 1980;
-
+            let serieSimulada = ""; let anio = Math.floor(Math.random() * (2026 - 1980 + 1)) + 1980;
             if (paisKey === "USD_1_2") serieSimulada = `${rLet(1)} ${rNum(8)} ${rLet(1)}`;
             else if (paisKey === "USD_MODERNO" || paisKey === "ECU") serieSimulada = `${rLet(2)} ${rNum(8)} ${rLet(1)}`;
             else if (paisKey === "CAD") serieSimulada = `${rLet(3)}-${rNum(7)}`;
             else if (paisKey === "MXN" || paisKey === "COL" || paisKey === "VEN") serieSimulada = `${rLet(2)} ${rNum(cfg.digitos)}`;
-            else {
-                let letrasGen = cfg.letras > 0 ? rLet(cfg.letras) + " " : "";
-                serieSimulada = `${letrasGen}${rNum(cfg.digitos)}`;
-            }
-
+            else { let letrasGen = cfg.letras > 0? rLet(cfg.letras) + " " : ""; serieSimulada = `${letrasGen}${rNum(cfg.digitos)}`; }
             generatedCurrent = `${serieSimulada} (${anio}) [${cfg.codigo}]`;
             document.getElementById('generated-serial-box').innerText = generatedCurrent;
             showToast(`🎲 Serie generada para ${cfg.pais}.`);
@@ -888,105 +558,51 @@
             const boton = document.getElementById('btn-save-generated');
             userPoints += 75;
             document.getElementById('display-points').innerText = userPoints.toLocaleString() + " PTS";
-
-            boton.disabled = true;
-            boton.innerText = "Guardando...";
-
+            boton.disabled = true; boton.innerText = "Guardando...";
             try {
-                const { error } = await supabaseClient
-                    .from('boveda_billetes')
-                    .insert([{
-                        user_alias: miembroActual,
-                        serial_number: generatedCurrent,
-                        country_code: 'USD',
-                        issue_year: 2020,
-                        rarity_level: 'Poco Común',
-                        entry_type: 'Roll'
-                    }]);
-
+                const { error } = await supabaseClient.from('boveda_billetes').insert([{ user_alias: crearAliasSeguro(miembroActual), serial_number: generatedCurrent, country_code: 'USD', issue_year: 2020, rarity_level: 'Poco Común', entry_type: 'Roll' }]);
                 if (error) throw error;
-
                 showToast(`Serie generada guardada en Supabase.`);
                 await cargarBovedaDesdeSupabase();
-            } catch (err) {
-                console.error("Error Supabase:", err.message);
-                showToast(`⚠️ Error al guardar Roll: ${err.message}`);
-            } finally {
-                boton.disabled = false;
-                boton.innerText = "📥 GUARDAR GENERADO";
-            }
+            } catch (err) { showToast(`⚠️ Error al guardar Roll: ${err.message}`); } finally { boton.disabled = false; boton.innerText = "📥 GUARDAR GENERADO"; }
         }
 
         function openStripeModal() { document.getElementById('stripe-modal').classList.add('active'); }
         function closeStripeModal() { document.getElementById('stripe-modal').classList.remove('active'); }
 
         function evaluateLocks() {
-            const l1 = userSecurityState.membershipActive;
-            const l2 = userSecurityState.daysSiembra >= 90;
-            const l3 = userSecurityState.timesLeader >= 3;
-            const l4 = userSecurityState.daysVault >= 30;
-
-            document.getElementById('lock-1').className = l1 ? 'lock-item unlocked' : 'lock-item locked';
-            document.getElementById('lock-2').className = l2 ? 'lock-item unlocked' : 'lock-item locked';
-            document.getElementById('lock-3').className = l3 ? 'lock-item unlocked' : 'lock-item locked';
-            document.getElementById('lock-4').className = l4 ? 'lock-item unlocked' : 'lock-item locked';
-
+            const l1 = userSecurityState.membershipActive; const l2 = userSecurityState.daysSiembra >= 90; const l3 = userSecurityState.timesLeader >= 3; const l4 = userSecurityState.daysVault >= 30;
+            document.getElementById('lock-1').className = l1? 'lock-item unlocked' : 'lock-item locked';
+            document.getElementById('lock-2').className = l2? 'lock-item unlocked' : 'lock-item locked';
+            document.getElementById('lock-3').className = l3? 'lock-item unlocked' : 'lock-item locked';
+            document.getElementById('lock-4').className = l4? 'lock-item unlocked' : 'lock-item locked';
             const allUnlocked = l1 && l2 && l3 && l4;
             const banner = document.getElementById('eligibility-banner');
             const titleEl = document.getElementById('eligibility-title');
             const descEl = document.getElementById('eligibility-desc');
             const btnPuntos = document.getElementById('btn-reclamar-puntos');
             const btnOferta = document.getElementById('btn-solicitar-oferta');
-
             if (allUnlocked) {
-                banner.className = 'eligibility-banner eligible';
-                titleEl.style.color = 'var(--accent-green)';
-                titleEl.innerText = '✔️ ¡Elegible para Recompensas y Ofertas!';
-                descEl.innerText = 'Cumples con todos los candados de seguridad de la campaña.';
-                btnPuntos.disabled = false; btnOferta.disabled = false;
+                banner.className = 'eligibility-banner eligible'; titleEl.style.color = 'var(--accent-green)'; titleEl.innerText = '✔️ ¡Elegible para Recompensas y Ofertas!'; descEl.innerText = 'Cumples con todos los candados de seguridad de la campaña.'; btnPuntos.disabled = false; btnOferta.disabled = false;
             } else {
-                banner.className = 'eligibility-banner no-eligible';
-                titleEl.style.color = 'var(--danger-red)';
-                titleEl.innerText = '❌ Candados de Elegibilidad Pendientes';
-                descEl.innerText = 'Cumple con las normativas de tiempo y estatus para habilitar los beneficios.';
-                btnPuntos.disabled = true; btnOferta.disabled = true;
+                banner.className = 'eligibility-banner no-eligible'; titleEl.style.color = 'var(--danger-red)'; titleEl.innerText = '❌ Candados de Elegibilidad Pendientes'; descEl.innerText = 'Cumple con las normativas de tiempo y estatus para habilitar los beneficios.'; btnPuntos.disabled = true; btnOferta.disabled = true;
             }
         }
 
-        function copyLeaderSerial() {
-            navigator.clipboard.writeText(leaderSerialValue);
-            showToast(`📋 Serie Líder copiada.`);
-        }
+        function copyLeaderSerial() { navigator.clipboard.writeText(leaderSerialValue); showToast(`📋 Serie Líder copiada.`); }
 
         async function reclamarPuntosLider() {
             if (!userSecurityState.membershipActive) { openStripeModal(); showToast('🛡️ Activa tu membresía Pro.'); return; }
             const miembroActual = obtenerMiembroActivo();
             userPoints += 150;
             document.getElementById('display-points').innerText = userPoints.toLocaleString() + " PTS";
-
-            function crearAliasSeguro(email) {
-  if (!email || email.includes('Anonimo')) return 'Invitado Anónimo';
-  if (!email.includes('@')) return email; // si ya es alias, déjalo
-  const parte = email.split('@')[0].slice(0,3);
-  const num = Math.floor(1000 + Math.random()*9000);
-  return `${parte}***#${num}`;
-}
-
-try {
-    const aliasSeguro = crearAliasSeguro(miembroActual);
-    await supabaseClient.from('boveda_billetes').insert([{
-        user_alias: aliasSeguro,
-        serial_number: leaderSerialValue,
-        country_code: 'USD',
-        issue_year: 2020,
-        rarity_level: 'Ultra Raro',
-        entry_type: 'Puntos Líder'
-    }]);
-    showToast(`🔢 ¡+150 Puntos acreditados en Supabase!`);
-    await cargarBovedaDesdeSupabase();
-} catch(e) {
-    showToast(`⚠️ Error: ${e.message}`);
-}
+            try {
+                const aliasSeguro = crearAliasSeguro(miembroActual);
+                await supabaseClient.from('boveda_billetes').insert([{ user_alias: aliasSeguro, serial_number: leaderSerialValue, country_code: 'USD', issue_year: 2020, rarity_level: 'Ultra Raro', entry_type: 'Puntos Líder' }]);
+                showToast(`🔢 ¡+150 Puntos acreditados en Supabase!`);
+                await cargarBovedaDesdeSupabase();
+            } catch(e) { showToast(`⚠️ Error: ${e.message}`); }
+        }
 
         function solicitarEvaluacionComercial() {
             if (!userSecurityState.membershipActive) { openStripeModal(); showToast('🛡️ Activa tu membresía Pro.'); return; }
@@ -995,52 +611,20 @@ try {
         }
 
         function closeCommercialModal() { document.getElementById('commercial-offer-modal').classList.remove('active'); }
-
-        function enviarSolicitudTasacionPrivada() {
-            closeCommercialModal();
-            showToast(`💼 Solicitud enviada exitosamente a DollarDgT bajo Sección X.4 (Supabase Cloud).`);
-        }
+        function enviarSolicitudTasacionPrivada() { closeCommercialModal(); showToast(`💼 Solicitud enviada exitosamente a DollarDgT bajo Sección X.4 (Supabase Cloud).`); }
 
         window.addEventListener('DOMContentLoaded', async () => {
             inicializarAnios();
             inicializarSelectorPaisesGenerador();
             evaluateLocks();
             generarRollAleatorioReal();
-            
             await verificarSesionSupabase();
             await cargarBovedaDesdeSupabase();
-
             const ctx = document.getElementById('probabilidadChart').getContext('2d');
             probabilidadChartInstance = new Chart(ctx, {
                 type: 'bar',
-                data: {
-                    labels: ['Casilla 1', 'Casilla 2', 'Casilla 3', 'Casilla 4', 'Casilla 5', 'Casilla 6', 'Casilla 7', 'Casilla 8'],
-                    datasets: [{
-                        label: 'Conteo Frecuencia Global',
-                        data: [0, 0, 0, 0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(0, 242, 254, 0.25)',
-                        borderColor: '#00f2fe',
-                        borderWidth: 1.5,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ` Conteo de Frecuencia: ${context.raw} registros (Moda Activa)`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: { grid: { color: 'rgba(30, 41, 59, 0.5)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
-                    }
-                }
+                data: { labels: ['Casilla 1', 'Casilla 2', 'Casilla 3', 'Casilla 4', 'Casilla 5', 'Casilla 6', 'Casilla 7', 'Casilla 8'], datasets: [{ label: 'Conteo Frecuencia Global', data: [0, 0, 0, 0, 0, 0, 0, 0], backgroundColor: 'rgba(0, 242, 254, 0.25)', borderColor: '#00f2fe', borderWidth: 1.5, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return ` Conteo de Frecuencia: ${context.raw} registros (Moda Activa)`; } } } }, scales: { y: { grid: { color: 'rgba(30, 41, 59, 0.5)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }, x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } } } }
             });
         });
     </script>
