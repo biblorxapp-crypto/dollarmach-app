@@ -6,7 +6,6 @@
     <title>DollarDgT 360 - Bóveda e Ingeniería de Frecuencias Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
-    <!-- Librería oficial de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -161,8 +160,6 @@
         }
         .seg-letters { color: var(--color-segment-letters); }
         .seg-part1   { color: var(--color-segment-part1); }
-        .seg-part2   { color: var(--color-segment-part2); }
-        .seg-part3   { color: var(--color-segment-part3); }
         .seg-year    { color: var(--color-segment-year); background: rgba(52, 211, 153, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px dashed var(--color-segment-year); }
         .seg-pais    { font-size: 0.7rem; color: var(--text-muted); background: var(--input-bg); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--card-border); }
 
@@ -178,7 +175,6 @@
         .progress-bar-fill { background: linear-gradient(90deg, var(--accent-green), #34d399); height: 100%; width: 1.19%; transition: width 0.5s ease; }
 
         .check-row { display: flex; gap: 8px; align-items: flex-start; background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: 0.75rem; }
-        .check-row a { color: var(--accent-cyan); text-decoration: underline; }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 10, 19, 0.85); backdrop-filter: blur(8px);
@@ -236,7 +232,7 @@
                 <div class="status-item"><span class="status-label">Usuario Conectado</span><span class="status-value" id="display-user-email">-</span></div>
                 <div class="status-item"><span class="status-label">Estatus Bóveda</span><span class="status-value" style="color: var(--accent-green);">Verificado</span></div>
                 <div class="status-item"><span class="status-label">Puntos Acumulados</span><span class="status-value" id="display-points" style="color: var(--accent-gold);">1,450 PTS</span></div>
-                <button class="identity-btn danger-btn" onclick="cerrarSesionSupabase()">Cerrar Sesión</button>
+                <button type="button" class="identity-btn danger-btn" onclick="cerrarSesionSupabase()">Cerrar Sesión</button>
             </div>
 
             <div id="auth-panel-logged-out" style="display: block;">
@@ -446,9 +442,10 @@
         // ==========================================
         const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
+        
+        // Instanciación única global segura
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Tu llave pública real de Stripe configurada
         const STRIPE_PUBLIC_KEY = 'pk_live_51U0o31IPKX7lMjR6jorRtUXLX4QbhnVkrZaSnBVFioWRhiTZKAu8p4OR0WyPWOLiTrH0toQGzrShEoVmwW82El7w00l2e179li';
         const stripe = Stripe(STRIPE_PUBLIC_KEY);
 
@@ -635,7 +632,7 @@
                 let frecuenciasPosiciones = [0, 0, 0, 0, 0, 0, 0, 0];
 
                 if (!data || data.length === 0) {
-                    list.innerHTML = '<div class="vault-item"><div><span>Bóveda vacía. ¡Inserta las 25 entradas o registra billetes!</span></div></div>';
+                    list.innerHTML = '<div class="vault-item"><div><span>Bóveda vacía. ¡Inserta entradas o registra billetes!</span></div></div>';
                 } else {
                     data.forEach(item => {
                         savedCount++;
@@ -878,10 +875,8 @@
         function openStripeModal() { document.getElementById('stripe-modal').classList.add('active'); }
         function closeStripeModal() { document.getElementById('stripe-modal').classList.remove('active'); }
 
-        // Integración Nativa con Stripe Live PK
         function procesarPagoStripeNativo() {
             showToast('🛡️ Iniciando pasarela nativa Stripe Pro...');
-            // Aquí puedes enlazar tu lógica nativa de Stripe Checkout con tu Live PK configurada
             setTimeout(() => {
                 showToast('⭐ ¡Membresía Pro activada exitosamente vía Stripe Live!');
                 userSecurityState.membershipActive = true;
