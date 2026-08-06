@@ -964,21 +964,29 @@
             userPoints += 150;
             document.getElementById('display-points').innerText = userPoints.toLocaleString() + " PTS";
 
-            try {
-                await supabaseClient.from('boveda_billetes').insert([{
-                    user_alias: miembroActual,
-                    serial_number: leaderSerialValue,
-                    country_code: 'USD',
-                    issue_year: 2020,
-                    rarity_level: 'Ultra Raro',
-                    entry_type: 'Puntos Líder'
-                }]);
-                showToast(`🔢 ¡+150 Puntos acreditados en Supabase!`);
-                await cargarBovedaDesdeSupabase();
-            } catch(e) {
-                showToast(`⚠️ Error: ${e.message}`);
-            }
-        }
+            function crearAliasSeguro(email) {
+  if (!email || email.includes('Anonimo')) return 'Invitado Anónimo';
+  if (!email.includes('@')) return email; // si ya es alias, déjalo
+  const parte = email.split('@')[0].slice(0,3);
+  const num = Math.floor(1000 + Math.random()*9000);
+  return `${parte}***#${num}`;
+}
+
+try {
+    const aliasSeguro = crearAliasSeguro(miembroActual);
+    await supabaseClient.from('boveda_billetes').insert([{
+        user_alias: aliasSeguro,
+        serial_number: leaderSerialValue,
+        country_code: 'USD',
+        issue_year: 2020,
+        rarity_level: 'Ultra Raro',
+        entry_type: 'Puntos Líder'
+    }]);
+    showToast(`🔢 ¡+150 Puntos acreditados en Supabase!`);
+    await cargarBovedaDesdeSupabase();
+} catch(e) {
+    showToast(`⚠️ Error: ${e.message}`);
+}
 
         function solicitarEvaluacionComercial() {
             if (!userSecurityState.membershipActive) { openStripeModal(); showToast('🛡️ Activa tu membresía Pro.'); return; }
