@@ -559,12 +559,10 @@
             return currentUserEmail || 'Invitado Anonimo';
         }
 
-
-        async function procesarPagoStripeNativo() {
+                async function procesarPagoStripeNativo() {
             showToast('🛡️ Conectando con Supabase para crear sesión de pago...');
             
             try {
-                // Obtenemos la sesión actual del usuario autenticado
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (!session) {
@@ -573,15 +571,14 @@
                     return;
                 }
 
-                // Llamada segura a tu Edge Function en Supabase
+                // Llamada limpia sin pasar el priceId, ya que la Edge Function lo tiene interno
                 const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', {
-                    body: { priceId: STRIPE_PRICE_ID }
+                    body: {}
                 });
 
                 if (error) throw error;
                 if (!data || !data.sessionId) throw new Error('No se pudo obtener el ID de la sesión de pago.');
 
-                // Redirigir al Checkout oficial de Stripe
                 const result = await stripe.redirectToCheckout({ sessionId: data.sessionId });
                 
                 if (result.error) {
@@ -593,6 +590,8 @@
                 showToast('⚠️ Error al procesar el pago: ' + err.message);
             }
         }
+
+
 
 
         async function verificarSesionSupabase() {
@@ -925,15 +924,6 @@
         function openStripeModal() { document.getElementById('stripe-modal').classList.add('active'); }
         function closeStripeModal() { document.getElementById('stripe-modal').classList.remove('active'); }
 
-        function procesarPagoStripeNativo() {
-            showToast('🛡️ Iniciando pasarela nativa Stripe Pro...');
-            setTimeout(() => {
-                showToast('⭐ ¡Membresía Pro activada exitosamente vía Stripe Live!');
-                userSecurityState.membershipActive = true;
-                evaluateLocks();
-                closeStripeModal();
-            }, 1500);
-        }
 
         function evaluateLocks() {
             const l1 = userSecurityState.membershipActive;
