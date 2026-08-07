@@ -138,7 +138,7 @@
     </style>
 </head>
 <body>
-    <div id="btn-pro-flotante" class="floating-pro-badge" onclick="openStripeModal()"><span>⭐</span> Suscríbete Pro ($4.99)</div>
+    <div class="floating-pro-badge" onclick="openStripeModal()"><span>⭐</span> Suscríbete Pro ($4.99)</div>
     <header class="top-header-pro">
         <div class="brand-logo"><span>🛡️</span> DOLLARDGT 360</div>
         <div class="header-stats-mini">
@@ -241,9 +241,9 @@
         <div class="modal-card">
             <div class="modal-title"><span>🛡️ Suscripción Stripe ($4.99/mes)</span><button class="close-modal" onclick="closeStripeModal()">&times;</button></div>
             <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">Procesa tu suscripción segura de forma nativa con Stripe. Cancela cuando quieras.</p>
-            <div class="check-row"><input type="checkbox" id="chk1" checked><label for="chk1">Acepto <a href="#terminos" onclick="openLegalModal('terminos')">Términos y Condiciones</a> (Sección X.4)</label></div>
-            <div class="check-row"><input type="checkbox" id="chk2" checked><label for="chk2">Acepto la <a href="#privacidad" onclick="openLegalModal('privacidad')">Política de Privacidad</a></label></div>
-            <div class="check-row"><input type="checkbox" id="chk3" checked><label for="chk3">Acepto la <a href="#reembolsos" onclick="openLegalModal('reembolsos')">Política de Reembolsos</a></label></div>
+            <div class="check-row"><input type="checkbox" id="chk1" <label for="chk1">Acepto <a href="#terminos" onclick="openLegalModal('terminos')">Términos y Condiciones</a> (Sección X.4)</label></div>
+            <div class="check-row"><input type="checkbox" id="chk2" <label for="chk2">Acepto la <a href="#privacidad" onclick="openLegalModal('privacidad')">Política de Privacidad</a></label></div>
+            <div class="check-row"><input type="checkbox" id="chk3" <label for="chk3">Acepto la <a href="#reembolsos" onclick="openLegalModal('reembolsos')">Política de Reembolsos</a></label></div>
             <button type="button" class="btn-action btn-gold" id="btn-pagar-stripe" onclick="procesarPagoStripeNativo()" style="margin-top: 12px;">Pagar $4.99 con Stripe Pro ↗</button>
         </div>
     </div>
@@ -337,34 +337,6 @@
             const num = Math.floor(1000 + Math.random()*9000);
             return `${parte}***#${num}`;
         }
-        
-        function actualizarVisibilidadPro() {
-            const proLocal = localStorage.getItem('dollardgt_pro') === '1';
-            const esPro = userSecurityState.membershipActive || proLocal;
-            const btn = document.getElementById('btn-pro-flotante');
-            const badgePro = document.querySelector('.floating-pro-badge');
-            if (btn) {
-                if (esPro) { btn.style.display = 'none'; }
-                else { btn.style.display = 'flex'; }
-            }
-            // Si es Pro, también desbloquea candado 1 visualmente
-            if (esPro) {
-                userSecurityState.membershipActive = true;
-                evaluateLocks();
-            }
-        }
-        function detectarPagoExitoso() {
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('pago') === 'exitoso' || params.get('success') === 'true' || params.get('checkout') === 'success' || params.get('session_id')) {
-                localStorage.setItem('dollardgt_pro', '1');
-                userSecurityState.membershipActive = true;
-                showToast('✅ ¡Pago Pro activado! Bienvenido a Pro');
-                actualizarVisibilidadPro();
-                // Limpia la URL para que no quede fea
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        }
-
         function mostrarAliasSeguro(alias) {
             if (!alias) return 'Invitado Anónimo';
             if (!alias.includes('@')) return alias;
@@ -385,7 +357,7 @@
         async function verificarSesionSupabase() {
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session && session.user) { currentUserEmail = session.user.email; document.getElementById('display-user-email').innerText = currentUserEmail; document.getElementById('auth-panel-logged-in').style.display = 'flex'; document.getElementById('auth-panel-logged-out').style.display = 'none'; actualizarVisibilidadPro(); }
+                if (session && session.user) { currentUserEmail = session.user.email; document.getElementById('display-user-email').innerText = currentUserEmail; document.getElementById('auth-panel-logged-in').style.display = 'flex'; document.getElementById('auth-panel-logged-out').style.display = 'none'; }
                 else { currentUserEmail = null; document.getElementById('auth-panel-logged-in').style.display = 'none'; document.getElementById('auth-panel-logged-out').style.display = 'block'; }
             } catch (err) { console.error("Error al verificar sesión:", err.message); }
         }
@@ -400,7 +372,7 @@
             try { const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password }); if (error) throw error; showToast('⭐ ¡Sesión iniciada correctamente en Supabase!'); await verificarSesionSupabase(); await cargarBovedaDesdeSupabase(); } catch (err) { showToast('⚠️ Error al iniciar sesión: ' + err.message); }
         }
         async function cerrarSesionSupabase() {
-            try { await supabaseClient.auth.signOut(); currentUserEmail = null; document.getElementById('auth-panel-logged-in').style.display = 'none'; document.getElementById('auth-panel-logged-out').style.display = 'block'; localStorage.removeItem('dollardgt_pro'); userSecurityState.membershipActive = false; actualizarVisibilidadPro(); showToast('🔒 Sesión cerrada.'); await cargarBovedaDesdeSupabase(); } catch (err) { console.error("Error al cerrar sesión:", err.message); }
+            try { await supabaseClient.auth.signOut(); currentUserEmail = null; document.getElementById('auth-panel-logged-in').style.display = 'none'; document.getElementById('auth-panel-logged-out').style.display = 'block'; showToast('🔒 Sesión cerrada.'); await cargarBovedaDesdeSupabase(); } catch (err) { console.error("Error al cerrar sesión:", err.message); }
         }
         async function cargarBovedaDesdeSupabase() {
             const list = document.getElementById('vault-list-container');
@@ -460,11 +432,9 @@
         function closeStripeModal() { document.getElementById('stripe-modal').classList.remove('active'); }
         function openLegalModal(tipo) {
             const modal = document.getElementById('legal-modal'); const titleEl = document.getElementById('legal-modal-title'); const contentEl = document.getElementById('legal-modal-content');
-            if (tipo === 'terminos') { titleEl.innerText = "Términos y Condiciones"; contentEl.innerHTML = `<p><strong>Sección X.4 - Membresía Pro y Tasación Discrecional:</strong> La suscripción a DollarDgT 360 Pro ($4.99/mes) habilita la sincronización en vivo con Supabase, funciones multi-país y beneficios comunitarios. Las tasaciones y ofertas de compra se realizan de forma estrictamente discrecional según los criterios de seguridad del sistema, sin constituir una obligación de compra. El usuario garantiza la veracidad y legitimidad de todos los registros numismáticos ingresados.
-</p><br><p>El usuario acepta el uso legítimo de la plataforma y la veracidad de los registros numismáticos ingresados.</p>`; }
+            if (tipo === 'terminos') { titleEl.innerText = "Términos y Condiciones"; contentEl.innerHTML = `<p><strong>Sección X.4 - Membresía Pro y Tasación Discrecional:</strong> Membresía Pro y Tasaciones. La suscripción a DollarDgT 360 Pro ($4.99/mes) habilita la sincronización en vivo con Supabase, funciones multi-país y beneficios comunitarios. Las tasaciones y ofertas de compra se realizan de forma estrictamente discrecional según los criterios de seguridad del sistema, sin constituir una obligación de compra. El usuario garantiza la veracidad y legitimidad de todos los registros numismáticos ingresados.</p><br><p>El usuario acepta el uso legítimo de la plataforma y la veracidad de los registros numismáticos ingresados.</p>`; }
             else if (tipo === 'privacidad') { titleEl.innerText = "Política de Privacidad"; contentEl.innerHTML = `<p>Aviso de Privacidad Simplificado. En DollarDgT 360 protegemos tus registros y datos de navegación en una bóveda digital cifrada mediante Supabase Cloud. Tus credenciales se usan exclusivamente para autenticación de tu cuenta de coleccionista. No transferimos datos personales a terceros, excepto a Stripe para el procesamiento seguro de pagos. Para tu seguridad, tu identidad dentro de la bóveda se mantiene protegida mediante alias anonimizados (ej. bib***#1234).</p>`; }
-            else if (tipo === 'reembolsos') { titleEl.innerText = "Política de Reembolsos"; contentEl.innerHTML = `<p>Términos de Suscripción Pro: 
-Cancelación: Libre y en cualquier momento. Cancela antes de tu próxima fecha de facturación para evitar cargos.Garantía de Reembolso: Disponible durante los primeros 7 días desde la compra.Condición obligatoria: El reembolso se anula automáticamente si ya has realizado peticiones de tasación comercial en el sistema.Contacto de Soporte: soporte@dollardgt.com</p>`; }
+            else if (tipo === 'reembolsos') { titleEl.innerText = "Política de Reembolsos"; contentEl.innerHTML = `<p>Términos de Suscripción Pro:Cancelación: Libre y en cualquier momento. Cancela antes de tu próxima fecha de facturación para evitar cargos.Garantía de Reembolso: Disponible durante los primeros 7 días desde la compra.Condición obligatoria: El reembolso se anula automáticamente si ya has realizado peticiones de tasación comercial en el sistema.Contacto de Soporte: soporte@dollardgt.com</p>`; }
             modal.classList.add('active');
         }
         function closeLegalModal() { document.getElementById('legal-modal').classList.remove('active'); }
@@ -489,7 +459,7 @@ Cancelación: Libre y en cualquier momento. Cancela antes de tu próxima fecha d
         function closeCommercialModal() { document.getElementById('commercial-offer-modal').classList.remove('active'); }
         function enviarSolicitudTasacionPrivada() { closeCommercialModal(); showToast(`💼 Solicitud enviada exitosamente a DollarDgT bajo Sección X.4 (Supabase Cloud).`); }
         window.addEventListener('DOMContentLoaded', async () => {
-            detectarPagoExitoso(); inicializarAnios(); inicializarSelectorPaisesGenerador(); evaluateLocks(); generarRollAleatorioReal(); await verificarSesionSupabase(); await cargarBovedaDesdeSupabase(); actualizarVisibilidadPro();
+            inicializarAnios(); inicializarSelectorPaisesGenerador(); evaluateLocks(); generarRollAleatorioReal(); await verificarSesionSupabase(); await cargarBovedaDesdeSupabase();
             const ctx = document.getElementById('probabilidadChart').getContext('2d');
             probabilidadChartInstance = new Chart(ctx, { type: 'bar', data: { labels: ['Casilla 1', 'Casilla 2', 'Casilla 3', 'Casilla 4', 'Casilla 5', 'Casilla 6', 'Casilla 7', 'Casilla 8'], datasets: [{ label: 'Conteo Frecuencia Global', data: [0, 0, 0, 0, 0, 0, 0, 0], backgroundColor: 'rgba(0, 242, 254, 0.25)', borderColor: '#00f2fe', borderWidth: 1.5, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return ` Conteo de Frecuencia: ${context.raw} registros (Moda Activa)`; } } } }, scales: { y: { grid: { color: 'rgba(30, 41, 59, 0.5)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }, x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } } } } });
         });
