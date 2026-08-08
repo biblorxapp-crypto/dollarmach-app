@@ -118,12 +118,16 @@
 <div class="mt-2">
   <input x-model="myEmail" placeholder="Tu Email para alertas globales (requerido)" class="w-full h-[44px] rounded-xl bg-black border border-emerald-500/20 px-3 text-[16px] text-white outline-none placeholder:text-zinc-600">
 </div>
-<div x-show="isLocked" class="mt-4 flex flex-col gap-2.5"><button @click="doMatch()" :disabled="matchAttemptsLeft<=0" class="kbtn w-full h-[64px] rounded-[18px] bg-gradient-to-b from-amber-400 to-amber-500 text-black font-black text-[22px] glow-match">$ MATCH <span class="text-[12px] bg-black/20 px-2 py-1 rounded-full" x-text="matchAttemptsLeft+'/10'"></span></button>
+<div x-show="isLocked" class="mt-4 flex flex-col gap-2.5">
+<button @click="doMatch()" :disabled="matchAttemptsLeft<=0" class="kbtn w-full h-[64px] rounded-[18px] bg-gradient-to-b from-amber-400 to-amber-500 text-black font-black text-[22px] glow-match">$ MATCH <span class="text-[12px] bg-black/20 px-2 py-1 rounded-full" x-text="matchAttemptsLeft+'/10'"></span></button>
+
+<!-- Botón inferior adaptado a membresía para evitar duplicidad -->
 <button @click="handleRegister()" class="kbtn w-full h-[58px] rounded-[16px] font-black text-[12px] tracking-[0.12em] flex flex-col items-center justify-center gap-0.5 border-2" :class="globalActive? 'bg-emerald-500 text-black border-emerald-400' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.4)]'">
 <span x-text="globalActive? '⬇ REGISTRAR EN BÓVEDA GLOBAL' : '🔒 REGISTRAR EN BÓVEDA • $5 VIDA'"></span>
-<span class="text-[9px] font-bold opacity-80" x-text="globalActive? 'Miembro activo - puedes registrar' : 'Requiere membresía $5 vida - Click para pagar'"></span>
+<span class="text-[9px] font-bold opacity-80" x-text="globalActive? 'Publicar tu combinación actual a la Bóveda' : 'Requiere membresía $5 vida - Click para pagar'"></span>
 </button>
-<div x-show="!globalActive" class="text-center text-[10px] text-zinc-500">Solo miembros pueden bajar su serie a la Bóveda Global. Pago único.</div>
+
+<div x-show="!globalActive" class="text-center text-[10px] text-zinc-500">Solo miembros pueden registrar su serie en la Bóveda Global. Pago único.</div>
 </div>
 <div x-show="!isLocked" class="mt-3 text-center text-[11px] text-zinc-600">Ingresa 4 dígitos (tuyos) + 4 de Bóveda para activar MATCH</div>
 </section>
@@ -139,7 +143,7 @@
 </div>
 <div class="rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Email alertas</div><input x-model="myEmail" placeholder="tu@email.com" class="mt-1 w-full bg-transparent text-[16px] font-bold text-white outline-none placeholder:text-zinc-600"></div></div><button @click="openStripeModal('global')" :class="globalActive? 'bg-emerald-500 text-black' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black'" class="mt-4 kbtn w-full h-[62px] rounded-[16px] font-black text-[14px] tracking-[0.14em] border border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.4)]"><span x-text="globalActive? '✅ MEMBRESÍA ACTIVA - '+globalSearch.serial : '💎 OBTENER MEMBRESÍA • $5 DE POR VIDA'"></span></button><div class="mt-2 text-center text-[10px] text-zinc-500">Pago único • Plataforma entre particulares • Sin responsabilidad sobre tratos</div></div></section>
 
-<section class="rounded-[28px] border border-white/10 bg-[#0E1212] p-4"><div class="flex justify-between items-center"><h3 class="font-black tracking-[0.18em] text-[12px] uppercase">🌎 BÓVEDA VIVA • <span x-text="filteredHistory.length"></span> series</h3><button @click="seedGhosts()" class="text-[9px] px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 font-black">👻 +50 Fantasmas</button></div><div class="mt-2 text-[10px] text-emerald-500/70" x-text="supabaseStatus"></div>
+<section class="rounded-[28px] border border-white/10 bg-[#0E1212] p-4"><div class="flex justify-between items-center"><h3 class="font-black tracking-[0.18em] text-[12px] uppercase">🌍 BÓVEDA VIVA • <span x-text="filteredHistory.length"></span> series</h3><button @click="seedGhosts()" class="text-[9px] px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 font-black">👻 +50 Fantasmas</button></div><div class="mt-2 text-[10px] text-emerald-500/70" x-text="supabaseStatus"></div>
 <div class="mt-3 flex gap-2"><input x-model="searchQuery" placeholder="🔍 Buscar serie, dueño, país, 7777..." class="flex-1 h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none placeholder:text-zinc-600 focus:border-amber-500/30"><button x-show="searchQuery" @click="searchQuery=''" class="h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-[11px] text-zinc-400">✕</button></div>
 <div class="mt-4 grid grid-cols-1 gap-2.5 max-h-[700px] overflow-auto"><template x-for="h in filteredHistory" :key="h.id"><div class="rounded-[16px] border p-3" :class="h.owner && h.owner.includes('Visitante')? 'bg-gradient-to-b from-[#1A1620] to-[#101212] border-violet-500/20' : 'bg-gradient-to-b from-[#1A1D1D] to-[#101212] border-white/10'"><div class="flex justify-between"><div><div class="font-mono font-black text-[14px] text-white flex gap-2 items-center"><span x-text="h.serial"></span><span x-show="h.owner && h.owner.includes('Visitante')" class="text-[7px] px-1.5 py-0.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300">👻 ANÓNIMO</span></div><div class="flex gap-2 mt-1"><span class="text-[9px] px-2 py-0.5 rounded-full border" :class="h.rarity?.badgeClass || 'border-white/10 bg-white/5 text-zinc-400'" x-text="h.rarity?.label || 'Común'"></span><span class="text-[9px] text-zinc-500" x-text="h.country"></span></div></div><div class="text-right"><div class="font-mono font-black text-[13px] text-emerald-300" x-text="h.points+' pts'"></div><div class="text-[9px] text-zinc-500" x-text="h.owner || 'Anon'"></div></div></div><div class="flex justify-between mt-2 pt-2 border-t border-white/5"><div class="flex gap-2 items-center"><div class="h-6 w-6 rounded-full grid place-items-center text-[10px]" :class="h.owner && h.owner.includes('Visitante')? 'bg-violet-500/20' : 'bg-emerald-500/20'">👤</div><div><div class="text-[11px] font-bold text-white" x-text="h.owner || 'Anon'"></div><div class="text-[9px] text-zinc-500" x-text="h.denom?'$'+h.denom:''"></div></div></div><div class="flex gap-1"><button @click="openContactModal(h)" class="h-8 px-2.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-black">CONTACTAR</button><button @click="useAsSource(h)" class="h-8 px-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">USAR</button></div></div></div></template></div><div x-show="filteredHistory.length===0" class="mt-4 text-center text-[11px] text-zinc-500 py-6">Sin resultados para "<span x-text="searchQuery" class="text-amber-300"></span>"</div></section>
 
@@ -214,7 +218,26 @@ function dollarMachineApp(){
  return {
   userDigits:[], tailDigits:Engine.genTail(), letters:Engine.genLetters(20), yr:Engine.genYear(), securitySeal:Engine.genSeal(), denom:20, isLocked:false, rarity:{type:'common',label:'Común',score:0}, value:20, isSearching:false, searchInterval:null, searchTimeout:null, isRollingLetters:false, isRollingYear:false, rollInterval:null, rollTimeout:null, matchAttemptsLeft:10, maxAttempts:10, toast:{visible:false}, history:[], searchQuery:'', searchFilter:'all', supabaseStatus:'Conectando...', globalSearch:{serial:'', country:'🇺🇸 USA $', denom:'$20'}, myNickname:'', myContact:'', myEmail:'', globalActive:false, currentVaultSource: Engine.genGhostEntry(0), nextVaultPreview:'Cargando...', vaultPool:[], stripeModal:{open:false, terms:false, privacy:false, refunds:false, source:''}, contactModal:{open:false, owner:'', contact:'', country:'', serial:'', denom:20}, legalModal:{open:false, title:'', content:''}, denomColorsClass:{1:'bg-emerald-500',5:'bg-sky-500',10:'bg-violet-500',20:'bg-orange-500',50:'bg-pink-500',100:'bg-amber-500'}, numpadGrid:[[{type:'num',val:7},{type:'num',val:8},{type:'num',val:9},{type:'denom',val:1}],[{type:'num',val:4},{type:'num',val:5},{type:'num',val:6},{type:'denom',val:5}],[{type:'num',val:1},{type:'num',val:2},{type:'num',val:3},{type:'denom',val:10}],[{type:'denom',val:20},{type:'num',val:0},{type:'denom',val:50},{type:'denom',val:100}]],
   leader:{lettersDisplay:'A-B-C', digitsDisplay:'0000 0000', seal:'CH-0000-XX', points:1250, rarity:{label:'Común',badgeClass:'border-white/10 bg-white/5 text-zinc-400'}, owner:'Bóveda', country:'USA', serial:''}, leaderSecondsLeft:3600, leaderTimer:null,
-  async initApp(){ if(!localStorage.getItem('dgt_anon')) localStorage.setItem('dgt_anon','anon_'+Math.random().toString(36).slice(2,9)); this.myNickname=localStorage.getItem('dgt_nick')||''; this.myContact=localStorage.getItem('dgt_contact')||''; this.myEmail=localStorage.getItem('dgt_email')||''; this.globalActive = localStorage.getItem('dgt_global_active')==='true'; this.globalSearch.serial = localStorage.getItem('dgt_global_serial')||''; const urlParams=new URLSearchParams(window.location.search); if(urlParams.get('success')==='true'){ localStorage.setItem('dgt_global_active','true'); this.globalActive=true; this.showToast('¡PAGO $5 CONFIRMADO! Membresía de por vida activa','success'); history.replaceState({},'',location.pathname); } await this.loadVaultFromSupabase(); this.initLeaderFromVault(); this.pickNewVaultSource(); this.updateRarityAndValue(); },
+  async initApp(){ 
+    if(!localStorage.getItem('dgt_anon')) localStorage.setItem('dgt_anon','anon_'+Math.random().toString(36).slice(2,9)); 
+    this.myNickname=localStorage.getItem('dgt_nick')||''; 
+    this.myContact=localStorage.getItem('dgt_contact')||''; 
+    this.myEmail=localStorage.getItem('dgt_email')||''; 
+    this.globalActive = localStorage.getItem('dgt_global_active')==='true'; 
+    this.globalSearch.serial = localStorage.getItem('dgt_global_serial')||''; 
+    
+    const urlParams=new URLSearchParams(window.location.search); 
+    if(urlParams.get('success')==='true'){ 
+      localStorage.setItem('dgt_global_active','true'); 
+      this.globalActive=true; 
+      this.showToast('¡PAGO $5 CONFIRMADO! Membresía de por vida activa','success'); 
+      history.replaceState({},'',location.pathname); 
+    } 
+    await this.loadVaultFromSupabase(); 
+    this.initLeaderFromVault(); 
+    this.pickNewVaultSource(); 
+    this.updateRarityAndValue(); 
+  },
   async loadVaultFromSupabase(){ const {data} = await supabaseClient.from('vault').select('*').order('created_at',{ascending:false}).limit(200); if(data && data.length>5){ this.history=data; this.vaultPool=[...data]; this.supabaseStatus=`✅ ${data.length} series en Bóveda Global`; } else { this.history=[]; this.vaultPool=[]; this.supabaseStatus=`📦 Bóveda vacía, dale a 👻 +50 Fantasmas`; } },
   async seedGhosts(){
     if(this.history.length >= 50){
@@ -258,12 +281,55 @@ function dollarMachineApp(){
   clearInput(){ this.userDigits=[]; this.isLocked=false; this.matchAttemptsLeft=this.maxAttempts; this.pickNewVaultSource(); this.triggerRoll(600); },
   lockCombo(){ this.isLocked=true; if(this.searchInterval) clearInterval(this.searchInterval); this.isSearching=false; },
   doMatch(){ if(!this.isLocked || this.matchAttemptsLeft<=0) return; this.triggerSearchEffect(); this.triggerRoll(500); this.matchAttemptsLeft--; this.pickNewVaultSource(); },
-  handleRegister(){ if(this.globalActive){ this.registerMatchToVault(); } else { this.openStripeModal('register'); } },
-  async registerMatchToVault(){ if(!this.isLocked) return; if(!this.globalActive){ this.openStripeModal('register'); return; } if(!this.myNickname ||!this.myEmail){ this.showToast('Pon alias y email','info'); return; } localStorage.setItem('dgt_nick', this.myNickname); localStorage.setItem('dgt_contact', this.myContact); localStorage.setItem('dgt_email', this.myEmail); const entry={ id: Math.random().toString(36).slice(2)+Date.now().toString(36), serial: `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`, letters: this.lettersDisplay, digits: `${this.finalUserPart} ${this.finalTailPart}`, seal: this.securitySeal, points: Engine.calcPoints(this.rarity,this.denom), rarity: this.rarity, denom: this.denom, yr: this.yr, country: this.globalSearch.country||'USA', owner: this.myNickname||'Anon', contact: `${this.myContact} | ${this.myEmail}`, anon_id: localStorage.getItem('dgt_anon'), created_at: new Date().toISOString() }; const {error} = await supabaseClient.from('vault').insert(entry); if(error) this.showToast('Error: '+error.message,'info'); else { this.showToast(`¡REGISTRADO! ${entry.serial}`,'success'); this.vaultPool.unshift(entry); this.history.unshift(entry); this.initLeaderFromVault(); } },
+  handleRegister(){ 
+    if(this.globalActive){ 
+      this.registerMatchToVault(); 
+    } else { 
+      this.openStripeModal('register'); 
+    } 
+  },
+  async registerMatchToVault(){ 
+    if(!this.isLocked) return; 
+    if(!this.globalActive){ 
+      this.openStripeModal('register'); 
+      return; 
+    } 
+    if(!this.myNickname || !this.myEmail){ 
+      this.showToast('Pon alias y email','info'); 
+      return; 
+    } 
+    localStorage.setItem('dgt_nick', this.myNickname); 
+    localStorage.setItem('dgt_contact', this.myContact); 
+    localStorage.setItem('dgt_email', this.myEmail); 
+    const entry={ 
+      id: Math.random().toString(36).slice(2)+Date.now().toString(36), 
+      serial: `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`, 
+      letters: this.lettersDisplay, 
+      digits: `${this.finalUserPart} ${this.finalTailPart}`, 
+      seal: this.securitySeal, 
+      points: Engine.calcPoints(this.rarity,this.denom), 
+      rarity: this.rarity, 
+      denom: this.denom, 
+      yr: this.yr, 
+      country: this.globalSearch.country||'USA', 
+      owner: this.myNickname||'Anon', 
+      contact: `${this.myContact} | ${this.myEmail}`, 
+      anon_id: localStorage.getItem('dgt_anon'), 
+      created_at: new Date().toISOString() 
+    }; 
+    const {error} = await supabaseClient.from('vault').insert(entry); 
+    if(error) this.showToast('Error: '+error.message,'info'); 
+    else { 
+      this.showToast(`¡REGISTRADO! ${entry.serial}`,'success'); 
+      this.vaultPool.unshift(entry); 
+      this.history.unshift(entry); 
+      this.initLeaderFromVault(); 
+    } 
+  },
   get filteredHistory(){ let q=this.searchQuery.toLowerCase().trim(); if(!q) return this.history; return this.history.filter(h=> (h.serial && h.serial.toLowerCase().includes(q)) || (h.owner && h.owner.toLowerCase().includes(q)) || (h.country && h.country.toLowerCase().includes(q)) || (h.digits && h.digits.toLowerCase().includes(q)) ); },
   openStripeModal(source){ this.stripeModal.source=source; this.stripeModal.open=true; },
   goToStripe(){
-    if(!this.myEmail ||!this.myNickname){ this.showToast('Pon alias y email','info'); return; }
+    if(!this.myEmail || !this.myNickname){ this.showToast('Pon alias y email','info'); return; }
     localStorage.setItem('dgt_nick', this.myNickname);
     localStorage.setItem('dgt_contact', this.myContact);
     localStorage.setItem('dgt_email', this.myEmail);
