@@ -21,32 +21,11 @@
 :where(code, pre, kbd, samp) {
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
-</style><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
 </style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#050707">
-<title>$DOLLARDGT - v4.5 STABLE APP FOCUS</title>
+<title>$DOLLARDGT - v4.6 FIX CONTACT + BTN VERDE</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@500;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter'],display:['Fraunces'],mono:['JetBrains Mono']}}}}</script>
@@ -68,7 +47,7 @@
 <body class="min-h-dvh antialiased text-white flex justify-center px-3 py-6" x-data="dollarMachineApp()" x-init="initApp()">
 <main class="w-full max-w-[420px] flex flex-col gap-4">
 <div class="flex items-center justify-between border-b border-white/10 pb-4">
-<div><h1 class="font-black text-[2.15rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[10px] tracking-[0.25em] text-emerald-400 uppercase mt-1">v4.5 FIX FOCUS • SEARCH + CANDADO • $5 VIDA</p></div>
+<div><h1 class="font-black text-[2.15rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[10px] tracking-[0.25em] text-emerald-400 uppercase mt-1">v4.6 FIX CONTACT + BTN • $5 VIDA</p></div>
 <div class="grid h-11 w-11 place-items-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-300 font-mono font-bold text-[8px] text-center vault-pulse">$5<br>LIFETIME</div>
 </div>
 
@@ -128,6 +107,7 @@
 <div x-show="!isLocked" class="mt-3 text-center text-[11px] text-zinc-600">Ingresa 4 dígitos (tuyos) + 4 de Bóveda para activar MATCH</div>
 </section>
 
+<!-- TARJETA MEMBRESIA DGT - FIX BOTON VERDE -->
 <section class="rounded-[28px] border border-amber-400/20 bg-gradient-to-b from-[#0A1518] to-[#050707] p-[1px] relative overflow-hidden"><div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent"></div><div class="rounded-[27px] bg-[#0C1214] p-5"><div class="flex justify-between"><div class="flex items-center gap-2"><div class="h-8 w-8 rounded-full bg-amber-500/15 border border-amber-400/30 grid place-items-center">💎</div><div><div class="text-[11px] font-black tracking-[0.2em] text-amber-300 uppercase">MEMBRESÍA DGT</div><div class="text-[9px] text-zinc-500">$5 de por vida • Sin mensualidad</div></div></div><span class="text-[9px] px-2 py-1 rounded-full border" :class="globalActive? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' : 'bg-amber-500/15 border-amber-500/30 text-amber-300'" x-text="globalActive? 'ACTIVO' : '$5 VIDA'"></span></div><div class="mt-4"><h2 class="font-display font-black text-[1.6rem] leading-[0.95] text-white">Colecciona series<br><span class="text-amber-300">similares por $5 vida.</span></h2><p class="text-[11px] text-zinc-400 mt-2">Pago único. Sin suscripción. Colección global para siempre.</p>
 <div class="mt-3 grid grid-cols-2 gap-2 text-[10px]"><div class="rounded-lg bg-white/5 border border-white/10 p-2"><span class="text-emerald-300">✓</span> Registrar en Bóveda Global</div><div class="rounded-lg bg-white/5 border border-white/10 p-2"><span class="text-emerald-300">✓</span> Ver contactos reales</div><div class="rounded-lg bg-white/5 border border-white/10 p-2"><span class="text-emerald-300">✓</span> Alertas email de MATCH</div><div class="rounded-lg bg-white/5 border border-white/10 p-2"><span class="text-emerald-300">✓</span> Cazar series similares</div></div>
 </div><div class="mt-4 grid grid-cols-2 gap-2.5"><div class="col-span-2 rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Tu Serie Global (8 dígitos)</div><input x-model="globalSearch.serial" placeholder="1234 5678" class="mt-1 w-full bg-transparent font-mono font-black text-[1.25rem] text-white outline-none"></div>
@@ -137,11 +117,30 @@
 <option class="bg-black">🇺🇸 USA $</option><option class="bg-black">🇲🇽 México $</option><option class="bg-black">🇪🇺 Euro €</option><option class="bg-black">🇨🇴 Colombia $</option><option class="bg-black">🇦🇷 Argentina $</option><option class="bg-black">🇨🇱 Chile $</option><option class="bg-black">🇵🇪 Perú $</option><option class="bg-black">🇧🇷 Brasil R$</option><option class="bg-black">🇪🇸 España €</option><option class="bg-black">🇬🇧 UK £</option><option class="bg-black">🇯🇵 Japón ¥</option><option class="bg-black">🇨🇦 Canadá $</option><option class="bg-black">🇦🇺 Australia $</option><option class="bg-black">🇩🇴 Rep. Dominicana $</option><option class="bg-black">🇻🇪 Venezuela $</option><option class="bg-black">🇪🇨 Ecuador $</option><option class="bg-black">🇵🇦 Panamá $</option><option class="bg-black">🇨🇷 Costa Rica ₡</option><option class="bg-black">🇬🇹 Guatemala Q</option><option class="bg-black">🇭🇳 Honduras L</option><option class="bg-black">🇨🇺 Cuba $</option><option class="bg-black">🇧🇴 Bolivia $b</option><option class="bg-black">🇵🇾 Paraguay ₲</option><option class="bg-black">🇺🇾 Uruguay $</option><option class="bg-black">🇳🇮 Nicaragua C$</option><option class="bg-black">🇸🇻 El Salvador $</option><option class="bg-black">🇭🇹 Haití G</option><option class="bg-black">🇯🇲 Jamaica $</option><option class="bg-black">🇧🇸 Bahamas $</option><option class="bg-black">🇧🇧 Barbados $</option><option class="bg-black">🇹🇹 Trinidad y Tobago $</option><option class="bg-black">🇧🇿 Belice $</option><option class="bg-black">🇬🇾 Guyana $</option><option class="bg-black">🇸🇷 Surinam $</option><option class="bg-black">🇨🇭 Suiza ₣</option><option class="bg-black">🇸🇪 Suecia kr</option><option class="bg-black">🇳🇴 Noruega kr</option><option class="bg-black">🇩🇰 Dinamarca kr</option><option class="bg-black">🇵🇱 Polonia zł</option><option class="bg-black">🇭🇺 Hungría Ft</option><option class="bg-black">🇷🇴 Rumanía lei</option><option class="bg-black">🇿🇦 Sudáfrica R</option><option class="bg-black">🇳🇿 Nueva Zelanda $</option><option class="bg-black">🇰🇷 Corea del Sur ₩</option><option class="bg-black">🇮🇳 India ₹</option><option class="bg-black">🇨🇳 China ¥</option><option class="bg-black">🇸🇬 Singapur $</option><option class="bg-black">🇭🇰 Hong Kong $</option>
 </select>
 </div>
-<div class="rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Email alertas</div><input x-model="myEmail" placeholder="tu@email.com" class="mt-1 w-full bg-transparent text-[16px] font-bold text-white outline-none placeholder:text-zinc-600"></div></div><button @click="openStripeModal('global')" :class="globalActive? 'bg-emerald-500 text-black' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black'" class="mt-4 kbtn w-full h-[62px] rounded-[16px] font-black text-[14px] tracking-[0.14em] border border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.4)]"><span x-text="globalActive? '✅ MEMBRESÍA ACTIVA - '+globalSearch.serial : '💎 OBTENER MEMBRESÍA • $5 DE POR VIDA'"></span></button><div class="mt-2 text-center text-[10px] text-zinc-500">Pago único • Plataforma entre particulares • Sin responsabilidad sobre tratos</div></div></section>
+<div class="rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Email alertas</div><input x-model="myEmail" placeholder="tu@email.com" class="mt-1 w-full bg-transparent text-[16px] font-bold text-white outline-none placeholder:text-zinc-600"></div></div>
+<!-- FIX BOTON VERDE: Si ya es activo, NO abre Stripe -->
+<button @click="handleMembershipButton()" :class="globalActive? 'bg-emerald-500 text-black border-emerald-400' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.4)]'" class="mt-4 kbtn w-full h-[62px] rounded-[16px] font-black text-[14px] tracking-[0.14em] border"><span x-text="globalActive? '✅ MEMBRESÍA ACTIVA - '+globalSearch.serial : '💎 OBTENER MEMBRESÍA • $5 DE POR VIDA'"></span></button>
+<div class="mt-2 text-center text-[10px] text-zinc-500">Pago único • Plataforma entre particulares • Sin responsabilidad sobre tratos</div></div></section>
 
+<!-- BOVEDA VIVA CON CONTACTO RESTAURADO -->
 <section class="rounded-[28px] border border-white/10 bg-[#0E1212] p-4"><div class="flex justify-between items-center"><h3 class="font-black tracking-[0.18em] text-[12px] uppercase">🌎 BÓVEDA VIVA • <span x-text="filteredHistory.length"></span> series</h3><button @click="seedGhosts()" class="text-[9px] px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 font-black">👻 +50 Fantasmas</button></div><div class="mt-2 text-[10px] text-emerald-500/70" x-text="supabaseStatus"></div>
 <div class="mt-3 flex gap-2"><input x-model="searchQuery" placeholder="🔍 Buscar serie, dueño, país, 7777..." class="flex-1 h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none placeholder:text-zinc-600 focus:border-amber-500/30"><button x-show="searchQuery" @click="searchQuery=''" class="h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-[11px] text-zinc-400">✕</button></div>
-<div class="mt-4 grid grid-cols-1 gap-2.5 max-h-[700px] overflow-auto"><template x-for="h in filteredHistory" :key="h.id"><div class="rounded-[16px] border p-3" :class="h.owner && h.owner.includes('Visitante')? 'bg-gradient-to-b from-[#1A1620] to-[#101212] border-violet-500/20' : 'bg-gradient-to-b from-[#1A1D1D] to-[#101212] border-white/10'"><div class="flex justify-between"><div><div class="font-mono font-black text-[14px] text-white flex gap-2 items-center"><span x-text="h.serial"></span><span x-show="h.owner && h.owner.includes('Visitante')" class="text-[7px] px-1.5 py-0.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300">👻 ANÓNIMO</span></div><div class="flex gap-2 mt-1"><span class="text-[9px] px-2 py-0.5 rounded-full border" :class="h.rarity?.badgeClass || 'border-white/10 bg-white/5 text-zinc-400'" x-text="h.rarity?.label || 'Común'"></span><span class="text-[9px] text-zinc-500" x-text="h.country"></span></div></div><div class="text-right"><div class="font-mono font-black text-[13px] text-emerald-300" x-text="h.points+' pts'"></div><div class="text-[9px] text-zinc-500" x-text="h.owner || 'Anon'"></div></div></div><div class="flex justify-between mt-2 pt-2 border-t border-white/5"><div class="flex gap-2 items-center"><div class="h-6 w-6 rounded-full grid place-items-center text-[10px]" :class="h.owner && h.owner.includes('Visitante')? 'bg-violet-500/20' : 'bg-emerald-500/20'">👤</div><div><div class="text-[11px] font-bold text-white" x-text="h.owner || 'Anon'"></div><div class="text-[9px] text-zinc-500" x-text="h.denom?'$'+h.denom:''"></div></div></div><div class="flex gap-1"><button @click="useAsSource(h)" class="h-8 px-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">USAR</button></div></div></div></template></div><div x-show="filteredHistory.length===0" class="mt-4 text-center text-[11px] text-zinc-500 py-6">Sin resultados para "<span x-text="searchQuery" class="text-amber-300"></span>"</div></section>
+<div class="mt-4 grid grid-cols-1 gap-2.5 max-h-[700px] overflow-auto"><template x-for="h in filteredHistory" :key="h.id"><div class="rounded-[16px] border p-3" :class="h.owner && h.owner.includes('Visitante')? 'bg-gradient-to-b from-[#1A1620] to-[#101212] border-violet-500/20' : 'bg-gradient-to-b from-[#1A1D1D] to-[#101212] border-white/10'">
+<div class="flex justify-between"><div><div class="font-mono font-black text-[14px] text-white flex gap-2 items-center"><span x-text="h.serial"></span><span x-show="h.owner && h.owner.includes('Visitante')" class="text-[7px] px-1.5 py-0.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300">👻 ANÓNIMO</span></div><div class="flex gap-2 mt-1"><span class="text-[9px] px-2 py-0.5 rounded-full border" :class="h.rarity?.badgeClass || 'border-white/10 bg-white/5 text-zinc-400'" x-text="h.rarity?.label || 'Común'"></span><span class="text-[9px] text-zinc-500" x-text="h.country"></span></div></div><div class="text-right"><div class="font-mono font-black text-[13px] text-emerald-300" x-text="h.points+' pts'"></div><div class="text-[9px] text-zinc-500" x-text="h.owner || 'Anon'"></div></div></div>
+<!-- TARJETA CONTACTO RESTAURADA -->
+<div class="mt-2 pt-2 border-t border-white/5">
+<div class="rounded-xl bg-black/50 border border-white/5 p-2.5">
+<div class="flex justify-between items-center">
+<div class="flex gap-2 items-center"><div class="h-7 w-7 rounded-full grid place-items-center text-[11px]" :class="h.owner && h.owner.includes('Visitante')? 'bg-violet-500/20' : 'bg-emerald-500/20'">👤</div><div><div class="text-[11px] font-bold text-white" x-text="h.owner || 'Anon'"></div><div class="text-[9px] text-amber-300/80" x-text="h.contact || 'Sin contacto'"></div></div></div>
+<div class="flex gap-1.5">
+<button @click="useAsSource(h)" class="h-8 px-3 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">USAR</button>
+<a x-show="h.contact && h.contact!=='Anónimo • Participante visitante'" :href="'https://wa.me/'+String(h.contact).replace(/[^0-9]/g,'').slice(-15)" target="_blank" class="h-8 w-8 rounded-full bg-emerald-500 text-black grid place-items-center text-[12px] font-black">💬</a>
+</div>
+</div>
+<div class="mt-1.5 flex justify-between text-[8px] text-zinc-500"><span x-text="'$'+(h.denom||'')+' • '+(h.yr||'')+' • '+(h.seal||'').slice(0,12)"></span><span x-text="new Date(h.created_at).toLocaleDateString()"></span></div>
+</div>
+</div>
+</div></template></div><div x-show="filteredHistory.length===0" class="mt-4 text-center text-[11px] text-zinc-500 py-6">Sin resultados para "<span x-text="searchQuery" class="text-amber-300"></span>"</div></section>
 
 <footer class="mt-6 rounded-[20px] border border-white/10 bg-[#0A0E0E] p-5 text-center"><div class="flex justify-center gap-4 text-[11px] font-bold tracking-widest text-zinc-400 uppercase"><button @click="openLegal('terminos')" class="hover:text-white underline">Términos</button><span class="text-zinc-600">•</span><button @click="openLegal('privacidad')" class="hover:text-white underline">Privacidad</button><span class="text-zinc-600">•</span><button @click="openLegal('reembolsos')" class="hover:text-white underline">Reembolsos</button><span class="text-zinc-600">•</span><button @click="openLegal('aviso')" class="hover:text-white underline">Aviso</button></div><div class="mt-3 text-[11px] text-zinc-500">© 2026 DollarDgt.com. Todos los derechos reservados.</div><div class="mt-1 text-[9px] text-zinc-600">Plataforma entre particulares • No somos casa de cambio • $5 pago único de por vida</div></footer>
 <div class="h-6"></div>
@@ -210,8 +209,14 @@ function dollarMachineApp(){
     localStorage.setItem('dgt_contact', this.myContact);
     localStorage.setItem('dgt_email', this.myEmail);
     this.stripeModal.open=false;
-    // FIX CRITICO: Misma pestaña para que ?success=true funcione para todos
     window.location.href = STRIPE_LINK+'?prefilled_email='+encodeURIComponent(this.myEmail);
+  },
+  handleMembershipButton(){
+    if(this.globalActive){
+      this.showToast('✅ Ya eres miembro ACTIVO - Membresía de por vida','success');
+      return;
+    }
+    this.openStripeModal('global');
   },
   openLegal(type){ 
     const texts={ 
