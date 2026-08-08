@@ -1,10 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050707">
-<title>$DOLLARDGT - v4.3 FIX $5 VIDA</title>
+<title>$DOLLARDGT - v4.4 FIX SEARCH + CANDADO</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@500;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter'],display:['Fraunces'],mono:['JetBrains Mono']}}}}</script>
@@ -15,7 +36,7 @@
 <body class="min-h-dvh antialiased text-white flex justify-center px-3 py-6" x-data="dollarMachineApp()" x-init="initApp()">
 <main class="w-full max-w-[420px] flex flex-col gap-4">
 <div class="flex items-center justify-between border-b border-white/10 pb-4">
-<div><h1 class="font-black text-[2.15rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[10px] tracking-[0.25em] text-emerald-400 uppercase mt-1">v4.3 FIX • $5 VIDA • Sistema Cerrado</p></div>
+<div><h1 class="font-black text-[2.15rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[10px] tracking-[0.25em] text-emerald-400 uppercase mt-1">v4.4 FIX • SEARCH + CANDADO • $5 VIDA</p></div>
 <div class="grid h-11 w-11 place-items-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-300 font-mono font-bold text-[8px] text-center vault-pulse">$5<br>LIFETIME</div>
 </div>
 
@@ -72,16 +93,71 @@
 
 <section class="rounded-[28px] border border-amber-400/20 bg-gradient-to-b from-[#0A1518] to-[#050707] p-[1px] relative overflow-hidden"><div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent"></div><div class="rounded-[27px] bg-[#0C1214] p-5"><div class="flex justify-between"><div class="flex items-center gap-2"><div class="h-8 w-8 rounded-full bg-amber-500/15 border border-amber-400/30 grid place-items-center">💎</div><div><div class="text-[11px] font-black tracking-[0.2em] text-amber-300 uppercase">MEMBRESÍA DGT</div><div class="text-[9px] text-zinc-500">$5 de por vida • Sin mensualidad</div></div></div><span class="text-[9px] px-2 py-1 rounded-full border" :class="globalActive? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' : 'bg-amber-500/15 border-amber-500/30 text-amber-300'" x-text="globalActive? 'ACTIVO' : '$5 VIDA'"></span></div><div class="mt-4"><h2 class="font-display font-black text-[1.6rem] leading-[0.95] text-white">Colecciona series<br><span class="text-amber-300">similares por $5 vida.</span></h2><p class="text-[11px] text-zinc-400 mt-2">Pago único. Sin suscripción. Colección global para siempre.</p>
 <div class="mt-3 grid grid-cols-2 gap-2 text-[10px]"><div class="rounded-lg bg-white/5 border border-white/10 p-2"><span class="text-emerald-300">✓</span> Registrar en Bóveda Global</div><div class="rounded-lg bg-white/5 border border-white/10 p-2"><span class="text-emerald-300">✓</span> Ver contactos reales</div><div class="rounded-lg bg-white/5 border border-white/10 p-2"><span class="text-emerald-300">✓</span> Alertas email de MATCH</div><div class="rounded-lg bg-white/5 border border-white/10 p-2"><span class="text-emerald-300">✓</span> Cazar series similares</div></div>
-</div><div class="mt-4 grid grid-cols-2 gap-2.5"><div class="col-span-2 rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Tu Serie Global (8 dígitos)</div><input x-model="globalSearch.serial" placeholder="1234 5678" class="mt-1 w-full bg-transparent font-mono font-black text-[1.25rem] text-white outline-none"></div><div class="rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">País (20 países)</div><select x-model="globalSearch.country" class="mt-1 w-full bg-transparent text-[13px] font-bold text-white outline-none"><option class="bg-black">USA $</option><option class="bg-black">México $</option><option class="bg-black">Euro €</option><option class="bg-black">Colombia $</option><option class="bg-black">Argentina $</option><option class="bg-black">Chile $</option><option class="bg-black">Perú $</option><option class="bg-black">Brasil R$</option><option class="bg-black">España €</option><option class="bg-black">UK £</option><option class="bg-black">Japón ¥</option><option class="bg-black">Canadá $</option><option class="bg-black">Australia $</option><option class="bg-black">Rep. Dominicana $</option><option class="bg-black">Venezuela $</option><option class="bg-black">Ecuador $</option><option class="bg-black">Panamá $</option><option class="bg-black">Costa Rica ₡</option><option class="bg-black">Guatemala Q</option><option class="bg-black">Honduras L</option></select></div><div class="rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Email alertas</div><input x-model="myEmail" placeholder="tu@email.com" class="mt-1 w-full bg-transparent text-[13px] font-bold text-white outline-none placeholder:text-zinc-600"></div></div><button @click="openStripeModal('global')" :class="globalActive? 'bg-emerald-500 text-black' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black'" class="mt-4 kbtn w-full h-[62px] rounded-[16px] font-black text-[14px] tracking-[0.14em] border border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.4)]"><span x-text="globalActive? '✅ MEMBRESÍA ACTIVA - '+globalSearch.serial : '💎 OBTENER MEMBRESÍA • $5 DE POR VIDA'"></span></button><div class="mt-2 text-center text-[10px] text-zinc-500">Pago único • Plataforma entre particulares • Sin responsabilidad sobre tratos</div></div></section>
+</div><div class="mt-4 grid grid-cols-2 gap-2.5"><div class="col-span-2 rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Tu Serie Global (8 dígitos)</div><input x-model="globalSearch.serial" placeholder="1234 5678" class="mt-1 w-full bg-transparent font-mono font-black text-[1.25rem] text-white outline-none"></div>
+<div class="rounded-xl bg-white/[0.04] border border-white/10 p-3">
+<div class="text-[9px] text-zinc-500 uppercase">País (48 países)</div>
+<select x-model="globalSearch.country" class="mt-1 w-full bg-transparent text-[13px] font-bold text-white outline-none">
+<option class="bg-black">🇺🇸 USA $</option>
+<option class="bg-black">🇲🇽 México $</option>
+<option class="bg-black">🇪🇺 Euro €</option>
+<option class="bg-black">🇨🇴 Colombia $</option>
+<option class="bg-black">🇦🇷 Argentina $</option>
+<option class="bg-black">🇨🇱 Chile $</option>
+<option class="bg-black">🇵🇪 Perú $</option>
+<option class="bg-black">🇧🇷 Brasil R$</option>
+<option class="bg-black">🇪🇸 España €</option>
+<option class="bg-black">🇬🇧 UK £</option>
+<option class="bg-black">🇯🇵 Japón ¥</option>
+<option class="bg-black">🇨🇦 Canadá $</option>
+<option class="bg-black">🇦🇺 Australia $</option>
+<option class="bg-black">🇩🇴 Rep. Dominicana $</option>
+<option class="bg-black">🇻🇪 Venezuela $</option>
+<option class="bg-black">🇪🇨 Ecuador $</option>
+<option class="bg-black">🇵🇦 Panamá $</option>
+<option class="bg-black">🇨🇷 Costa Rica ₡</option>
+<option class="bg-black">🇬🇹 Guatemala Q</option>
+<option class="bg-black">🇭🇳 Honduras L</option>
+<option class="bg-black">🇨🇺 Cuba $</option>
+<option class="bg-black">🇧🇴 Bolivia $b</option>
+<option class="bg-black">🇵🇾 Paraguay ₲</option>
+<option class="bg-black">🇺🇾 Uruguay $</option>
+<option class="bg-black">🇳🇮 Nicaragua C$</option>
+<option class="bg-black">🇸🇻 El Salvador $</option>
+<option class="bg-black">🇭🇹 Haití G</option>
+<option class="bg-black">🇯🇲 Jamaica $</option>
+<option class="bg-black">🇧🇸 Bahamas $</option>
+<option class="bg-black">🇧🇧 Barbados $</option>
+<option class="bg-black">🇹🇹 Trinidad y Tobago $</option>
+<option class="bg-black">🇧🇿 Belice $</option>
+<option class="bg-black">🇬🇾 Guyana $</option>
+<option class="bg-black">🇸🇷 Surinam $</option>
+<option class="bg-black">🇨🇭 Suiza ₣</option>
+<option class="bg-black">🇸🇪 Suecia kr</option>
+<option class="bg-black">🇳🇴 Noruega kr</option>
+<option class="bg-black">🇩🇰 Dinamarca kr</option>
+<option class="bg-black">🇵🇱 Polonia zł</option>
+<option class="bg-black">🇭🇺 Hungría Ft</option>
+<option class="bg-black">🇷🇴 Rumanía lei</option>
+<option class="bg-black">🇿🇦 Sudáfrica R</option>
+<option class="bg-black">🇳🇿 Nueva Zelanda $</option>
+<option class="bg-black">🇰🇷 Corea del Sur ₩</option>
+<option class="bg-black">🇮🇳 India ₹</option>
+<option class="bg-black">🇨🇳 China ¥</option>
+<option class="bg-black">🇸🇬 Singapur $</option>
+<option class="bg-black">🇭🇰 Hong Kong $</option>
+</select>
+</div>
+<div class="rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Email alertas</div><input x-model="myEmail" placeholder="tu@email.com" class="mt-1 w-full bg-transparent text-[13px] font-bold text-white outline-none placeholder:text-zinc-600"></div></div><button @click="openStripeModal('global')" :class="globalActive? 'bg-emerald-500 text-black' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black'" class="mt-4 kbtn w-full h-[62px] rounded-[16px] font-black text-[14px] tracking-[0.14em] border border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.4)]"><span x-text="globalActive? '✅ MEMBRESÍA ACTIVA - '+globalSearch.serial : '💎 OBTENER MEMBRESÍA • $5 DE POR VIDA'"></span></button><div class="mt-2 text-center text-[10px] text-zinc-500">Pago único • Plataforma entre particulares • Sin responsabilidad sobre tratos</div></div></section>
 
-<section class="rounded-[28px] border border-white/10 bg-[#0E1212] p-4"><div class="flex justify-between items-center"><h3 class="font-black tracking-[0.18em] text-[12px] uppercase">🌎 BÓVEDA VIVA • <span x-text="filteredHistory.length"></span> series</h3><button @click="seedGhosts()" class="text-[9px] px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 font-black">👻 +50 Fantasmas Anónimos</button></div><div class="mt-2 text-[10px] text-emerald-500/70" x-text="supabaseStatus"></div>
-<div class="mt-4 grid grid-cols-1 gap-2.5 max-h-[700px] overflow-auto"><template x-for="h in filteredHistory" :key="h.id"><div class="rounded-[16px] border p-3" :class="h.owner && h.owner.includes('Visitante') ? 'bg-gradient-to-b from-[#1A1620] to-[#101212] border-violet-500/20' : 'bg-gradient-to-b from-[#1A1D1D] to-[#101212] border-white/10'"><div class="flex justify-between"><div><div class="font-mono font-black text-[14px] text-white flex gap-2 items-center"><span x-text="h.serial"></span><span x-show="h.owner && h.owner.includes('Visitante')" class="text-[7px] px-1.5 py-0.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300">👻 ANÓNIMO</span></div><div class="flex gap-2 mt-1"><span class="text-[9px] px-2 py-0.5 rounded-full border" :class="h.rarity?.badgeClass || 'border-white/10 bg-white/5 text-zinc-400'" x-text="h.rarity?.label || 'Común'"></span><span class="text-[9px] text-zinc-500" x-text="h.country"></span></div></div><div class="text-right"><div class="font-mono font-black text-[13px] text-emerald-300" x-text="h.points+' pts'"></div><div class="text-[9px] text-zinc-500" x-text="h.owner || 'Anon'"></div></div></div><div class="flex justify-between mt-2 pt-2 border-t border-white/5"><div class="flex gap-2 items-center"><div class="h-6 w-6 rounded-full grid place-items-center text-[10px]" :class="h.owner && h.owner.includes('Visitante') ? 'bg-violet-500/20' : 'bg-emerald-500/20'">👤</div><div><div class="text-[11px] font-bold text-white" x-text="h.owner || 'Anon'"></div><div class="text-[9px] text-zinc-500" x-text="h.denom?'$'+h.denom:''"></div></div></div><div class="flex gap-1"><button @click="useAsSource(h)" class="h-8 px-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">USAR</button></div></div></div></template></div></section>
+<section class="rounded-[28px] border border-white/10 bg-[#0E1212] p-4"><div class="flex justify-between items-center"><h3 class="font-black tracking-[0.18em] text-[12px] uppercase">🌎 BÓVEDA VIVA • <span x-text="filteredHistory.length"></span> series</h3><button @click="seedGhosts()" class="text-[9px] px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 font-black">👻 +50 Fantasmas</button></div><div class="mt-2 text-[10px] text-emerald-500/70" x-text="supabaseStatus"></div>
+<div class="mt-3 flex gap-2"><input x-model="searchQuery" placeholder="🔍 Buscar serie, dueño, país, 7777..." class="flex-1 h-[40px] rounded-xl bg-black border border-white/10 px-3 text-[12px] text-white outline-none placeholder:text-zinc-600 focus:border-amber-500/30"><button x-show="searchQuery" @click="searchQuery=''" class="h-[40px] px-3 rounded-xl bg-white/5 border border-white/10 text-[11px] text-zinc-400">✕</button></div>
+<div class="mt-4 grid grid-cols-1 gap-2.5 max-h-[700px] overflow-auto"><template x-for="h in filteredHistory" :key="h.id"><div class="rounded-[16px] border p-3" :class="h.owner && h.owner.includes('Visitante')? 'bg-gradient-to-b from-[#1A1620] to-[#101212] border-violet-500/20' : 'bg-gradient-to-b from-[#1A1D1D] to-[#101212] border-white/10'"><div class="flex justify-between"><div><div class="font-mono font-black text-[14px] text-white flex gap-2 items-center"><span x-text="h.serial"></span><span x-show="h.owner && h.owner.includes('Visitante')" class="text-[7px] px-1.5 py-0.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300">👻 ANÓNIMO</span></div><div class="flex gap-2 mt-1"><span class="text-[9px] px-2 py-0.5 rounded-full border" :class="h.rarity?.badgeClass || 'border-white/10 bg-white/5 text-zinc-400'" x-text="h.rarity?.label || 'Común'"></span><span class="text-[9px] text-zinc-500" x-text="h.country"></span></div></div><div class="text-right"><div class="font-mono font-black text-[13px] text-emerald-300" x-text="h.points+' pts'"></div><div class="text-[9px] text-zinc-500" x-text="h.owner || 'Anon'"></div></div></div><div class="flex justify-between mt-2 pt-2 border-t border-white/5"><div class="flex gap-2 items-center"><div class="h-6 w-6 rounded-full grid place-items-center text-[10px]" :class="h.owner && h.owner.includes('Visitante')? 'bg-violet-500/20' : 'bg-emerald-500/20'">👤</div><div><div class="text-[11px] font-bold text-white" x-text="h.owner || 'Anon'"></div><div class="text-[9px] text-zinc-500" x-text="h.denom?'$'+h.denom:''"></div></div></div><div class="flex gap-1"><button @click="useAsSource(h)" class="h-8 px-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">USAR</button></div></div></div></template></div><div x-show="filteredHistory.length===0" class="mt-4 text-center text-[11px] text-zinc-500 py-6">Sin resultados para "<span x-text="searchQuery" class="text-amber-300"></span>"</div></section>
 
 <footer class="mt-6 rounded-[20px] border border-white/10 bg-[#0A0E0E] p-5 text-center"><div class="flex justify-center gap-4 text-[11px] font-bold tracking-widest text-zinc-400 uppercase"><button @click="openLegal('terminos')" class="hover:text-white underline">Términos</button><span class="text-zinc-600">•</span><button @click="openLegal('privacidad')" class="hover:text-white underline">Privacidad</button><span class="text-zinc-600">•</span><button @click="openLegal('reembolsos')" class="hover:text-white underline">Reembolsos</button><span class="text-zinc-600">•</span><button @click="openLegal('aviso')" class="hover:text-white underline">Aviso</button></div><div class="mt-3 text-[11px] text-zinc-500">© 2026 DollarDgt.com. Todos los derechos reservados.</div><div class="mt-1 text-[9px] text-zinc-600">Plataforma entre particulares • No somos casa de cambio • $5 pago único de por vida</div></footer>
 <div class="h-6"></div>
 </main>
 
-<div x-show="stripeModal.open" class="fixed inset-0 z-[70] flex items-center justify-center p-3"><div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="stripeModal.open=false"></div><div class="relative w-full max-w-[400px] rounded-[24px] bg-[#111616] border border-amber-500/20 p-6 shadow-2xl"><div class="flex justify-between"><div><h3 class="font-black text-[18px] text-white leading-tight">Membresía DGT<br><span class="text-amber-300">$5 de por vida</span></h3><p class="text-[11px] text-zinc-400 mt-1">Pago único. Sin mensualidad. Para siempre.</p></div><button @click="stripeModal.open=false" class="h-8 w-8 rounded-full bg-white/10">✕</button></div><div class="mt-4 rounded-xl bg-amber-500/10 border border-amber-500/20 p-3"><div class="text-[11px] font-black text-amber-300">¿Qué incluye?</div><div class="mt-1 grid grid-cols-1 gap-1 text-[11px] text-zinc-300"><div>✓ Registrar tu serie en Bóveda Global</div><div>✓ Ver contactos reales</div><div>✓ Alertas por email de series similares</div><div>✓ Cazar dígitos similares mundial</div></div></div><div class="mt-4 space-y-2"><input x-model="myNickname" placeholder="Tu alias" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[13px] text-white outline-none"><input x-model="myEmail" placeholder="Tu Email (requerido)" class="w-full h-[44px] rounded-xl bg-black border border-amber-500/30 px-3 text-[13px] text-white outline-none"><input x-model="myContact" placeholder="Tu WhatsApp" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[13px] text-white outline-none"></div><div class="mt-5 space-y-3"><label class="flex gap-3 items-start cursor-pointer"><input type="checkbox" x-model="stripeModal.terms" class="mt-1 h-4 w-4 rounded accent-amber-400"><span class="text-[11px] leading-[1.4] text-zinc-300">Acepto <button @click.prevent="openLegal('terminos')" class="text-amber-300 underline font-bold">Términos</button> • Entre particulares, nosotros no intervenimos.</span></label><label class="flex gap-3 items-start cursor-pointer"><input type="checkbox" x-model="stripeModal.privacy" class="mt-1 h-4 w-4 rounded accent-amber-400"><span class="text-[11px] leading-[1.4] text-zinc-300">Acepto <button @click.prevent="openLegal('privacidad')" class="text-amber-300 underline font-bold">Privacidad</button></span></label><label class="flex gap-3 items-start cursor-pointer"><input type="checkbox" x-model="stripeModal.refunds" class="mt-1 h-4 w-4 rounded accent-amber-400"><span class="text-[11px] leading-[1.4] text-zinc-300">Entiendo <button @click.prevent="openLegal('reembolsos')" class="text-amber-300 underline font-bold">Reembolsos</button>: $5 pago único, sin reembolso, acceso de por vida.</span></label></div><button :disabled="!stripeModal.terms ||!stripeModal.privacy ||!stripeModal.refunds ||!myEmail ||!myNickname" @click="goToStripe()" class="mt-6 kbtn w-full h-[56px] rounded-[16px] font-black text-[13px] flex flex-col items-center justify-center gap-0 border-2" :class="stripeModal.terms && stripeModal.privacy && stripeModal.refunds && myEmail && myNickname ? 'bg-gradient-to-b from-amber-400 to-amber-500 text-black border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.5)]' : 'bg-zinc-800 text-zinc-500 border-white/10'"><span>💎 PAGAR $5 • ACCESO DE POR VIDA →</span><span class="text-[9px] opacity-80">Stripe • Pago seguro • Sin suscripción</span></button></div></div>
+<div x-show="stripeModal.open" class="fixed inset-0 z-[70] flex items-center justify-center p-3"><div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="stripeModal.open=false"></div><div class="relative w-full max-w-[400px] rounded-[24px] bg-[#111616] border border-amber-500/20 p-6 shadow-2xl"><div class="flex justify-between"><div><h3 class="font-black text-[18px] text-white leading-tight">Membresía DGT<br><span class="text-amber-300">$5 de por vida</span></h3><p class="text-[11px] text-zinc-400 mt-1">Pago único. Sin mensualidad. Para siempre.</p></div><button @click="stripeModal.open=false" class="h-8 w-8 rounded-full bg-white/10">✕</button></div><div class="mt-4 rounded-xl bg-amber-500/10 border border-amber-500/20 p-3"><div class="text-[11px] font-black text-amber-300">¿Qué incluye?</div><div class="mt-1 grid grid-cols-1 gap-1 text-[11px] text-zinc-300"><div>✓ Registrar tu serie en Bóveda Global</div><div>✓ Ver contactos reales</div><div>✓ Alertas por email de series similares</div><div>✓ Cazar dígitos similares mundial</div></div></div><div class="mt-4 space-y-2"><input x-model="myNickname" placeholder="Tu alias" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[13px] text-white outline-none"><input x-model="myEmail" placeholder="Tu Email (requerido)" class="w-full h-[44px] rounded-xl bg-black border border-amber-500/30 px-3 text-[13px] text-white outline-none"><input x-model="myContact" placeholder="Tu WhatsApp" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[13px] text-white outline-none"></div><div class="mt-5 space-y-3"><label class="flex gap-3 items-start cursor-pointer"><input type="checkbox" x-model="stripeModal.terms" class="mt-1 h-4 w-4 rounded accent-amber-400"><span class="text-[11px] leading-[1.4] text-zinc-300">Acepto <button @click.prevent="openLegal('terminos')" class="text-amber-300 underline font-bold">Términos</button> • Entre particulares, nosotros no intervenimos.</span></label><label class="flex gap-3 items-start cursor-pointer"><input type="checkbox" x-model="stripeModal.privacy" class="mt-1 h-4 w-4 rounded accent-amber-400"><span class="text-[11px] leading-[1.4] text-zinc-300">Acepto <button @click.prevent="openLegal('privacidad')" class="text-amber-300 underline font-bold">Privacidad</button></span></label><label class="flex gap-3 items-start cursor-pointer"><input type="checkbox" x-model="stripeModal.refunds" class="mt-1 h-4 w-4 rounded accent-amber-400"><span class="text-[11px] leading-[1.4] text-zinc-300">Entiendo <button @click.prevent="openLegal('reembolsos')" class="text-amber-300 underline font-bold">Reembolsos</button>: $5 pago único, sin reembolso, acceso de por vida.</span></label></div><button :disabled="!stripeModal.terms ||!stripeModal.privacy ||!stripeModal.refunds ||!myEmail ||!myNickname" @click="goToStripe()" class="mt-6 kbtn w-full h-[56px] rounded-[16px] font-black text-[13px] flex flex-col items-center justify-center gap-0 border-2" :class="stripeModal.terms && stripeModal.privacy && stripeModal.refunds && myEmail && myNickname? 'bg-gradient-to-b from-amber-400 to-amber-500 text-black border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.5)]' : 'bg-zinc-800 text-zinc-500 border-white/10'"><span>💎 PAGAR $5 • ACCESO DE POR VIDA →</span><span class="text-[9px] opacity-80">Stripe • Pago seguro • Sin suscripción</span></button></div></div>
 
 <div x-show="legalModal.open" class="fixed inset-0 z-[80] flex items-end md:items-center justify-center p-3"><div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="legalModal.open=false"></div><div class="relative w-full max-w-[500px] max-h-[80vh] overflow-auto rounded-[24px] bg-[#0F1414] border border-white/15 p-6"><div class="flex justify-between"><h3 class="font-black text-white" x-text="legalModal.title"></h3><button @click="legalModal.open=false" class="h-8 w-8 rounded-full bg-white/10">✕</button></div><div class="mt-4 text-[12px] leading-[1.6] text-zinc-300 whitespace-pre-wrap" x-text="legalModal.content"></div></div></div>
 <div x-show="toast.visible" x-transition class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-full px-5 py-3 text-[13px] font-bold max-w-[90vw] text-center" :class="toast.classes" x-text="toast.message"></div>
@@ -92,131 +168,38 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 const STRIPE_LINK = 'https://buy.stripe.com/14AdRa8BagNr2GegAbenS01';
 const GHOST_NAMES = ['Visitante_Anónimo_01','Visitante_Anónimo_02','Coleccionista_Anónimo_MX','Hunter_USA_Anon','Euro_Hunter_Anon','DGT_Visitor_Anon','Serie_Lover_Anon','Bill_Hunter_Anon'];
-const COUNTRIES = ['USA $','México $','Euro €','Colombia $','Argentina $','Chile $','Perú $','Brasil R$','España €','UK £','Japón ¥','Canadá $','Australia $','Rep. Dominicana $','Venezuela $','Ecuador $','Panamá $','Costa Rica ₡','Guatemala Q','Honduras L'];
-
-const Engine = {
-  genTail(){return Array.from({length:4},()=>Math.floor(Math.random()*10))},
-  parseVaultSerial(serial){ try{ const m=serial.match(/([A-Z]+)\s*(\d{4})\s*(\d{4})\s*([A-Z])/); if(!m) return null; return {prefix:m[1], user:m[2], tail:m[3], suffix:m[4]} }catch(e){return null;} },
-  genLetters(d){const L='ABCDEFGHJKLMNPQRSTUVWXYZ'; const r=()=>L[Math.floor(Math.random()*L.length)]; if(d===1) return {a:r(),c:r()}; return {a:r(),b:r(),c:r()}},
-  genYear(){const y=[1963,1969,1974,1977,1981,1985,1988,1990,1993,1995,1999,2001,2003,2006,2009,2013,2017,2021]; return y[Math.floor(Math.random()*y.length)]},
-  genSeal(){return 'CH-'+Math.floor(1000+Math.random()*9000)+'-'+Math.random().toString(36).slice(2,4).toUpperCase()},
-  checkRarity(s){if(!s) return {type:'common',label:'Común',score:0,badgeClass:'border-white/10 bg-white/5 text-zinc-400'}; if(/^(\d)\1{7}$/.test(s)) return {type:'solid',label:'SOLID',score:100,badgeClass:'border-amber-400 bg-amber-400/20 text-amber-300'}; if(/0123|1234|2345|4567|5678|6789|9876|1212|3434/.test(s)) return {type:'ladder',label:'LADDER',score:85,badgeClass:'border-sky-400 bg-sky-400/20 text-sky-300'}; if(s.slice(0,4)===s.slice(4).split('').reverse().join('')) return {type:'radar',label:'RADAR',score:80,badgeClass:'border-violet-400 bg-violet-400/20 text-violet-300'}; if(/(\d)\1{2,}/.test(s)) return {type:'semi-solid',label:'SEMI-SOLID',score:60,badgeClass:'border-emerald-400 bg-emerald-400/20 text-emerald-300'}; return {type:'common',label:'Común',score:Math.floor(Math.random()*15),badgeClass:'border-white/10 bg-white/5 text-zinc-400'};},
-  calcPoints(r,denom){let b=100+r.score*18+denom*2+Math.floor(Math.random()*350); if(r.type!=='common') b*=3.2; return Math.floor(b)},
-  genGhostEntry(i){
-    const denoms=[1,5,20,50,100]; const denom=denoms[Math.floor(Math.random()*denoms.length)];
-    const letters=Engine.genLetters(denom);
-    const userPart=Array.from({length:4},()=>Math.floor(Math.random()*10)).join('');
-    const tail=Array.from({length:4},()=>Math.floor(Math.random()*10)).join('');
-    let finalUser=userPart, finalTail=tail;
-    if(i%7===0) finalUser='7777';
-    if(i%11===0) finalTail='7777';
-    if(i%13===0) finalUser='1234';
-    const full=finalUser+finalTail;
-    const rarity=Engine.checkRarity(full);
-    const lettersStr=denom===1? `${letters.a}-${letters.c}` : `${letters.a}-${letters.b}-${letters.c}`;
-    const prefix=denom===1? letters.a : `${letters.a}${letters.b}`;
-    const country=COUNTRIES[Math.floor(Math.random()*COUNTRIES.length)];
-    const ghostName=GHOST_NAMES[Math.floor(Math.random()*GHOST_NAMES.length)] + Math.floor(100+Math.random()*900);
-    return {
-      id:'ghost_'+i+'_'+Math.random().toString(36).slice(2,8),
-      serial:`${prefix} ${finalUser}${finalTail} ${letters.c}`,
-      letters:lettersStr,
-      digits:`${finalUser} ${finalTail}`,
-      seal:Engine.genSeal(),
-      points:Engine.calcPoints(rarity,denom),
-      rarity, denom, yr:Engine.genYear(),
-      country,
-      owner:ghostName,
-      contact:'Anónimo • Participante visitante',
-      anon_id:'ghost_'+i,
-      created_at: new Date(Date.now() - Math.floor(Math.random()*30)*24*3600*1000).toISOString()
-    };
-  }
-};
-
+const COUNTRIES = ['🇺🇸 USA $','🇲🇽 México $','🇪🇺 Euro €','🇨🇴 Colombia $','🇦🇷 Argentina $','🇨🇱 Chile $','🇵🇪 Perú $','🇧🇷 Brasil R$','🇪🇸 España €','🇬🇧 UK £','🇯🇵 Japón ¥','🇨🇦 Canadá $','🇦🇺 Australia $','🇩🇴 Rep. Dominicana $','🇻🇪 Venezuela $','🇪🇨 Ecuador $','🇵🇦 Panamá $','🇨🇷 Costa Rica ₡','🇬🇹 Guatemala Q','🇭🇳 Honduras L','🇨🇺 Cuba $','🇧🇴 Bolivia $b','🇵🇾 Paraguay ₲','🇺🇾 Uruguay $','🇳🇮 Nicaragua C$','🇸🇻 El Salvador $','🇭🇹 Haití G','🇯🇲 Jamaica $','🇧🇸 Bahamas $','🇧🇧 Barbados $','🇹🇹 Trinidad y Tobago $','🇧🇿 Belice $','🇬🇾 Guyana $','🇸🇷 Surinam $','🇨🇭 Suiza ₣','🇸🇪 Suecia kr','🇳🇴 Noruega kr','🇩🇰 Dinamarca kr','🇵🇱 Polonia zł','🇭🇺 Hungría Ft','🇷🇴 Rumanía lei','🇿🇦 Sudáfrica R','🇳🇿 Nueva Zelanda $','🇰🇷 Corea del Sur ₩','🇮🇳 India ₹','🇨🇳 China ¥','🇸🇬 Singapur $','🇭🇰 Hong Kong $'];
+const Engine = { genTail(){return Array.from({length:4},()=>Math.floor(Math.random()*10))}, parseVaultSerial(serial){ try{ const m=serial.match(/([A-Z]+)\s*(\d{4})\s*(\d{4})\s*([A-Z])/); if(!m) return null; return {prefix:m[1], user:m[2], tail:m[3], suffix:m[4]} }catch(e){return null;} }, genLetters(d){const L='ABCDEFGHJKLMNPQRSTUVWXYZ'; const r=()=>L[Math.floor(Math.random()*L.length)]; if(d===1) return {a:r(),c:r()}; return {a:r(),b:r(),c:r()}}, genYear(){const y=[1963,1969,1974,1977,1981,1985,1988,1990,1993,1995,1999,2001,2003,2006,2009,2013,2017,2021]; return y[Math.floor(Math.random()*y.length)]}, genSeal(){return 'CH-'+Math.floor(1000+Math.random()*9000)+'-'+Math.random().toString(36).slice(2,4).toUpperCase()}, checkRarity(s){if(!s) return {type:'common',label:'Común',score:0,badgeClass:'border-white/10 bg-white/5 text-zinc-400'}; if(/^(\d)\1{7}$/.test(s)) return {type:'solid',label:'SOLID',score:100,badgeClass:'border-amber-400 bg-amber-400/20 text-amber-300'}; if(/0123|1234|2345|4567|5678|6789|9876|1212|3434/.test(s)) return {type:'ladder',label:'LADDER',score:85,badgeClass:'border-sky-400 bg-sky-400/20 text-sky-300'}; if(s.slice(0,4)===s.slice(4).split('').reverse().join('')) return {type:'radar',label:'RADAR',score:80,badgeClass:'border-violet-400 bg-violet-400/20 text-violet-300'}; if(/(\d)\1{2,}/.test(s)) return {type:'semi-solid',label:'SEMI-SOLID',score:60,badgeClass:'border-emerald-400 bg-emerald-400/20 text-emerald-300'}; return {type:'common',label:'Común',score:Math.floor(Math.random()*15),badgeClass:'border-white/10 bg-white/5 text-zinc-400'};}, calcPoints(r,denom){let b=100+r.score*18+denom*2+Math.floor(Math.random()*350); if(r.type!=='common') b*=3.2; return Math.floor(b)}, genGhostEntry(i){ const denoms=[1,5,20,50,100]; const denom=denoms[Math.floor(Math.random()*denoms.length)]; const letters=Engine.genLetters(denom); const userPart=Array.from({length:4},()=>Math.floor(Math.random()*10)).join(''); const tail=Array.from({length:4},()=>Math.floor(Math.random()*10)).join(''); let finalUser=userPart, finalTail=tail; if(i%7===0) finalUser='7777'; if(i%11===0) finalTail='7777'; if(i%13===0) finalUser='1234'; const full=finalUser+finalTail; const rarity=Engine.checkRarity(full); const lettersStr=denom===1? `${letters.a}-${letters.c}` : `${letters.a}-${letters.b}-${letters.c}`; const prefix=denom===1? letters.a : `${letters.a}${letters.b}`; const country=COUNTRIES[Math.floor(Math.random()*COUNTRIES.length)]; const ghostName=GHOST_NAMES[Math.floor(Math.random()*GHOST_NAMES.length)] + Math.floor(100+Math.random()*900); return { id:'ghost_'+i+'_'+Math.random().toString(36).slice(2,8), serial:`${prefix} ${finalUser}${finalTail} ${letters.c}`, letters:lettersStr, digits:`${finalUser} ${finalTail}`, seal:Engine.genSeal(), points:Engine.calcPoints(rarity,denom), rarity, denom, yr:Engine.genYear(), country, owner:ghostName, contact:'Anónimo • Participante visitante', anon_id:'ghost_'+i, created_at: new Date(Date.now() - Math.floor(Math.random()*30)*24*3600*1000).toISOString() }; } };
 function dollarMachineApp(){
  return {
-  userDigits:[], tailDigits:Engine.genTail(), letters:Engine.genLetters(20), yr:Engine.genYear(), securitySeal:Engine.genSeal(), denom:20, isLocked:false, rarity:{type:'common',label:'Común',score:0}, value:20, isSearching:false, searchInterval:null, searchTimeout:null, isRollingLetters:false, isRollingYear:false, rollInterval:null, rollTimeout:null, matchAttemptsLeft:10, maxAttempts:10, toast:{visible:false}, history:[], searchQuery:'', searchFilter:'all', supabaseStatus:'Conectando...', globalSearch:{serial:'', country:'USA $', denom:'$20'}, myNickname:'', myContact:'', myEmail:'', globalActive:false, currentVaultSource: Engine.genGhostEntry(0), nextVaultPreview:'Cargando...', vaultPool:[], stripeModal:{open:false, terms:false, privacy:false, refunds:false, source:''}, legalModal:{open:false, title:'', content:''}, denomColorsClass:{1:'bg-emerald-500',5:'bg-sky-500',10:'bg-violet-500',20:'bg-orange-500',50:'bg-pink-500',100:'bg-amber-500'}, numpadGrid:[[{type:'num',val:7},{type:'num',val:8},{type:'num',val:9},{type:'denom',val:1}],[{type:'num',val:4},{type:'num',val:5},{type:'num',val:6},{type:'denom',val:5}],[{type:'num',val:1},{type:'num',val:2},{type:'num',val:3},{type:'denom',val:10}],[{type:'denom',val:20},{type:'num',val:0},{type:'denom',val:50},{type:'denom',val:100}]],
+  userDigits:[], tailDigits:Engine.genTail(), letters:Engine.genLetters(20), yr:Engine.genYear(), securitySeal:Engine.genSeal(), denom:20, isLocked:false, rarity:{type:'common',label:'Común',score:0}, value:20, isSearching:false, searchInterval:null, searchTimeout:null, isRollingLetters:false, isRollingYear:false, rollInterval:null, rollTimeout:null, matchAttemptsLeft:10, maxAttempts:10, toast:{visible:false}, history:[], searchQuery:'', searchFilter:'all', supabaseStatus:'Conectando...', globalSearch:{serial:'', country:'🇺🇸 USA $', denom:'$20'}, myNickname:'', myContact:'', myEmail:'', globalActive:false, currentVaultSource: Engine.genGhostEntry(0), nextVaultPreview:'Cargando...', vaultPool:[], stripeModal:{open:false, terms:false, privacy:false, refunds:false, source:''}, legalModal:{open:false, title:'', content:''}, denomColorsClass:{1:'bg-emerald-500',5:'bg-sky-500',10:'bg-violet-500',20:'bg-orange-500',50:'bg-pink-500',100:'bg-amber-500'}, numpadGrid:[[{type:'num',val:7},{type:'num',val:8},{type:'num',val:9},{type:'denom',val:1}],[{type:'num',val:4},{type:'num',val:5},{type:'num',val:6},{type:'denom',val:5}],[{type:'num',val:1},{type:'num',val:2},{type:'num',val:3},{type:'denom',val:10}],[{type:'denom',val:20},{type:'num',val:0},{type:'denom',val:50},{type:'denom',val:100}]],
   leader:{lettersDisplay:'A-B-C', digitsDisplay:'0000 0000', seal:'CH-0000-XX', points:1250, rarity:{label:'Común',badgeClass:'border-white/10 bg-white/5 text-zinc-400'}, owner:'Bóveda', country:'USA', serial:''}, leaderSecondsLeft:3600, leaderTimer:null,
-
-  async initApp(){
-    if(!localStorage.getItem('dgt_anon')) localStorage.setItem('dgt_anon','anon_'+Math.random().toString(36).slice(2,9));
-    this.myNickname=localStorage.getItem('dgt_nick')||''; this.myContact=localStorage.getItem('dgt_contact')||''; this.myEmail=localStorage.getItem('dgt_email')||'';
-    this.globalActive = localStorage.getItem('dgt_global_active')==='true';
-    this.globalSearch.serial = localStorage.getItem('dgt_global_serial')||'';
-    const urlParams=new URLSearchParams(window.location.search);
-    if(urlParams.get('success')==='true'){ localStorage.setItem('dgt_global_active','true'); this.globalActive=true; this.showToast('¡PAGO $5 CONFIRMADO! Membresía de por vida activa','success'); history.replaceState({},'',location.pathname); }
-    await this.loadVaultFromSupabase();
-    this.initLeaderFromVault();
-    this.pickNewVaultSource();
-    this.updateRarityAndValue();
-  },
-
-  async loadVaultFromSupabase(){
-    const {data} = await supabaseClient.from('vault').select('*').order('created_at',{ascending:false}).limit(200);
-    if(data && data.length>5){
-      this.history=data; this.vaultPool=[...data];
-      this.supabaseStatus=`✅ ${data.length} series en Bóveda Global (incluye 👻 anónimos)`;
-    } else {
-      this.history=[]; this.vaultPool=[];
-      this.supabaseStatus=`📦 Bóveda vacía, dale a 👻 +50 Fantasmas Anónimos`;
-    }
-  },
-
+  async initApp(){ if(!localStorage.getItem('dgt_anon')) localStorage.setItem('dgt_anon','anon_'+Math.random().toString(36).slice(2,9)); this.myNickname=localStorage.getItem('dgt_nick')||''; this.myContact=localStorage.getItem('dgt_contact')||''; this.myEmail=localStorage.getItem('dgt_email')||''; this.globalActive = localStorage.getItem('dgt_global_active')==='true'; this.globalSearch.serial = localStorage.getItem('dgt_global_serial')||''; const urlParams=new URLSearchParams(window.location.search); if(urlParams.get('success')==='true'){ localStorage.setItem('dgt_global_active','true'); this.globalActive=true; this.showToast('¡PAGO $5 CONFIRMADO! Membresía de por vida activa','success'); history.replaceState({},'',location.pathname); } await this.loadVaultFromSupabase(); this.initLeaderFromVault(); this.pickNewVaultSource(); this.updateRarityAndValue(); },
+  async loadVaultFromSupabase(){ const {data} = await supabaseClient.from('vault').select('*').order('created_at',{ascending:false}).limit(200); if(data && data.length>5){ this.history=data; this.vaultPool=[...data]; this.supabaseStatus=`✅ ${data.length} series en Bóveda Global`; } else { this.history=[]; this.vaultPool=[]; this.supabaseStatus=`📦 Bóveda vacía, dale a 👻 +50 Fantasmas`; } },
   async seedGhosts(){
-    this.showToast('Generando 50 visitantes anónimos...','info');
+    if(this.history.length >= 50){
+      this.showToast('Bóveda ya tiene '+this.history.length+' series - no necesita más','info');
+      return;
+    }
+    this.showToast('Generando 50 visitantes...','info');
     const ghosts=[];
     for(let i=0;i<50;i++) ghosts.push(Engine.genGhostEntry(i));
     const {error} = await supabaseClient.from('vault').insert(ghosts);
     if(error){
-      this.history=ghosts; this.vaultPool=[...ghosts];
+      this.history=ghosts;
+      this.vaultPool=[...ghosts];
       this.supabaseStatus=`👻 ${ghosts.length} fantasmas locales (Error: ${error.message})`;
     } else {
-      this.history=ghosts; this.vaultPool=[...ghosts];
-      this.supabaseStatus=`👻 ${ghosts.length} visitantes anónimos generados en Supabase`;
-      this.showToast(`¡50 fantasmas creados! Bóveda ya no vacía`,'success');
+      this.history=ghosts;
+      this.vaultPool=[...ghosts];
+      this.supabaseStatus=`👻 ${ghosts.length} visitantes generados`;
+      this.showToast('¡50 fantasmas creados!','success');
     }
     this.pickNewVaultSource();
     this.initLeaderFromVault();
   },
-
-  pickNewVaultSource(){
-    if(this.vaultPool.length===0) { this.currentVaultSource=Engine.genGhostEntry(0); this.tailDigits=this.currentVaultSource.digits.slice(-4).split('').map(Number); return; }
-    const idx=Math.floor(Math.random()*this.vaultPool.length);
-    this.currentVaultSource=this.vaultPool[idx];
-    const nextIdx=(idx+1)%this.vaultPool.length;
-    this.nextVaultPreview=this.vaultPool[nextIdx]?.serial || '---';
-    const parsed=Engine.parseVaultSerial(this.currentVaultSource.serial);
-    if(parsed){
-      this.tailDigits=parsed.tail.split('').map(Number);
-      const lettersParts=this.currentVaultSource.letters?.split('-') || [parsed.prefix[0], parsed.suffix];
-      if(lettersParts.length===2) this.letters={a:lettersParts[0], b:lettersParts[0], c:lettersParts[1]};
-      else if(lettersParts.length===3) this.letters={a:lettersParts[0], b:lettersParts[1], c:lettersParts[2]};
-    }
-    this.yr=this.currentVaultSource.yr || Engine.genYear();
-    this.securitySeal=this.currentVaultSource.seal || Engine.genSeal();
-    this.updateRarityAndValue();
-  },
-
-  initLeaderFromVault(){
-    if(this.vaultPool.length===0) return;
-    const sorted=[...this.vaultPool].sort((a,b)=>b.points-a.points);
-    const top=sorted[0];
-    this.leader={
-      lettersDisplay: top.letters || top.serial.slice(0,3),
-      digitsDisplay: top.digits || top.serial,
-      seal: top.seal,
-      points: top.points,
-      rarity: top.rarity || {label:'Común', badgeClass:'border-white/10 bg-white/5 text-zinc-400'},
-      owner: top.owner || 'Anónimo',
-      country: top.country || 'USA',
-      serial: top.serial
-    };
-    this.leaderSecondsLeft=3600;
-    if(this.leaderTimer) clearInterval(this.leaderTimer);
-    this.leaderTimer=setInterval(()=>{ this.leaderSecondsLeft--; if(this.leaderSecondsLeft<=0){ this.pickNewVaultSource(); this.initLeaderFromVault(); this.leaderSecondsLeft=3600; } },1000);
-  },
-
+  pickNewVaultSource(){ if(this.vaultPool.length===0) { this.currentVaultSource=Engine.genGhostEntry(0); this.tailDigits=this.currentVaultSource.digits.slice(-4).split('').map(Number); return; } const idx=Math.floor(Math.random()*this.vaultPool.length); this.currentVaultSource=this.vaultPool[idx]; const nextIdx=(idx+1)%this.vaultPool.length; this.nextVaultPreview=this.vaultPool[nextIdx]?.serial || '---'; const parsed=Engine.parseVaultSerial(this.currentVaultSource.serial); if(parsed){ this.tailDigits=parsed.tail.split('').map(Number); const lettersParts=this.currentVaultSource.letters?.split('-') || [parsed.prefix[0], parsed.suffix]; if(lettersParts.length===2) this.letters={a:lettersParts[0], b:lettersParts[0], c:lettersParts[1]}; else if(lettersParts.length===3) this.letters={a:lettersParts[0], b:lettersParts[1], c:lettersParts[2]}; } this.yr=this.currentVaultSource.yr || Engine.genYear(); this.securitySeal=this.currentVaultSource.seal || Engine.genSeal(); this.updateRarityAndValue(); },
+  initLeaderFromVault(){ if(this.vaultPool.length===0) return; const sorted=[...this.vaultPool].sort((a,b)=>b.points-a.points); const top=sorted[0]; this.leader={ lettersDisplay: top.letters || top.serial.slice(0,3), digitsDisplay: top.digits || top.serial, seal: top.seal, points: top.points, rarity: top.rarity || {label:'Común', badgeClass:'border-white/10 bg-white/5 text-zinc-400'}, owner: top.owner || 'Anónimo', country: top.country || 'USA', serial: top.serial }; this.leaderSecondsLeft=3600; if(this.leaderTimer) clearInterval(this.leaderTimer); this.leaderTimer=setInterval(()=>{ this.leaderSecondsLeft--; if(this.leaderSecondsLeft<=0){ this.pickNewVaultSource(); this.initLeaderFromVault(); this.leaderSecondsLeft=3600; } },1000); },
   useAsSource(bill){ this.currentVaultSource=bill; const parsed=Engine.parseVaultSerial(bill.serial); if(parsed) this.tailDigits=parsed.tail.split('').map(Number); else this.tailDigits=Engine.genTail(); this.yr=bill.yr; this.securitySeal=bill.seal; this.triggerRoll(600); this.updateRarityAndValue(); this.showToast(`Fuente: ${bill.serial}`,'success'); },
   triggerRoll(d=600){ if(this.rollInterval) clearInterval(this.rollInterval); if(this.rollTimeout) clearTimeout(this.rollTimeout); this.isRollingLetters=true; this.isRollingYear=true; this.rollInterval=setInterval(()=>{ this.letters=Engine.genLetters(this.denom); this.yr=Engine.genYear(); },55); this.rollTimeout=setTimeout(()=>{ clearInterval(this.rollInterval); this.pickNewVaultSource(); this.isRollingLetters=false; this.isRollingYear=false; },d); },
   triggerSearchEffect(){ if(this.searchInterval) clearInterval(this.searchInterval); if(this.searchTimeout) clearTimeout(this.searchTimeout); this.isSearching=true; this.searchInterval=setInterval(()=>{ if(this.vaultPool.length>0){ const rb=this.vaultPool[Math.floor(Math.random()*this.vaultPool.length)]; const p=Engine.parseVaultSerial(rb.serial); if(p) this.tailDigits=p.tail.split('').map(Number); } else this.tailDigits=Engine.genTail(); },80); this.searchTimeout=setTimeout(()=>{ clearInterval(this.searchInterval); this.isSearching=false; this.pickNewVaultSource(); },900); },
@@ -227,55 +210,12 @@ function dollarMachineApp(){
   clearInput(){ this.userDigits=[]; this.isLocked=false; this.matchAttemptsLeft=this.maxAttempts; this.pickNewVaultSource(); this.triggerRoll(600); },
   lockCombo(){ this.isLocked=true; if(this.searchInterval) clearInterval(this.searchInterval); this.isSearching=false; },
   doMatch(){ if(!this.isLocked || this.matchAttemptsLeft<=0) return; this.triggerSearchEffect(); this.triggerRoll(500); this.matchAttemptsLeft--; this.pickNewVaultSource(); },
-
-  handleRegister(){
-    if(this.globalActive){ this.registerMatchToVault(); }
-    else { this.openStripeModal('register'); }
-  },
-
-  async registerMatchToVault(){
-    if(!this.isLocked) return;
-    if(!this.globalActive){ this.openStripeModal('register'); return; }
-    if(!this.myNickname || !this.myEmail){ this.showToast('Pon alias y email','info'); return; }
-    localStorage.setItem('dgt_nick', this.myNickname); localStorage.setItem('dgt_contact', this.myContact); localStorage.setItem('dgt_email', this.myEmail);
-    const entry={
-      id: Math.random().toString(36).slice(2)+Date.now().toString(36),
-      serial: `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`,
-      letters: this.lettersDisplay,
-      digits: `${this.finalUserPart} ${this.finalTailPart}`,
-      seal: this.securitySeal,
-      points: Engine.calcPoints(this.rarity,this.denom),
-      rarity: this.rarity,
-      denom: this.denom,
-      yr: this.yr,
-      country: this.globalSearch.country||'USA',
-      owner: this.myNickname||'Anon',
-      contact: `${this.myContact} | ${this.myEmail}`,
-      anon_id: localStorage.getItem('dgt_anon'),
-      created_at: new Date().toISOString()
-    };
-    const {error} = await supabaseClient.from('vault').insert(entry);
-    if(error) this.showToast('Error: '+error.message,'info');
-    else { this.showToast(`¡REGISTRADO! ${entry.serial}`,'success'); this.vaultPool.unshift(entry); this.history.unshift(entry); this.initLeaderFromVault(); }
-  },
-
-  get filteredHistory(){ let h=this.history; return h; },
+  handleRegister(){ if(this.globalActive){ this.registerMatchToVault(); } else { this.openStripeModal('register'); } },
+  async registerMatchToVault(){ if(!this.isLocked) return; if(!this.globalActive){ this.openStripeModal('register'); return; } if(!this.myNickname ||!this.myEmail){ this.showToast('Pon alias y email','info'); return; } localStorage.setItem('dgt_nick', this.myNickname); localStorage.setItem('dgt_contact', this.myContact); localStorage.setItem('dgt_email', this.myEmail); const entry={ id: Math.random().toString(36).slice(2)+Date.now().toString(36), serial: `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`, letters: this.lettersDisplay, digits: `${this.finalUserPart} ${this.finalTailPart}`, seal: this.securitySeal, points: Engine.calcPoints(this.rarity,this.denom), rarity: this.rarity, denom: this.denom, yr: this.yr, country: this.globalSearch.country||'USA', owner: this.myNickname||'Anon', contact: `${this.myContact} | ${this.myEmail}`, anon_id: localStorage.getItem('dgt_anon'), created_at: new Date().toISOString() }; const {error} = await supabaseClient.from('vault').insert(entry); if(error) this.showToast('Error: '+error.message,'info'); else { this.showToast(`¡REGISTRADO! ${entry.serial}`,'success'); this.vaultPool.unshift(entry); this.history.unshift(entry); this.initLeaderFromVault(); } },
+  get filteredHistory(){ let q=this.searchQuery.toLowerCase().trim(); if(!q) return this.history; return this.history.filter(h=> (h.serial && h.serial.toLowerCase().includes(q)) || (h.owner && h.owner.toLowerCase().includes(q)) || (h.country && h.country.toLowerCase().includes(q)) || (h.digits && h.digits.toLowerCase().includes(q)) ); },
   openStripeModal(source){ this.stripeModal.source=source; this.stripeModal.open=true; },
-  goToStripe(){
-    if(!this.myEmail || !this.myNickname){ this.showToast('Pon alias y email','info'); return; }
-    
-    this.stripeModal.open=false;
-    window.open(STRIPE_LINK+'?prefilled_email='+encodeURIComponent(this.myEmail), '_blank');
-  },
-  openLegal(type){
-    const texts={
-      terminos: {title:'Términos $5 Vida', content:`TÉRMINOS - DollarDgt.com\n\n1. $5 DE POR VIDA - Pago único, sin mensualidad.\n2. Plataforma entre particulares. DollarDgt NO interviene, no es responsable de tratos.\n3. Visitantes anónimos son demo para alimentar Bóveda inicial, marcados como ANÓNIMO.`},
-      privacidad: {title:'Privacidad', content:`PRIVACIDAD\n\nGuardamos alias, email, WhatsApp, series, país. Email solo para alertas MATCH. No vendemos datos.`},
-      reembolsos: {title:'Reembolsos $5 Vida', content:`$5 USD pago ÚNICO de por vida. Sin suscripción. Sin reembolso por ser acceso digital de por vida.`},
-      aviso: {title:'Aviso Legal', content:`DollarDgt.com plataforma coleccionistas. No somos entidad financiera. Tratos entre particulares bajo su responsabilidad.\n© 2026 DollarDgt.com`}
-    };
-    this.legalModal.title=texts[type].title; this.legalModal.content=texts[type].content; this.legalModal.open=true;
-  },
+  goToStripe(){ if(!this.myEmail ||!this.myNickname){ this.showToast('Pon alias y email','info'); return; } this.stripeModal.open=false; window.open(STRIPE_LINK+'?prefilled_email='+encodeURIComponent(this.myEmail), '_blank'); },
+  openLegal(type){ const texts={ terminos: {title:'Términos $5 Vida', content:`TÉRMINOS - DollarDgt.com\n\n1. $5 DE POR VIDA - Pago único, sin mensualidad.\n2. Plataforma entre particulares. DollarDgt NO interviene.\n3. Visitantes anónimos son demo para alimentar Bóveda inicial.`}, privacidad: {title:'Privacidad', content:`PRIVACIDAD\n\nGuardamos alias, email, WhatsApp, series, país. Email solo para alertas MATCH. No vendemos datos.`}, reembolsos: {title:'Reembolsos $5 Vida', content:`$5 USD pago ÚNICO de por vida. Sin suscripción. Sin reembolso por ser acceso digital de por vida.`}, aviso: {title:'Aviso Legal', content:`DollarDgt.com plataforma coleccionistas. No somos entidad financiera. Tratos entre particulares.\n© 2026 DollarDgt.com`} }; this.legalModal.title=texts[type].title; this.legalModal.content=texts[type].content; this.legalModal.open=true; },
   showToast(m,type='success'){ clearTimeout(this.toastTimer); this.toast.classes=type==='success'? 'bg-amber-400 text-black' : 'bg-zinc-800 text-white border border-white/10'; this.toast.message=m; this.toast.visible=true; this.toastTimer=setTimeout(()=>{ this.toast.visible=false; },4000); },
   get leaderCountdownFormatted(){ const mm=Math.floor(this.leaderSecondsLeft/60).toString().padStart(2,'0'); const ss=(this.leaderSecondsLeft%60).toString().padStart(2,'0'); return `${mm}:${ss}`; },
   get topDigitsDisplayFixed(){ const u=this.userDigits; return `${u[0]??'-'}${u[1]??'-'} ${u[2]??'-'}${u[3]??'-'}`; },
@@ -287,5 +227,5 @@ function dollarMachineApp(){
  }
 }
 </script>
-</body>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
