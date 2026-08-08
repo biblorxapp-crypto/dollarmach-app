@@ -231,7 +231,31 @@ function dollarMachineApp(){
   get filteredHistory(){ let q=this.searchQuery.toLowerCase().trim(); if(!q) return this.history; return this.history.filter(h=> (h.serial && h.serial.toLowerCase().includes(q)) || (h.owner && h.owner.toLowerCase().includes(q)) || (h.country && h.country.toLowerCase().includes(q)) || (h.digits && h.digits.toLowerCase().includes(q)) ); },
   openStripeModal(source){ this.stripeModal.source=source; this.stripeModal.open=true; },
   goToStripe(){ if(!this.myEmail ||!this.myNickname){ this.showToast('Pon alias y email','info'); return; } this.stripeModal.open=false; window.open(STRIPE_LINK+'?prefilled_email='+encodeURIComponent(this.myEmail), '_blank'); },
-  openLegal(type){ const texts={ terminos: {title:'Términos $5 Vida', content:`TÉRMINOS - DollarDgt.com\n\n1. $5 DE POR VIDA - Pago único, sin mensualidad.\n2. Plataforma entre particulares. DollarDgt NO interviene.\n3. Visitantes anónimos son demo para alimentar Bóveda inicial.`}, privacidad: {title:'Privacidad', content:`PRIVACIDAD\n\nGuardamos alias, email, WhatsApp, series, país. Email solo para alertas MATCH. No vendemos datos.`}, reembolsos: {title:'Reembolsos $5 Vida', content:`$5 USD pago ÚNICO de por vida. Sin suscripción. Sin reembolso por ser acceso digital de por vida.`}, aviso: {title:'Aviso Legal', content:`DollarDgt.com plataforma coleccionistas. No somos entidad financiera. Tratos entre particulares.\n© 2026 DollarDgt.com`} }; this.legalModal.title=texts[type].title; this.legalModal.content=texts[type].content; this.legalModal.open=true; },
+  
+  openLegal(type){ 
+    const texts={ 
+      terminos: {
+        title:'Términos y Condiciones de Uso', 
+        content:`TÉRMINOS Y CONDICIONES GENERALES - DollarDgt.com\n\n1. NATURALEZA DE LA PLATAFORMA\nDollarDgt.com es una herramienta digital de catálogo, entretenimiento y contacto entre coleccionistas particulares de billetes y numerología. La plataforma NO is una casa de cambio, institución financiera, casa de empeño ni intermediaria en transacciones comerciales.\n\n2. MEMBRESÍA DE POR VIDA ($5 USD)\nEl pago único de $5 USD otorga acceso vitalicio a las funciones avanzadas de la Bóveda Global y registro de series. Este pago es definitivo y corresponde a un servicio digital de software y base de datos.\n\n3. RESPONSABILIDAD DE LOS USUARIOS\nCualquier trato, intercambio, compra o venta de billetes físicos que los usuarios realicen por su cuenta se hace de manera estrictamente particular y bajo su propia y exclusiva responsabilidad. DollarDgt no interviene, supervisa ni garantiza los acuerdos entre particulares.`
+      }, 
+      privacidad: {
+        title:'Política de Privacidad', 
+        content:`POLÍTICA DE PRIVACIDAD - DollarDgt.com\n\n1. DATOS QUE RECOPILAMOS\nRecopilamos la información básica que el usuario proporciona voluntariamente: Alias (Nickname), Correo Electrónico (Email) y número de contacto (WhatsApp opcional), así como las series de billetes registradas y país de origen.\n\n2. USO DE LA INFORMACIÓN\nLos datos se utilizan exclusivamente para:\n- Gestionar el acceso a la Bóveda Global y mostrar las series publicadas.\n- Enviar alertas automáticas al correo electrónico cuando se detecten coincidencias (MATCH) con otras series.\n\n3. PROTECCIÓN DE DATOS\nNo vendemos, alquilamos ni cedemos información personal a terceros. Los datos de contacto solo son visibles para otros usuarios según las configuraciones de la comunidad y la membresía activa.`
+      }, 
+      reembolsos: {
+        title:'Política de Reembolsos', 
+        content:`POLÍTICA DE REEMBOLSOS Y PAGOS - DollarDgt.com\n\n1. PAGO ÚNICO DE POR VIDA\nLa membresía de DollarDgt.com tiene un costo único de $5 USD. No existen mensualidades, cobros ocultos ni renovaciones automáticas.\n\n2. CONDICIONES DE REEMBOLSO\nDebido a la naturaleza digital e inmediata del acceso al software y base de datos de la Bóveda Global tras la confirmación del pago, no se realizan reembolsos una vez procesada la transacción.\n\n3. SOPORTE\nSi experimentas algún problema técnico con la activación de tu cuenta tras realizar el pago, puedes contactar con nuestro soporte técnico para solucionarlo de inmediato.`
+      }, 
+      aviso: {
+        title:'Aviso Legal', 
+        content:`AVISO LEGAL - DollarDgt.com\n\n1. TITULARIDAD Y OBJETIVO\nPlataforma web diseñada para entusiastas de la numismática y coleccionistas de números de serie particulares.\n\n2. EXENCIÓN DE RESPONSABILIDAD\nLos creadores y administradores de DollarDgt.com no asumen ninguna responsabilidad por pérdidas, desacuerdos, disputas o incumplimientos derivados de los tratos económicos o intercambios que los usuarios realicen por fuera o a raíz del contacto generado en la plataforma.\n\n© 2026 DollarDgt.com. Todos los derechos reservados.`
+      } 
+    }; 
+    this.legalModal.title = texts[type].title; 
+    this.legalModal.content = texts[type].content; 
+    this.legalModal.open = true; 
+  },
+
   showToast(m,type='success'){ clearTimeout(this.toastTimer); this.toast.classes=type==='success'? 'bg-amber-400 text-black' : 'bg-zinc-800 text-white border border-white/10'; this.toast.message=m; this.toast.visible=true; this.toastTimer=setTimeout(()=>{ this.toast.visible=false; },4000); },
   get leaderCountdownFormatted(){ const mm=Math.floor(this.leaderSecondsLeft/60).toString().padStart(2,'0'); const ss=(this.leaderSecondsLeft%60).toString().padStart(2,'0'); return `${mm}:${ss}`; },
   get topDigitsDisplayFixed(){ const u=this.userDigits; return `${u[0]??'-'}${u[1]??'-'} ${u[2]??'-'}${u[3]??'-'}`; },
