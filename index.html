@@ -11,37 +11,21 @@
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 <style>
-  @font-face {
-    font-family: "Optimistic";
-    font-style: normal;
-    font-weight: 400 600;
-    font-display: swap;
-    src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-  }
-  @font-face {
-    font-family: "Optimistic Mono";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-  }
-  :where(html) {
-    font-family: "Optimistic", system-ui, sans-serif;
-  }
-  :where(code, pre, kbd, samp) {
-    font-family: "Optimistic Mono", ui-monospace, monospace;
-  }
+  @font-face { font-family: "Optimistic"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2"); }
+  @font-face { font-family: "Optimistic Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2"); }
+  :where(html) { font-family: "Optimistic", system-ui, sans-serif; }
+  :where(code, pre, kbd, samp) { font-family: "Optimistic Mono", ui-monospace, monospace; }
   body{background:#050707; touch-action: manipulation; -webkit-text-size-adjust: 100%;}
   input, select { font-size: 16px!important; }
-  .kbtn:active{transform:translateY(2px) scale(.97)}
-  .shuffling{animation:blurShuffle .25s infinite ease-in-out}
+ .kbtn:active{transform:translateY(2px) scale(.97)}
+ .shuffling{animation:blurShuffle.25s infinite ease-in-out}
   @keyframes blurShuffle{0%{filter:blur(0px) brightness(1);opacity:1}50%{filter:blur(1.2px) brightness(1.25);opacity:.75}100%{filter:blur(0px) brightness(1);opacity:1}}
-  .glow-match{box-shadow:0 0 40px rgba(245,158,11,0.6);animation:pulseGold 1.8s infinite}
+ .glow-match{box-shadow:0 0 40px rgba(245,158,11,0.6);animation:pulseGold 1.8s infinite}
   @keyframes pulseGold{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-  .rolling-letters{transition:all 0.15s ease-out; filter:blur(1.2px); transform:scaleY(1.12); opacity:.75;}
-  .vault-pulse{animation:vaultPulse 2s infinite}
+ .rolling-letters{transition:all 0.15s ease-out; filter:blur(1.2px); transform:scaleY(1.12); opacity:.75;}
+ .vault-pulse{animation:vaultPulse 2s infinite}
   @keyframes vaultPulse{0%,100%{border-color:rgba(245,158,11,0.3)}50%{border-color:rgba(245,158,11,0.6)}}
-  .leader-change{animation:leaderPop .7s ease}
+ .leader-change{animation:leaderPop.7s ease}
   @keyframes leaderPop{0%{transform:scale(.96)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 </style>
 </head>
@@ -125,38 +109,37 @@
 <input type="number" x-model.number="globalSearch.yr" placeholder="2026" class="mt-1 w-full bg-black text-[16px] font-bold text-amber-300 outline-none border border-amber-500/20 rounded-lg px-2 py-1">
 </div>
 
-<!-- CASILLA OBLIGATORIA: VALOR NOMINAL (NOM) -->
 <div class="col-span-2 rounded-xl bg-white/[0.04] border border-emerald-500/30 p-3">
 <div class="text-[9px] text-emerald-400 uppercase font-extrabold tracking-wider">NOM • Valor Nominal (Mueve los Puntos Real)</div>
-<select x-model.number="globalSearch.nom" class="mt-1 w-full bg-black text-[16px] font-bold text-emerald-300 outline-none border border-emerald-500/20 rounded-lg px-2 py-1.5">
-<option class="bg-black" :value="1">NOM 1</option>
-<option class="bg-black" :value="2">NOM 2</option>
-<option class="bg-black" :value="5">NOM 5</option>
-<option class="bg-black" :value="10">NOM 10</option>
-<option class="bg-black" :value="20">NOM 20</option>
-<option class="bg-black" :value="50">NOM 50</option>
-<option class="bg-black" :value="100">NOM 100 (Recomendado)</option>
-<option class="bg-black" :value="200">NOM 200</option>
-<option class="bg-black" :value="500">NOM 500</option>
-<option class="bg-black" :value="1000">NOM 1000 (Máximo)</option>
+<select x-model="globalSearch.nom" class="mt-1 w-full bg-black text-[16px] font-bold text-emerald-300 outline-none border border-emerald-500/20 rounded-lg px-2 py-1.5">
+<option class="bg-black" value="1">NOM 1</option>
+<option class="bg-black" value="2">NOM 2</option>
+<option class="bg-black" value="5">NOM 5</option>
+<option class="bg-black" value="10">NOM 10</option>
+<option class="bg-black" value="20">NOM 20</option>
+<option class="bg-black" value="50">NOM 50</option>
+<option class="bg-black" value="100">NOM 100 (Recomendado)</option>
+<option class="bg-black" value="200">NOM 200</option>
+<option class="bg-black" value="500">NOM 500</option>
+<option class="bg-black" value="1000">NOM 1000 (Máximo)</option>
 </select>
 </div>
 
 <div class="col-span-2 rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Email alertas</div><input x-model="myEmail" placeholder="tu@email.com" class="mt-1 w-full bg-transparent text-[16px] font-bold text-white outline-none placeholder:text-zinc-600"></div></div>
 
-<button @click="handleGlobalMembershipClick()" class="mt-4 kbtn w-full min-h-[62px] rounded-[16px] font-black text-[11px] tracking-[0.1em] border-2 px-2 py-2 leading-tight" :class="globalActive? 'bg-emerald-500 text-black border-emerald-300 shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black border-amber-300'"><span x-text="globalActive? (globalSearch.serial? 'PUBLICAR BILLETE REAL - NOM ' + globalSearch.nom + ' GLOBAL ' : '✅ MEMBRESÍA ACTIVA') : '💎 OBTENER MEMBRESÍA • $5 DE POR VIDA'"></span></button>
+<button @click="handleGlobalMembershipClick()" class="mt-4 kbtn w-full min-h-[62px] rounded-[16px] font-black text-[11px] tracking-[0.1em] border-2 px-2 py-2 leading-tight" :class="globalActive? 'bg-emerald-500 text-black border-emerald-300 shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black border-amber-300'"><span x-text="globalActive? (globalSearch.serial? 'PUBLICAR BILLETE REAL - NOM ' + globalSearch.nom + ' GLOBAL ' : '✅ MEMBRESÍA ACTIVA - BAJAR A BÓVEDA') : '💎 OBTENER MEMBRESÍA • $5 DE POR VIDA'"></span></button>
 <button x-show="!globalActive" @click="restoreMembership()" class="mt-2 w-full h-[44px] rounded-xl bg-white/03 border border-emerald-500/30 text-emerald-300 font-bold text-[11px]">🔑 Ya pagué $5 - Activar con mi Email</button>
 <div class="mt-2 text-center text-[10px] text-zinc-500">ABAJO = Real → vault (con NOM variable) • ARRIBA = Jugada FULL → boveda_jugadas</div></div></section>
 
 <section id="boveda-viva" class="rounded-[28px] border border-white/10 bg-[#0E1212] p-4 scroll-mt-4"><div class="flex justify-between"><h3 class="font-black tracking-[0.18em] text-[12px] uppercase">🌍 BÓVEDA REAL • <span x-text="filteredHistory.length"></span> series (vault)</h3><button @click="seedGhosts()" class="text-[9px] px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 font-black">👻 +50 en Jugadas FULL</button></div><div class="mt-2 text-[10px] text-emerald-500/70" x-text="supabaseStatus"></div>
 <div class="mt-3 flex gap-2"><input x-model="searchQuery" placeholder="🔍 Buscar serie real..." class="flex-1 h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none placeholder:text-zinc-600 focus:border-amber-500/30"><button x-show="searchQuery" @click="searchQuery=''" class="h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-[11px] text-zinc-400">✕</button></div>
-<div class="mt-4 grid grid-cols-1 gap-2.5 max-h-[700px] overflow-auto"><template x-for="h in filteredHistory" :key="h.id"><div class="rounded-[16px] border p-3 bg-gradient-to-b from-[#1A1D1D] to-[#101212] border-white/10"><div class="flex justify-between"><div><div class="font-mono font-black text-[14px] text-white flex items-center gap-2"><span x-text="h.serial"></span><span class="text-[8px] px-1.5 py-0.5 rounded-full bg-sky-500/20 border border-sky-500/30 text-sky-300" x-text="h.yr||''"></span></div><div class="flex gap-2 mt-1"><span class="text-[9px] px-2 py-0.5 rounded-full border" :class="h.rarity?.badgeClass || 'border-white/10 bg-white/5 text-zinc-400'" x-text="h.rarity?.label || 'Común'"></span><span class="text-[9px] text-zinc-500" x-text="h.country"></span><span class="text-[9px] text-emerald-400 font-bold" x-text="'NOM: ' + (h.nom !== undefined && h.nom !== null ? h.nom : (h.denom || 100))"></span></div></div><div class="text-right"><div class="font-mono font-black text-[15px] text-emerald-300" x-text="(h.points||0).toLocaleString() + ' pts'"></div><div class="text-[9px] text-zinc-500 mt-1" x-text="h.owner || 'Anon'"></div></div></div><div class="flex justify-between mt-2 pt-2 border-t border-white/5"><div class="flex gap-2 items-center"><div class="h-6 w-6 rounded-full grid place-items-center text-[10px] bg-emerald-500/20">👤</div><div><div class="text-[11px] font-bold text-white" x-text="h.owner || 'Anon'"></div><div class="text-[9px] text-zinc-500" x-text="h.nom !== undefined && h.nom !== null ? 'NOM ' + h.nom : (h.denom ? '$'+h.denom : '')"></div></div></div><div class="flex gap-1"><button @click="openContactModal(h)" class="h-8 px-2.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-black">CONTACTAR</button><button @click="useAsSource(h)" class="h-8 px-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">USAR</button></div></div></div></template></div></section>
+<div class="mt-4 grid grid-cols-1 gap-2.5 max-h-[700px] overflow-auto"><template x-for="h in filteredHistory" :key="h.id"><div class="rounded-[16px] border p-3 bg-gradient-to-b from-[#1A1D1D] to-[#101212] border-white/10"><div class="flex justify-between"><div><div class="font-mono font-black text-[14px] text-white flex items-center gap-2"><span x-text="h.serial"></span><span class="text-[8px] px-1.5 py-0.5 rounded-full bg-sky-500/20 border border-sky-500/30 text-sky-300" x-text="h.yr||''"></span></div><div class="flex gap-2 mt-1"><span class="text-[9px] px-2 py-0.5 rounded-full border" :class="h.rarity?.badgeClass || 'border-white/10 bg-white/5 text-zinc-400'" x-text="h.rarity?.label || 'Común'"></span><span class="text-[9px] text-zinc-500" x-text="h.country"></span><span class="text-[9px] text-emerald-400 font-bold" x-text="'NOM: ' + (h.nom!== undefined && h.nom!== null? h.nom : (h.denom || 100))"></span></div></div><div class="text-right"><div class="font-mono font-black text-[15px] text-emerald-300" x-text="(h.points||0).toLocaleString() + ' pts'"></div><div class="text-[9px] text-zinc-500 mt-1" x-text="h.owner || 'Anon'"></div></div></div><div class="flex justify-between mt-2 pt-2 border-t border-white/5"><div class="flex gap-2 items-center"><div class="h-6 w-6 rounded-full grid place-items-center text-[10px] bg-emerald-500/20">👤</div><div><div class="text-[11px] font-bold text-white" x-text="h.owner || 'Anon'"></div><div class="text-[9px] text-zinc-500" x-text="h.nom!== undefined && h.nom!== null? 'NOM ' + h.nom : (h.denom? '$'+h.denom : '')"></div></div></div><div class="flex gap-1"><button @click="openContactModal(h)" class="h-8 px-2.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-black">CONTACTAR</button><button @click="useAsSource(h)" class="h-8 px-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">USAR</button></div></div></div></template></div></section>
 
 <footer class="mt-6 rounded-[20px] border border-white/10 bg-[#0A0E0E] p-5 text-center"><div class="flex justify-center gap-4 text-[11px] font-bold tracking-widest text-zinc-400 uppercase"><button @click="openLegal('terminos')" class="hover:text-white underline">Términos</button><span class="text-zinc-600">•</span><button @click="openLegal('privacidad')" class="hover:text-white underline">Privacidad</button><span class="text-zinc-600">•</span><button @click="openLegal('reembolsos')" class="hover:text-white underline">Reembolsos</button><span class="text-zinc-600">•</span><button @click="openLegal('aviso')" class="hover:text-white underline">Aviso</button></div><div class="mt-3 text-[11px] text-zinc-500">© 2026 DollarDgt.com. v5.1 FULL LIDER</div></footer>
 <div class="h-6"></div>
 </main>
 
-<div x-show="stripeModal.open" class="fixed inset-0 z-[70] flex items-center justify-center p-3"><div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="stripeModal.open=false"></div><div class="relative w-full max-w-[400px] rounded-[24px] bg-[#111616] border border-amber-500/20 p-6 shadow-2xl"><div class="flex justify-between"><div><h3 class="font-black text-[18px] text-white leading-tight">Membresía DGT<br><span class="text-amber-300">$5 de por vida</span></h3></div><button @click="stripeModal.open=false" class="h-8 w-8 rounded-full bg-white/10">✕</button></div><div class="mt-4 space-y-2"><input x-model="myNickname" placeholder="Tu alias" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none"><input x-model="myEmail" placeholder="Tu Email" class="w-full h-[44px] rounded-xl bg-black border border-amber-500/30 px-3 text-[16px] text-white outline-none"><input x-model="myContact" placeholder="Tu WhatsApp" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none"></div><div class="mt-4 space-y-2 text-[11px] text-zinc-400"><label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" x-model="stripeModal.terms" class="mt-1 accent-amber-400"><span>He leído y acepto los <button type="button" @click="openLegal('terminos')" class="underline text-amber-300">Términos</button>.</span></label><label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" x-model="stripeModal.privacy" class="mt-1 accent-amber-400"><span>Acepto la <button type="button" @click="openLegal('privacidad')" class="underline text-amber-300">Privacidad</button>.</span></label><label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" x-model="stripeModal.refunds" class="mt-1 accent-amber-400"><span>Entiendo que no hay reembolsos.</span></label></div><button :disabled="!myEmail || !myNickname || !stripeModal.terms || !stripeModal.privacy || !stripeModal.refunds" @click="goToStripe()" class="mt-6 kbtn w-full h-[56px] rounded-[16px] font-black text-[13px] border-2" :class="(myEmail && myNickname && stripeModal.terms && stripeModal.privacy && stripeModal.refunds) ? 'bg-amber-400 text-black border-amber-300' : 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50'">💎 PAGAR $5 • ACCESO DE POR VIDA →</button></div></div>
+<div x-show="stripeModal.open" class="fixed inset-0 z-[70] flex items-center justify-center p-3"><div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="stripeModal.open=false"></div><div class="relative w-full max-w-[400px] rounded-[24px] bg-[#111616] border border-amber-500/20 p-6 shadow-2xl"><div class="flex justify-between"><div><h3 class="font-black text-[18px] text-white leading-tight">Membresía DGT<br><span class="text-amber-300">$5 de por vida</span></h3></div><button @click="stripeModal.open=false" class="h-8 w-8 rounded-full bg-white/10">✕</button></div><div class="mt-4 space-y-2"><input x-model="myNickname" placeholder="Tu alias" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none"><input x-model="myEmail" placeholder="Tu Email" class="w-full h-[44px] rounded-xl bg-black border border-amber-500/30 px-3 text-[16px] text-white outline-none"><input x-model="myContact" placeholder="Tu WhatsApp" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none"></div><div class="mt-4 space-y-2 text-[11px] text-zinc-400"><label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" x-model="stripeModal.terms" class="mt-1 accent-amber-400"><span>He leído y acepto los <button type="button" @click="openLegal('terminos')" class="underline text-amber-300">Términos</button>.</span></label><label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" x-model="stripeModal.privacy" class="mt-1 accent-amber-400"><span>Acepto la <button type="button" @click="openLegal('privacidad')" class="underline text-amber-300">Privacidad</button>.</span></label><label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" x-model="stripeModal.refunds" class="mt-1 accent-amber-400"><span>Entiendo que no hay reembolsos.</span></label></div><button :disabled="!myEmail ||!myNickname ||!stripeModal.terms ||!stripeModal.privacy ||!stripeModal.refunds" @click="goToStripe()" class="mt-6 kbtn w-full h-[56px] rounded-[16px] font-black text-[13px] border-2" :class="(myEmail && myNickname && stripeModal.terms && stripeModal.privacy && stripeModal.refunds)? 'bg-amber-400 text-black border-amber-300' : 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50'">💎 PAGAR $5 • ACCESO DE POR VIDA →</button></div></div>
 <div x-show="contactModal.open" class="fixed inset-0 z-[90] flex items-center justify-center p-3"><div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="contactModal.open=false"></div><div class="relative w-full max-w-[380px] rounded-[24px] bg-[#111616] border border-amber-500/40 p-6 shadow-2xl"><div class="flex justify-between items-start"><div><span class="text-[9px] uppercase tracking-widest text-amber-400 font-bold">Tarjeta Real</span><h3 class="font-black text-[20px] text-white mt-0.5" x-text="contactModal.owner"></h3></div><button @click="contactModal.open=false" class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-zinc-300">✕</button></div><div class="mt-4 rounded-2xl bg-black/50 border border-white/10 p-4 space-y-2"><div class="flex justify-between text-[11px]"><span class="text-zinc-400">Serie Real:</span><span class="font-mono font-bold text-amber-300" x-text="contactModal.serial"></span></div><div class="flex justify-between text-[11px]"><span class="text-zinc-400">País / NOM:</span><span class="font-bold text-white" x-text="contactModal.country + ' (NOM ' + contactModal.nom + ')'"></span></div></div><div class="mt-5 space-y-2"><a :href="contactModal.whatsappUrl" target="_blank" class="kbtn flex items-center justify-center gap-2 w-full h-[52px] rounded-[16px] bg-emerald-500 text-black font-black text-[14px]">💬 WHATSAPP</a><button @click="contactModal.open=false" class="w-full h-[40px] rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[12px]">Cerrar</button></div></div></div>
 <div x-show="legalModal.open" class="fixed inset-0 z-[80] flex items-end md:items-center justify-center p-3"><div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="legalModal.open=false"></div><div class="relative w-full max-w-[500px] max-h-[80vh] overflow-auto rounded-[24px] bg-[#0F1414] border border-white/15 p-6"><div class="flex justify-between"><h3 class="font-black text-white" x-text="legalModal.title"></h3><button @click="legalModal.open=false" class="h-8 w-8 rounded-full bg-white/10">✕</button></div><div class="mt-4 text-[12px] leading-[1.7] text-zinc-300 whitespace-pre-wrap" x-text="legalModal.content"></div></div></div>
 <div x-show="toast.visible" x-transition class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-full px-5 py-3 text-[13px] font-bold max-w-[90vw] text-center" :class="toast.classes" x-text="toast.message"></div>
@@ -171,7 +154,7 @@ const COUNTRIES = ['🇺🇸 USA $','🇲🇽 México $','🇪🇺 Euro €','�
 const VAULT_REAL_TABLE = 'vault';
 const VAULT_JUGADAS_TABLE = 'boveda_jugadas';
 const AudioFX = { ctx: null, init(){ if(!this.ctx){ const AudioContext = window.AudioContext || window.webkitAudioContext; if(AudioContext) this.ctx = new AudioContext(); } if(this.ctx && this.ctx.state === 'suspended'){ this.ctx.resume(); } }, playClick(freq=440,type='sine',duration=0.04,vol=0.08){ try{ this.init(); if(!this.ctx) return; const osc=this.ctx.createOscillator(); const gain=this.ctx.createGain(); osc.type=type; osc.frequency.setValueAtTime(freq,this.ctx.currentTime); gain.gain.setValueAtTime(vol,this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.0001,this.ctx.currentTime+duration); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime+duration);}catch(e){} }, num(){this.playClick(580,'sine',0.04,0.06);}, denom(){this.playClick(720,'triangle',0.06,0.08);}, action(){this.playClick(320,'square',0.07,0.05);}, success(){this.playClick(523.25,'sine',0.08,0.1); setTimeout(()=>this.playClick(659.25,'sine',0.08,0.1),80); setTimeout(()=>this.playClick(783.99,'sine',0.12,0.12),160);} };
-const Engine = { genTail(){return Array.from({length:4},()=>Math.floor(Math.random()*10))}, parseVaultSerial(serial){ try{ const m=serial.match(/([A-Z]+)\s*(\d{4})\s*(\d{4})\s*([A-Z])/); if(!m) return null; return {prefix:m[1], user:m[2], tail:m[3], suffix:m[4]} }catch(e){return null;} }, genLetters(d){const L='ABCDEFGHJKLMNPQRSTUVWXYZ'; const r=()=>L[Math.floor(Math.random()*L.length)]; if(d===1) return {a:r(),c:r()}; return {a:r(),b:r(),c:r()}}, genYear(){const y=[1963,1969,1974,1977,1981,1985,1988,1990,1993,1995,1999,2001,2003,2006,2009,2013,2017,2021]; return y[Math.floor(Math.random()*y.length)]}, genSeal(){return 'CH-'+Math.floor(1000+Math.random()*9000)+'-'+Math.random().toString(36).slice(2,4).toUpperCase()}, checkRarity(s){if(!s) return {type:'common',label:'Común',score:0,badgeClass:'border-white/10 bg-white/5 text-zinc-400'}; if(/^(\d)\1{7,}$/.test(s)) return {type:'solid',label:'SOLID',score:100,badgeClass:'border-amber-400 bg-amber-400/20 text-amber-300'}; if(/0123|1234|2345|4567|5678|6789|9876|1212|3434/.test(s)) return {type:'ladder',label:'LADDER',score:85,badgeClass:'border-sky-400 bg-sky-400/20 text-sky-300'}; if(s.slice(0,4)===s.slice(4,8).split('').reverse().join('')) return {type:'radar',label:'RADAR',score:80,badgeClass:'border-violet-400 bg-violet-400/20 text-violet-300'}; if(/(\d)\1{2,}/.test(s)) return {type:'semi-solid',label:'SEMI-SOLID',score:60,badgeClass:'border-emerald-400 bg-emerald-400/20 text-emerald-300'}; return {type:'common',label:'Común',score:Math.floor(Math.random()*15),badgeClass:'border-white/10 bg-white/5 text-zinc-400'};}, calcRealPoints(rarity, nom){ let base = 100 + (rarity.score * 25) + (Number(nom) * 3.5); if(rarity.type !== 'common') base *= 4.5; return Math.floor(base); }, calcPoints(r,denom){let b=100+r.score*18+denom*2+Math.floor(Math.random()*350); if(r.type!=='common') b*=3.2; return Math.floor(b)}, genGhostEntry(i){ const denoms=[1,5,20,50,100]; const denom=denoms[Math.floor(Math.random()*denoms.length)]; const letters=Engine.genLetters(denom); const userPart=Array.from({length:4},()=>Math.floor(Math.random()*10)).join(''); const tail=Array.from({length:4},()=>Math.floor(Math.random()*10)).join(''); let finalUser=userPart, finalTail=tail; if(i%7===0) finalUser='7777'; if(i%11===0) finalTail='7777'; const full=finalUser+finalTail; const rarity=Engine.checkRarity(full); const lettersStr=denom===1? `${letters.a}-${letters.c}` : `${letters.a}-${letters.b}-${letters.c}`; const prefix=denom===1? letters.a : `${letters.a}${letters.b}`; const country=COUNTRIES[Math.floor(Math.random()*COUNTRIES.length)]; const ghostName=GHOST_NAMES[Math.floor(Math.random()*GHOST_NAMES.length)] + Math.floor(100+Math.random()*900); return { id:'ghost_'+i+'_'+Math.random().toString(36).slice(2,8), serial:`${prefix} ${finalUser}${finalTail} ${letters.c}`, letters:lettersStr, digits:`${finalUser} ${finalTail}`, seal:Engine.genSeal(), points:Engine.calcPoints(rarity,denom), rarity, denom, yr:Engine.genYear(), country, owner:ghostName, contact:'+15550000000', anon_id:'ghost_'+i, created_at: new Date(Date.now() - Math.floor(Math.random()*30)*24*3600*1000).toISOString() }; } };
+const Engine = { genTail(){return Array.from({length:4},()=>Math.floor(Math.random()*10))}, parseVaultSerial(serial){ try{ const m=serial.match(/([A-Z]+)\s*(\d{4})\s*(\d{4})\s*([A-Z])/); if(!m) return null; return {prefix:m[1], user:m[2], tail:m[3], suffix:m[4]} }catch(e){return null;} }, genLetters(d){const L='ABCDEFGHJKLMNPQRSTUVWXYZ'; const r=()=>L[Math.floor(Math.random()*L.length)]; if(d===1) return {a:r(),c:r()}; return {a:r(),b:r(),c:r()}}, genYear(){const y=[1963,1969,1974,1977,1981,1985,1988,1990,1993,1995,1999,2001,2003,2006,2009,2013,2017,2021]; return y[Math.floor(Math.random()*y.length)]}, genSeal(){return 'CH-'+Math.floor(1000+Math.random()*9000)+'-'+Math.random().toString(36).slice(2,4).toUpperCase()}, checkRarity(s){if(!s) return {type:'common',label:'Común',score:0,badgeClass:'border-white/10 bg-white/5 text-zinc-400'}; if(/^(\d)\1{7,}$/.test(s)) return {type:'solid',label:'SOLID',score:100,badgeClass:'border-amber-400 bg-amber-400/20 text-amber-300'}; if(/0123|1234|2345|4567|5678|6789|9876|1212|3434/.test(s)) return {type:'ladder',label:'LADDER',score:85,badgeClass:'border-sky-400 bg-sky-400/20 text-sky-300'}; if(s.slice(0,4)===s.slice(4,8).split('').reverse().join('')) return {type:'radar',label:'RADAR',score:80,badgeClass:'border-violet-400 bg-violet-400/20 text-violet-300'}; if(/(\d)\1{2,}/.test(s)) return {type:'semi-solid',label:'SEMI-SOLID',score:60,badgeClass:'border-emerald-400 bg-emerald-400/20 text-emerald-300'}; return {type:'common',label:'Común',score:Math.floor(Math.random()*15),badgeClass:'border-white/10 bg-white/5 text-zinc-400'};}, calcRealPoints(rarity, nom){ let base = 100 + (rarity.score * 25) + (Number(nom) * 3.5); if(rarity.type!== 'common') base *= 4.5; return Math.floor(base); }, calcPoints(r,denom){let b=100+r.score*18+denom*2+Math.floor(Math.random()*350); if(r.type!=='common') b*=3.2; return Math.floor(b)}, genGhostEntry(i){ const denoms=[1,5,20,50,100]; const denom=denoms[Math.floor(Math.random()*denoms.length)]; const letters=Engine.genLetters(denom); const userPart=Array.from({length:4},()=>Math.floor(Math.random()*10)).join(''); const tail=Array.from({length:4},()=>Math.floor(Math.random()*10)).join(''); let finalUser=userPart, finalTail=tail; if(i%7===0) finalUser='7777'; if(i%11===0) finalTail='7777'; const full=finalUser+finalTail; const rarity=Engine.checkRarity(full); const lettersStr=denom===1? `${letters.a}-${letters.c}` : `${letters.a}-${letters.b}-${letters.c}`; const prefix=denom===1? letters.a : `${letters.a}${letters.b}`; const country=COUNTRIES[Math.floor(Math.random()*COUNTRIES.length)]; const ghostName=GHOST_NAMES[Math.floor(Math.random()*GHOST_NAMES.length)] + Math.floor(100+Math.random()*900); return { id:'ghost_'+i+'_'+Math.random().toString(36).slice(2,8), serial:`${prefix} ${finalUser}${finalTail} ${letters.c}`, letters:lettersStr, digits:`${finalUser} ${finalTail}`, seal:Engine.genSeal(), points:Engine.calcPoints(rarity,denom), rarity, denom, yr:Engine.genYear(), country, owner:ghostName, contact:'+15550000000', anon_id:'ghost_'+i, created_at: new Date(Date.now() - Math.floor(Math.random()*30)*24*3600*1000).toISOString() }; } };
 
 function dollarMachineApp(){
  return {
@@ -201,7 +184,8 @@ function dollarMachineApp(){
   },
 
   async loadVaultFromSupabase(){
-    const {data: vaultData} = await supabaseClient.from(VAULT_REAL_TABLE).select('*').order('created_at',{ascending:false}).limit(200);
+    const {data: vaultData, error: vaultError} = await supabaseClient.from(VAULT_REAL_TABLE).select('*').order('created_at',{ascending:false}).limit(200);
+    if(vaultError){ this.supabaseStatus = 'Error vault: '+vaultError.message; console.error(vaultError); }
     this.history=vaultData||[]; this.vaultPool=[...this.history];
     const {data: jugadasData, error} = await supabaseClient.from(VAULT_JUGADAS_TABLE).select('*').order('created_at',{ascending:false}).limit(200);
     if(error){ this.jugadasPool=[...this.vaultPool]; this.supabaseStatus=`⚠️ Crea boveda_jugadas | Real: ${this.vaultPool.length}`; }
@@ -217,7 +201,7 @@ function dollarMachineApp(){
   },
 
   pickNewVaultSource(){
-    const pool = this.jugadasPool.length>0 ? this.jugadasPool : this.vaultPool;
+    const pool = this.jugadasPool.length>0? this.jugadasPool : this.vaultPool;
     if(pool.length===0){ this.currentVaultSource=Engine.genGhostEntry(0); this.tailDigits=this.currentVaultSource.digits.slice(-4).split('').map(Number); this.headDigits=this.currentVaultSource.digits.slice(0,4).split('').map(Number); return; }
     let idx; let tries=0; let lastSerial=this.currentVaultSource?.serial;
     do{ idx=Math.floor(Math.random()*pool.length); tries++; } while(pool[idx].serial===lastSerial && tries<10 && pool.length>1);
@@ -241,7 +225,7 @@ function dollarMachineApp(){
   },
 
   initLeaderFromVault(isFirst=false){
-    const pool = this.jugadasPool.length>0 ? this.jugadasPool : this.vaultPool;
+    const pool = this.jugadasPool.length>0? this.jugadasPool : this.vaultPool;
     if(pool.length===0) return;
     const sorted=[...pool].sort((a,b)=>b.points-a.points);
     this.leaderPool=sorted.slice(0,5);
@@ -272,13 +256,13 @@ function dollarMachineApp(){
   },
 
   becomeLeaderInstant(entry, isReal=false){
-    if(!isReal){ this.leaderPool=[entry, ...this.leaderPool.slice(0,4)]; this.jugadasPool.unshift(entry); }
+    if(!isReal){ this.leaderPool=[entry,...this.leaderPool.slice(0,4)]; this.jugadasPool.unshift(entry); }
     this.leaderIndex=0; this.setLeader(entry); this.leaderSecondsLeft=120; this.leaderRank=1;
-    this.leaderRankText= isReal ? `¡REAL LÍDER FULL!` : `¡TU JUGADA FULL 8 ES LÍDER!`;
+    this.leaderRankText= isReal? `¡REAL LÍDER FULL!` : `¡TU JUGADA FULL 8 ES LÍDER!`;
   },
 
   useAsSource(b){ this.currentVaultSource=b; const p=Engine.parseVaultSerial(b.serial); if(p){ this.tailDigits=p.tail.split('').map(Number); this.headDigits=p.user.split('').map(Number); } else { const d=(b.digits||'0000 0000').replace(/\s/g,''); this.headDigits=(d.slice(0,4)||'0000').split('').map(Number); this.tailDigits=(d.slice(4,8)||'0000').split('').map(Number); } this.yr=b.yr; this.securitySeal=b.seal; this.triggerRoll(900); this.updateRarityAndValue(); },
-  openContactModal(b){ this.contactModal.owner=b.owner||'Anónimo'; this.contactModal.country=b.country||'USA'; this.contactModal.serial=b.serial||''; this.contactModal.denom=b.denom||20; this.contactModal.yr=b.yr||2017; this.contactModal.nom=b.nom !== undefined && b.nom !== null ? b.nom : (b.denom || 100); let raw=b.contact||''; let phone=raw.split('|')[0].trim().replace(/[^0-9+]/g,''); if(!phone||phone.length<6) phone='+15550000000'; const msg=encodeURIComponent(`Hola ${this.contactModal.owner}, me interesa tu billete REAL ${this.contactModal.serial} Año ${this.contactModal.yr} NOM ${this.contactModal.nom} ${this.contactModal.country}`); this.contactModal.whatsappUrl=`https://wa.me/${phone}?text=${msg}`; this.contactModal.open=true; },
+  openContactModal(b){ this.contactModal.owner=b.owner||'Anónimo'; this.contactModal.country=b.country||'USA'; this.contactModal.serial=b.serial||''; this.contactModal.denom=b.denom||20; this.contactModal.yr=b.yr||2017; this.contactModal.nom=b.nom!== undefined && b.nom!== null? b.nom : (b.denom || 100); let raw=b.contact||''; let phone=raw.split('|')[0].trim().replace(/[^0-9+]/g,''); if(!phone||phone.length<6) phone='+15550000000'; const msg=encodeURIComponent(`Hola ${this.contactModal.owner}, me interesa tu billete REAL ${this.contactModal.serial} Año ${this.contactModal.yr} NOM ${this.contactModal.nom} ${this.contactModal.country}`); this.contactModal.whatsappUrl=`https://wa.me/${phone}?text=${msg}`; this.contactModal.open=true; },
   triggerRoll(durationMs=900){ if(this.rollInterval) clearInterval(this.rollInterval); if(this.rollTimeout) clearTimeout(this.rollTimeout); this.isRollingLetters=true; this.isRollingYear=true; let ticks=0; this.rollInterval=setInterval(()=>{ ticks++; this.letters=Engine.genLetters(this.denom); if(ticks%2===0){ this.yr=Engine.genYear(); this.tailDigits=Engine.genTail(); this.headDigits=Engine.genTail(); } },75); this.rollTimeout=setTimeout(()=>{ clearInterval(this.rollInterval); this.pickNewVaultSource(); this.isRollingLetters=false; this.isRollingYear=false; },durationMs); },
   triggerSearchEffect(){ if(this.searchInterval) clearInterval(this.searchInterval); if(this.searchTimeout) clearTimeout(this.searchTimeout); this.isSearching=true; let sTicks=0; this.searchInterval=setInterval(()=>{ sTicks++; const pool=this.jugadasPool.length>0?this.jugadasPool:this.vaultPool; if(sTicks%2===0 && pool.length>0){ const rb=pool[Math.floor(Math.random()*pool.length)]; const p=Engine.parseVaultSerial(rb.serial); if(p){ this.tailDigits=p.tail.split('').map(Number); this.headDigits=p.user.split('').map(Number); } } else { this.tailDigits=Engine.genTail(); this.headDigits=Engine.genTail(); } },90); this.searchTimeout=setTimeout(()=>{ clearInterval(this.searchInterval); this.isSearching=false; this.pickNewVaultSource(); },1200); },
   updateRarityAndValue(){ const full=this.userDigits.join('')+this.tailDigits.join(''); this.rarity=Engine.checkRarity(full.length===8?full:null); this.value=parseFloat((this.denom*(1.5+Math.random()*2)).toFixed(2)); },
@@ -293,43 +277,44 @@ function dollarMachineApp(){
     if(!this.isLocked) return; if(!this.globalActive){ this.openStripeModal('register'); return; }
     if(!this.myNickname ||!this.myEmail){ this.showToast('Pon alias y email','info'); return; }
     AudioFX.success(); localStorage.setItem('dgt_nick',this.myNickname); localStorage.setItem('dgt_contact',this.myContact); localStorage.setItem('dgt_email',this.myEmail);
-    const entry={ id: Math.random().toString(36).slice(2)+Date.now().toString(36), serial: `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`, letters: this.lettersDisplay, digits: `${this.finalUserPart} ${this.finalTailPart}`, seal: this.securitySeal, points: Engine.calcPoints(this.rarity,this.denom), rarity: this.rarity, denom: this.denom, yr: this.yr, country: this.globalSearch.country||'🇺🇸 USA $', owner: this.myNickname||'Anon', contact: `${this.myContact} | ${this.myEmail}`, anon_id: localStorage.getItem('dgt_anon'), created_at: new Date().toISOString() };
-    const {error}=await supabaseClient.from(VAULT_JUGADAS_TABLE).insert(entry);
-    if(!error){ this.becomeLeaderInstant(entry,false); this.showToast(`👑 ¡JUGADA FULL LÍDER! ${entry.serial} • ${entry.letters} • 8 dig`,'success'); } else { this.showToast('Error: '+error.message,'info'); }
+    const entry={ serial: `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`, letters: this.lettersDisplay, digits: `${this.finalUserPart} ${this.finalTailPart}`, seal: this.securitySeal, points: Engine.calcPoints(this.rarity,this.denom), rarity: this.rarity, denom: this.denom, yr: this.yr, country: this.globalSearch.country||'🇺🇸 USA $', owner: this.myNickname||'Anon', contact: `${this.myContact} | ${this.myEmail}`, anon_id: localStorage.getItem('dgt_anon') };
+    const {data, error}=await supabaseClient.from(VAULT_JUGADAS_TABLE).insert(entry).select();
+    if(!error){ await this.loadVaultFromSupabase(); this.becomeLeaderInstant(data[0]||entry,false); this.showToast(`👑 ¡JUGADA FULL LÍDER! ${entry.serial}`,'success'); } else { this.showToast('Error: '+error.message,'info'); }
   },
 
   async handleGlobalMembershipClick(){
-    const chosenNom = Number(this.globalSearch.nom) || 100;
+    const chosenNom = parseInt(this.globalSearch.nom) || 100;
     const chosenCountry = this.globalSearch.country || '🇺🇸 USA $';
     const chosenYr = Number(this.globalSearch.yr) || 2026;
-    const raw = this.globalSearch.serial.toUpperCase().trim();
+    const raw = (this.globalSearch.serial||'').toUpperCase().trim();
 
     if(!raw || raw.length < 6){
-      this.showToast('Pon tu serie real, ej: R34343443M','info');
+      document.getElementById('boveda-viva')?.scrollIntoView({behavior:'smooth'});
       return;
     }
 
-    // ANTES DE INSERTAR - Verifica si ya existe en la Bóveda Real (vault)
-    const { data: existe } = await supabaseClient.from(VAULT_REAL_TABLE)
-      .select('id, owner')
-      .eq('country', chosenCountry)
-      .eq('nom', chosenNom)
-      .eq('yr', chosenYr)
-      .ilike('serial', raw)
-      .limit(1);
-
-    if(existe && existe.length > 0){
-      this.showToast(`⛔ Esa serie ya está registrada: ${raw} en ${chosenCountry} NOM ${chosenNom} por ${existe[0].owner}`, 'info');
-      return; // Detiene el proceso para que no se repita ni se duplique dueño
-    }
-
+    // Guarda borrador local SIEMPRE
     localStorage.setItem('dgt_global_serial',raw);
     localStorage.setItem('dgt_global_yr',chosenYr);
     localStorage.setItem('dgt_global_nom',chosenNom);
     localStorage.setItem('dgt_global_country',chosenCountry);
+    localStorage.setItem('dgt_nick',this.myNickname);
+    localStorage.setItem('dgt_contact',this.myContact);
+    localStorage.setItem('dgt_email',this.myEmail);
 
-    if(!this.globalActive){
-      this.openStripeModal('global');
+    if(!this.globalActive){ this.openStripeModal('global'); return; }
+
+    // Verifica duplicado
+    const { data: existe } = await supabaseClient.from(VAULT_REAL_TABLE)
+     .select('id, owner')
+     .eq('country', chosenCountry)
+     .eq('nom', chosenNom)
+     .eq('yr', chosenYr)
+     .ilike('serial', raw).limit(1);
+
+    if(existe && existe.length > 0){
+      this.showToast(`⛔ Ya existe por ${existe[0].owner}`,'info');
+      document.getElementById('boveda-viva')?.scrollIntoView({behavior:'smooth'});
       return;
     }
 
@@ -338,35 +323,27 @@ function dollarMachineApp(){
     const rarityObj = Engine.checkRarity(digitsOnly);
     const calculatedPoints = Engine.calcRealPoints(rarityObj, chosenNom);
 
-    const entry = { 
-      serial: raw, 
-      letters: 'REAL', 
-      digits: digitsOnly, 
-      seal: this.securitySeal, 
-      points: calculatedPoints, 
-      rarity: rarityObj, 
-      denom: chosenNom, 
-      yr: chosenYr, 
-      nom: chosenNom, 
-      country: chosenCountry, 
-      owner: this.myNickname||'MundoLive', 
-      contact: `${this.myContact} | ${this.myEmail}`, 
+    const entry = {
+      serial: raw, letters: 'REAL', digits: digitsOnly, seal: this.securitySeal,
+      points: calculatedPoints, rarity: rarityObj, denom: chosenNom,
+      yr: chosenYr, nom: chosenNom, country: chosenCountry,
+      owner: this.myNickname||'MundoLive',
+      contact: `${this.myContact} | ${this.myEmail}`,
       anon_id: localStorage.getItem('dgt_anon')
     };
-
-    this.history = [entry, ...this.history];
-    this.vaultPool = [entry, ...this.vaultPool];
-    this.becomeLeaderInstant(entry, true);
-    this.showToast(`👑 ¡REAL ${rarityObj.label} NOM ${chosenNom} publicado!`,'success');
-    document.getElementById('boveda-viva')?.scrollIntoView({behavior:'smooth'});
 
     const { data, error } = await supabaseClient.from(VAULT_REAL_TABLE).insert(entry).select();
     if(error){
       console.error(error);
-      this.showToast('Se ve local pero Supabase dio error: '+error.message,'info');
-    } else {
-      await this.loadVaultFromSupabase();
+      this.showToast('Supabase error: '+error.message,'info');
+      return;
     }
+
+    this.showToast(`👑 ¡REAL ${rarityObj.label} NOM ${chosenNom} publicado!`,'success');
+    await this.loadVaultFromSupabase();
+    if(data && data[0]) this.becomeLeaderInstant(data[0], true);
+    else this.becomeLeaderInstant(entry, true);
+    document.getElementById('boveda-viva')?.scrollIntoView({behavior:'smooth'});
   },
 
   get filteredHistory(){ let q=this.searchQuery.toLowerCase().trim(); if(!q) return this.history; return this.history.filter(h=> (h.serial && h.serial.toLowerCase().includes(q)) || (h.owner && h.owner.toLowerCase().includes(q)) || (h.country && h.country.toLowerCase().includes(q)) ); },
