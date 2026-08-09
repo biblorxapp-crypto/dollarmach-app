@@ -137,7 +137,49 @@
 
 <div x-show="stripeModal.open" class="fixed inset-0 z-[70] flex items-center justify-center p-3"><div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="stripeModal.open=false"></div><div class="relative w-full max-w-[400px] rounded-[24px] bg-[#111616] border border-amber-500/20 p-6 shadow-2xl"><div class="flex justify-between"><div><h3 class="font-black text-[18px] text-white leading-tight">Membresía DGT<br><span class="text-amber-300">$5 de por vida</span></h3></div><button @click="stripeModal.open=false" class="h-8 w-8 rounded-full bg-white/10">✕</button></div><div class="mt-4 space-y-2"><input x-model="myNickname" placeholder="Tu alias" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none"><input x-model="myEmail" placeholder="Tu Email" class="w-full h-[44px] rounded-xl bg-black border border-amber-500/30 px-3 text-[16px] text-white outline-none"><input x-model="myContact" placeholder="Tu WhatsApp" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none"></div><button :disabled="!myEmail ||!myNickname" @click="goToStripe()" class="mt-6 kbtn w-full h-[56px] rounded-[16px] font-black text-[13px] border-2" :class="myEmail && myNickname? 'bg-amber-400 text-black border-amber-300' : 'bg-zinc-800 text-zinc-500'">💎 PAGAR $5 • ACCESO DE POR VIDA →</button></div></div>
 
-<div x-show="contactModal.open" class="fixed inset-0 z-[90] flex items-center justify-center p-3"><div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="contactModal.open=false"></div><div class="relative w-full max-w-[380px] rounded-[24px] bg-[#111616] border border-amber-500/30 p-6"><div class="flex justify-between"><h3 class="font-black text-[20px] text-white" x-text="contactModal.owner"></h3><button @click="contactModal.open=false" class="h-8 w-8 rounded-full bg-white/10">✕</button></div><div class="mt-4 rounded-2xl bg-black/40 border border-white/10 p-4"><div class="flex justify-between text-[11px]"><span class="text-zinc-500">Serie:</span><span class="font-mono font-bold text-amber-200" x-text="contactModal.serial"></span></div><div class="flex justify-between text-[11px]"><span class="text-zinc-500">País:</span><span class="font-bold text-white" x-text="contactModal.country"></span></div></div><button @click="contactModal.open=false" class="mt-4 w-full h-[40px] rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold">Cerrar</button></div></div>
+<!-- TARJETA DE CONTACTO NATIVA (MODAL PRIVADO PROTEGIDO) -->
+<div x-show="contactModal.open" class="fixed inset-0 z-[90] flex items-center justify-center p-3">
+  <div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="contactModal.open=false"></div>
+  <div class="relative w-full max-w-[380px] rounded-[24px] bg-[#111616] border border-amber-500/40 p-6 shadow-2xl animate-in fade-in zoom-in-95">
+    
+    <div class="flex justify-between items-start">
+      <div>
+        <span class="text-[9px] uppercase tracking-widest text-amber-400 font-bold">Tarjeta de Presentación</span>
+        <h3 class="font-black text-[20px] text-white mt-0.5" x-text="contactModal.owner"></h3>
+      </div>
+      <button @click="contactModal.open=false" class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-zinc-300 hover:bg-white/20">✕</button>
+    </div>
+
+    <div class="mt-4 rounded-2xl bg-black/50 border border-white/10 p-4 space-y-2">
+      <div class="flex justify-between text-[11px]">
+        <span class="text-zinc-400">Coleccionable:</span>
+        <span class="font-mono font-bold text-amber-300" x-text="contactModal.serial"></span>
+      </div>
+      <div class="flex justify-between text-[11px]">
+        <span class="text-zinc-400">País / Divisa:</span>
+        <span class="font-bold text-white" x-text="contactModal.country"></span>
+      </div>
+      <div class="flex justify-between text-[11px]">
+        <span class="text-zinc-400">Denominación:</span>
+        <span class="font-bold text-emerald-300" x-text="contactModal.denom ? '$' + contactModal.denom : 'N/A'"></span>
+      </div>
+    </div>
+
+    <p class="text-[11px] text-zinc-400 mt-4 text-center leading-relaxed">
+      Haz clic para enviar un mensaje directo y seguro vía WhatsApp con los detalles de este billete.
+    </p>
+
+    <div class="mt-5 space-y-2">
+      <a :href="contactModal.whatsappUrl" target="_blank" class="kbtn flex items-center justify-center gap-2 w-full h-[52px] rounded-[16px] bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[14px] shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+        💬 ENVIAR MENSAJE A WHATSAPP
+      </a>
+      <button @click="contactModal.open=false" class="w-full h-[40px] rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[12px] hover:bg-white/10">
+        Cerrar
+      </button>
+    </div>
+
+  </div>
+</div>
 
 <div x-show="legalModal.open" class="fixed inset-0 z-[80] flex items-end md:items-center justify-center p-3"><div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="legalModal.open=false"></div><div class="relative w-full max-w-[500px] max-h-[80vh] overflow-auto rounded-[24px] bg-[#0F1414] border border-white/15 p-6"><div class="flex justify-between"><h3 class="font-black text-white" x-text="legalModal.title"></h3><button @click="legalModal.open=false" class="h-8 w-8 rounded-full bg-white/10">✕</button></div><div class="mt-4 text-[12px] leading-[1.7] text-zinc-300 whitespace-pre-wrap" x-text="legalModal.content"></div></div></div>
 <div x-show="toast.visible" x-transition class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-full px-5 py-3 text-[13px] font-bold max-w-[90vw] text-center" :class="toast.classes" x-text="toast.message"></div>
@@ -196,12 +238,12 @@ const Engine = {
  genSeal(){return 'CH-'+Math.floor(1000+Math.random()*9000)+'-'+Math.random().toString(36).slice(2,4).toUpperCase()},
  checkRarity(s){if(!s) return {type:'common',label:'Común',score:0,badgeClass:'border-white/10 bg-white/5 text-zinc-400'}; if(/^(\d)\1{7}$/.test(s)) return {type:'solid',label:'SOLID',score:100,badgeClass:'border-amber-400 bg-amber-400/20 text-amber-300'}; if(/0123|1234|2345|4567|5678|6789|9876|1212|3434/.test(s)) return {type:'ladder',label:'LADDER',score:85,badgeClass:'border-sky-400 bg-sky-400/20 text-sky-300'}; if(s.slice(0,4)===s.slice(4).split('').reverse().join('')) return {type:'radar',label:'RADAR',score:80,badgeClass:'border-violet-400 bg-violet-400/20 text-violet-300'}; if(/(\d)\1{2,}/.test(s)) return {type:'semi-solid',label:'SEMI-SOLID',score:60,badgeClass:'border-emerald-400 bg-emerald-400/20 text-emerald-300'}; return {type:'common',label:'Común',score:Math.floor(Math.random()*15),badgeClass:'border-white/10 bg-white/5 text-zinc-400'};},
  calcPoints(r,denom){let b=100+r.score*18+denom*2+Math.floor(Math.random()*350); if(r.type!=='common') b*=3.2; return Math.floor(b)},
- genGhostEntry(i){ const denoms=[1,5,20,50,100]; const denom=denoms[Math.floor(Math.random()*denoms.length)]; const letters=Engine.genLetters(denom); const userPart=Array.from({length:4},()=>Math.floor(Math.random()*10)).join(''); const tail=Array.from({length:4},()=>Math.floor(Math.random()*10)).join(''); let finalUser=userPart, finalTail=tail; if(i%7===0) finalUser='7777'; if(i%11===0) finalTail='7777'; const full=finalUser+finalTail; const rarity=Engine.checkRarity(full); const lettersStr=denom===1? `${letters.a}-${letters.c}` : `${letters.a}-${letters.b}-${letters.c}`; const prefix=denom===1? letters.a : `${letters.a}${letters.b}`; const country=COUNTRIES[Math.floor(Math.random()*COUNTRIES.length)]; const ghostName=GHOST_NAMES[Math.floor(Math.random()*GHOST_NAMES.length)] + Math.floor(100+Math.random()*900); return { id:'ghost_'+i+'_'+Math.random().toString(36).slice(2,8), serial:`${prefix} ${finalUser}${finalTail} ${letters.c}`, letters:lettersStr, digits:`${finalUser} ${finalTail}`, seal:Engine.genSeal(), points:Engine.calcPoints(rarity,denom), rarity, denom, yr:Engine.genYear(), country, owner:ghostName, contact:'Anónimo', anon_id:'ghost_'+i, created_at: new Date(Date.now() - Math.floor(Math.random()*30)*24*3600*1000).toISOString() }; }
+ genGhostEntry(i){ const denoms=[1,5,20,50,100]; const denom=denoms[Math.floor(Math.random()*denoms.length)]; const letters=Engine.genLetters(denom); const userPart=Array.from({length:4},()=>Math.floor(Math.random()*10)).join(''); const tail=Array.from({length:4},()=>Math.floor(Math.random()*10)).join(''); let finalUser=userPart, finalTail=tail; if(i%7===0) finalUser='7777'; if(i%11===0) finalTail='7777'; const full=finalUser+finalTail; const rarity=Engine.checkRarity(full); const lettersStr=denom===1? `${letters.a}-${letters.c}` : `${letters.a}-${letters.b}-${letters.c}`; const prefix=denom===1? letters.a : `${letters.a}${letters.b}`; const country=COUNTRIES[Math.floor(Math.random()*COUNTRIES.length)]; const ghostName=GHOST_NAMES[Math.floor(Math.random()*GHOST_NAMES.length)] + Math.floor(100+Math.random()*900); return { id:'ghost_'+i+'_'+Math.random().toString(36).slice(2,8), serial:`${prefix} ${finalUser}${finalTail} ${letters.c}`, letters:lettersStr, digits:`${finalUser} ${finalTail}`, seal:Engine.genSeal(), points:Engine.calcPoints(rarity,denom), rarity, denom, yr:Engine.genYear(), country, owner:ghostName, contact:'+15550000000', anon_id:'ghost_'+i, created_at: new Date(Date.now() - Math.floor(Math.random()*30)*24*3600*1000).toISOString() }; }
 };
 
 function dollarMachineApp(){
  return {
-  userDigits:[], tailDigits:Engine.genTail(), letters:Engine.genLetters(20), yr:Engine.genYear(), securitySeal:Engine.genSeal(), denom:20, isLocked:false, rarity:{type:'common',label:'Común',score:0}, value:20, isSearching:false, searchInterval:null, searchTimeout:null, isRollingLetters:false, isRollingYear:false, rollInterval:null, rollTimeout:null, matchAttemptsLeft:10, maxAttempts:10, toast:{visible:false}, history:[], searchQuery:'', supabaseStatus:'Conectando...', globalSearch:{serial:localStorage.getItem('dgt_global_serial')||'R34343443M', country:'🇦🇷 Argentina $'}, myNickname:localStorage.getItem('dgt_nick')||'', myContact:localStorage.getItem('dgt_contact')||'', myEmail:localStorage.getItem('dgt_email')||'', globalActive:localStorage.getItem('dgt_global_active')==='true', currentVaultSource: Engine.genGhostEntry(0), nextVaultPreview:'Cargando...', vaultPool:[], stripeModal:{open:false, terms:false, privacy:false, refunds:false, source:''}, contactModal:{open:false, owner:'', contact:'', country:'', serial:'', denom:20}, legalModal:{open:false, title:'', content:''}, denomColorsClass:{1:'bg-emerald-500',5:'bg-sky-500',10:'bg-violet-500',20:'bg-orange-500',50:'bg-pink-500',100:'bg-amber-500'}, numpadGrid:[[{type:'num',val:7},{type:'num',val:8},{type:'num',val:9},{type:'denom',val:1}],[{type:'num',val:4},{type:'num',val:5},{type:'num',val:6},{type:'denom',val:5}],[{type:'num',val:1},{type:'num',val:2},{type:'num',val:3},{type:'denom',val:10}],[{type:'denom',val:20},{type:'num',val:0},{type:'denom',val:50},{type:'denom',val:100}]],
+  userDigits:[], tailDigits:Engine.genTail(), letters:Engine.genLetters(20), yr:Engine.genYear(), securitySeal:Engine.genSeal(), denom:20, isLocked:false, rarity:{type:'common',label:'Común',score:0}, value:20, isSearching:false, searchInterval:null, searchTimeout:null, isRollingLetters:false, isRollingYear:false, rollInterval:null, rollTimeout:null, matchAttemptsLeft:10, maxAttempts:10, toast:{visible:false}, history:[], searchQuery:'', supabaseStatus:'Conectando...', globalSearch:{serial:localStorage.getItem('dgt_global_serial')||'R34343443M', country:'🇦🇷 Argentina $'}, myNickname:localStorage.getItem('dgt_nick')||'', myContact:localStorage.getItem('dgt_contact')||'', myEmail:localStorage.getItem('dgt_email')||'', globalActive:localStorage.getItem('dgt_global_active')==='true', currentVaultSource: Engine.genGhostEntry(0), nextVaultPreview:'Cargando...', vaultPool:[], stripeModal:{open:false, terms:false, privacy:false, refunds:false, source:''}, contactModal:{open:false, owner:'', contact:'', country:'', serial:'', denom:20, whatsappUrl:''}, legalModal:{open:false, title:'', content:''}, denomColorsClass:{1:'bg-emerald-500',5:'bg-sky-500',10:'bg-violet-500',20:'bg-orange-500',50:'bg-pink-500',100:'bg-amber-500'}, numpadGrid:[[{type:'num',val:7},{type:'num',val:8},{type:'num',val:9},{type:'denom',val:1}],[{type:'num',val:4},{type:'num',val:5},{type:'num',val:6},{type:'denom',val:5}],[{type:'num',val:1},{type:'num',val:2},{type:'num',val:3},{type:'denom',val:10}],[{type:'denom',val:20},{type:'num',val:0},{type:'denom',val:50},{type:'denom',val:100}]],
   leader:{lettersDisplay:'A-B-C', digitsDisplay:'0000 0000', seal:'CH-0000-XX', points:1250, rarity:{label:'Común',badgeClass:'border-white/10 bg-white/5 text-zinc-400'}, owner:'Bóveda', country:'USA', serial:''}, leaderSecondsLeft:120, leaderTimer:null, leaderIndex:0, leaderPool:[], leaderJustChanged:false, leaderRank:1, leaderRankText:'Top 1',
 
   async initApp(){
@@ -317,7 +359,27 @@ function dollarMachineApp(){
   },
 
   useAsSource(b){ this.currentVaultSource=b; const p=Engine.parseVaultSerial(b.serial); if(p) this.tailDigits=p.tail.split('').map(Number); else this.tailDigits=Engine.genTail(); this.yr=b.yr; this.securitySeal=b.seal; this.triggerRoll(900); this.updateRarityAndValue(); },
-  openContactModal(b){ this.contactModal.owner=b.owner||'Anónimo'; this.contactModal.country=b.country||'USA'; this.contactModal.serial=b.serial||''; this.contactModal.denom=b.denom||20; this.contactModal.open=true; },
+  
+  openContactModal(b){ 
+    this.contactModal.owner = b.owner || 'Anónimo'; 
+    this.contactModal.country = b.country || 'USA'; 
+    this.contactModal.serial = b.serial || ''; 
+    this.contactModal.denom = b.denom || 20; 
+    
+    // Obtener teléfono seguro o usar un número por defecto de respaldo
+    let rawContact = b.contact || '';
+    let phoneNum = rawContact.split('|')[0].trim();
+    if(!phoneNum || phoneNum.toLowerCase() === 'anónimo' || phoneNum.length < 6) {
+      phoneNum = '+15550000000';
+    }
+    phoneNum = phoneNum.replace(/[^0-9+]/g, '');
+
+    // Construir mensaje preconfigurado optimizado
+    const msg = encodeURIComponent(`Hola ${this.contactModal.owner}, me interesa tu billete registrado en DollarDgt:\nSerie: ${this.contactModal.serial}\nPaís: ${this.contactModal.country}\n¿Está disponible?`);
+    this.contactModal.whatsappUrl = `https://wa.me/${phoneNum}?text=${msg}`;
+    
+    this.contactModal.open = true; 
+  },
 
   triggerRoll(durationMs = 900){
     if(this.rollInterval) clearInterval(this.rollInterval);
@@ -509,6 +571,5 @@ function dollarMachineApp(){
   get finalTailPart(){ return this.tailDigits.join(''); }
  }
 }
-</script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</script></body>
 </html>
