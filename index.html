@@ -124,7 +124,7 @@
 </div>
 <div class="rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Email alertas</div><input x-model="myEmail" placeholder="tu@email.com" class="mt-1 w-full bg-transparent text-[16px] font-bold text-white outline-none placeholder:text-zinc-600"></div></div>
 <button @click="handleGlobalMembershipClick()" class="mt-4 kbtn w-full min-h-[62px] rounded-[16px] font-black text-[11px] tracking-[0.1em] border-2 px-2 py-2 leading-tight" :class="globalActive? 'bg-emerald-500 text-black border-emerald-300 shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black border-amber-300'"><span x-text="globalActive? (globalSearch.serial? 'PUBLICAR MI BILLETE ' + globalSearch.serial.toUpperCase() + ' EN BÓVEDA - ' + globalSearch.country + ' - Dgt' : '✅ MEMBRESÍA ACTIVA -...') : '💎 OBTENER MEMBRESÍA • $5 DE POR VIDA'"></span></button>
-<button x-show="!globalActive" @click="restoreMembership()" class="mt-2 w-full h-[44px] rounded-xl bg-white/[0.03] border border-emerald-500/30 text-emerald-300 font-bold text-[11px]">🔑 Ya pagué $5 - Activar con mi Email</button>
+<button x-show="!globalActive" @click="restoreMembership()" class="mt-2 w-full h-[44px] rounded-xl bg-white/03 border border-emerald-500/30 text-emerald-300 font-bold text-[11px]">🔑 Ya pagué $5 - Activar con mi Email</button>
 <div class="mt-2 text-center text-[10px] text-zinc-500">ABAJO = Billete real • Te hace Líder al instante • ARRIBA = Jugada • No pisa tu billete</div></div></section>
 
 <section id="boveda-viva" class="rounded-[28px] border border-white/10 bg-[#0E1212] p-4 scroll-mt-4"><div class="flex justify-between"><h3 class="font-black tracking-[0.18em] text-[12px] uppercase">🌍 BÓVEDA VIVA • <span x-text="filteredHistory.length"></span> series</h3><button @click="seedGhosts()" class="text-[9px] px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 font-black">👻 +50 Fantasmas</button></div><div class="mt-2 text-[10px] text-emerald-500/70" x-text="supabaseStatus"></div>
@@ -135,7 +135,46 @@
 <div class="h-6"></div>
 </main>
 
-<div x-show="stripeModal.open" class="fixed inset-0 z-[70] flex items-center justify-center p-3"><div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="stripeModal.open=false"></div><div class="relative w-full max-w-[400px] rounded-[24px] bg-[#111616] border border-amber-500/20 p-6 shadow-2xl"><div class="flex justify-between"><div><h3 class="font-black text-[18px] text-white leading-tight">Membresía DGT<br><span class="text-amber-300">$5 de por vida</span></h3></div><button @click="stripeModal.open=false" class="h-8 w-8 rounded-full bg-white/10">✕</button></div><div class="mt-4 space-y-2"><input x-model="myNickname" placeholder="Tu alias" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none"><input x-model="myEmail" placeholder="Tu Email" class="w-full h-[44px] rounded-xl bg-black border border-amber-500/30 px-3 text-[16px] text-white outline-none"><input x-model="myContact" placeholder="Tu WhatsApp" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none"></div><button :disabled="!myEmail ||!myNickname" @click="goToStripe()" class="mt-6 kbtn w-full h-[56px] rounded-[16px] font-black text-[13px] border-2" :class="myEmail && myNickname? 'bg-amber-400 text-black border-amber-300' : 'bg-zinc-800 text-zinc-500'">💎 PAGAR $5 • ACCESO DE POR VIDA →</button></div></div>
+<div x-show="stripeModal.open" class="fixed inset-0 z-[70] flex items-center justify-center p-3">
+  <div class="absolute inset-0 bg-black/85 backdrop-blur-md" @click="stripeModal.open=false"></div>
+  <div class="relative w-full max-w-[400px] rounded-[24px] bg-[#111616] border border-amber-500/20 p-6 shadow-2xl">
+    <div class="flex justify-between">
+      <div>
+        <h3 class="font-black text-[18px] text-white leading-tight">Membresía DGT<br><span class="text-amber-300">$5 de por vida</span></h3>
+      </div>
+      <button @click="stripeModal.open=false" class="h-8 w-8 rounded-full bg-white/10">✕</button>
+    </div>
+    <div class="mt-4 space-y-2">
+      <input x-model="myNickname" placeholder="Tu alias" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none">
+      <input x-model="myEmail" placeholder="Tu Email" class="w-full h-[44px] rounded-xl bg-black border border-amber-500/30 px-3 text-[16px] text-white outline-none">
+      <input x-model="myContact" placeholder="Tu WhatsApp" class="w-full h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none">
+    </div>
+
+    <!-- NUEVA SECCIÓN DE CHECKBOXES OBLIGATORIOS -->
+    <div class="mt-4 space-y-2 text-[11px] text-zinc-400">
+        <label class="flex items-start gap-2 cursor-pointer">
+            <input type="checkbox" x-model="stripeModal.terms" class="mt-1 accent-amber-400">
+            <span>He leído y acepto los <button type="button" @click="openLegal('terminos')" class="underline text-amber-300">Términos y Condiciones</button>.</span>
+        </label>
+        <label class="flex items-start gap-2 cursor-pointer">
+            <input type="checkbox" x-model="stripeModal.privacy" class="mt-1 accent-amber-400">
+            <span>Acepto la <button type="button" @click="openLegal('privacidad')" class="underline text-amber-300">Política de Privacidad</button> y el tratamiento de datos.</span>
+        </label>
+        <label class="flex items-start gap-2 cursor-pointer">
+            <input type="checkbox" x-model="stripeModal.refunds" class="mt-1 accent-amber-400">
+            <span>Entiendo que el pago es único y no hay reembolsos (ver <button type="button" @click="openLegal('reembolsos')" class="underline text-amber-300">Política</button>).</span>
+        </label>
+    </div>
+
+    <!-- BOTÓN DE PAGO ACTUALIZADO (Bloqueado hasta llenar datos y marcar los 3 checks) -->
+    <button :disabled="!myEmail || !myNickname || !stripeModal.terms || !stripeModal.privacy || !stripeModal.refunds" 
+            @click="goToStripe()" 
+            class="mt-6 kbtn w-full h-[56px] rounded-[16px] font-black text-[13px] border-2 transition-opacity" 
+            :class="(myEmail && myNickname && stripeModal.terms && stripeModal.privacy && stripeModal.refunds) ? 'bg-amber-400 text-black border-amber-300' : 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50'">
+        💎 PAGAR $5 • ACCESO DE POR VIDA →
+    </button>
+  </div>
+</div>
 
 <!-- TARJETA DE CONTACTO NATIVA (MODAL PRIVADO PROTEGIDO) -->
 <div x-show="contactModal.open" class="fixed inset-0 z-[90] flex items-center justify-center p-3">
@@ -366,7 +405,6 @@ function dollarMachineApp(){
     this.contactModal.serial = b.serial || ''; 
     this.contactModal.denom = b.denom || 20; 
     
-    // Obtener teléfono seguro o usar un número por defecto de respaldo
     let rawContact = b.contact || '';
     let phoneNum = rawContact.split('|')[0].trim();
     if(!phoneNum || phoneNum.toLowerCase() === 'anónimo' || phoneNum.length < 6) {
@@ -374,7 +412,6 @@ function dollarMachineApp(){
     }
     phoneNum = phoneNum.replace(/[^0-9+]/g, '');
 
-    // Construir mensaje preconfigurado optimizado
     const msg = encodeURIComponent(`Hola ${this.contactModal.owner}, me interesa tu billete registrado en DollarDgt:\nSerie: ${this.contactModal.serial}\nPaís: ${this.contactModal.country}\n¿Está disponible?`);
     this.contactModal.whatsappUrl = `https://wa.me/${phoneNum}?text=${msg}`;
     
