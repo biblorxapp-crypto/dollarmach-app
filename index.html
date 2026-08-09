@@ -54,14 +54,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 <style>
   body{background:#050707; touch-action: manipulation; -webkit-text-size-adjust: 100%;}
-  input, select { font-size: 16px !important; }
-  .kbtn:active{transform:translateY(2px) scale(.97)}
-  .shuffling{animation:blurShuffle .09s infinite}
+  input, select { font-size: 16px!important; }
+ .kbtn:active{transform:translateY(2px) scale(.97)}
+ .shuffling{animation:blurShuffle.09s infinite}
   @keyframes blurShuffle{0%{filter:blur(0)}50%{filter:blur(.8px)}100%{filter:blur(0)}}
-  .glow-match{box-shadow:0 0 40px rgba(245,158,11,0.6);animation:pulseGold 1.8s infinite}
+ .glow-match{box-shadow:0 0 40px rgba(245,158,11,0.6);animation:pulseGold 1.8s infinite}
   @keyframes pulseGold{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-  .rolling-letters{filter:blur(1px);transform:scaleY(1.2);opacity:.6}
-  .vault-pulse{animation:vaultPulse 2s infinite}
+ .rolling-letters{filter:blur(1px);transform:scaleY(1.2);opacity:.6}
+ .vault-pulse{animation:vaultPulse 2s infinite}
   @keyframes vaultPulse{0%,100%{border-color:rgba(245,158,11,0.3)}50%{border-color:rgba(245,158,11,0.6)}}
 </style>
 </head>
@@ -121,7 +121,7 @@
 <div x-show="isLocked" class="mt-4 flex flex-col gap-2.5">
 <button @click="doMatch()" :disabled="matchAttemptsLeft<=0" class="kbtn w-full h-[64px] rounded-[18px] bg-gradient-to-b from-amber-400 to-amber-500 text-black font-black text-[22px] glow-match">$ MATCH <span class="text-[12px] bg-black/20 px-2 py-1 rounded-full" x-text="matchAttemptsLeft+'/10'"></span></button>
 
-<!-- Botón inferior adaptado a membresía para evitar duplicidad -->
+<!-- Botón superior - FIX: Respeta membresía -->
 <button @click="handleRegister()" class="kbtn w-full h-[58px] rounded-[16px] font-black text-[12px] tracking-[0.12em] flex flex-col items-center justify-center gap-0.5 border-2" :class="globalActive? 'bg-emerald-500 text-black border-emerald-400' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.4)]'">
 <span x-text="globalActive? '⬇ REGISTRAR EN BÓVEDA GLOBAL' : '🔒 REGISTRAR EN BÓVEDA • $5 VIDA'"></span>
 <span class="text-[9px] font-bold opacity-80" x-text="globalActive? 'Publicar tu combinación actual a la Bóveda' : 'Requiere membresía $5 vida - Click para pagar'"></span>
@@ -141,7 +141,10 @@
 <option class="bg-black">🇺🇸 USA $</option><option class="bg-black">🇲🇽 México $</option><option class="bg-black">🇪🇺 Euro €</option><option class="bg-black">🇨🇴 Colombia $</option><option class="bg-black">🇦🇷 Argentina $</option><option class="bg-black">🇨🇱 Chile $</option><option class="bg-black">🇵🇪 Perú $</option><option class="bg-black">🇧🇷 Brasil R$</option><option class="bg-black">🇪🇸 España €</option><option class="bg-black">🇬🇧 UK £</option><option class="bg-black">🇯🇵 Japón ¥</option><option class="bg-black">🇨🇦 Canadá $</option><option class="bg-black">🇦🇺 Australia $</option><option class="bg-black">🇩🇴 Rep. Dominicana $</option><option class="bg-black">🇻🇪 Venezuela $</option><option class="bg-black">🇪🇨 Ecuador $</option><option class="bg-black">🇵🇦 Panamá $</option><option class="bg-black">🇨🇷 Costa Rica ₡</option><option class="bg-black">🇬🇹 Guatemala Q</option><option class="bg-black">🇭🇳 Honduras L</option><option class="bg-black">🇨🇺 Cuba $</option><option class="bg-black">🇧🇴 Bolivia $b</option><option class="bg-black">🇵🇾 Paraguay ₲</option><option class="bg-black">🇺🇾 Uruguay $</option><option class="bg-black">🇳🇮 Nicaragua C$</option><option class="bg-black">🇸🇻 El Salvador $</option><option class="bg-black">🇭🇹 Haití G</option><option class="bg-black">🇯🇲 Jamaica $</option><option class="bg-black">🇧🇸 Bahamas $</option><option class="bg-black">🇧🇧 Barbados $</option><option class="bg-black">🇹🇹 Trinidad y Tobago $</option><option class="bg-black">🇧🇿 Belice $</option><option class="bg-black">🇬🇾 Guyana $</option><option class="bg-black">🇸🇷 Surinam $</option><option class="bg-black">🇨🇭 Suiza ₣</option><option class="bg-black">🇸🇪 Suecia kr</option><option class="bg-black">🇳🇴 Noruega kr</option><option class="bg-black">🇩🇰 Dinamarca kr</option><option class="bg-black">🇵🇱 Polonia zł</option><option class="bg-black">🇭🇺 Hungría Ft</option><option class="bg-black">🇷🇴 Rumanía lei</option><option class="bg-black">🇿🇦 Sudáfrica R</option><option class="bg-black">🇳🇿 Nueva Zelanda $</option><option class="bg-black">🇰🇷 Corea del Sur ₩</option><option class="bg-black">🇮🇳 India ₹</option><option class="bg-black">🇨🇳 China ¥</option><option class="bg-black">🇸🇬 Singapur $</option><option class="bg-black">🇭🇰 Hong Kong $</option>
 </select>
 </div>
-<div class="rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Email alertas</div><input x-model="myEmail" placeholder="tu@email.com" class="mt-1 w-full bg-transparent text-[16px] font-bold text-white outline-none placeholder:text-zinc-600"></div></div><button @click="openStripeModal('global')" :class="globalActive? 'bg-emerald-500 text-black' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black'" class="mt-4 kbtn w-full h-[62px] rounded-[16px] font-black text-[14px] tracking-[0.14em] border border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.4)]"><span x-text="globalActive? '✅ MEMBRESÍA ACTIVA - '+globalSearch.serial : '💎 OBTENER MEMBRESÍA • $5 DE POR VIDA'"></span></button><div class="mt-2 text-center text-[10px] text-zinc-500">Pago único • Plataforma entre particulares • Sin responsabilidad sobre tratos</div></div></section>
+<div class="rounded-xl bg-white/[0.04] border border-white/10 p-3"><div class="text-[9px] text-zinc-500 uppercase">Email alertas</div><input x-model="myEmail" placeholder="tu@email.com" class="mt-1 w-full bg-transparent text-[16px] font-bold text-white outline-none placeholder:text-zinc-600"></div></div>
+<!-- BOTÓN INFERIOR CORREGIDO -->
+<button @click="handleGlobalMembershipClick()" :class="globalActive? 'bg-emerald-500 text-black' : 'bg-gradient-to-b from-amber-400 to-amber-500 text-black'" class="mt-4 kbtn w-full h-[62px] rounded-[16px] font-black text-[14px] tracking-[0.14em] border border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.4)]"><span x-text="globalActive? '✅ MEMBRESÍA ACTIVA - '+(globalSearch.serial || 'VITALICIA') : '💎 OBTENER MEMBRESÍA • $5 DE POR VIDA'"></span></button>
+<div class="mt-2 text-center text-[10px] text-zinc-500">Pago único • Plataforma entre particulares • Sin responsabilidad sobre tratos</div></div></section>
 
 <section class="rounded-[28px] border border-white/10 bg-[#0E1212] p-4"><div class="flex justify-between items-center"><h3 class="font-black tracking-[0.18em] text-[12px] uppercase">🌍 BÓVEDA VIVA • <span x-text="filteredHistory.length"></span> series</h3><button @click="seedGhosts()" class="text-[9px] px-3 py-1.5 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 font-black">👻 +50 Fantasmas</button></div><div class="mt-2 text-[10px] text-emerald-500/70" x-text="supabaseStatus"></div>
 <div class="mt-3 flex gap-2"><input x-model="searchQuery" placeholder="🔍 Buscar serie, dueño, país, 7777..." class="flex-1 h-[44px] rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none placeholder:text-zinc-600 focus:border-amber-500/30"><button x-show="searchQuery" @click="searchQuery=''" class="h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-[11px] text-zinc-400">✕</button></div>
@@ -187,12 +190,12 @@
         </div>
 
         <div class="mt-5 space-y-2">
-            <a :href="'https://wa.me/?text=Hola%20' + encodeURIComponent(contactModal.owner) + ',%20me%20interesa%20tu%20serie%20' + encodeURIComponent(contactModal.serial) + '%20registrada%20en%20DollarDgt.'" 
-               target="_blank" 
+            <a :href="'https://wa.me/?text=Hola%20' + encodeURIComponent(contactModal.owner) + ',%20me%20interesa%20tu%20serie%20' + encodeURIComponent(contactModal.serial) + '%20registrada%20en%20DollarDgt.'"
+               target="_blank"
                class="kbtn w-full h-[50px] rounded-xl bg-emerald-500 text-black font-black text-[12px] flex items-center justify-center gap-2 shadow-lg">
                <span>💬 Enviar Mensaje por WhatsApp</span>
             </a>
-            
+
             <button @click="contactModal.open=false" class="kbtn w-full h-[40px] rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[11px]">
                Cerrar Tarjeta
             </button>
@@ -218,25 +221,25 @@ function dollarMachineApp(){
  return {
   userDigits:[], tailDigits:Engine.genTail(), letters:Engine.genLetters(20), yr:Engine.genYear(), securitySeal:Engine.genSeal(), denom:20, isLocked:false, rarity:{type:'common',label:'Común',score:0}, value:20, isSearching:false, searchInterval:null, searchTimeout:null, isRollingLetters:false, isRollingYear:false, rollInterval:null, rollTimeout:null, matchAttemptsLeft:10, maxAttempts:10, toast:{visible:false}, history:[], searchQuery:'', searchFilter:'all', supabaseStatus:'Conectando...', globalSearch:{serial:'', country:'🇺🇸 USA $', denom:'$20'}, myNickname:'', myContact:'', myEmail:'', globalActive:false, currentVaultSource: Engine.genGhostEntry(0), nextVaultPreview:'Cargando...', vaultPool:[], stripeModal:{open:false, terms:false, privacy:false, refunds:false, source:''}, contactModal:{open:false, owner:'', contact:'', country:'', serial:'', denom:20}, legalModal:{open:false, title:'', content:''}, denomColorsClass:{1:'bg-emerald-500',5:'bg-sky-500',10:'bg-violet-500',20:'bg-orange-500',50:'bg-pink-500',100:'bg-amber-500'}, numpadGrid:[[{type:'num',val:7},{type:'num',val:8},{type:'num',val:9},{type:'denom',val:1}],[{type:'num',val:4},{type:'num',val:5},{type:'num',val:6},{type:'denom',val:5}],[{type:'num',val:1},{type:'num',val:2},{type:'num',val:3},{type:'denom',val:10}],[{type:'denom',val:20},{type:'num',val:0},{type:'denom',val:50},{type:'denom',val:100}]],
   leader:{lettersDisplay:'A-B-C', digitsDisplay:'0000 0000', seal:'CH-0000-XX', points:1250, rarity:{label:'Común',badgeClass:'border-white/10 bg-white/5 text-zinc-400'}, owner:'Bóveda', country:'USA', serial:''}, leaderSecondsLeft:3600, leaderTimer:null,
-  async initApp(){ 
-    if(!localStorage.getItem('dgt_anon')) localStorage.setItem('dgt_anon','anon_'+Math.random().toString(36).slice(2,9)); 
-    this.myNickname=localStorage.getItem('dgt_nick')||''; 
-    this.myContact=localStorage.getItem('dgt_contact')||''; 
-    this.myEmail=localStorage.getItem('dgt_email')||''; 
-    this.globalActive = localStorage.getItem('dgt_global_active')==='true'; 
-    this.globalSearch.serial = localStorage.getItem('dgt_global_serial')||''; 
-    
-    const urlParams=new URLSearchParams(window.location.search); 
-    if(urlParams.get('success')==='true'){ 
-      localStorage.setItem('dgt_global_active','true'); 
-      this.globalActive=true; 
-      this.showToast('¡PAGO $5 CONFIRMADO! Membresía de por vida activa','success'); 
-      history.replaceState({},'',location.pathname); 
-    } 
-    await this.loadVaultFromSupabase(); 
-    this.initLeaderFromVault(); 
-    this.pickNewVaultSource(); 
-    this.updateRarityAndValue(); 
+  async initApp(){
+    if(!localStorage.getItem('dgt_anon')) localStorage.setItem('dgt_anon','anon_'+Math.random().toString(36).slice(2,9));
+    this.myNickname=localStorage.getItem('dgt_nick')||'';
+    this.myContact=localStorage.getItem('dgt_contact')||'';
+    this.myEmail=localStorage.getItem('dgt_email')||'';
+    this.globalActive = localStorage.getItem('dgt_global_active')==='true';
+    this.globalSearch.serial = localStorage.getItem('dgt_global_serial')||'';
+
+    const urlParams=new URLSearchParams(window.location.search);
+    if(urlParams.get('success')==='true'){
+      localStorage.setItem('dgt_global_active','true');
+      this.globalActive=true;
+      this.showToast('¡PAGO $5 CONFIRMADO! Membresía de por vida activa','success');
+      history.replaceState({},'',location.pathname);
+    }
+    await this.loadVaultFromSupabase();
+    this.initLeaderFromVault();
+    this.pickNewVaultSource();
+    this.updateRarityAndValue();
   },
   async loadVaultFromSupabase(){ const {data} = await supabaseClient.from('vault').select('*').order('created_at',{ascending:false}).limit(200); if(data && data.length>5){ this.history=data; this.vaultPool=[...data]; this.supabaseStatus=`✅ ${data.length} series en Bóveda Global`; } else { this.history=[]; this.vaultPool=[]; this.supabaseStatus=`📦 Bóveda vacía, dale a 👻 +50 Fantasmas`; } },
   async seedGhosts(){
@@ -281,71 +284,88 @@ function dollarMachineApp(){
   clearInput(){ this.userDigits=[]; this.isLocked=false; this.matchAttemptsLeft=this.maxAttempts; this.pickNewVaultSource(); this.triggerRoll(600); },
   lockCombo(){ this.isLocked=true; if(this.searchInterval) clearInterval(this.searchInterval); this.isSearching=false; },
   doMatch(){ if(!this.isLocked || this.matchAttemptsLeft<=0) return; this.triggerSearchEffect(); this.triggerRoll(500); this.matchAttemptsLeft--; this.pickNewVaultSource(); },
-  handleRegister(){ 
-    if(this.globalActive){ 
-      this.registerMatchToVault(); 
-    } else { 
-      this.openStripeModal('register'); 
-    } 
+  handleRegister(){
+    if(this.globalActive){
+      this.registerMatchToVault();
+    } else {
+      this.openStripeModal('register');
+    }
   },
-  async registerMatchToVault(){ 
-    if(!this.isLocked) return; 
-    if(!this.globalActive){ 
-      this.openStripeModal('register'); 
-      return; 
-    } 
-    if(!this.myNickname || !this.myEmail){ 
-      this.showToast('Pon alias y email','info'); 
-      return; 
-    } 
-    localStorage.setItem('dgt_nick', this.myNickname); 
-    localStorage.setItem('dgt_contact', this.myContact); 
-    localStorage.setItem('dgt_email', this.myEmail); 
-    const entry={ 
-      id: Math.random().toString(36).slice(2)+Date.now().toString(36), 
-      serial: `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`, 
-      letters: this.lettersDisplay, 
-      digits: `${this.finalUserPart} ${this.finalTailPart}`, 
-      seal: this.securitySeal, 
-      points: Engine.calcPoints(this.rarity,this.denom), 
-      rarity: this.rarity, 
-      denom: this.denom, 
-      yr: this.yr, 
-      country: this.globalSearch.country||'USA', 
-      owner: this.myNickname||'Anon', 
-      contact: `${this.myContact} | ${this.myEmail}`, 
-      anon_id: localStorage.getItem('dgt_anon'), 
-      created_at: new Date().toISOString() 
-    }; 
-    const {error} = await supabaseClient.from('vault').insert(entry); 
-    if(error) this.showToast('Error: '+error.message,'info'); 
-    else { 
-      this.showToast(`¡REGISTRADO! ${entry.serial}`,'success'); 
-      this.vaultPool.unshift(entry); 
-      this.history.unshift(entry); 
-      this.initLeaderFromVault(); 
-    } 
+  handleGlobalMembershipClick(){
+    if(this.globalActive){
+      this.showToast('✅ Ya eres miembro vitalicio' + (this.globalSearch.serial? ' - Serie: ' + this.globalSearch.serial : ''), 'success');
+      window.scrollTo({top: 0, behavior: 'smooth'});
+      return;
+    }
+    this.openStripeModal('global');
+  },
+  async registerMatchToVault(){
+    if(!this.isLocked) return;
+    if(!this.globalActive){
+      this.openStripeModal('register');
+      return;
+    }
+    if(!this.myNickname ||!this.myEmail){
+      this.showToast('Pon alias y email','info');
+      return;
+    }
+    localStorage.setItem('dgt_nick', this.myNickname);
+    localStorage.setItem('dgt_contact', this.myContact);
+    localStorage.setItem('dgt_email', this.myEmail);
+    const entry={
+      id: Math.random().toString(36).slice(2)+Date.now().toString(36),
+      serial: `${this.finalPrefix} ${this.finalUserPart}${this.finalTailPart} ${this.letters.c}`,
+      letters: this.lettersDisplay,
+      digits: `${this.finalUserPart} ${this.finalTailPart}`,
+      seal: this.securitySeal,
+      points: Engine.calcPoints(this.rarity,this.denom),
+      rarity: this.rarity,
+      denom: this.denom,
+      yr: this.yr,
+      country: this.globalSearch.country||'USA',
+      owner: this.myNickname||'Anon',
+      contact: `${this.myContact} | ${this.myEmail}`,
+      anon_id: localStorage.getItem('dgt_anon'),
+      created_at: new Date().toISOString()
+    };
+    const {error} = await supabaseClient.from('vault').insert(entry);
+    if(error) this.showToast('Error: '+error.message,'info');
+    else {
+      this.showToast(`¡REGISTRADO! ${entry.serial}`,'success');
+      this.vaultPool.unshift(entry);
+      this.history.unshift(entry);
+      this.globalSearch.serial = entry.serial;
+      localStorage.setItem('dgt_global_serial', entry.serial);
+      this.initLeaderFromVault();
+    }
   },
   get filteredHistory(){ let q=this.searchQuery.toLowerCase().trim(); if(!q) return this.history; return this.history.filter(h=> (h.serial && h.serial.toLowerCase().includes(q)) || (h.owner && h.owner.toLowerCase().includes(q)) || (h.country && h.country.toLowerCase().includes(q)) || (h.digits && h.digits.toLowerCase().includes(q)) ); },
-  openStripeModal(source){ this.stripeModal.source=source; this.stripeModal.open=true; },
+  openStripeModal(source){
+    if(this.globalActive && source === 'global'){
+      this.showToast('✅ Tu membresía vitalicia ya está activa: ' + (this.globalSearch.serial || ''), 'success');
+      return;
+    }
+    this.stripeModal.source=source;
+    this.stripeModal.open=true;
+  },
   goToStripe(){
-    if(!this.myEmail || !this.myNickname){ this.showToast('Pon alias y email','info'); return; }
+    if(!this.myEmail ||!this.myNickname){ this.showToast('Pon alias y email','info'); return; }
     localStorage.setItem('dgt_nick', this.myNickname);
     localStorage.setItem('dgt_contact', this.myContact);
     localStorage.setItem('dgt_email', this.myEmail);
     this.stripeModal.open=false;
     window.location.href = STRIPE_LINK+'?prefilled_email='+encodeURIComponent(this.myEmail);
   },
-  openLegal(type){ 
-    const texts={ 
-      terminos: {title:'Términos y Condiciones de Uso', content:`TÉRMINOS Y CONDICIONES GENERALES - DollarDgt.com\n\n1. NATURALEZA DE LA PLATAFORMA\nDollarDgt.com es una herramienta digital de catálogo, entretenimiento y contacto entre coleccionistas particulares de billetes y numerología. La plataforma NO is una casa de cambio, institución financiera, casa de empeño ni intermediaria en transacciones comerciales.\n\n2. MEMBRESÍA DE POR VIDA ($5 USD)\nEl pago único de $5 USD otorga acceso vitalicio a las funciones avanzadas de la Bóveda Global y registro de series. Este pago es definitivo y corresponde a un servicio digital de software y base de datos.\n\n3. RESPONSABILIDAD DE LOS USUARIOS\nCualquier trato, intercambio, compra o venta de billetes físicos que los usuarios realicen por su cuenta se hace de manera estrictamente particular y bajo su propia y exclusiva responsabilidad. DollarDgt no interviene, supervisa ni garantiza los acuerdos entre particulares.`}, 
-      privacidad: {title:'Política de Privacidad', content:`POLÍTICA DE PRIVACIDAD - DollarDgt.com\n\n1. DATOS QUE RECOPILAMOS\nRecopilamos la información básica que el usuario proporciona voluntariamente: Alias (Nickname), Correo Electrónico (Email) y número de contacto (WhatsApp opcional), así como las series de billetes registradas y país de origen.\n\n2. USO DE LA INFORMACIÓN\nLos datos se utilizan exclusivamente para:\n- Gestionar el acceso a la Bóveda Global y mostrar las series publicadas.\n- Enviar alertas automáticas al correo electrónico cuando se detecten coincidencias (MATCH) con otras series.\n\n3. PROTECCIÓN DE DATOS\nNo vendemos, alquilamos ni cedemos información personal a terceros. Los datos de contacto solo son visibles para otros usuarios según las configuraciones de la comunidad y la membresía activa.`}, 
-      reembolsos: {title:'Política de Reembolsos', content:`POLÍTICA DE REEMBOLSOS Y PAGOS - DollarDgt.com\n\n1. PAGO ÚNICO DE POR VIDA\nLa membresía de DollarDgt.com tiene un costo único de $5 USD. No existen mensualidades, cobros ocultos ni renovaciones automáticas.\n\n2. CONDICIONES DE REEMBOLSO\nDebido a la naturaleza digital e inmediata del acceso al software y base de datos de la Bóveda Global tras la confirmación del pago, no se realizan reembolsos una vez procesada la transacción.\n\n3. SOPORTE\nSi experimentas algún problema técnico con la activación de tu cuenta tras realizar el pago, puedes contactar con nuestro soporte técnico para solucionarlo de inmediato.`}, 
-      aviso: {title:'Aviso Legal', content:`AVISO LEGAL - DollarDgt.com\n\n1. TITULARIDAD Y OBJETIVO\nPlataforma web diseñada para entusiastas de la numismática y coleccionistas de números de serie particulares.\n\n2. EXENCIÓN DE RESPONSABILIDAD\nLos creadores y administradores de DollarDgt.com no asumen ninguna responsabilidad por pérdidas, desacuerdos, disputas o incumplimientos derivados de los tratos económicos o intercambios que los usuarios realicen por fuera o a raíz del contacto generado en la plataforma.\n\n© 2026 DollarDgt.com. Todos los derechos reservados.`} 
-    }; 
-    this.legalModal.title = texts[type].title; 
-    this.legalModal.content = texts[type].content; 
-    this.legalModal.open = true; 
+  openLegal(type){
+    const texts={
+      terminos: {title:'Términos y Condiciones de Uso', content:`TÉRMINOS Y CONDICIONES GENERALES - DollarDgt.com\n\n1. NATURALEZA DE LA PLATAFORMA\nDollarDgt.com es una herramienta digital de catálogo, entretenimiento y contacto entre coleccionistas particulares de billetes y numerología. La plataforma NO is una casa de cambio, institución financiera, casa de empeño ni intermediaria en transacciones comerciales.\n\n2. MEMBRESÍA DE POR VIDA ($5 USD)\nEl pago único de $5 USD otorga acceso vitalicio a las funciones avanzadas de la Bóveda Global y registro de series. Este pago es definitivo y corresponde a un servicio digital de software y base de datos.\n\n3. RESPONSABILIDAD DE LOS USUARIOS\nCualquier trato, intercambio, compra o venta de billetes físicos que los usuarios realicen por su cuenta se hace de manera estrictamente particular y bajo su propia y exclusiva responsabilidad. DollarDgt no interviene, supervisa ni garantiza los acuerdos entre particulares.`},
+      privacidad: {title:'Política de Privacidad', content:`POLÍTICA DE PRIVACIDAD - DollarDgt.com\n\n1. DATOS QUE RECOPILAMOS\nRecopilamos la información básica que el usuario proporciona voluntariamente: Alias (Nickname), Correo Electrónico (Email) y número de contacto (WhatsApp opcional), así como las series de billetes registradas y país de origen.\n\n2. USO DE LA INFORMACIÓN\nLos datos se utilizan exclusivamente para:\n- Gestionar el acceso a la Bóveda Global y mostrar las series publicadas.\n- Enviar alertas automáticas al correo electrónico cuando se detecten coincidencias (MATCH) con otras series.\n\n3. PROTECCIÓN DE DATOS\nNo vendemos, alquilamos ni cedemos información personal a terceros. Los datos de contacto solo son visibles para otros usuarios según las configuraciones de la comunidad y la membresía activa.`},
+      reembolsos: {title:'Política de Reembolsos', content:`POLÍTICA DE REEMBOLSOS Y PAGOS - DollarDgt.com\n\n1. PAGO ÚNICO DE POR VIDA\nLa membresía de DollarDgt.com tiene un costo único de $5 USD. No existen mensualidades, cobros ocultos ni renovaciones automáticas.\n\n2. CONDICIONES DE REEMBOLSO\nDebido a la naturaleza digital e inmediata del acceso al software y base de datos de la Bóveda Global tras la confirmación del pago, no se realizan reembolsos una vez procesada la transacción.\n\n3. SOPORTE\nSi experimentas algún problema técnico con la activación de tu cuenta tras realizar el pago, puedes contactar con nuestro soporte técnico para solucionarlo de inmediato.`},
+      aviso: {title:'Aviso Legal', content:`AVISO LEGAL - DollarDgt.com\n\n1. TITULARIDAD Y OBJETIVO\nPlataforma web diseñada para entusiastas de la numismática y coleccionistas de números de serie particulares.\n\n2. EXENCIÓN DE RESPONSABILIDAD\nLos creadores y administradores de DollarDgt.com no asumen ninguna responsabilidad por pérdidas, desacuerdos, disputas o incumplimientos derivados de los tratos económicos o intercambios que los usuarios realicen por fuera o a raíz del contacto generado en la plataforma.\n\n© 2026 DollarDgt.com. Todos los derechos reservados.`}
+    };
+    this.legalModal.title = texts[type].title;
+    this.legalModal.content = texts[type].content;
+    this.legalModal.open = true;
   },
   showToast(m,type='success'){ clearTimeout(this.toastTimer); this.toast.classes=type==='success'? 'bg-amber-400 text-black' : 'bg-zinc-800 text-white border border-white/10'; this.toast.message=m; this.toast.visible=true; this.toastTimer=setTimeout(()=>{ this.toast.visible=false; },4000); },
   get leaderCountdownFormatted(){ const mm=Math.floor(this.leaderSecondsLeft/60).toString().padStart(2,'0'); const ss=(this.leaderSecondsLeft%60).toString().padStart(2,'0'); return `${mm}:${ss}`; },
