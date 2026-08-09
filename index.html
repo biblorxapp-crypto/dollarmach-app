@@ -309,6 +309,20 @@ function dollarMachineApp(){
       return;
     }
 
+    // ANTES DE INSERTAR - Verifica si ya existe en la Bóveda Real (vault)
+    const { data: existe } = await supabaseClient.from(VAULT_REAL_TABLE)
+      .select('id, owner')
+      .eq('country', chosenCountry)
+      .eq('nom', chosenNom)
+      .eq('yr', chosenYr)
+      .ilike('serial', raw)
+      .limit(1);
+
+    if(existe && existe.length > 0){
+      this.showToast(`⛔ Esa serie ya está registrada: ${raw} en ${chosenCountry} NOM ${chosenNom} por ${existe[0].owner}`, 'info');
+      return; // Detiene el proceso para que no se repita ni se duplique dueño
+    }
+
     localStorage.setItem('dgt_global_serial',raw);
     localStorage.setItem('dgt_global_yr',chosenYr);
     localStorage.setItem('dgt_global_nom',chosenNom);
