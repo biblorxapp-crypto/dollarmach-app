@@ -75,12 +75,7 @@
  .card-hover{ transition:transform .3s ease, box-shadow .3s ease; }
  .card-hover:hover{ transform:translateY(-3px); }
  .sheen{ position:relative; overflow:hidden; }
- .sheen::after{
-    content:""; position:absolute; top:0; left:-60%; width:40%; height:100%;
-    background:linear-gradient(115deg, transparent, rgba(255,255,255,.10), transparent);
-    transform:skewX(-20deg);
-    animation:sheenMove 5.5s ease-in-out infinite;
- }
+  .sheen::after{ display:none; }
   @keyframes sheenMove{0%{left:-60%}55%,100%{left:130%}}
 
   /* ===== TÍTULO NEÓN ===== */
