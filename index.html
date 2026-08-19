@@ -537,10 +537,10 @@
 </div>
 
 <script>
-// ===== CONFIGURACIÓN =====
+// ===== CONFIGURACIÓN (ACTUALIZADO CON TUS CREDENCIALES) =====
 const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
-const SUPABASE_ANON = 'TU_ANON_KEY'; // Reemplaza con tu anon key
-const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/TU_LINK'; // Reemplaza con tu Payment Link
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
+const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/14AdRa8BagNr2GegAbenS01';
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -655,8 +655,8 @@ function app() {
     // Rate limiting client-side
     lastPublishTime: 0,
     lastToqueTimes: {},
-    rateLimitPublishMs: 60000, // 1 minuto entre publicaciones
-    rateLimitToqueMs: 30000,   // 30 segundos entre toques al mismo usuario
+    rateLimitPublishMs: 60000,
+    rateLimitToqueMs: 30000,
 
     // Gamificación
     userPoints: 0,
@@ -688,8 +688,8 @@ function app() {
     get globalResults(){ return this.globalResultsCache; },
     get mySearches(){
       const alias = this.profile.alias.toLowerCase();
-      const email = this.profile.email;
-      return this.jugadasPool.filter(j=> (j.owner||'').toLowerCase()===alias || (j.contact||'').includes(this.encodeSensitive(email))).slice(0,20);
+      const email = this.encodeSensitive(this.profile.email);
+      return this.jugadasPool.filter(j=> (j.owner||'').toLowerCase()===alias || (j.contact||'').includes(email)).slice(0,20);
     },
     get leaderCountdownFormatted(){ return String(Math.floor(this.leaderSecondsLeft/60)).padStart(2,'0')+':'+String(this.leaderSecondsLeft%60).padStart(2,'0'); },
     get lettersDisplay(){ return this.denom===1?`${this.letters.a}-${this.letters.c}`:`${this.letters.a}-${this.letters.b}-${this.letters.c}`; },
@@ -935,7 +935,6 @@ function app() {
       if(!this.globalActive){ this.openStripeModal(); this.showToast('Requiere membresía $5'); return; }
       if((h.owner||'').toLowerCase()===this.profile.alias.toLowerCase()){ this.showToast('No puedes tocar tu propio billete'); return; }
 
-      // Rate limiting
       const last = this.lastToqueTimes[h.owner] || 0;
       const now = Date.now();
       if (now - last < this.rateLimitToqueMs) {
@@ -1216,7 +1215,6 @@ function app() {
     },
     async publishSearchToVault(){
       if(!this.canPublish) return;
-      // Rate limiting
       const now = Date.now();
       if (now - this.lastPublishTime < this.rateLimitPublishMs) {
         this.showToast('Espera un minuto antes de publicar otro número');
