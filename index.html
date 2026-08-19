@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#050707">
-  <title>$DOLLARDGT - v7.9 Fase 5</title>
+  <title>$DOLLARDGT - v7.9 Fase 5 + Activación Manual</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@500;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter'],display:['Fraunces'],mono:['JetBrains Mono']}}}}</script>
@@ -37,7 +37,7 @@
 
   <!-- HEADER -->
   <div class="flex items-center justify-between">
-    <div><h1 class="font-black text-[1.9rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[9px] tracking-[0.22em] text-zinc-500 uppercase mt-1">v7.9 · Fase 5 · Seguridad</p></div>
+    <div><h1 class="font-black text-[1.9rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[9px] tracking-[0.22em] text-zinc-500 uppercase mt-1">v7.9 · Fase 5 · Activación Manual</p></div>
     <div class="flex items-center gap-2">
       <button @click="showOnboarding=true" class="h-9 w-9 rounded-xl bg-white/5 border border-white/10 grid place-items-center text-[12px]" aria-label="Ayuda">?</button>
       <div class="h-9 px-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 grid place-items-center font-mono text-[9px] text-amber-300 font-bold" x-text="globalActive?'MIEMBRO':'$5 VIDA'"></div>
@@ -256,6 +256,8 @@
         <p x-show="globalActive" class="text-[11px] text-emerald-300">✓ Acceso completo a bóveda global, toques privados y chat.</p>
         <p x-show="!globalActive" class="text-[11px] text-zinc-400">Activa la membresía para publicar tus números, enviar toques y chatear con otros coleccionistas.</p>
         <button x-show="!globalActive" @click="openStripeModal()" class="mt-2 w-full h-11 rounded-xl bg-amber-400 text-black font-black text-[12px]" aria-label="Activar membresía">ACTIVAR MEMBRESÍA $5</button>
+        <!-- Botón de activación manual -->
+        <button x-show="!globalActive" @click="manualActivateMembership()" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px]" aria-label="Ya pagué, activar ahora">¿Ya pagaste? Activar ahora</button>
         <button x-show="globalActive" @click="globalActive=false; localStorage.removeItem('dgt_global_active'); showToast('Membresía desactivada (demo)')" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px]" aria-label="Cancelar membresía demo">Cancelar membresía (demo)</button>
       </div>
     </section>
@@ -371,7 +373,7 @@
     </div>
     <div class="mt-2 flex flex-wrap justify-between items-center gap-2 text-[8px] text-zinc-600">
       <span>Stripe $5 de por vida · Supabase · Bóveda Global · Colección internacional</span>
-      <span class="text-zinc-500">v7.9 · Fase 5 · Seguridad</span>
+      <span class="text-zinc-500">v7.9 · Fase 5 · Activación Manual</span>
     </div>
   </footer>
 </main>
@@ -452,6 +454,7 @@
   </div>
   <button @click="redirectToStripe()" :disabled="!acceptStripeTerms" class="mt-4 w-full h-11 rounded-xl bg-amber-400 text-black font-black disabled:opacity-40 disabled:cursor-not-allowed" aria-label="Ir a pagar">IR A PAGAR $5</button>
   <p class="text-[9px] text-zinc-600 text-center mt-2">Pago único procesado por Stripe. No se almacenan datos de tarjeta.</p>
+  <button @click="manualActivateMembership()" class="mt-2 w-full h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-bold text-[10px]" aria-label="Ya pagué, activar ahora">¿Ya pagaste? Activar ahora</button>
 </div></div>
 
 <!-- MODAL CHAT -->
@@ -537,7 +540,7 @@
 </div>
 
 <script>
-// ===== CONFIGURACIÓN (ACTUALIZADO CON TUS CREDENCIALES) =====
+// ===== CONFIGURACIÓN =====
 const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
 const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/14AdRa8BagNr2GegAbenS01';
@@ -852,6 +855,30 @@ function app() {
       window.open(STRIPE_PAYMENT_LINK, '_blank');
       this.stripeModal.open=false;
       this.showToast('Completa el pago en Stripe y vuelve');
+    },
+
+    // ===== ACTIVACIÓN MANUAL DE MEMBRESÍA =====
+    async manualActivateMembership() {
+      if (!this.user) {
+        this.authModal.open = true;
+        return;
+      }
+      const { error } = await supabaseClient
+        .from('members')
+        .upsert({
+          user_id: this.user.id,
+          active: true,
+          paid_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+      if (!error) {
+        this.globalActive = true;
+        localStorage.setItem('dgt_global_active', 'true');
+        this.showToast('Membresía activada ✓');
+        this.stripeModal.open = false;
+      } else {
+        console.error('ManualActivate error:', error);
+        this.showToast('Error al activar membresía: ' + error.message);
+      }
     },
 
     async loadVault(){
