@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#050707">
-  <title>$DOLLARDGT - v7.9 Fase 5 + Fix Bóveda</title>
+  <title>$DOLLARDGT - v7.9 Serial Real Global</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@500;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter'],display:['Fraunces'],mono:['JetBrains Mono']}}}}</script>
@@ -17,6 +17,7 @@
     .slot-rolling{animation:slotRoll .11s infinite linear;filter:blur(1px)} @keyframes slotRoll{0%{transform:translateY(-40%)}100%{transform:translateY(40%)}}
     .settle{animation:settlePop .35s cubic-bezier(.2,1.4,.4,1)} @keyframes settlePop{0%{transform:scale(.75) translateY(10px)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
     .digit-gold{border-color:rgba(251,191,36,.85)!important;background:#1E1A0A!important;box-shadow:0 0 16px rgba(251,191,36,.3)}
+    .digit-pop{animation:digitPress .25s ease-out} @keyframes digitPress{0%{transform:scale(1)}50%{transform:scale(1.15);box-shadow:0 0 25px rgba(251,191,36,.8)}100%{transform:scale(1)}}
     .flip{animation:flipIn .32s cubic-bezier(.2,1.4,.4,1)} @keyframes flipIn{0%{transform:rotateX(90deg) scale(.8);opacity:0}100%{transform:rotateX(0) scale(1);opacity:1}}
     .pop{animation:popIn .28s cubic-bezier(.2,1.4,.4,1)} @keyframes popIn{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
     .value-glow{animation:valuePulse .4s ease-out} @keyframes valuePulse{0%{transform:scale(.9);text-shadow:0 0 0 rgba(16,185,129,0)}50%{transform:scale(1.08);text-shadow:0 0 18px rgba(16,185,129,.6)}100%{transform:scale(1);text-shadow:none}}
@@ -33,7 +34,7 @@
 
   <!-- HEADER -->
   <div class="flex items-center justify-between">
-    <div><h1 class="font-black text-[1.9rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[9px] tracking-[0.22em] text-zinc-500 uppercase mt-1">v7.9 · Fase 5 · Fix Bóveda</p></div>
+    <div><h1 class="font-black text-[1.9rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[9px] tracking-[0.22em] text-zinc-500 uppercase mt-1">v7.9 · Serial Real Global</p></div>
     <div class="flex items-center gap-2">
       <button @click="showOnboarding=true" class="h-9 w-9 rounded-xl bg-white/5 border border-white/10 grid place-items-center text-[12px]" aria-label="Ayuda">?</button>
       <div class="h-9 px-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 grid place-items-center font-mono text-[9px] text-amber-300 font-bold" x-text="globalActive?'MIEMBRO':'$5 VIDA'"></div>
@@ -68,6 +69,7 @@
   <!-- TAB EXPLORAR -->
   <div x-show="tab==='explorar'" class="flex flex-col gap-4">
 
+    <!-- SERIE LÍDER -->
     <section class="rounded-[20px] border border-amber-400/20 bg-[#1E1A0A] p-3">
       <div class="flex justify-between items-center">
         <span class="text-[10px] font-black tracking-widest text-amber-200 uppercase">Serie Líder · <span x-text="leader.owner"></span></span>
@@ -85,91 +87,120 @@
       </div>
     </section>
 
+    <!-- CAPTURA DE SERIAL COMPLETO -->
     <section class="rounded-[24px] border border-amber-500/30 bg-gradient-to-b from-[#16140E] to-[#0D1010] p-5">
       <div class="flex justify-between items-start">
         <div>
           <div class="flex items-center gap-2">
-            <span class="text-[11px] font-bold tracking-[0.18em] uppercase text-amber-300/90">Tu combinación</span>
-            <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/20 text-emerald-300" x-show="userDigits.length>=2" x-text="userDigits.length+'/10'"></span>
+            <span class="text-[11px] font-bold tracking-[0.18em] uppercase text-amber-300/90">Tu billete real</span>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/20 text-emerald-300" x-show="userDigits.length>=2" x-text="userDigits.length+'/10 dígitos'"></span>
           </div>
-          <div class="text-[10px] text-zinc-500 mt-1">Solo tus dígitos · máx 10 · abajo verás similares globales</div>
+          <div class="text-[10px] text-zinc-500 mt-1">Ingresa los datos reales del billete</div>
         </div>
         <button @click="clearInput()" class="text-[9px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-500">LIMPIAR</button>
       </div>
 
-      <div class="mt-5 min-h-[68px] rounded-2xl bg-black border border-white/10 p-3 flex flex-wrap gap-1.5 justify-center items-center" :class="digitsSettled?'soft-settle':''">
+      <!-- Línea de prefijo / sufijo / año -->
+      <div class="mt-4 grid grid-cols-3 gap-2">
+        <div>
+          <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Prefijo *</label>
+          <input x-model="serialPrefix" placeholder="AB" maxlength="3" class="input-base mt-1 uppercase" aria-label="Prefijo del serial">
+        </div>
+        <div>
+          <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Sufijo *</label>
+          <input x-model="serialSuffix" placeholder="C" maxlength="1" class="input-base mt-1 uppercase" aria-label="Sufijo del serial">
+        </div>
+        <div>
+          <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Año *</label>
+          <input x-model="serialYear" type="number" placeholder="2017" class="input-base mt-1" aria-label="Año del billete">
+        </div>
+      </div>
+
+      <!-- Denominación con selector global -->
+      <div class="mt-3">
+        <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Denominación *</label>
+        <select x-model="denom" class="input-base mt-1">
+          <option value="1">$1 USD</option>
+          <option value="2">$2 USD</option>
+          <option value="5">$5 USD</option>
+          <option value="10">$10 USD</option>
+          <option value="20">$20 USD</option>
+          <option value="50">$50 USD</option>
+          <option value="100">$100 USD</option>
+          <option value="5">€5 EUR</option>
+          <option value="10">€10 EUR</option>
+          <option value="20">€20 EUR</option>
+          <option value="50">€50 EUR</option>
+          <option value="100">€100 EUR</option>
+          <option value="5">£5 GBP</option>
+          <option value="10">£10 GBP</option>
+          <option value="20">£20 GBP</option>
+          <option value="1000">¥1000 JPY</option>
+          <option value="5000">¥5000 JPY</option>
+          <option value="10000">¥10000 JPY</option>
+          <option value="20">$20 ARS</option>
+          <option value="50">$50 ARS</option>
+          <option value="100">$100 ARS</option>
+          <option value="200">$200 ARS</option>
+          <option value="500">$500 ARS</option>
+          <option value="1000">$1000 ARS</option>
+        </select>
+      </div>
+
+      <!-- SLOT SOLO TUS DIGITOS -->
+      <div class="mt-4 min-h-[68px] rounded-2xl bg-black border border-white/10 p-3 flex flex-wrap gap-1.5 justify-center items-center" :class="digitsSettled?'soft-settle':''">
         <template x-if="userDigits.length===0">
           <span class="text-[11px] text-zinc-600 font-mono text-center">Toca números… ej. 343434<br><span class="text-[9px]">máximo 10 dígitos</span></span>
         </template>
         <template x-for="(d,i) in userDigits" :key="i">
-          <div class="h-[44px] w-[34px] rounded-[10px] border grid place-items-center font-mono font-black text-[1.5rem] digit-gold text-amber-100" :class="[rolling.includes(i)?'slot-rolling':'', justSettled===i?'settle':'']">
+          <div class="h-[44px] w-[34px] rounded-[10px] border grid place-items-center font-mono font-black text-[1.5rem] digit-gold text-amber-100" :class="[rolling.includes(i)?'slot-rolling':'', justSettled===i?'settle digit-pop':'']">
             <span x-text="d"></span>
           </div>
         </template>
       </div>
 
-      <div class="mt-4 flex justify-between items-center">
-        <div class="font-mono text-[11px] text-zinc-500">Ingresado: <b class="text-white text-[13px]" x-text="queryFull||'—'"></b></div>
+      <div class="mt-3 flex justify-between items-center">
+        <div class="font-mono text-[11px] text-zinc-500">Ingresado: <b class="text-white text-[13px]" x-text="userDigits.length ? userDigits.join('') : '—'"></b></div>
         <div class="text-[10px] font-bold" :class="userDigits.length>=10?'text-rose-400':'text-zinc-500'" x-text="userDigits.length+'/10 MAX'"></div>
       </div>
 
-      <div x-show="queryFull.length>=2" class="mt-3 rounded-xl bg-amber-500/10 border border-amber-500/20 p-2.5 flex justify-between items-center">
-        <span class="text-[9px] text-amber-300 uppercase font-black">Buscando similares globales para</span>
-        <span class="font-mono font-black text-amber-100" x-text="queryFull"></span>
-        <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-400 text-black font-black" x-text="searchLoading ? '...' : globalResults.length+' hallazgos'"></span>
+      <!-- Vista previa del serial completo -->
+      <div x-show="serialPrefix || userDigits.length" class="mt-3 rounded-xl bg-black border border-amber-500/20 p-2.5">
+        <div class="text-[9px] text-amber-300 uppercase font-black mb-1">Vista previa del serial</div>
+        <div class="font-mono font-black text-[1.2rem] text-white" x-text="fullSerialPreview"></div>
+        <div class="text-[9px] text-zinc-500 mt-1" x-text="'Año: ' + (serialYear || '????') + ' · Denom: ' + denom"></div>
       </div>
-    </section>
 
-    <section class="grid grid-cols-3 gap-2">
-      <div class="rounded-2xl border border-white/10 bg-[#0E1612] p-3 text-center overflow-hidden">
-        <div class="text-[9px] text-zinc-500 uppercase font-bold">Prefijo</div>
-        <div class="mt-1 font-mono text-[1rem] font-bold text-amber-200" :class="animLetters?'flip':''" x-text="lettersDisplay"></div>
-        <div class="text-[8px] text-zinc-500 mt-1" x-text="queryFull ? 'cambia con dígitos' : 'Letras'"></div>
-      </div>
-      <div class="rounded-2xl border border-white/10 bg-[#0E1416] p-3 text-center overflow-hidden">
-        <div class="text-[9px] text-zinc-500 uppercase font-bold">Año</div>
-        <div class="mt-1 font-mono text-[1rem] font-bold text-sky-300" :class="animYr?'flip':''" x-text="yr"></div>
-        <div class="text-[8px] text-zinc-500 mt-1" :class="animYr?'pop':''" x-text="securitySeal"></div>
-      </div>
-      <div class="rounded-2xl border border-white/10 bg-[#16140E] p-3 text-center overflow-hidden">
-        <div class="text-[9px] text-zinc-500 uppercase font-bold">Valor · Rareza</div>
-        <div class="mt-1 font-mono text-[1rem] font-black text-emerald-300" :class="animValue?'value-glow':''" x-text="'$'+value.toFixed(2)"></div>
-        <div class="text-[7px] text-zinc-500 mt-1" x-text="'$'+denom+' × '+(rarity.label==='SOLID'?'4.8': rarity.label==='RADAR'?'3.7': rarity.label==='LADDER'?'3.2': rarity.label==='REPEATER'?'2.8': rarity.label==='BINARY'?'2.4': rarity.label==='SEMI-SOLID'?'2.1':'1.6')+' + rareza'"></div>
-        <button @click="explainRarity(rarity)" class="text-[8px] mt-1 px-1.5 py-0.5 rounded-full border transition-all" :class="[rarity.badgeClass, animValue?'pop':'']" x-text="rarity.label"></button>
-      </div>
-    </section>
-    <div x-show="rarityTip.visible" class="rounded-xl border border-amber-500/20 bg-[#15120A] px-3 py-2 text-[11px] text-zinc-300"><b class="text-amber-200" x-text="rarityTip.label"></b>: <span x-text="rarityTip.text"></span></div>
+      <!-- NUMPAD (0-9) -->
+      <section class="mt-4">
+        <div class="grid grid-cols-4 gap-2">
+          <template x-for="row in numpadGrid"><template x-for="btn in row"><div>
+            <button x-show="btn.type==='denom'" @click="setDenom(btn.val)" class="kbtn h-[48px] w-full rounded-[12px] text-[12px] font-black text-white border border-white/10" :class="[denomColorsClass[btn.val], denom===btn.val?'ring-2 ring-white/30':'opacity-80']" x-text="'$'+btn.val"></button>
+            <button x-show="btn.type==='num'" @click="pressNum(btn.val)" :disabled="userDigits.length>=10" class="kbtn h-[48px] w-full rounded-[12px] border border-white/[0.06] bg-[#1C2424] text-[16px] font-black text-[#D4E2DC] disabled:opacity-20" x-text="btn.val"></button>
+          </div></template></template>
+        </div>
+        <div class="mt-2 flex gap-2"><button @click="clearInput()" class="flex-1 h-9 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400">Borrar todo</button><button @click="deleteDigit()" class="flex-1 h-9 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400">⌫ último</button></div>
+        <div class="mt-2 text-[9px] text-zinc-600 text-center">Máximo 10 dígitos · solo tus dígitos · sin cola extra</div>
+      </section>
 
-    <section class="rounded-[24px] border border-white/[0.06] bg-[#0E1212] p-3">
-      <div class="grid grid-cols-4 gap-2">
-        <template x-for="row in numpadGrid"><template x-for="btn in row"><div>
-          <button x-show="btn.type==='denom'" @click="setDenom(btn.val)" class="kbtn h-[48px] w-full rounded-[12px] text-[12px] font-black text-white border border-white/10" :class="[denomColorsClass[btn.val], denom===btn.val?'ring-2 ring-white/30':'opacity-80']" x-text="'$'+btn.val"></button>
-          <button x-show="btn.type==='num'" @click="pressNum(btn.val)" :disabled="userDigits.length>=10" class="kbtn h-[48px] w-full rounded-[12px] border border-white/[0.06] bg-[#1C2424] text-[16px] font-black text-[#D4E2DC] disabled:opacity-20" x-text="btn.val"></button>
-        </div></template></template>
-      </div>
-      <div class="mt-2 flex gap-2"><button @click="clearInput()" class="flex-1 h-9 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400">Borrar todo</button><button @click="deleteDigit()" class="flex-1 h-9 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400">⌫ último</button></div>
-      <div class="mt-2 text-[9px] text-zinc-600 text-center">Máximo 10 dígitos · solo tus dígitos · sin cola extra</div>
-    </section>
-
-    <section class="rounded-[20px] border border-amber-500/20 bg-[#0F1A14] p-4">
-      <div class="font-mono text-[13px] text-white" x-text="queryFull ? finalPrefix+' '+queryFull+' '+letters.c : 'Ingresa dígitos para vista previa'"></div>
-      <div class="text-[9px] text-zinc-500 mt-1">Vista previa · prefijo + <b class="text-white">tus dígitos</b> + sufijo · <span x-text="yr"></span> · <span x-text="lettersDisplay"></span></div>
-      <div class="mt-4 flex flex-col gap-2">
-        <button @click="handleRegister()" :disabled="!queryFull || loadingPublish" class="kbtn w-full h-[48px] rounded-[14px] font-black text-[13px] border disabled:opacity-40" :class="user && globalActive && profileComplete ? 'bg-violet-500 text-white border-violet-400' : 'bg-amber-400 text-black border-amber-300'">
-          <span x-show="!loadingPublish" x-text="!user ? 'LOGIN PARA BAJAR A BÓVEDA' : (globalActive ? 'BAJAR MI '+queryFull+' A BÓVEDA GLOBAL' : 'ACTIVAR MEMBRESÍA $5 PARA BAJAR')"></span>
+      <!-- ACCIÓN: BAJAR A BÓVEDA -->
+      <div class="mt-4">
+        <button @click="handleRegister()" :disabled="!canPublish || loadingPublish" class="kbtn w-full h-[48px] rounded-[14px] font-black text-[13px] border disabled:opacity-40" :class="user && globalActive && profileComplete ? 'bg-violet-500 text-white border-violet-400' : 'bg-amber-400 text-black border-amber-300'">
+          <span x-show="!loadingPublish" x-text="!user ? 'LOGIN PARA BAJAR A BÓVEDA' : (globalActive ? 'BAJAR SERIAL COMPLETO A BÓVEDA' : 'ACTIVAR MEMBRESÍA $5 PARA BAJAR')"></span>
           <span x-show="loadingPublish" class="spinner"></span>
         </button>
-        <div class="text-[9px] text-zinc-500 text-center">Si eres miembro $5, tu número queda en <b class="text-zinc-300">boveda_jugadas</b> con tu país, alias, email, WhatsApp para que el mundo coincida contigo</div>
+        <div class="text-[9px] text-zinc-500 text-center mt-1">El serial completo se guardará en la bóveda global</div>
       </div>
     </section>
 
+    <!-- SIMILITUDES GLOBALES -->
     <section class="rounded-[20px] border border-amber-500/20 bg-[#0C1214] p-4">
       <div class="flex justify-between items-center mb-3">
         <span class="text-[11px] font-black tracking-widest text-amber-300 uppercase">Similitudes Globales</span>
         <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-400 text-black font-black" x-text="queryFull ? (searchLoading ? 'Buscando...' : queryFull+' · '+globalResults.length+' similares') : 'Ingresa dígitos'"></span>
       </div>
-      <div x-show="queryFull.length<3" class="text-[11px] text-zinc-600 text-center py-6">Ingresa al menos 3 dígitos arriba<br><span class="text-[9px]">Búsqueda global optimizada (debounce 300ms)</span></div>
-      <div x-show="queryFull.length>=3 && !searchLoading && globalResults.length===0" class="text-[11px] text-zinc-500 text-center py-6">No hay similares para <b class="text-white" x-text="queryFull"></b> aún<br><span class="text-amber-300 text-[10px]">¡Sé el primero en bajarlo a la bóveda!</span></div>
+      <div x-show="queryFull.length<3" class="text-[11px] text-zinc-600 text-center py-6">Ingresa al menos 3 dígitos para buscar similitudes</div>
+      <div x-show="queryFull.length>=3 && !searchLoading && globalResults.length===0" class="text-[11px] text-zinc-500 text-center py-6">No hay similares para <b class="text-white" x-text="queryFull"></b> aún</div>
       <div x-show="searchLoading && queryFull.length>=3" class="text-center py-6"><span class="spinner"></span></div>
       <div class="space-y-2 max-h-[460px] overflow-auto" x-show="!searchLoading">
         <template x-for="h in globalResults.slice(0,50)" :key="h.id||h.serial">
@@ -375,10 +406,6 @@
         <a href="mailto:support@dollardgt.com" class="text-zinc-400 hover:text-amber-300 underline">Soporte</a>
       </div>
       <div class="text-[10px] font-black tracking-widest text-zinc-400">2026 DollarDgt.com</div>
-    </div>
-    <div class="mt-2 flex flex-wrap justify-between items-center gap-2 text-[8px] text-zinc-600">
-      <span>Stripe $5 de por vida · Supabase · Bóveda Global · Colección internacional</span>
-      <span class="text-zinc-500">v7.9 · Fase 5 · Fix Bóveda</span>
     </div>
   </footer>
 </main>
@@ -628,6 +655,9 @@ function app() {
     showOnboarding: localStorage.getItem('dgt_onboarding_done') !== '1',
     onboardingStep: 1,
     userDigits:[],
+    serialPrefix:'',
+    serialSuffix:'',
+    serialYear:'',
     letters: Engine.genLetters(20),
     yr: Engine.genYear(),
     securitySeal: Engine.genSeal(),
@@ -699,7 +729,6 @@ function app() {
     rateLimitPublishMs:60000,
     rateLimitToqueMs:30000,
 
-    // Gamificación
     userPoints:0,
     userStreak:0,
     userRank:null,
@@ -717,7 +746,20 @@ function app() {
     get queryFirst4(){ return this.userDigits.slice(0,4).join(''); },
     get isEmailValid(){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.profile.email); },
     get profileComplete(){ return this.user && this.profile.country && this.profile.alias && this.isEmailValid; },
-    get canPublish(){ return this.profileComplete && this.queryFull.length>=3; },
+    get fullSerialPreview(){
+      const parts = [];
+      if (this.serialPrefix) parts.push(this.serialPrefix.toUpperCase());
+      if (this.userDigits.length) parts.push(this.userDigits.join(''));
+      if (this.serialSuffix) parts.push(this.serialSuffix.toUpperCase());
+      return parts.join(' ') || 'Ingresa datos';
+    },
+    get canPublish(){
+      return this.user && this.globalActive && this.profileComplete &&
+             this.serialPrefix.trim().length >= 1 &&
+             this.serialSuffix.trim().length === 1 &&
+             this.userDigits.length >= 3 &&
+             this.serialYear && this.serialYear >= 1800 && this.serialYear <= 2026;
+    },
     get filteredHistory(){
       let l = [...(this.history || []), ...(this.jugadasPool || [])];
       const q=(this.searchQuery||'').toLowerCase();
@@ -1231,14 +1273,14 @@ function app() {
     pushLastMatch() {
       if (!this.queryFull) return;
       const snapshotLetters = this.lettersDisplay;
-      const snapshotSerial = `${this.finalPrefix} ${this.queryFull} ${this.letters.c}`;
+      const snapshotSerial = this.fullSerialPreview;
       const entry = {
         id: 'm_' + Date.now(),
         serial: snapshotSerial,
         digits: this.queryFull,
         lettersSnapshot: snapshotLetters,
         denomSnapshot: this.denom,
-        yrSnapshot: this.yr,
+        yrSnapshot: this.serialYear || this.yr,
         rarity: this.rarity.label,
         rarityScore: this.rarity.score,
         valueSnapshot: this.value,
@@ -1262,7 +1304,7 @@ function app() {
     },
     handleRegister() {
       if (!this.user) { this.authModal.open = true; return; }
-      if (!this.profile.alias || !this.isEmailValid) {
+      if (!this.profileComplete) {
         this.openQuickProfile();
         this.pendingPublish = true;
         return;
@@ -1318,35 +1360,35 @@ function app() {
       if (now - this.lastPublishTime < this.rateLimitPublishMs) { this.showToast('Espera un minuto antes de publicar otro número'); return; }
       this.lastPublishTime = now;
       this.loadingPublish = true;
-      const full = this.queryFull;
-      const first4 = this.queryFirst4;
+      const fullSerial = this.fullSerialPreview;
+      const full = this.userDigits.join('');
+      const first4 = full.slice(0,4);
       const rarity = Engine.checkRarity(full);
       const points = Engine.calcPoints(rarity, parseInt(this.profile.denom));
-      const serialReal = `${this.profile.alias.slice(0,2).toUpperCase()} ${full.padEnd(8,'0')} ${String.fromCharCode(65+Math.floor(Math.random()*26))}`;
       const payload = {
         user_id: this.user.id,
-        serial: serialReal,
-        serial_display: serialReal,
+        serial: fullSerial,
+        serial_display: fullSerial,
         digits: full,
         search_key: first4,
         points: points,
         rarity: rarity,
-        denom: parseInt(this.profile.denom),
-        nom: parseInt(this.profile.denom),
-        yr: parseInt(this.profile.yr) || 2017,
+        denom: this.denom,
+        nom: this.denom,
+        yr: parseInt(this.serialYear) || this.yr,
         country: this.profile.country,
         owner: this.profile.alias,
         contact: this.encodeSensitive(`${this.profile.phone || ''}|${this.profile.email}`),
         email: this.encodeSensitive(this.profile.email),
         alias: this.profile.alias,
-        letters_snapshot: this.lettersDisplay,
+        letters_snapshot: `${this.serialPrefix} ${this.serialSuffix}`,
         value_snapshot: this.value,
         created_at: new Date().toISOString()
       };
       try {
         const { error } = await supabaseClient.from('boveda_jugadas').insert(payload);
         if (error) throw error;
-        this.showToast(`✅ Tu ${full} bajado a bóveda · $${this.value.toFixed(2)} · ${rarity.label}`);
+        this.showToast(`✅ Serial ${fullSerial} bajado a bóveda · $${this.value.toFixed(2)} · ${rarity.label}`);
         await this.loadVault();
         this.tab = 'boveda';
         this.addPoints(50, 'Publicación');
