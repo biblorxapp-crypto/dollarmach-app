@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#050707">
-  <title>$DOLLARDGT - v7.9 Fase 5 + Activación Manual</title>
+  <title>$DOLLARDGT - v7.9 Fase 5 + Perfil Automático</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@500;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter'],display:['Fraunces'],mono:['JetBrains Mono']}}}}</script>
@@ -25,11 +25,7 @@
     .input-base:focus{border-color:rgba(251,191,36,.5)} .input-base.invalid{border-color:rgba(244,63,94,.6)}
     select.input-base{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%a1a1aa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .6rem center;background-size:1rem;padding-right:2rem}
     .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite} @keyframes spin{to{transform:rotate(360deg)}}
-    /* Accesibilidad: foco visible */
-    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
-      outline: 2px solid #FBBF24;
-      outline-offset: 2px;
-    }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }
   </style>
 </head>
 <body class="min-h-dvh antialiased text-white flex justify-center px-3 py-4" x-data="app()" x-init="init()">
@@ -37,7 +33,7 @@
 
   <!-- HEADER -->
   <div class="flex items-center justify-between">
-    <div><h1 class="font-black text-[1.9rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[9px] tracking-[0.22em] text-zinc-500 uppercase mt-1">v7.9 · Fase 5 · Activación Manual</p></div>
+    <div><h1 class="font-black text-[1.9rem] leading-none text-amber-400 font-display">$DOLLARDGT</h1><p class="text-[9px] tracking-[0.22em] text-zinc-500 uppercase mt-1">v7.9 · Fase 5 · Perfil Automático</p></div>
     <div class="flex items-center gap-2">
       <button @click="showOnboarding=true" class="h-9 w-9 rounded-xl bg-white/5 border border-white/10 grid place-items-center text-[12px]" aria-label="Ayuda">?</button>
       <div class="h-9 px-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 grid place-items-center font-mono text-[9px] text-amber-300 font-bold" x-text="globalActive?'MIEMBRO':'$5 VIDA'"></div>
@@ -54,9 +50,9 @@
 
   <!-- TABS -->
   <div class="flex gap-2 p-1 rounded-2xl bg-[#0E1212] border border-white/10 sticky top-2 z-20 backdrop-blur">
-    <button @click="tab='explorar'" class="flex-1 h-9 rounded-xl text-[11px] font-black tracking-widest uppercase border" :class="tab==='explorar'?'tab-active':'tab-idle'" aria-label="Explorar">EXPLORAR</button>
-    <button @click="tab='boveda'" class="flex-1 h-9 rounded-xl text-[11px] font-black tracking-widest uppercase border" :class="tab==='boveda'?'tab-active':'tab-idle'" aria-label="Bóveda">BÓVEDA <span x-text="'('+filteredHistory.length+')'"></span></button>
-    <button @click="tab='cuenta'" class="flex-1 h-9 rounded-xl text-[11px] font-black tracking-widest uppercase border relative" :class="tab==='cuenta'?'tab-active':'tab-idle'" aria-label="Cuenta">CUENTA <span x-show="profileComplete">✓</span> <span x-show="unreadToques>0" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[8px] h-4 w-4 rounded-full grid place-items-center font-black" x-text="unreadToques"></span></button>
+    <button @click="tab='explorar'" class="flex-1 h-9 rounded-xl text-[11px] font-black tracking-widest uppercase border" :class="tab==='explorar'?'tab-active':'tab-idle'">EXPLORAR</button>
+    <button @click="tab='boveda'" class="flex-1 h-9 rounded-xl text-[11px] font-black tracking-widest uppercase border" :class="tab==='boveda'?'tab-active':'tab-idle'">BÓVEDA <span x-text="'('+filteredHistory.length+')'"></span></button>
+    <button @click="tab='cuenta'" class="flex-1 h-9 rounded-xl text-[11px] font-black tracking-widest uppercase border relative" :class="tab==='cuenta'?'tab-active':'tab-idle'">CUENTA <span x-show="profileComplete">✓</span> <span x-show="unreadToques>0" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[8px] h-4 w-4 rounded-full grid place-items-center font-black" x-text="unreadToques"></span></button>
   </div>
 
   <!-- TAB EXPLORAR -->
@@ -88,7 +84,7 @@
           </div>
           <div class="text-[10px] text-zinc-500 mt-1">Solo tus dígitos · máx 10 · abajo verás similares globales</div>
         </div>
-        <button @click="clearInput()" class="text-[9px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-500" aria-label="Limpiar dígitos">LIMPIAR</button>
+        <button @click="clearInput()" class="text-[9px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-500">LIMPIAR</button>
       </div>
 
       <div class="mt-5 min-h-[68px] rounded-2xl bg-black border border-white/10 p-3 flex flex-wrap gap-1.5 justify-center items-center" :class="digitsSettled?'soft-settle':''">
@@ -129,7 +125,7 @@
         <div class="text-[9px] text-zinc-500 uppercase font-bold">Valor · Rareza</div>
         <div class="mt-1 font-mono text-[1rem] font-black text-emerald-300" :class="animValue?'value-glow':''" x-text="'$'+value.toFixed(2)"></div>
         <div class="text-[7px] text-zinc-500 mt-1" x-text="'$'+denom+' × '+(rarity.label==='SOLID'?'4.8': rarity.label==='RADAR'?'3.7': rarity.label==='LADDER'?'3.2': rarity.label==='REPEATER'?'2.8': rarity.label==='BINARY'?'2.4': rarity.label==='SEMI-SOLID'?'2.1':'1.6')+' + rareza'"></div>
-        <button @click="explainRarity(rarity)" class="text-[8px] mt-1 px-1.5 py-0.5 rounded-full border transition-all" :class="[rarity.badgeClass, animValue?'pop':'']" x-text="rarity.label" aria-label="Explicar rareza"></button>
+        <button @click="explainRarity(rarity)" class="text-[8px] mt-1 px-1.5 py-0.5 rounded-full border transition-all" :class="[rarity.badgeClass, animValue?'pop':'']" x-text="rarity.label"></button>
       </div>
     </section>
     <div x-show="rarityTip.visible" class="rounded-xl border border-amber-500/20 bg-[#15120A] px-3 py-2 text-[11px] text-zinc-300"><b class="text-amber-200" x-text="rarityTip.label"></b>: <span x-text="rarityTip.text"></span></div>
@@ -137,11 +133,11 @@
     <section class="rounded-[24px] border border-white/[0.06] bg-[#0E1212] p-3">
       <div class="grid grid-cols-4 gap-2">
         <template x-for="row in numpadGrid"><template x-for="btn in row"><div>
-          <button x-show="btn.type==='denom'" @click="setDenom(btn.val)" class="kbtn h-[48px] w-full rounded-[12px] text-[12px] font-black text-white border border-white/10" :class="[denomColorsClass[btn.val], denom===btn.val?'ring-2 ring-white/30':'opacity-80']" x-text="'$'+btn.val" :aria-label="'Denominación '+btn.val"></button>
-          <button x-show="btn.type==='num'" @click="pressNum(btn.val)" :disabled="userDigits.length>=10" class="kbtn h-[48px] w-full rounded-[12px] border border-white/[0.06] bg-[#1C2424] text-[16px] font-black text-[#D4E2DC] disabled:opacity-20" x-text="btn.val" :aria-label="'Número '+btn.val"></button>
+          <button x-show="btn.type==='denom'" @click="setDenom(btn.val)" class="kbtn h-[48px] w-full rounded-[12px] text-[12px] font-black text-white border border-white/10" :class="[denomColorsClass[btn.val], denom===btn.val?'ring-2 ring-white/30':'opacity-80']" x-text="'$'+btn.val"></button>
+          <button x-show="btn.type==='num'" @click="pressNum(btn.val)" :disabled="userDigits.length>=10" class="kbtn h-[48px] w-full rounded-[12px] border border-white/[0.06] bg-[#1C2424] text-[16px] font-black text-[#D4E2DC] disabled:opacity-20" x-text="btn.val"></button>
         </div></template></template>
       </div>
-      <div class="mt-2 flex gap-2"><button @click="clearInput()" class="flex-1 h-9 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400" aria-label="Borrar todo">Borrar todo</button><button @click="deleteDigit()" class="flex-1 h-9 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400" aria-label="Borrar último dígito">⌫ último</button></div>
+      <div class="mt-2 flex gap-2"><button @click="clearInput()" class="flex-1 h-9 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400">Borrar todo</button><button @click="deleteDigit()" class="flex-1 h-9 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400">⌫ último</button></div>
       <div class="mt-2 text-[9px] text-zinc-600 text-center">Máximo 10 dígitos · solo tus dígitos · sin cola extra</div>
     </section>
 
@@ -149,8 +145,8 @@
       <div class="font-mono text-[13px] text-white" x-text="queryFull ? finalPrefix+' '+queryFull+' '+letters.c : 'Ingresa dígitos para vista previa'"></div>
       <div class="text-[9px] text-zinc-500 mt-1">Vista previa · prefijo + <b class="text-white">tus dígitos</b> + sufijo · <span x-text="yr"></span> · <span x-text="lettersDisplay"></span></div>
       <div class="mt-4 flex flex-col gap-2">
-        <button @click="handleRegister()" :disabled="!queryFull || loadingPublish" class="kbtn w-full h-[48px] rounded-[14px] font-black text-[13px] border disabled:opacity-40" :class="user && globalActive ? 'bg-violet-500 text-white border-violet-400' : 'bg-amber-400 text-black border-amber-300'" aria-label="Publicar en bóveda">
-          <span x-show="!loadingPublish" x-text="!user ? 'LOGIN PARA BAJAR A BÓVEDA' : (globalActive ? 'BAJAR MI '+queryFull+' A BÓVEDA GLOBAL' : 'ACTIVAR MEMBRESÍA $5 PARA BAJAR')"></span>
+        <button @click="handleRegister()" :disabled="!queryFull || loadingPublish" class="kbtn w-full h-[48px] rounded-[14px] font-black text-[13px] border disabled:opacity-40" :class="user && globalActive && profileComplete ? 'bg-violet-500 text-white border-violet-400' : 'bg-amber-400 text-black border-amber-300'">
+          <span x-show="!loadingPublish" x-text="!user ? 'LOGIN PARA BAJAR A BÓVEDA' : (!profileComplete ? 'COMPLETA TU ALIAS EN CUENTA' : (globalActive ? 'BAJAR MI '+queryFull+' A BÓVEDA GLOBAL' : 'ACTIVAR MEMBRESÍA $5 PARA BAJAR'))"></span>
           <span x-show="loadingPublish" class="spinner"></span>
         </button>
         <div class="text-[9px] text-zinc-500 text-center">Si eres miembro $5, tu número queda en <b class="text-zinc-300">boveda_jugadas</b> con tu país, alias, email, WhatsApp para que el mundo coincida contigo</div>
@@ -181,8 +177,8 @@
               <span x-show="h.email" class="text-[8px] text-zinc-600" x-text="'· '+decodeSensitive(h.email)"></span>
             </div>
             <div class="flex gap-1.5 mt-2">
-              <button @click="usarDigitos(h)" class="h-7 px-3 rounded-full border text-[10px] font-bold border-white/10 text-zinc-400" aria-label="Usar dígitos">USAR</button>
-              <button @click="enviarToqueReal(h)" class="flex-1 h-7 rounded-full border text-[10px] font-bold" :class="globalActive?'border-amber-500/30 text-amber-300 bg-amber-500/10':'border-white/10 text-zinc-500'" x-text="globalActive?'👋 TOQUE':'$5'" aria-label="Enviar toque"></button>
+              <button @click="usarDigitos(h)" class="h-7 px-3 rounded-full border text-[10px] font-bold border-white/10 text-zinc-400">USAR</button>
+              <button @click="enviarToqueReal(h)" class="flex-1 h-7 rounded-full border text-[10px] font-bold" :class="globalActive?'border-amber-500/30 text-amber-300 bg-amber-500/10':'border-white/10 text-zinc-500'" x-text="globalActive?'👋 TOQUE':'$5'"></button>
             </div>
           </div>
         </template>
@@ -190,7 +186,7 @@
     </section>
 
     <section class="rounded-[20px] border border-white/10 bg-[#0C1214] p-4">
-      <div class="flex justify-between mb-2"><span class="text-[11px] font-black tracking-widest text-zinc-300 uppercase">Historial local</span><button @click="clearLastMatches()" class="text-[10px] text-zinc-500" aria-label="Limpiar historial">Limpiar</button></div>
+      <div class="flex justify-between mb-2"><span class="text-[11px] font-black tracking-widest text-zinc-300 uppercase">Historial local</span><button @click="clearLastMatches()" class="text-[10px] text-zinc-500">Limpiar</button></div>
       <div class="space-y-1.5"><template x-for="m in lastMatches" :key="m.id"><div class="flex justify-between items-center rounded-lg bg-white/[0.03] border border-white/5 px-2.5 py-2"><span class="font-mono text-[11px] text-white" x-text="m.serial"></span><span class="text-[9px] text-zinc-500" x-text="m.rarity"></span></div></template><div x-show="!lastMatches.length" class="text-[11px] text-zinc-500 text-center py-2">Tus búsquedas aparecerán aquí</div></div>
     </section>
   </div>
@@ -199,8 +195,8 @@
   <div x-show="tab==='boveda'" class="flex flex-col gap-4">
     <section class="rounded-[20px] border border-white/10 bg-[#0C1214] p-4">
       <div class="flex justify-between mb-3"><span class="text-[11px] font-black tracking-widest text-white uppercase">Bóveda viva · <span x-text="filteredHistory.length"></span></span><span class="text-[9px] text-emerald-400" x-text="supabaseStatus"></span></div>
-      <input x-model="searchQuery" placeholder="Buscar serie similar, alias, país" class="w-full h-10 rounded-xl bg-black border border-white/10 px-3 text-[13px] text-white outline-none" aria-label="Buscar en bóveda">
-      <div class="mt-2 flex flex-wrap gap-1.5"><template x-for="r in ['','SOLID','RADAR','LADDER','REPEATER','BINARY']"><button @click="filters.rarity=r" class="text-[9px] px-2.5 py-1 rounded-full border font-bold" :class="filters.rarity===r?'bg-amber-500/20 border-amber-400/30 text-amber-300':'border-white/10 text-zinc-500'" x-text="r||'Todas'" :aria-label="'Filtrar '+r"></button></template></div>
+      <input x-model="searchQuery" placeholder="Buscar serie similar, alias, país" class="w-full h-10 rounded-xl bg-black border border-white/10 px-3 text-[13px] text-white outline-none">
+      <div class="mt-2 flex flex-wrap gap-1.5"><template x-for="r in ['','SOLID','RADAR','LADDER','REPEATER','BINARY']"><button @click="filters.rarity=r" class="text-[9px] px-2.5 py-1 rounded-full border font-bold" :class="filters.rarity===r?'bg-amber-500/20 border-amber-400/30 text-amber-300':'border-white/10 text-zinc-500'" x-text="r||'Todas'"></button></template></div>
       <div class="mt-3 space-y-2 max-h-[580px] overflow-auto" id="boveda-list">
         <template x-for="h in paginatedHistory" :key="h.id||h.serial">
           <div class="rounded-xl border border-white/10 p-3 bg-[#0E1414] hover:border-amber-500/20 transition">
@@ -208,8 +204,8 @@
               <div>
                 <div class="font-mono font-black text-[13px] text-white flex items-center gap-2">
                   <span x-text="h.serial"></span>
-                  <button @click="copySerial(h.serial)" class="text-[8px] px-1 py-0.5 rounded bg-white/5 text-zinc-400" aria-label="Copiar serial">COPIAR</button>
-                  <button @click="shareSerial(h.serial)" class="text-[8px] px-1 py-0.5 rounded bg-white/5 text-zinc-400" aria-label="Compartir serial">COMPARTIR</button>
+                  <button @click="copySerial(h.serial)" class="text-[8px] px-1 py-0.5 rounded bg-white/5 text-zinc-400">COPIAR</button>
+                  <button @click="shareSerial(h.serial)" class="text-[8px] px-1 py-0.5 rounded bg-white/5 text-zinc-400">COMPARTIR</button>
                 </div>
                 <div class="flex gap-1.5 mt-1.5 flex-wrap">
                   <span class="text-[8px] px-1.5 py-0.5 rounded-full border font-bold" :class="h.rarity?.badgeClass" x-text="h.rarity?.label"></span>
@@ -226,8 +222,8 @@
               </div>
             </div>
             <div class="flex gap-1.5 mt-3">
-              <button @click="toggleFavorite(h)" class="h-9 w-9 rounded-full border grid place-items-center text-[13px] shrink-0" :class="isFavorite(h)?'bg-rose-500/20 border-rose-500/30 text-rose-300':'border-white/10 text-zinc-500 bg-white/5'" aria-label="Favorito">♥</button>
-              <button @click="enviarToqueReal(h)" class="flex-1 h-9 rounded-full font-black text-[11px] border-2 transition" :class="globalActive?'bg-amber-400 text-black border-amber-300':'bg-zinc-800 text-zinc-400 border-white/10'" aria-label="Enviar toque a dueño">
+              <button @click="toggleFavorite(h)" class="h-9 w-9 rounded-full border grid place-items-center text-[13px] shrink-0" :class="isFavorite(h)?'bg-rose-500/20 border-rose-500/30 text-rose-300':'border-white/10 text-zinc-500 bg-white/5'">♥</button>
+              <button @click="enviarToqueReal(h)" class="flex-1 h-9 rounded-full font-black text-[11px] border-2 transition" :class="globalActive?'bg-amber-400 text-black border-amber-300':'bg-zinc-800 text-zinc-400 border-white/10'">
                 <span x-show="!loadingToque" x-text="globalActive ? '👋 TOQUE A '+h.owner : '🔒 $5 PARA TOCAR A '+h.owner"></span>
                 <span x-show="loadingToque" class="spinner"></span>
               </button>
@@ -237,7 +233,7 @@
         </template>
       </div>
       <div class="mt-4 text-center">
-        <button x-show="filteredHistory.length > visibleCount" @click="loadMore()" class="h-10 px-6 rounded-xl bg-white/5 border border-white/10 text-[11px] font-bold text-zinc-300" aria-label="Cargar más">CARGAR MÁS ({{ visibleCount }}/{{ filteredHistory.length }})</button>
+        <button x-show="filteredHistory.length > visibleCount" @click="loadMore()" class="h-10 px-6 rounded-xl bg-white/5 border border-white/10 text-[11px] font-bold text-zinc-300">CARGAR MÁS ({{ visibleCount }}/{{ filteredHistory.length }})</button>
       </div>
     </section>
   </div>
@@ -255,10 +251,9 @@
       <div class="mt-3">
         <p x-show="globalActive" class="text-[11px] text-emerald-300">✓ Acceso completo a bóveda global, toques privados y chat.</p>
         <p x-show="!globalActive" class="text-[11px] text-zinc-400">Activa la membresía para publicar tus números, enviar toques y chatear con otros coleccionistas.</p>
-        <button x-show="!globalActive" @click="openStripeModal()" class="mt-2 w-full h-11 rounded-xl bg-amber-400 text-black font-black text-[12px]" aria-label="Activar membresía">ACTIVAR MEMBRESÍA $5</button>
-        <!-- Botón de activación manual -->
-        <button x-show="!globalActive" @click="manualActivateMembership()" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px]" aria-label="Ya pagué, activar ahora">¿Ya pagaste? Activar ahora</button>
-        <button x-show="globalActive" @click="globalActive=false; localStorage.removeItem('dgt_global_active'); showToast('Membresía desactivada (demo)')" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px]" aria-label="Cancelar membresía demo">Cancelar membresía (demo)</button>
+        <button x-show="!globalActive" @click="openStripeModal()" class="mt-2 w-full h-11 rounded-xl bg-amber-400 text-black font-black text-[12px]">ACTIVAR MEMBRESÍA $5</button>
+        <button x-show="!globalActive" @click="manualActivateMembership()" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px]">¿Ya pagaste? Activar ahora</button>
+        <button x-show="globalActive" @click="globalActive=false; localStorage.removeItem('dgt_global_active'); showToast('Membresía desactivada (demo)')" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px]">Cancelar membresía (demo)</button>
       </div>
     </section>
 
@@ -312,12 +307,12 @@
       <div class="flex justify-between items-start"><div><div class="text-[12px] font-black tracking-[0.18em] text-amber-300 uppercase">Cuenta DGT</div><div class="text-[10px] text-zinc-500 mt-1">País, alias, email, WhatsApp → viajan con tu número a Supabase</div></div><div class="text-[9px] px-2 py-1 rounded-full border font-bold" :class="profileComplete?'bg-emerald-500/15 border-emerald-500/30 text-emerald-300':'bg-rose-500/15 border-rose-500/30 text-rose-300'" x-text="profileComplete?'COMPLETO':'INCOMPLETO'"></div></div>
       <div class="mt-5 space-y-3">
         <div><label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">País *</label><select x-model="profile.country" class="input-base mt-1"><option>🇦🇷 Argentina $</option><option>🇺🇸 USA $</option><option>🇲🇽 México $</option><option>🇪🇸 España €</option><option>🇪🇺 Euro €</option><option>🇨🇴 Colombia $</option><option>🇵🇪 Perú S/</option><option>🇨🇱 Chile $</option><option>🇧🇷 Brasil R$</option></select></div>
-        <div class="grid grid-cols-2 gap-2"><div><label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Alias *</label><input x-model="profile.alias" placeholder="Coleccionista77" class="input-base mt-1" :class="aliasError ? 'invalid' : ''" aria-label="Alias"></div><div><label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Año fav</label><input x-model="profile.yr" type="number" placeholder="2017" class="input-base mt-1" aria-label="Año favorito"></div></div>
-        <div><label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Email *</label><input x-model="profile.email" type="email" placeholder="tu@email.com" class="input-base mt-1" :class="!isEmailValid && profile.email ? 'invalid':''" aria-label="Email"></div>
-        <div><label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">WhatsApp *</label><input x-model="profile.phone" placeholder="+54 9 11 ..." class="input-base mt-1" :class="phoneError ? 'invalid' : ''" aria-label="WhatsApp"></div>
+        <div class="grid grid-cols-2 gap-2"><div><label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Alias *</label><input x-model="profile.alias" placeholder="Escribe tu alias" class="input-base mt-1" :class="aliasError ? 'invalid' : ''" aria-label="Alias"></div><div><label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Año fav</label><input x-model="profile.yr" type="number" placeholder="2017" class="input-base mt-1"></div></div>
+        <div><label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Email *</label><input x-model="profile.email" type="email" placeholder="tu@email.com" class="input-base mt-1" :class="!isEmailValid && profile.email ? 'invalid':''"></div>
+        <div><label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">WhatsApp *</label><input x-model="profile.phone" placeholder="+54 9 11 ..." class="input-base mt-1" :class="phoneError ? 'invalid' : ''"></div>
         <div class="grid grid-cols-2 gap-2"><div><label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">$ Denom</label><select x-model="profile.denom" class="input-base mt-1"><option value="1">$1</option><option value="5">$5</option><option value="20">$20</option><option value="50">$50</option><option value="100">$100</option></select></div><div><label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Visible</label><select x-model="profile.contactVisible" class="input-base mt-1"><option value="yes">Sí público</option><option value="no">Solo $5</option></select></div></div>
         <div class="rounded-xl border border-white/10 bg-black p-3 flex justify-between items-center"><div><div class="text-[9px] text-zinc-500 uppercase">Supabase</div><div class="font-mono text-[11px] text-white mt-0.5" x-text="supabaseStatus"></div><div class="text-[8px] text-zinc-600" x-text="profile.lastSync||'Sin sync'"></div></div><div class="h-2 w-2 rounded-full" :class="profile.synced?'bg-emerald-400':'bg-zinc-600'"></div></div>
-        <button @click="saveProfile()" :disabled="saving" class="w-full h-12 rounded-xl font-black text-[12px] border-2" :class="profileComplete?'bg-amber-400 text-black border-amber-300':'bg-zinc-800 text-zinc-500 border-white/10'" aria-label="Guardar cuenta">
+        <button @click="saveProfile()" :disabled="saving" class="w-full h-12 rounded-xl font-black text-[12px] border-2" :class="profileComplete?'bg-amber-400 text-black border-amber-300':'bg-zinc-800 text-zinc-500 border-white/10'">
           <span x-show="!saving" x-text="saving?'GUARDANDO...':'GUARDAR CUENTA EN SUPABASE'"></span>
           <span x-show="saving" class="spinner"></span>
         </button>
@@ -329,7 +324,7 @@
         <span class="text-[11px] font-black tracking-widest text-violet-300 uppercase">Toques Privados · <span x-text="toquesRecibidos.length"></span></span>
         <div class="flex items-center gap-2">
           <span x-show="unreadToques>0" class="text-[9px] px-2 py-0.5 rounded-full bg-rose-500 text-white font-black" x-text="unreadToques+' nuevos'"></span>
-          <button @click="loadToques()" class="text-[9px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-400" aria-label="Recargar toques">↻</button>
+          <button @click="loadToques()" class="text-[9px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-400">↻</button>
         </div>
       </div>
       <div x-show="toquesLoading" class="text-[11px] text-zinc-500 text-center py-3">Cargando toques...</div>
@@ -342,10 +337,10 @@
               <div class="text-[9px] px-2 py-1 rounded-full font-bold" :class="t.status==='pending'?'bg-amber-500/20 text-amber-300': t.status==='accepted'?'bg-emerald-500/20 text-emerald-300':'bg-white/5 text-zinc-500'" x-text="t.status"></div>
             </div>
             <div x-show="t.status==='pending'" class="flex gap-2 mt-2">
-              <button @click="acceptToque(t)" class="flex-1 h-8 rounded-full bg-emerald-500 text-black font-black text-[10px]" aria-label="Aceptar toque">ACEPTAR → CHAT PRIVADO</button>
-              <button @click="rejectToque(t)" class="flex-1 h-8 rounded-full bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px]" aria-label="Rechazar toque">RECHAZAR</button>
+              <button @click="acceptToque(t)" class="flex-1 h-8 rounded-full bg-emerald-500 text-black font-black text-[10px]">ACEPTAR → CHAT PRIVADO</button>
+              <button @click="rejectToque(t)" class="flex-1 h-8 rounded-full bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px]">RECHAZAR</button>
             </div>
-            <div x-show="t.status==='accepted'" class="mt-2"><button @click="openPrivateChat(t)" class="w-full h-8 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 font-bold text-[10px]" aria-label="Abrir chat">ABRIR CHAT PRIVADO</button></div>
+            <div x-show="t.status==='accepted'" class="mt-2"><button @click="openPrivateChat(t)" class="w-full h-8 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 font-bold text-[10px]">ABRIR CHAT PRIVADO</button></div>
           </div>
         </template>
       </div>
@@ -363,17 +358,17 @@
   <footer class="mt-6 rounded-[16px] border border-white/10 bg-[#0A0E0E] p-3">
     <div class="flex flex-wrap justify-between items-center gap-2">
       <div class="flex items-center gap-2 text-[10px]">
-        <a href="#" @click.prevent="showTerms='terms'" class="text-zinc-400 hover:text-amber-300 underline" aria-label="Términos">Términos</a>
+        <a href="#" @click.prevent="showTerms='terms'" class="text-zinc-400 hover:text-amber-300 underline">Términos</a>
         <span class="text-zinc-700">·</span>
-        <a href="#" @click.prevent="showTerms='privacy'" class="text-zinc-400 hover:text-amber-300 underline" aria-label="Privacidad">Privacidad</a>
+        <a href="#" @click.prevent="showTerms='privacy'" class="text-zinc-400 hover:text-amber-300 underline">Privacidad</a>
         <span class="text-zinc-700">·</span>
-        <a href="mailto:support@dollardgt.com" class="text-zinc-400 hover:text-amber-300 underline" aria-label="Soporte">Soporte</a>
+        <a href="mailto:support@dollardgt.com" class="text-zinc-400 hover:text-amber-300 underline">Soporte</a>
       </div>
       <div class="text-[10px] font-black tracking-widest text-zinc-400">2026 DollarDgt.com</div>
     </div>
     <div class="mt-2 flex flex-wrap justify-between items-center gap-2 text-[8px] text-zinc-600">
       <span>Stripe $5 de por vida · Supabase · Bóveda Global · Colección internacional</span>
-      <span class="text-zinc-500">v7.9 · Fase 5 · Activación Manual</span>
+      <span class="text-zinc-500">v7.9 · Fase 5 · Perfil Automático</span>
     </div>
   </footer>
 </main>
@@ -385,15 +380,15 @@
     <h3 class="font-black text-white text-[14px]">Acceso a $DOLLARDGT</h3>
     <p class="text-[10px] text-zinc-500 mt-1">Regístrate gratis para guardar tus datos y activar la membresía.</p>
     <div class="mt-4 space-y-2">
-      <input x-model="authModal.email" type="email" placeholder="Email" class="input-base" aria-label="Email">
-      <input x-model="authModal.password" type="password" placeholder="Contraseña" class="input-base" aria-label="Contraseña">
+      <input x-model="authModal.email" type="email" placeholder="Email" class="input-base">
+      <input x-model="authModal.password" type="password" placeholder="Contraseña" class="input-base">
       <div class="flex gap-2">
-        <button @click="signUp()" class="flex-1 h-11 rounded-xl bg-amber-400 text-black font-black text-[12px]" aria-label="Crear cuenta">CREAR CUENTA</button>
-        <button @click="signIn()" class="flex-1 h-11 rounded-xl bg-white/10 border border-white/20 font-black text-[12px]" aria-label="Iniciar sesión">INICIAR SESIÓN</button>
+        <button @click="signUp()" class="flex-1 h-11 rounded-xl bg-amber-400 text-black font-black text-[12px]">CREAR CUENTA</button>
+        <button @click="signIn()" class="flex-1 h-11 rounded-xl bg-white/10 border border-white/20 font-black text-[12px]">INICIAR SESIÓN</button>
       </div>
       <p x-show="authModal.error" class="text-[10px] text-rose-400" x-text="authModal.error"></p>
     </div>
-    <button @click="authModal.open=false" class="mt-3 w-full h-9 rounded-xl bg-white/5 text-zinc-400 font-bold text-[10px]" aria-label="Cancelar">CANCELAR</button>
+    <button @click="authModal.open=false" class="mt-3 w-full h-9 rounded-xl bg-white/5 text-zinc-400 font-bold text-[10px]">CANCELAR</button>
   </div>
 </div>
 
@@ -403,7 +398,7 @@
   <div class="relative w-full max-w-[400px] rounded-[20px] bg-[#0E1212] border border-white/10 p-5 max-h-[70vh] overflow-auto">
     <div class="flex justify-between items-center sticky top-0 bg-[#0E1212] pb-2 border-b border-white/10">
       <h3 class="font-black text-white text-[13px]" x-text="showTerms==='terms'?'Términos y Condiciones':'Política de Privacidad'"></h3>
-      <button @click="showTerms=false" class="h-7 w-7 rounded-full bg-white/5 grid place-items-center" aria-label="Cerrar">✕</button>
+      <button @click="showTerms=false" class="h-7 w-7 rounded-full bg-white/5 grid place-items-center">✕</button>
     </div>
     <div class="mt-3 text-[11px] text-zinc-400 leading-relaxed space-y-4">
       <template x-if="showTerms==='terms'">
@@ -449,12 +444,12 @@
   <div class="mt-4 bg-black border border-white/10 rounded-xl p-3 text-[11px] text-zinc-300">
     <label class="flex items-start gap-2 cursor-pointer">
       <input type="checkbox" x-model="acceptStripeTerms" class="mt-0.5 h-4 w-4">
-      <span>Acepto los <a href="#" @click.prevent="showTerms='terms'; stripeModal.open=false" class="text-amber-300 underline" aria-label="Términos">Términos</a> y la <a href="#" @click.prevent="showTerms='privacy'; stripeModal.open=false" class="text-amber-300 underline" aria-label="Privacidad">Privacidad</a>.</span>
+      <span>Acepto los <a href="#" @click.prevent="showTerms='terms'; stripeModal.open=false" class="text-amber-300 underline">Términos</a> y la <a href="#" @click.prevent="showTerms='privacy'; stripeModal.open=false" class="text-amber-300 underline">Privacidad</a>.</span>
     </label>
   </div>
-  <button @click="redirectToStripe()" :disabled="!acceptStripeTerms" class="mt-4 w-full h-11 rounded-xl bg-amber-400 text-black font-black disabled:opacity-40 disabled:cursor-not-allowed" aria-label="Ir a pagar">IR A PAGAR $5</button>
+  <button @click="redirectToStripe()" :disabled="!acceptStripeTerms" class="mt-4 w-full h-11 rounded-xl bg-amber-400 text-black font-black disabled:opacity-40 disabled:cursor-not-allowed">IR A PAGAR $5</button>
   <p class="text-[9px] text-zinc-600 text-center mt-2">Pago único procesado por Stripe. No se almacenan datos de tarjeta.</p>
-  <button @click="manualActivateMembership()" class="mt-2 w-full h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-bold text-[10px]" aria-label="Ya pagué, activar ahora">¿Ya pagaste? Activar ahora</button>
+  <button @click="manualActivateMembership()" class="mt-2 w-full h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-bold text-[10px]">¿Ya pagaste? Activar ahora</button>
 </div></div>
 
 <!-- MODAL CHAT -->
@@ -463,7 +458,7 @@
   <div class="relative w-full max-w-[380px] h-[75vh] sm:h-[520px] rounded-t-[20px] sm:rounded-[20px] bg-[#0E1212] border border-violet-500/30 flex flex-col overflow-hidden">
     <div class="p-4 border-b border-white/10 flex justify-between items-center bg-[#15101F]">
       <div><div class="font-black text-[12px] text-white" x-text="'Chat con '+ (chatModal.toque?.from_alias===profile.alias ? chatModal.toque?.to_owner : chatModal.toque?.from_alias)"></div><div class="font-mono text-[10px] text-violet-300" x-text="chatModal.toque?.serial"></div></div>
-      <button @click="chatModal.open=false" class="h-8 w-8 rounded-full bg-white/5 grid place-items-center" aria-label="Cerrar chat">✕</button>
+      <button @click="chatModal.open=false" class="h-8 w-8 rounded-full bg-white/5 grid place-items-center">✕</button>
     </div>
     <div class="flex-1 overflow-auto p-3 space-y-2 bg-black/30">
       <div x-show="chatModal.loading" class="text-[11px] text-zinc-500 text-center py-4">Cargando chat privado...</div>
@@ -478,8 +473,8 @@
       <div x-show="!chatModal.loading && chatModal.messages.length===0" class="text-[11px] text-zinc-600 text-center py-6">Chat privado iniciado<br><span class="text-[9px]">Solo ustedes dos ven estos mensajes</span></div>
     </div>
     <div class="p-3 border-t border-white/10 flex gap-2 bg-[#0E1212]">
-      <input x-model="chatModal.newMessage" @keydown.enter="sendMessage()" placeholder="Mensaje privado..." class="flex-1 h-11 rounded-xl bg-black border border-white/10 px-3 text-[13px] text-white outline-none" aria-label="Mensaje">
-      <button @click="sendMessage()" class="h-11 w-11 rounded-xl bg-violet-500 text-white grid place-items-center font-black" aria-label="Enviar">↑</button>
+      <input x-model="chatModal.newMessage" @keydown.enter="sendMessage()" placeholder="Mensaje privado..." class="flex-1 h-11 rounded-xl bg-black border border-white/10 px-3 text-[13px] text-white outline-none">
+      <button @click="sendMessage()" class="h-11 w-11 rounded-xl bg-violet-500 text-white grid place-items-center font-black">↑</button>
     </div>
     <div class="p-2 text-center text-[8px] text-zinc-600 bg-black/50">Chat privado · encriptado · solo participantes</div>
   </div>
@@ -527,9 +522,9 @@
       </div>
     </div>
     <div class="mt-4 flex gap-2">
-      <button x-show="onboardingStep > 1" @click="onboardingStep--" class="h-11 flex-1 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-black text-[12px]" aria-label="Anterior">ANTERIOR</button>
-      <button x-show="onboardingStep < 3" @click="onboardingStep++" class="h-11 flex-1 rounded-xl bg-amber-400 text-black font-black text-[12px]" aria-label="Siguiente">SIGUIENTE</button>
-      <button x-show="onboardingStep === 3" @click="showOnboarding=false; localStorage.setItem('dgt_onboarding_done','1')" class="h-11 flex-1 rounded-xl bg-emerald-500 text-black font-black text-[12px]" aria-label="Comenzar">COMENZAR</button>
+      <button x-show="onboardingStep > 1" @click="onboardingStep--" class="h-11 flex-1 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-black text-[12px]">ANTERIOR</button>
+      <button x-show="onboardingStep < 3" @click="onboardingStep++" class="h-11 flex-1 rounded-xl bg-amber-400 text-black font-black text-[12px]">SIGUIENTE</button>
+      <button x-show="onboardingStep === 3" @click="showOnboarding=false; localStorage.setItem('dgt_onboarding_done','1')" class="h-11 flex-1 rounded-xl bg-emerald-500 text-black font-black text-[12px]">COMENZAR</button>
     </div>
     <div class="mt-2 flex justify-center gap-1">
       <span class="h-1.5 w-1.5 rounded-full" :class="onboardingStep>=1?'bg-amber-400':'bg-white/20'"></span>
@@ -724,7 +719,7 @@ function app() {
           this.user = session?.user || null;
           if(this.user){
             this.profile.email = this.user.email || '';
-            this.loadProfile();
+            this.ensureProfile();
             this.loadMembership();
             this.loadGamification();
           } else {
@@ -736,7 +731,7 @@ function app() {
         if(session){
           this.user = session.user;
           this.profile.email = session.user.email || '';
-          await this.loadProfile();
+          await this.ensureProfile();
           await this.loadMembership();
           await this.loadGamification();
         }
@@ -754,6 +749,51 @@ function app() {
         console.error('Init error:', error);
         this.showToast('Error inicial, revisa consola');
       }
+    },
+
+    // ===== NUEVA FUNCIÓN: asegurar perfil automático =====
+    async ensureProfile() {
+      if (!this.user) return;
+      const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', this.user.id)
+        .single();
+
+      if (!data) {
+        // Crear perfil básico
+        const newProfile = {
+          id: this.user.id,
+          email: this.user.email || '',
+          nickname: '',
+          alias: '',
+          country: '🇦🇷 Argentina $',
+          phone: '',
+          denom_pref: 20,
+          yr_pref: 2017,
+          contact_visible: true,
+          updated_at: new Date().toISOString()
+        };
+        const { error: insertError } = await supabaseClient
+          .from('profiles')
+          .insert(newProfile);
+        if (!insertError) {
+          this.profile = { ...this.profile, ...newProfile };
+        } else {
+          console.error('Error creando perfil:', insertError);
+        }
+      } else {
+        this.profile = { ...this.profile, ...data };
+        // Guardar en localStorage
+        localStorage.setItem('dgt_country', data.country || '');
+        localStorage.setItem('dgt_nick', data.alias || data.nickname || '');
+        localStorage.setItem('dgt_email', data.email || '');
+        localStorage.setItem('dgt_phone', data.phone || '');
+        localStorage.setItem('dgt_denom', data.denom_pref || '20');
+        localStorage.setItem('dgt_yr', data.yr_pref || '2017');
+      }
+      this.validateAlias();
+      this.validatePhone();
     },
 
     async signUp(){
@@ -783,15 +823,11 @@ function app() {
       this.showToast('Sesión cerrada');
     },
 
+    // Podemos mantener loadProfile como alias de ensureProfile
     async loadProfile(){
-      if(!this.user) return;
-      const {data,error}=await supabaseClient.from('profiles').select('*').eq('id', this.user.id).single();
-      if(data){
-        this.profile = {...this.profile, ...data};
-        this.validateAlias();
-        this.validatePhone();
-      }
+      await this.ensureProfile();
     },
+
     async loadMembership(){
       if(!this.user) return;
       const {data}=await supabaseClient.from('members').select('*').eq('user_id', this.user.id).single();
@@ -1236,7 +1272,16 @@ function app() {
     },
     handleRegister(){
       if(!this.user){ this.authModal.open=true; return; }
-      if(!this.profileComplete){ this.tab='cuenta'; this.showToast('Completa tu Cuenta'); return; }
+      if(!this.profile.alias || !this.isEmailValid){
+        this.tab='cuenta';
+        this.showToast('Completa tu alias y email en Cuenta');
+        // Enfocar el campo alias
+        this.$nextTick(() => {
+          const aliasInput = document.querySelector('input[aria-label="Alias"]');
+          if (aliasInput) aliasInput.focus();
+        });
+        return;
+      }
       if(!this.globalActive){ this.openStripeModal(); return; }
       this.publishSearchToVault();
     },
