@@ -527,10 +527,10 @@
   </div>
 </div>
 
-<!-- MODAL MEMBRESÍA STRIPE (con estilo personalizado) -->
+<!-- MODAL MEMBRESÍA STRIPE (con scroll y estilo) -->
 <div x-show="stripeModal.open" class="fixed inset-0 z-[80] flex items-center justify-center p-3">
   <div class="absolute inset-0 bg-black/80" @click="closeStripeModal()"></div>
-  <div class="relative w-full max-w-[360px] rounded-[20px] bg-[#111616] border border-amber-500/20 p-5">
+  <div class="relative w-full max-w-[360px] max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-[20px] bg-[#111616] border border-amber-500/20 p-5">
     <h3 class="font-black">Membresía $5 de por vida</h3>
     <p class="text-[11px] text-zinc-400 mt-1">Publicar en bóveda global, enviar toques privados y chatear con coleccionistas.</p>
     <div class="mt-4 bg-black border border-white/10 rounded-xl p-3 text-[11px] text-zinc-300">
