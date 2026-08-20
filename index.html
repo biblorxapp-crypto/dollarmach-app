@@ -10,10 +10,8 @@
   <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter'],display:['Fraunces'],mono:['JetBrains Mono']}}}}</script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
-  <!-- Stripe.js para el checkout embebido -->
   <script src="https://js.stripe.com/v3/"></script>
   <style>
-    /* ===== FIX: evita scroll horizontal / "deslizamiento lateral" en móviles ===== */
     *, *::before, *::after { box-sizing: border-box; }
     html, body { overflow-x: hidden; width: 100%; max-width: 100vw; }
     main { overflow-x: hidden; max-width: 100vw; }
@@ -30,12 +28,15 @@
     .pop{animation:popIn .28s cubic-bezier(.2,1.4,.4,1)} @keyframes popIn{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
     .value-glow{animation:valuePulse .4s ease-out} @keyframes valuePulse{0%{transform:scale(.9);text-shadow:0 0 0 rgba(16,185,129,0)}50%{transform:scale(1.08);text-shadow:0 0 18px rgba(16,185,129,.6)}100%{transform:scale(1);text-shadow:none}}
     .tab-active{background:#FBBF24;color:#000;border-color:#FBBF24} .tab-idle{background:rgba(255,255,255,.05);color:#a1a1aa;border-color:rgba(255,255,255,.1)}
-    /* FIX: font-size 16px en inputs evita el auto-zoom de iOS que causa el "salto" lateral al enfocar */
     .input-base{width:100%;height:44px;border-radius:12px;background:#000;border:1px solid rgba(255,255,255,.1);padding:0 12px;color:#fff;font-size:16px;outline:none}
     .input-base:focus{border-color:rgba(251,191,36,.5)} .input-base.invalid{border-color:rgba(244,63,94,.6)}
     select.input-base{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a1a1aa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .6rem center;background-size:1rem;padding-right:2rem}
     .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite} @keyframes spin{to{transform:rotate(360deg)}}
     button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }
+
+    .modal-backdrop { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+    #payment-element { min-height: 140px; }
+    #payment-element iframe { border-radius: 12px !important; }
   </style>
 </head>
 <body class="min-h-dvh antialiased text-white flex justify-center px-3 py-4" x-data="app()" x-init="init()">
@@ -59,13 +60,13 @@
   </div>
 
   <!-- TARJETA RESUMEN DE USUARIO -->
-  <div x-show="user" class="rounded-[20px] border border-white/10 bg-[#0C1214] p-3 flex flex-wrap items-center gap-3">
-    <div class="h-10 w-10 rounded-full bg-amber-400/20 border border-amber-400/30 grid place-items-center font-mono font-black text-amber-300" x-text="profile.alias ? profile.alias[0].toUpperCase() : '?'"></div>
+  <div x-show="user" class="rounded-[20px] border border-white/10 bg-[#0C1214] p-4 flex flex-wrap items-center gap-3">
+    <div class="h-12 w-12 rounded-full bg-amber-400/20 border border-amber-400/30 grid place-items-center font-mono font-black text-amber-300 text-lg shrink-0" x-text="profile.alias ? profile.alias[0].toUpperCase() : '?'"></div>
     <div class="flex-1 min-w-0">
-      <div class="font-bold text-[13px] text-white truncate" x-text="profile.alias || 'Sin alias'"></div>
-      <div class="text-[9px] text-zinc-500 truncate" x-text="profile.country + ' · ' + (globalActive ? 'Miembro' : 'No miembro')"></div>
+      <div class="font-bold text-[14px] text-white truncate" x-text="profile.alias || 'Sin alias'"></div>
+      <div class="text-[10px] text-zinc-500 truncate mt-0.5" x-text="profile.country + ' · ' + (globalActive ? 'Miembro activo' : 'No miembro')"></div>
     </div>
-    <button @click="openQuickProfile()" class="h-8 px-3 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-zinc-300">EDITAR PERFIL</button>
+    <button @click="openQuickProfile()" class="h-9 px-4 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-zinc-300 shrink-0">EDITAR PERFIL</button>
   </div>
 
   <!-- TABS -->
@@ -79,7 +80,7 @@
   <div x-show="tab==='explorar'" class="flex flex-col gap-4">
 
     <!-- SERIE LÍDER -->
-    <section class="rounded-[20px] border border-amber-400/20 bg-[#1E1A0A] p-3">
+    <section class="rounded-[20px] border border-amber-400/20 bg-[#1E1A0A] p-4">
       <div class="flex justify-between items-center">
         <span class="text-[10px] font-black tracking-widest text-amber-200 uppercase truncate">Serie Líder · <span x-text="leader.owner"></span></span>
         <span class="font-mono text-[10px] text-amber-300 bg-black/40 border border-amber-500/20 px-2 py-0.5 rounded-lg shrink-0" x-text="leaderCountdownFormatted"></span>
@@ -109,10 +110,6 @@
         <button @click="clearInput()" class="text-[9px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-500 shrink-0">LIMPIAR</button>
       </div>
 
-      <!-- Letras del serial: 2 van SIEMPRE antes de los dígitos (prefijo) y la
-           3ra va SIEMPRE después (sufijo) — así es como se arman los seriales
-           reales (ej. USD: AB 12345678 C). Si el país usa menos letras, se
-           dejan las que sobran en — (blanco). -->
       <div class="mt-4">
         <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Letras del serial (deja en — la que no uses)</label>
         <div class="mt-1 grid grid-cols-3 gap-2">
@@ -146,7 +143,6 @@
         </div>
       </div>
 
-      <!-- País/moneda + Año -->
       <div class="mt-3 grid grid-cols-2 gap-2">
         <div class="min-w-0">
           <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">País / Moneda *</label>
@@ -162,7 +158,6 @@
         </div>
       </div>
 
-      <!-- Denominación: solo muestra las que existen para la moneda elegida -->
       <div class="mt-3">
         <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Denominación *</label>
         <select x-model.number="denom" @change="updateRarity()" class="input-base mt-1">
@@ -172,8 +167,7 @@
         </select>
       </div>
 
-      <!-- Vista previa del serial completo + rareza -->
-      <div x-show="anySerialLetter || userDigits.length" class="mt-3 rounded-xl bg-black border border-amber-500/20 p-2.5">
+      <div x-show="anySerialLetter || userDigits.length" class="mt-3 rounded-xl bg-black border border-amber-500/20 p-3">
         <div class="flex items-center justify-between gap-2">
           <div class="min-w-0">
             <div class="text-[9px] text-amber-300 uppercase font-black mb-1">Vista previa del serial</div>
@@ -187,8 +181,6 @@
         </div>
       </div>
 
-
-      <!-- SLOT SOLO TUS DIGITOS -->
       <div class="mt-4 min-h-[68px] rounded-2xl bg-black border border-white/10 p-3 flex flex-wrap gap-1.5 justify-center items-center" :class="digitsSettled?'soft-settle':''">
         <template x-if="userDigits.length===0">
           <span class="text-[11px] text-zinc-600 font-mono text-center">Toca números… ej. 343434<br><span class="text-[9px]">máximo 10 dígitos</span></span>
@@ -205,7 +197,6 @@
         <div class="text-[10px] font-bold shrink-0" :class="userDigits.length>=10?'text-rose-400':'text-zinc-500'" x-text="userDigits.length+'/10 MAX'"></div>
       </div>
 
-      <!-- NUMPAD (0-9) -->
       <section class="mt-4">
         <div class="grid grid-cols-3 gap-2">
           <template x-for="n in [7,8,9,4,5,6,1,2,3]" :key="n">
@@ -220,13 +211,12 @@
         <div class="mt-2 text-[9px] text-zinc-600 text-center">Máximo 10 dígitos · solo tus dígitos · sin cola extra</div>
       </section>
 
-      <!-- ACCIÓN: BAJAR A BÓVEDA -->
       <div class="mt-4">
-        <button @click="handleRegister()" :disabled="loadingPublish" class="kbtn w-full h-[48px] rounded-[14px] font-black text-[13px] border disabled:opacity-40" :class="user && globalActive && profileComplete ? 'bg-violet-500 text-white border-violet-400' : 'bg-amber-400 text-black border-amber-300'">
+        <button @click="handleRegister()" :disabled="loadingPublish" class="kbtn w-full h-[52px] rounded-[14px] font-black text-[13px] border disabled:opacity-40" :class="user && globalActive && profileComplete ? 'bg-violet-500 text-white border-violet-400' : 'bg-amber-400 text-black border-amber-300'">
           <span x-show="!loadingPublish" x-text="!user ? 'LOGIN PARA BAJAR A BÓVEDA' : (globalActive ? 'BAJAR SERIAL COMPLETO A BÓVEDA' : 'ACTIVAR MEMBRESÍA $5 PARA BAJAR')"></span>
           <span x-show="loadingPublish" class="spinner"></span>
         </button>
-        <div class="text-[9px] text-zinc-500 text-center mt-1">El serial completo se guardará en la bóveda global</div>
+        <div class="text-[9px] text-zinc-500 text-center mt-1.5">El serial completo se guardará en la bóveda global</div>
       </div>
     </section>
 
@@ -330,9 +320,6 @@
       </div>
       <div class="mt-3">
         <p x-show="globalActive" class="text-[11px] text-emerald-300">✓ Acceso completo a bóveda global, toques privados y chat.</p>
-        <!-- UX: si el usuario acaba de volver de pagar, no le mostramos el botón
-             de pago otra vez (confunde: "¿me robaron?") — mostramos que estamos
-             verificando, con reintentos automáticos por ~1 minuto. -->
         <div x-show="!globalActive && awaitingPayment" class="rounded-xl bg-amber-500/5 border border-amber-500/20 p-3 flex items-center gap-3">
           <span class="spinner shrink-0"></span>
           <p class="text-[11px] text-amber-200">Confirmando tu pago con Stripe… esto puede tardar unos segundos. No hace falta que hagas nada.</p>
@@ -449,7 +436,7 @@
   </div>
 
   <!-- FOOTER LEGAL -->
-  <footer class="mt-6 rounded-[16px] border border-white/10 bg-[#0A0E0E] p-3">
+  <footer class="mt-6 rounded-[16px] border border-white/10 bg-[#0A0E0E] p-4">
     <div class="flex flex-wrap justify-between items-center gap-2">
       <div class="flex items-center gap-2 text-[10px] flex-wrap">
         <a href="#" @click.prevent="showTerms='terms'" class="text-zinc-400 hover:text-amber-300 underline">Términos</a>
@@ -463,34 +450,44 @@
   </footer>
 </main>
 
+<!-- ================================================================
+     MODALES — max-w ajustado y padding consistente
+     ================================================================ -->
+
 <!-- MODAL AUTH -->
-<div x-show="authModal.open" class="fixed inset-0 z-[75] flex items-center justify-center p-3">
+<div x-show="authModal.open" class="fixed inset-0 z-[75] flex items-center justify-center p-4 modal-backdrop">
   <div class="absolute inset-0 bg-black/80" @click="authModal.open=false"></div>
-  <div class="relative w-full max-w-[360px] rounded-[20px] bg-[#0E1212] border border-amber-500/30 p-5">
-    <h3 class="font-black text-white text-[14px]">Acceso a $DOLLARDGT</h3>
-    <p class="text-[10px] text-zinc-500 mt-1">Regístrate gratis para guardar tus datos y activar la membresía.</p>
-    <div class="mt-4 space-y-2">
-      <input x-model="authModal.email" type="email" placeholder="Email" class="input-base">
-      <input x-model="authModal.password" type="password" placeholder="Contraseña" class="input-base">
-      <div class="flex gap-2">
-        <button @click="signUp()" class="flex-1 h-11 rounded-xl bg-amber-400 text-black font-black text-[12px]">CREAR CUENTA</button>
-        <button @click="signIn()" class="flex-1 h-11 rounded-xl bg-white/10 border border-white/20 font-black text-[12px]">INICIAR SESIÓN</button>
+  <div class="relative w-full max-w-[420px] rounded-[24px] bg-[#0E1212] border border-amber-500/30 p-6 shadow-2xl">
+    <h3 class="font-black text-white text-[16px]">Acceso a $DOLLARDGT</h3>
+    <p class="text-[11px] text-zinc-500 mt-1.5">Regístrate gratis para guardar tus datos y activar la membresía.</p>
+    <div class="mt-5 space-y-3">
+      <div>
+        <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Email</label>
+        <input x-model="authModal.email" type="email" placeholder="tu@email.com" class="input-base mt-1">
       </div>
-      <p x-show="authModal.error" class="text-[10px] text-rose-400" x-text="authModal.error"></p>
+      <div>
+        <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Contraseña</label>
+        <input x-model="authModal.password" type="password" placeholder="••••••••" class="input-base mt-1">
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button @click="signUp()" class="flex-1 h-12 rounded-xl bg-amber-400 text-black font-black text-[12px]">CREAR CUENTA</button>
+        <button @click="signIn()" class="flex-1 h-12 rounded-xl bg-white/10 border border-white/20 font-black text-[12px]">INICIAR SESIÓN</button>
+      </div>
+      <p x-show="authModal.error" class="text-[11px] text-rose-400 text-center" x-text="authModal.error"></p>
     </div>
-    <button @click="authModal.open=false" class="mt-3 w-full h-9 rounded-xl bg-white/5 text-zinc-400 font-bold text-[10px]">CANCELAR</button>
+    <button @click="authModal.open=false" class="mt-4 w-full h-10 rounded-xl bg-white/5 text-zinc-400 font-bold text-[11px]">CANCELAR</button>
   </div>
 </div>
 
 <!-- MODAL TÉRMINOS/PRIVACIDAD -->
-<div x-show="showTerms" class="fixed inset-0 z-[85] flex items-center justify-center p-3">
+<div x-show="showTerms" class="fixed inset-0 z-[85] flex items-center justify-center p-4 modal-backdrop">
   <div class="absolute inset-0 bg-black/80" @click="showTerms=false"></div>
-  <div class="relative w-full max-w-[400px] rounded-[20px] bg-[#0E1212] border border-white/10 p-5 max-h-[70vh] overflow-y-auto overflow-x-hidden">
-    <div class="flex justify-between items-center sticky top-0 bg-[#0E1212] pb-2 border-b border-white/10">
-      <h3 class="font-black text-white text-[13px]" x-text="showTerms==='terms'?'Términos y Condiciones':'Política de Privacidad'"></h3>
-      <button @click="showTerms=false" class="h-7 w-7 rounded-full bg-white/5 grid place-items-center">✕</button>
+  <div class="relative w-full max-w-[480px] rounded-[24px] bg-[#0E1212] border border-white/10 p-6 max-h-[78vh] overflow-y-auto overflow-x-hidden shadow-2xl">
+    <div class="flex justify-between items-center sticky top-0 bg-[#0E1212] pb-3 border-b border-white/10 -mx-6 px-6 z-10">
+      <h3 class="font-black text-white text-[14px]" x-text="showTerms==='terms'?'Términos y Condiciones':'Política de Privacidad'"></h3>
+      <button @click="showTerms=false" class="h-8 w-8 rounded-full bg-white/5 border border-white/10 grid place-items-center text-zinc-400 hover:text-white shrink-0">✕</button>
     </div>
-    <div class="mt-3 text-[11px] text-zinc-400 leading-relaxed space-y-4">
+    <div class="mt-4 text-[11px] text-zinc-400 leading-relaxed space-y-4">
       <template x-if="showTerms==='terms'">
         <div class="space-y-4 text-[11px] leading-relaxed">
           <p><b class="text-white">1. Aceptación</b><br>Al usar $DOLLARDGT aceptas estos términos. Debes ser mayor de 18 años.</p>
@@ -527,125 +524,170 @@
   </div>
 </div>
 
-<!-- MODAL MEMBRESÍA STRIPE (con scroll y estilo) -->
-<div x-show="stripeModal.open" class="fixed inset-0 z-[80] flex items-center justify-center p-3">
-  <div class="absolute inset-0 bg-black/80" @click="closeStripeModal()"></div>
-  <div class="relative w-full max-w-[360px] max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-[20px] bg-[#111616] border border-amber-500/20 p-5">
-    <h3 class="font-black">Membresía $5 de por vida</h3>
-    <p class="text-[11px] text-zinc-400 mt-1">Publicar en bóveda global, enviar toques privados y chatear con coleccionistas.</p>
-    <div class="mt-4 bg-black border border-white/10 rounded-xl p-3 text-[11px] text-zinc-300">
-      <label class="flex items-start gap-2 cursor-pointer">
-        <input type="checkbox" x-model="acceptStripeTerms" class="mt-0.5 h-4 w-4">
-        <span>Acepto los <a href="#" @click.prevent="showTerms='terms'; closeStripeModal()" class="text-amber-300 underline">Términos</a> y la <a href="#" @click.prevent="showTerms='privacy'; closeStripeModal()" class="text-amber-300 underline">Privacidad</a>.</span>
+<!-- MODAL MEMBRESÍA STRIPE — ampliado -->
+<div x-show="stripeModal.open" class="fixed inset-0 z-[80] flex items-center justify-center p-4 modal-backdrop">
+  <div class="absolute inset-0 bg-black/85" @click="closeStripeModal()"></div>
+  <div class="relative w-full max-w-[500px] max-h-[92vh] overflow-y-auto overflow-x-hidden rounded-[28px] bg-[#111616] border border-amber-500/25 p-6 shadow-2xl">
+
+    <div class="flex items-start justify-between gap-3 mb-1">
+      <div>
+        <h3 class="font-black text-white text-[18px] leading-tight">Membresía de por vida</h3>
+        <p class="text-amber-400 font-black text-[22px] font-mono mt-0.5">$5 <span class="text-[13px] text-zinc-400 font-normal">pago único</span></p>
+      </div>
+      <button @click="closeStripeModal()" class="h-8 w-8 rounded-full bg-white/5 border border-white/10 grid place-items-center text-zinc-400 hover:text-white shrink-0 mt-1">✕</button>
+    </div>
+
+    <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+      <div class="rounded-xl bg-black/60 border border-white/10 p-2.5">
+        <div class="text-[18px]">🌐</div>
+        <div class="text-[9px] text-zinc-300 font-bold mt-1">Bóveda global</div>
+      </div>
+      <div class="rounded-xl bg-black/60 border border-white/10 p-2.5">
+        <div class="text-[18px]">👋</div>
+        <div class="text-[9px] text-zinc-300 font-bold mt-1">Toques privados</div>
+      </div>
+      <div class="rounded-xl bg-black/60 border border-white/10 p-2.5">
+        <div class="text-[18px]">💬</div>
+        <div class="text-[9px] text-zinc-300 font-bold mt-1">Chat directo</div>
+      </div>
+    </div>
+
+    <div class="mt-4 bg-black/40 border border-white/10 rounded-xl p-3.5">
+      <label class="flex items-start gap-3 cursor-pointer">
+        <input type="checkbox" x-model="acceptStripeTerms" class="mt-0.5 h-4 w-4 shrink-0 accent-amber-400">
+        <span class="text-[11px] text-zinc-300 leading-relaxed">Acepto los <a href="#" @click.prevent="showTerms='terms'; closeStripeModal()" class="text-amber-300 underline">Términos y Condiciones</a> y la <a href="#" @click.prevent="showTerms='privacy'; closeStripeModal()" class="text-amber-300 underline">Política de Privacidad</a>.</span>
       </label>
     </div>
 
-    <!-- Contenedor estilizado para el elemento de pago -->
-    <div class="mt-4 rounded-xl border border-white/10 bg-black p-3">
-      <div class="text-[9px] text-zinc-500 uppercase mb-2">Datos de pago</div>
-      <div x-show="!stripeLoading" id="payment-element"></div>
-      <div x-show="stripeLoading" class="text-center py-4"><span class="spinner"></span></div>
+    <div class="mt-5 flex items-center gap-3">
+      <div class="flex-1 h-px bg-white/10"></div>
+      <span class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Datos de pago</span>
+      <div class="flex-1 h-px bg-white/10"></div>
     </div>
 
-    <button @click="payNow()" :disabled="!acceptStripeTerms || !stripe || paying" class="mt-4 w-full h-11 rounded-xl bg-amber-400 text-black font-black disabled:opacity-40 disabled:cursor-not-allowed">PAGAR $5</button>
-    <p class="text-[9px] text-zinc-600 text-center mt-2">Pago único procesado por Stripe. La membresía se activa automáticamente al confirmarse el pago.</p>
-    <button @click="checkMembershipStatus()" :disabled="checkingMembership" class="mt-2 w-full h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-bold text-[10px] disabled:opacity-50">
-      <span x-show="!checkingMembership">¿Ya pagaste? Verificar estado</span>
-      <span x-show="checkingMembership" class="spinner"></span>
+    <div class="mt-3 rounded-[16px] border border-white/15 bg-black/50 p-4">
+      <div x-show="!stripeLoading" id="payment-element" class="min-h-[160px]"></div>
+      <div x-show="stripeLoading" class="flex flex-col items-center justify-center py-10 gap-3">
+        <span class="spinner" style="width:24px;height:24px;border-width:3px;"></span>
+        <span class="text-[11px] text-zinc-500">Cargando formulario de pago…</span>
+      </div>
+    </div>
+
+    <button @click="payNow()" :disabled="!acceptStripeTerms || !stripe || paying" class="mt-5 w-full h-[52px] rounded-[14px] bg-amber-400 text-black font-black text-[14px] tracking-widest disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-[.98]">
+      <span x-show="!paying">PAGAR $5 · MEMBRESÍA VITALICIA</span>
+      <span x-show="paying" class="flex items-center justify-center gap-2">
+        <span class="spinner" style="border-top-color:#000;border-color:rgba(0,0,0,.3)"></span>
+        <span class="text-black text-[13px]">Procesando…</span>
+      </span>
     </button>
-    <button @click="closeStripeModal()" class="mt-2 w-full h-9 rounded-xl bg-white/5 text-zinc-400 font-bold text-[10px]">CANCELAR</button>
+
+    <div class="mt-3 flex items-center justify-center gap-1.5 text-[10px] text-zinc-500">
+      <svg width="12" height="14" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 0L0 2.5V7C0 10.25 2.57 13.3 6 14C9.43 13.3 12 10.25 12 7V2.5L6 0Z" fill="#34D399" fill-opacity="0.4"/></svg>
+      <span>Pago seguro procesado por Stripe</span>
+    </div>
+
+    <div class="mt-4 space-y-2">
+      <button @click="checkMembershipStatus()" :disabled="checkingMembership" class="w-full h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-bold text-[11px] disabled:opacity-50">
+        <span x-show="!checkingMembership">¿Ya pagaste? Verificar estado</span>
+        <span x-show="checkingMembership" class="spinner"></span>
+      </button>
+      <button @click="closeStripeModal()" class="w-full h-9 rounded-xl bg-transparent text-zinc-500 font-bold text-[10px] hover:text-zinc-300 transition">Cancelar</button>
+    </div>
   </div>
 </div>
 
 <!-- MODAL CHAT -->
-<div x-show="chatModal.open" class="fixed inset-0 z-[95] flex items-end sm:items-center justify-center p-0 sm:p-3">
-  <div class="absolute inset-0 bg-black/85" @click="chatModal.open=false"></div>
-  <div class="relative w-full max-w-[380px] h-[75vh] sm:h-[520px] rounded-t-[20px] sm:rounded-[20px] bg-[#0E1212] border border-violet-500/30 flex flex-col overflow-hidden">
-    <div class="p-4 border-b border-white/10 flex justify-between items-center bg-[#15101F] gap-2">
-      <div class="min-w-0"><div class="font-black text-[12px] text-white truncate" x-text="'Chat con '+ (chatModal.toque?.from_alias===profile.alias ? chatModal.toque?.to_owner : chatModal.toque?.from_alias)"></div><div class="font-mono text-[10px] text-violet-300 truncate" x-text="chatModal.toque?.serial"></div></div>
-      <button @click="chatModal.open=false" class="h-8 w-8 rounded-full bg-white/5 grid place-items-center shrink-0">✕</button>
+<div x-show="chatModal.open" class="fixed inset-0 z-[95] flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="absolute inset-0 bg-black/85 modal-backdrop" @click="chatModal.open=false"></div>
+  <div class="relative w-full max-w-[480px] h-[80vh] sm:h-[560px] rounded-t-[24px] sm:rounded-[24px] bg-[#0E1212] border border-violet-500/30 flex flex-col overflow-hidden shadow-2xl">
+    <div class="p-4 border-b border-white/10 flex justify-between items-center bg-[#15101F] gap-2 shrink-0">
+      <div class="min-w-0">
+        <div class="font-black text-[13px] text-white truncate" x-text="'Chat con '+ (chatModal.toque?.from_alias===profile.alias ? chatModal.toque?.to_owner : chatModal.toque?.from_alias)"></div>
+        <div class="font-mono text-[10px] text-violet-300 truncate mt-0.5" x-text="chatModal.toque?.serial"></div>
+      </div>
+      <button @click="chatModal.open=false" class="h-9 w-9 rounded-full bg-white/5 border border-white/10 grid place-items-center text-zinc-400 hover:text-white shrink-0">✕</button>
     </div>
-    <div class="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-2 bg-black/30">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-3 bg-black/30">
       <div x-show="chatModal.loading" class="text-[11px] text-zinc-500 text-center py-4">Cargando chat privado...</div>
       <template x-for="m in chatModal.messages" :key="m.id||m.created_at">
         <div class="flex" :class="m.from_alias===profile.alias ? 'justify-end' : 'justify-start'">
-          <div class="max-w-[75%] rounded-2xl px-3 py-2 text-[12px] break-words" :class="m.from_alias===profile.alias ? 'bg-amber-400 text-black rounded-br-sm' : 'bg-white/10 text-white rounded-bl-sm'">
+          <div class="max-w-[78%] rounded-2xl px-3.5 py-2.5 text-[12px] break-words" :class="m.from_alias===profile.alias ? 'bg-amber-400 text-black rounded-br-sm' : 'bg-white/10 text-white rounded-bl-sm'">
             <div x-text="m.message"></div>
             <div class="text-[8px] opacity-60 mt-1" x-text="new Date(m.created_at).toLocaleTimeString()"></div>
           </div>
         </div>
       </template>
-      <div x-show="!chatModal.loading && chatModal.messages.length===0" class="text-[11px] text-zinc-600 text-center py-6">Chat privado iniciado<br><span class="text-[9px]">Solo ustedes dos ven estos mensajes</span></div>
+      <div x-show="!chatModal.loading && chatModal.messages.length===0" class="text-[11px] text-zinc-600 text-center py-8">Chat privado iniciado<br><span class="text-[9px]">Solo ustedes dos ven estos mensajes</span></div>
     </div>
-    <div class="p-3 border-t border-white/10 flex gap-2 bg-[#0E1212]">
-      <input x-model="chatModal.newMessage" @keydown.enter="sendMessage()" placeholder="Mensaje privado..." class="flex-1 h-11 rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none min-w-0">
-      <button @click="sendMessage()" class="h-11 w-11 rounded-xl bg-violet-500 text-white grid place-items-center font-black shrink-0">↑</button>
+    <div class="p-3 border-t border-white/10 flex gap-2 bg-[#0E1212] shrink-0">
+      <input x-model="chatModal.newMessage" @keydown.enter="sendMessage()" placeholder="Mensaje privado..." class="flex-1 h-12 rounded-xl bg-black border border-white/10 px-4 text-[16px] text-white outline-none min-w-0 focus:border-violet-500/50">
+      <button @click="sendMessage()" class="h-12 w-12 rounded-xl bg-violet-500 text-white grid place-items-center font-black shrink-0 hover:bg-violet-400 transition">↑</button>
     </div>
-    <div class="p-2 text-center text-[8px] text-zinc-600 bg-black/50">Chat privado · encriptado · solo participantes</div>
+    <div class="px-3 pb-2.5 text-center text-[8px] text-zinc-600 bg-black/50 shrink-0">Chat privado · encriptado · solo participantes</div>
   </div>
 </div>
 
 <!-- TOAST -->
-<div x-show="toast.visible" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 rounded-full px-5 py-2.5 text-[12px] font-bold max-w-[90vw] text-center" :class="toast.classes" x-text="toast.message"></div>
+<div x-show="toast.visible" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] rounded-full px-5 py-2.5 text-[12px] font-bold max-w-[90vw] text-center shadow-lg" :class="toast.classes" x-text="toast.message"></div>
 
-<!-- ONBOARDING INTERACTIVO -->
-<div x-show="showOnboarding" class="fixed inset-0 z-50 flex items-center justify-center p-3">
+<!-- ONBOARDING -->
+<div x-show="showOnboarding" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
   <div class="absolute inset-0 bg-black/85" @click="showOnboarding=false"></div>
-  <div class="relative w-full max-w-[360px] rounded-[20px] bg-[#111616] border border-amber-500/20 p-5">
-    <h3 class="font-black text-white text-[14px]">Bienvenido a $DOLLARDGT</h3>
+  <div class="relative w-full max-w-[400px] rounded-[24px] bg-[#111616] border border-amber-500/20 p-6 shadow-2xl">
+    <h3 class="font-black text-white text-[15px]">Bienvenido a $DOLLARDGT</h3>
     <div x-show="onboardingStep === 1" class="mt-4 space-y-3 text-[12px] text-zinc-400">
       <div class="text-center">
-        <div class="text-[40px]">🔢</div>
-        <p class="font-bold text-amber-300 mt-2">Ingresa hasta 10 dígitos</p>
-        <p>Busca similitudes en la bóveda global. Toca números y observa las rarezas.</p>
+        <div class="text-[44px]">🔢</div>
+        <p class="font-bold text-amber-300 mt-2 text-[13px]">Ingresa hasta 10 dígitos</p>
+        <p class="mt-1">Busca similitudes en la bóveda global. Toca números y observa las rarezas.</p>
         <div class="mt-3 p-3 bg-black rounded-xl text-left">
           <p class="font-mono text-white text-[14px]">343434</p>
-          <p class="text-[9px] text-emerald-300">REPEATER · $56.00 · RADAR</p>
+          <p class="text-[9px] text-emerald-300 mt-1">REPEATER · $56.00 · RADAR</p>
         </div>
       </div>
     </div>
     <div x-show="onboardingStep === 2" class="mt-4 space-y-3 text-[12px] text-zinc-400">
       <div class="text-center">
-        <div class="text-[40px]">🌐</div>
-        <p class="font-bold text-amber-300 mt-2">Publica en la Bóveda Global</p>
-        <p>Si eres miembro ($5 de por vida), puedes bajar tus números y contactar coleccionistas.</p>
+        <div class="text-[44px]">🌐</div>
+        <p class="font-bold text-amber-300 mt-2 text-[13px]">Publica en la Bóveda Global</p>
+        <p class="mt-1">Si eres miembro ($5 de por vida), puedes bajar tus números y contactar coleccionistas.</p>
         <div class="mt-3 p-3 bg-black rounded-xl text-left">
           <p class="text-white font-mono">AB 123456 C</p>
-          <p class="text-[9px] text-zinc-400">Argentina · $20 · 2017</p>
+          <p class="text-[9px] text-zinc-400 mt-1">Argentina · $20 · 2017</p>
         </div>
       </div>
     </div>
     <div x-show="onboardingStep === 3" class="mt-4 space-y-3 text-[12px] text-zinc-400">
       <div class="text-center">
-        <div class="text-[40px]">👋</div>
-        <p class="font-bold text-amber-300 mt-2">Toques Privados</p>
-        <p>Envía un toque a un coleccionista. Si acepta, se abre un chat privado.</p>
+        <div class="text-[44px]">👋</div>
+        <p class="font-bold text-amber-300 mt-2 text-[13px]">Toques Privados</p>
+        <p class="mt-1">Envía un toque a un coleccionista. Si acepta, se abre un chat privado.</p>
         <div class="mt-3 p-3 bg-black rounded-xl text-left">
           <p class="text-white">👋 Collector_77 te tocó</p>
-          <p class="text-[9px] text-emerald-300">ACEPTAR → CHAT PRIVADO</p>
+          <p class="text-[9px] text-emerald-300 mt-1">ACEPTAR → CHAT PRIVADO</p>
         </div>
       </div>
     </div>
-    <div class="mt-4 flex gap-2">
+    <div class="mt-5 flex gap-2">
       <button x-show="onboardingStep > 1" @click="onboardingStep--" class="h-11 flex-1 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-black text-[12px]">ANTERIOR</button>
       <button x-show="onboardingStep < 3" @click="onboardingStep++" class="h-11 flex-1 rounded-xl bg-amber-400 text-black font-black text-[12px]">SIGUIENTE</button>
       <button x-show="onboardingStep === 3" @click="showOnboarding=false; localStorage.setItem('dgt_onboarding_done','1')" class="h-11 flex-1 rounded-xl bg-emerald-500 text-black font-black text-[12px]">COMENZAR</button>
     </div>
-    <div class="mt-2 flex justify-center gap-1">
-      <span class="h-1.5 w-1.5 rounded-full" :class="onboardingStep>=1?'bg-amber-400':'bg-white/20'"></span>
-      <span class="h-1.5 w-1.5 rounded-full" :class="onboardingStep>=2?'bg-amber-400':'bg-white/20'"></span>
-      <span class="h-1.5 w-1.5 rounded-full" :class="onboardingStep>=3?'bg-amber-400':'bg-white/20'"></span>
+    <div class="mt-3 flex justify-center gap-1.5">
+      <span class="h-1.5 w-6 rounded-full transition-all" :class="onboardingStep>=1?'bg-amber-400':'bg-white/20'"></span>
+      <span class="h-1.5 w-6 rounded-full transition-all" :class="onboardingStep>=2?'bg-amber-400':'bg-white/20'"></span>
+      <span class="h-1.5 w-6 rounded-full transition-all" :class="onboardingStep>=3?'bg-amber-400':'bg-white/20'"></span>
     </div>
   </div>
 </div>
 
 <!-- MODAL PERFIL RÁPIDO -->
-<div x-show="quickProfileModal.open" class="fixed inset-0 z-[82] flex items-center justify-center p-3">
+<div x-show="quickProfileModal.open" class="fixed inset-0 z-[82] flex items-center justify-center p-4 modal-backdrop">
   <div class="absolute inset-0 bg-black/80" @click="quickProfileModal.open=false"></div>
-  <div class="relative w-full max-w-[360px] rounded-[20px] bg-[#0E1212] border border-amber-500/30 p-5">
-    <h3 class="font-black text-white text-[14px]">Editar perfil rápido</h3>
-    <p class="text-[10px] text-zinc-500 mt-1">Completa estos datos para publicar y contactar.</p>
-    <div class="mt-4 space-y-2">
+  <div class="relative w-full max-w-[420px] rounded-[24px] bg-[#0E1212] border border-amber-500/30 p-6 shadow-2xl">
+    <h3 class="font-black text-white text-[15px]">Editar perfil</h3>
+    <p class="text-[11px] text-zinc-500 mt-1">Completa estos datos para publicar y contactar.</p>
+    <div class="mt-5 space-y-3">
       <div>
         <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Alias *</label>
         <input x-model="quickProfileModal.alias" placeholder="Escribe tu alias" class="input-base mt-1">
@@ -665,9 +707,9 @@
         <input x-model="quickProfileModal.phone" placeholder="+54 9 11 ..." class="input-base mt-1">
       </div>
     </div>
-    <div class="mt-4 flex gap-2">
-      <button @click="quickProfileModal.open=false" class="flex-1 h-11 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-black text-[12px]">CANCELAR</button>
-      <button @click="saveQuickProfile()" class="flex-1 h-11 rounded-xl bg-amber-400 text-black font-black text-[12px]">GUARDAR</button>
+    <div class="mt-5 flex gap-2">
+      <button @click="quickProfileModal.open=false" class="flex-1 h-12 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-black text-[12px]">CANCELAR</button>
+      <button @click="saveQuickProfile()" class="flex-1 h-12 rounded-xl bg-amber-400 text-black font-black text-[12px]">GUARDAR</button>
     </div>
   </div>
 </div>
@@ -767,7 +809,6 @@ function app() {
     _paymentPollAttempts: 0,
     stripeModal:{open:false},
     acceptStripeTerms:false,
-    // Variables para Stripe Elements
     stripe: null,
     elements: null,
     clientSecret: null,
@@ -1033,7 +1074,6 @@ function app() {
       this.saving = false;
     },
 
-    // ===== NUEVO FLUJO STRIPE EMBEBIDO (con estilo personalizado) =====
     async openStripeModal() {
       if (!this.user) { this.authModal.open = true; return; }
       this.acceptStripeTerms = false;
@@ -1050,31 +1090,54 @@ function app() {
         if (!data.client_secret) throw new Error(data.error || 'No se pudo crear pago');
         this.clientSecret = data.client_secret;
         this.stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-        this.elements = this.stripe.elements({ clientSecret: this.clientSecret });
-        this.elements.create('payment', {
-          style: {
-            base: {
-              color: '#FFFFFF',
+        this.elements = this.stripe.elements({
+          clientSecret: this.clientSecret,
+          appearance: {
+            theme: 'night',
+            variables: {
+              colorPrimary: '#FBBF24',
+              colorBackground: '#000000',
+              colorText: '#ffffff',
+              colorDanger: '#F43F5E',
               fontFamily: '"Inter", sans-serif',
-              fontSize: '16px',
-              fontWeight: '500',
-              backgroundColor: 'transparent',
-              '::placeholder': {
-                color: '#71717A'
+              spacingUnit: '4px',
+              borderRadius: '12px',
+              colorTextPlaceholder: '#71717a',
+            },
+            rules: {
+              '.Input': {
+                border: '1px solid rgba(255,255,255,0.15)',
+                padding: '14px 16px',
+                fontSize: '16px',
+                backgroundColor: '#0a0a0a',
               },
-              borderRadius: '8px',
-              padding: '10px 12px',
-              border: '1px solid rgba(255,255,255,0.1)'
-            },
-            invalid: {
-              color: '#F43F5E',
-              iconColor: '#F43F5E'
-            },
-            complete: {
-              color: '#34D399'
+              '.Input:focus': {
+                border: '1px solid rgba(251,191,36,0.6)',
+                boxShadow: '0 0 0 3px rgba(251,191,36,0.1)',
+              },
+              '.Label': {
+                color: '#a1a1aa',
+                fontSize: '11px',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                marginBottom: '6px',
+              },
+              '.Tab': {
+                border: '1px solid rgba(255,255,255,0.1)',
+                backgroundColor: '#111',
+              },
+              '.Tab--selected': {
+                border: '1px solid rgba(251,191,36,0.5)',
+                backgroundColor: 'rgba(251,191,36,0.1)',
+              },
+              '.Tab:hover': {
+                backgroundColor: 'rgba(255,255,255,0.05)',
+              },
             }
           }
-        }).mount('#payment-element');
+        });
+        this.elements.create('payment').mount('#payment-element');
         this.stripeLoading = false;
       } catch(e) {
         this.stripeLoading = false;
@@ -1082,7 +1145,7 @@ function app() {
       }
     },
     async payNow() {
-      if (!this.acceptStripeTerms) { this.showToast('Acepta términos'); return; }
+      if (!this.acceptStripeTerms) { this.showToast('Acepta los términos para continuar'); return; }
       if (!this.stripe || !this.elements) { this.showToast('Cargando pago...'); return; }
       this.paying = true;
       try {
@@ -1118,11 +1181,9 @@ function app() {
       }
       this.stripe = null;
     },
-    // ===== FIN NUEVO FLUJO =====
 
-    // Reintenta chequear la membresía cada pocos segundos durante ~1 minuto.
     startPaymentPolling() {
-      if (this._paymentPollInterval) return; // ya está corriendo
+      if (this._paymentPollInterval) return;
       this._paymentPollAttempts = 0;
       this._paymentPollInterval = setInterval(async () => {
         this._paymentPollAttempts++;
@@ -1136,8 +1197,8 @@ function app() {
             this.stopPaymentPolling();
             return;
           }
-        } catch (e) { /* aún no hay fila activa; seguimos intentando */ }
-        if (this._paymentPollAttempts >= 15) { // ~15 x 4s = 60s
+        } catch (e) { }
+        if (this._paymentPollAttempts >= 15) {
           this.stopPaymentPolling();
         }
       }, 4000);
@@ -1367,7 +1428,6 @@ function app() {
       try {
         supabaseClient.channel('public:dgt_toques')
           .on('postgres_changes', {event:'*', schema:'public', table:'dgt_toques'}, (payload) => {
-            console.log('Toque realtime:', payload);
             this.loadToques();
             if (payload.eventType === 'INSERT' && payload.new.to_email === this.encodeSensitive(this.profile.email)) {
               this.showToast(`👋 ${payload.new.from_alias} te tocó!`);
