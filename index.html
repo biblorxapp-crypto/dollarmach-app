@@ -31,7 +31,7 @@
     /* FIX: font-size 16px en inputs evita el auto-zoom de iOS que causa el "salto" lateral al enfocar */
     .input-base{width:100%;height:44px;border-radius:12px;background:#000;border:1px solid rgba(255,255,255,.1);padding:0 12px;color:#fff;font-size:16px;outline:none}
     .input-base:focus{border-color:rgba(251,191,36,.5)} .input-base.invalid{border-color:rgba(244,63,94,.6)}
-    select.input-base{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%a1a1aa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .6rem center;background-size:1rem;padding-right:2rem}
+    select.input-base{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a1a1aa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .6rem center;background-size:1rem;padding-right:2rem}
     .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite} @keyframes spin{to{transform:rotate(360deg)}}
     button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }
   </style>
@@ -107,19 +107,40 @@
         <button @click="clearInput()" class="text-[9px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-500 shrink-0">LIMPIAR</button>
       </div>
 
-      <!-- Letras del serial: 3 selectores individuales en vez de teclado.
-           Cada país usa de 1 a 3 letras; el que sobra se deja en blanco (—). -->
+      <!-- Letras del serial: 2 van SIEMPRE antes de los dígitos (prefijo) y la
+           3ra va SIEMPRE después (sufijo) — así es como se arman los seriales
+           reales (ej. USD: AB 12345678 C). Si el país usa menos letras, se
+           dejan las que sobran en — (blanco). -->
       <div class="mt-4">
         <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Letras del serial (deja en — la que no uses)</label>
         <div class="mt-1 grid grid-cols-3 gap-2">
-          <template x-for="(l, i) in serialLetters" :key="i">
-            <select x-model="serialLetters[i]" class="input-base text-center font-mono font-black text-[16px]" :aria-label="'Letra '+(i+1)+' del serial'">
+          <div class="min-w-0">
+            <select x-model="serialLetters[0]" class="input-base text-center font-mono font-black text-[16px]" aria-label="Primera letra del prefijo">
               <option value="">—</option>
               <template x-for="letter in ALPHABET" :key="letter">
                 <option :value="letter" x-text="letter"></option>
               </template>
             </select>
-          </template>
+            <div class="text-[8px] text-zinc-600 text-center mt-0.5">prefijo</div>
+          </div>
+          <div class="min-w-0">
+            <select x-model="serialLetters[1]" class="input-base text-center font-mono font-black text-[16px]" aria-label="Segunda letra del prefijo">
+              <option value="">—</option>
+              <template x-for="letter in ALPHABET" :key="letter">
+                <option :value="letter" x-text="letter"></option>
+              </template>
+            </select>
+            <div class="text-[8px] text-zinc-600 text-center mt-0.5">prefijo</div>
+          </div>
+          <div class="min-w-0">
+            <select x-model="serialLetters[2]" class="input-base text-center font-mono font-black text-[16px]" aria-label="Letra de sufijo, va después de los dígitos">
+              <option value="">—</option>
+              <template x-for="letter in ALPHABET" :key="letter">
+                <option :value="letter" x-text="letter"></option>
+              </template>
+            </select>
+            <div class="text-[8px] text-amber-300/70 text-center mt-0.5">sufijo (va detrás)</div>
+          </div>
         </div>
       </div>
 
@@ -792,12 +813,14 @@ function app() {
     get currentCurrencyInfo(){ return this.CURRENCIES.find(c => c.code === this.serialCurrency) || this.CURRENCIES[0]; },
     get currentCurrencyDenoms(){ return this.currentCurrencyInfo.denoms; },
     get currentCurrencySymbol(){ return this.currentCurrencyInfo.symbol; },
+    get serialPrefix(){ return [this.serialLetters[0], this.serialLetters[1]].filter(l => l).join(''); },
+    get serialSuffix(){ return this.serialLetters[2] || ''; },
     get fullSerialPreview(){
-      const letters = this.serialLetters.filter(l => l).join('');
-      const parts = [];
-      if (letters) parts.push(letters);
-      if (this.userDigits.length) parts.push(this.userDigits.join(''));
-      return parts.join(' ') || 'Ingresa datos';
+      const digits = this.userDigits.join('');
+      // Espacio solo entre prefijo y dígitos (legible); el sufijo va pegado,
+      // igual que en un billete real (ej. AB 12345678C).
+      if (!this.serialPrefix && !digits && !this.serialSuffix) return 'Ingresa datos';
+      return (this.serialPrefix ? this.serialPrefix + ' ' : '') + digits + this.serialSuffix;
     },
     get canPublish(){
       return this.user && this.globalActive && this.profileComplete &&
