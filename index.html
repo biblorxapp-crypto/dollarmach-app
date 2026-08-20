@@ -107,52 +107,63 @@
         <button @click="clearInput()" class="text-[9px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-500 shrink-0">LIMPIAR</button>
       </div>
 
-      <!-- Línea de prefijo / sufijo / año -->
-      <div class="mt-4 grid grid-cols-3 gap-2">
-        <div class="min-w-0">
-          <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Prefijo *</label>
-          <input x-model="serialPrefix" placeholder="AB" maxlength="3" class="input-base mt-1 uppercase" aria-label="Prefijo del serial">
-        </div>
-        <div class="min-w-0">
-          <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Sufijo *</label>
-          <input x-model="serialSuffix" placeholder="C" maxlength="1" class="input-base mt-1 uppercase" aria-label="Sufijo del serial">
-        </div>
-        <div class="min-w-0">
-          <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Año *</label>
-          <input x-model="serialYear" type="number" placeholder="2017" class="input-base mt-1" aria-label="Año del billete">
+      <!-- Letras del serial: 3 selectores individuales en vez de teclado.
+           Cada país usa de 1 a 3 letras; el que sobra se deja en blanco (—). -->
+      <div class="mt-4">
+        <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Letras del serial (deja en — la que no uses)</label>
+        <div class="mt-1 grid grid-cols-3 gap-2">
+          <template x-for="(l, i) in serialLetters" :key="i">
+            <select x-model="serialLetters[i]" class="input-base text-center font-mono font-black text-[16px]" :aria-label="'Letra '+(i+1)+' del serial'">
+              <option value="">—</option>
+              <template x-for="letter in ALPHABET" :key="letter">
+                <option :value="letter" x-text="letter"></option>
+              </template>
+            </select>
+          </template>
         </div>
       </div>
 
-      <!-- Denominación con selector global -->
+      <!-- País/moneda + Año -->
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        <div class="min-w-0">
+          <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">País / Moneda *</label>
+          <select x-model="serialCurrency" @change="onCurrencyChange()" class="input-base mt-1">
+            <template x-for="c in CURRENCIES" :key="c.code">
+              <option :value="c.code" x-text="c.flag+' '+c.code"></option>
+            </template>
+          </select>
+        </div>
+        <div class="min-w-0">
+          <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Año *</label>
+          <input x-model="serialYear" type="number" inputmode="numeric" placeholder="2017" class="input-base mt-1" aria-label="Año del billete">
+        </div>
+      </div>
+
+      <!-- Denominación: solo muestra las que existen para la moneda elegida -->
       <div class="mt-3">
         <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Denominación *</label>
-        <select x-model="denom" class="input-base mt-1">
-          <option value="1">$1 USD</option>
-          <option value="2">$2 USD</option>
-          <option value="5">$5 USD</option>
-          <option value="10">$10 USD</option>
-          <option value="20">$20 USD</option>
-          <option value="50">$50 USD</option>
-          <option value="100">$100 USD</option>
-          <option value="5">€5 EUR</option>
-          <option value="10">€10 EUR</option>
-          <option value="20">€20 EUR</option>
-          <option value="50">€50 EUR</option>
-          <option value="100">€100 EUR</option>
-          <option value="5">£5 GBP</option>
-          <option value="10">£10 GBP</option>
-          <option value="20">£20 GBP</option>
-          <option value="1000">¥1000 JPY</option>
-          <option value="5000">¥5000 JPY</option>
-          <option value="10000">¥10000 JPY</option>
-          <option value="20">$20 ARS</option>
-          <option value="50">$50 ARS</option>
-          <option value="100">$100 ARS</option>
-          <option value="200">$200 ARS</option>
-          <option value="500">$500 ARS</option>
-          <option value="1000">$1000 ARS</option>
+        <select x-model.number="denom" @change="updateRarity()" class="input-base mt-1">
+          <template x-for="d in currentCurrencyDenoms" :key="d">
+            <option :value="d" x-text="currentCurrencySymbol + d + ' ' + serialCurrency"></option>
+          </template>
         </select>
       </div>
+
+      <!-- Vista previa del serial completo + rareza -->
+      <div x-show="anySerialLetter || userDigits.length" class="mt-3 rounded-xl bg-black border border-amber-500/20 p-2.5">
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="text-[9px] text-amber-300 uppercase font-black mb-1">Vista previa del serial</div>
+            <div class="font-mono font-black text-[1.2rem] text-white truncate" x-text="fullSerialPreview"></div>
+            <div class="text-[9px] text-zinc-500 mt-1 truncate" x-text="'Año: ' + (serialYear || '????') + ' · ' + currentCurrencySymbol + denom + ' ' + serialCurrency"></div>
+          </div>
+          <div class="flex flex-col items-end gap-1 shrink-0">
+            <span class="text-[8px] px-2 py-0.5 rounded-full border font-bold" :class="rarity.badgeClass" x-text="rarity.label"></span>
+            <span class="font-mono font-black text-emerald-300 text-[14px]" x-text="'$'+value.toFixed(2)"></span>
+          </div>
+        </div>
+      </div>
+
 
       <!-- SLOT SOLO TUS DIGITOS -->
       <div class="mt-4 min-h-[68px] rounded-2xl bg-black border border-white/10 p-3 flex flex-wrap gap-1.5 justify-center items-center" :class="digitsSettled?'soft-settle':''">
@@ -171,30 +182,18 @@
         <div class="text-[10px] font-bold shrink-0" :class="userDigits.length>=10?'text-rose-400':'text-zinc-500'" x-text="userDigits.length+'/10 MAX'"></div>
       </div>
 
-      <!-- Vista previa del serial completo + rareza -->
-      <div x-show="serialPrefix || userDigits.length" class="mt-3 rounded-xl bg-black border border-amber-500/20 p-2.5">
-        <div class="flex items-center justify-between gap-2">
-          <div class="min-w-0">
-            <div class="text-[9px] text-amber-300 uppercase font-black mb-1">Vista previa del serial</div>
-            <div class="font-mono font-black text-[1.2rem] text-white truncate" x-text="fullSerialPreview"></div>
-            <div class="text-[9px] text-zinc-500 mt-1 truncate" x-text="'Año: ' + (serialYear || '????') + ' · Denom: ' + denom"></div>
-          </div>
-          <div class="flex flex-col items-end gap-1 shrink-0">
-            <span class="text-[8px] px-2 py-0.5 rounded-full border font-bold" :class="rarity.badgeClass" x-text="rarity.label"></span>
-            <span class="font-mono font-black text-emerald-300 text-[14px]" x-text="'$'+value.toFixed(2)"></span>
-          </div>
-        </div>
-      </div>
-
       <!-- NUMPAD (0-9) -->
       <section class="mt-4">
-        <div class="grid grid-cols-4 gap-2">
-          <template x-for="row in numpadGrid"><template x-for="btn in row"><div>
-            <button x-show="btn.type==='denom'" @click="setDenom(btn.val)" class="kbtn h-[48px] w-full rounded-[12px] text-[12px] font-black text-white border border-white/10" :class="[denomColorsClass[btn.val], denom===btn.val?'ring-2 ring-white/30':'opacity-80']" x-text="'$'+btn.val"></button>
-            <button x-show="btn.type==='num'" @click="pressNum(btn.val)" :disabled="userDigits.length>=10" class="kbtn h-[48px] w-full rounded-[12px] border border-white/[0.06] bg-[#1C2424] text-[16px] font-black text-[#D4E2DC] disabled:opacity-20" x-text="btn.val"></button>
-          </div></template></template>
+        <div class="grid grid-cols-3 gap-2">
+          <template x-for="n in [7,8,9,4,5,6,1,2,3]" :key="n">
+            <button @click="pressNum(n)" :disabled="userDigits.length>=10" class="kbtn h-[48px] w-full rounded-[12px] border border-white/[0.06] bg-[#1C2424] text-[16px] font-black text-[#D4E2DC] disabled:opacity-20" x-text="n"></button>
+          </template>
         </div>
-        <div class="mt-2 flex gap-2"><button @click="clearInput()" class="flex-1 h-9 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400">Borrar todo</button><button @click="deleteDigit()" class="flex-1 h-9 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400">⌫ último</button></div>
+        <div class="mt-2 grid grid-cols-3 gap-2">
+          <button @click="deleteDigit()" class="h-[44px] rounded-[12px] bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400">⌫</button>
+          <button @click="pressNum(0)" :disabled="userDigits.length>=10" class="h-[44px] rounded-[12px] border border-white/[0.06] bg-[#1C2424] text-[16px] font-black text-[#D4E2DC] disabled:opacity-20">0</button>
+          <button @click="clearInput()" class="h-[44px] rounded-[12px] bg-white/[0.04] border border-white/10 text-[11px] font-bold text-zinc-400">Borrar</button>
+        </div>
         <div class="mt-2 text-[9px] text-zinc-600 text-center">Máximo 10 dígitos · solo tus dígitos · sin cola extra</div>
       </section>
 
@@ -310,7 +309,10 @@
         <p x-show="globalActive" class="text-[11px] text-emerald-300">✓ Acceso completo a bóveda global, toques privados y chat.</p>
         <p x-show="!globalActive" class="text-[11px] text-zinc-400">Activa la membresía para publicar tus números, enviar toques y chatear con otros coleccionistas.</p>
         <button x-show="!globalActive" @click="openStripeModal()" class="mt-2 w-full h-11 rounded-xl bg-amber-400 text-black font-black text-[12px]">ACTIVAR MEMBRESÍA $5</button>
-        <button x-show="!globalActive" @click="manualActivateMembership()" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px]">¿Ya pagaste? Activar ahora</button>
+        <button x-show="!globalActive" @click="checkMembershipStatus()" :disabled="checkingMembership" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px] disabled:opacity-50">
+          <span x-show="!checkingMembership">¿Ya pagaste? Verificar estado</span>
+          <span x-show="checkingMembership" class="spinner"></span>
+        </button>
         <button x-show="globalActive" @click="cancelMembership()" :disabled="cancellingMembership" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px] disabled:opacity-50">
           <span x-show="!cancellingMembership">Cancelar membresía (demo)</span>
           <span x-show="cancellingMembership" class="spinner"></span>
@@ -505,8 +507,11 @@
     </label>
   </div>
   <button @click="redirectToStripe()" :disabled="!acceptStripeTerms" class="mt-4 w-full h-11 rounded-xl bg-amber-400 text-black font-black disabled:opacity-40 disabled:cursor-not-allowed">IR A PAGAR $5</button>
-  <p class="text-[9px] text-zinc-600 text-center mt-2">Pago único procesado por Stripe. No se almacenan datos de tarjeta.</p>
-  <button @click="manualActivateMembership()" class="mt-2 w-full h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-bold text-[10px]">¿Ya pagaste? Activar ahora</button>
+  <p class="text-[9px] text-zinc-600 text-center mt-2">Pago único procesado por Stripe. La membresía se activa automáticamente al confirmarse el pago (puede tardar unos segundos).</p>
+  <button @click="checkMembershipStatus()" :disabled="checkingMembership" class="mt-2 w-full h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-bold text-[10px] disabled:opacity-50">
+    <span x-show="!checkingMembership">¿Ya pagaste? Verificar estado</span>
+    <span x-show="checkingMembership" class="spinner"></span>
+  </button>
 </div></div>
 
 <!-- MODAL CHAT -->
@@ -641,6 +646,23 @@ const RARITY_TIPS = {
   Común: 'Sin patrón'
 };
 
+// FIX UX: antes la denominación era un único <select> con países mezclados
+// y valores duplicados (ej. value="5" para $5 USD, €5 y £5 a la vez), lo que
+// hacía imposible saber cuál estaba realmente elegido. Ahora cada moneda
+// tiene su propia lista de denominaciones reales.
+const CURRENCIES = [
+  { code:'USD', flag:'🇺🇸', symbol:'$', denoms:[1,2,5,10,20,50,100] },
+  { code:'EUR', flag:'🇪🇺', symbol:'€', denoms:[5,10,20,50,100,200] },
+  { code:'GBP', flag:'🇬🇧', symbol:'£', denoms:[5,10,20,50] },
+  { code:'JPY', flag:'🇯🇵', symbol:'¥', denoms:[1000,2000,5000,10000] },
+  { code:'ARS', flag:'🇦🇷', symbol:'$', denoms:[20,50,100,200,500,1000,2000,10000] },
+  { code:'MXN', flag:'🇲🇽', symbol:'$', denoms:[20,50,100,200,500,1000] },
+  { code:'COP', flag:'🇨🇴', symbol:'$', denoms:[1000,2000,5000,10000,20000,50000,100000] },
+  { code:'PEN', flag:'🇵🇪', symbol:'S/', denoms:[10,20,50,100,200] },
+  { code:'CLP', flag:'🇨🇱', symbol:'$', denoms:[1000,2000,5000,10000,20000] },
+  { code:'BRL', flag:'🇧🇷', symbol:'R$', denoms:[2,5,10,20,50,100,200] },
+];
+
 const Engine = {
   genLetters(d) { const L='ABCDEFGHJKLMNPQRSTUVWXYZ',r=()=>L[Math.floor(Math.random()*L.length)]; return d===1?{a:r(),c:r()}:{a:r(),b:r(),c:r()}; },
   genYear() { return [1963,1974,1988,1999,2003,2013,2017,2021][Math.floor(Math.random()*8)]; },
@@ -675,8 +697,13 @@ function app() {
     showOnboarding: localStorage.getItem('dgt_onboarding_done') !== '1',
     onboardingStep: 1,
     userDigits:[],
-    serialPrefix:'',
-    serialSuffix:'',
+    // FIX UX: antes eran 2 inputs de texto (Prefijo/Sufijo) que exigían teclado.
+    // Ahora son 3 selectores independientes; cada país usa entre 1 y 3 letras,
+    // los slots que no se usan quedan en '' (—).
+    serialLetters: ['', '', ''],
+    ALPHABET: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+    serialCurrency: 'USD',
+    CURRENCIES: CURRENCIES,
     serialYear:'',
     letters: Engine.genLetters(20),
     yr: Engine.genYear(),
@@ -696,6 +723,7 @@ function app() {
     _debounceTimer:null,
     globalActive: localStorage.getItem('dgt_global_active')==='true',
     cancellingMembership:false,
+    checkingMembership:false,
     stripeModal:{open:false},
     acceptStripeTerms:false,
     toquesRecibidos:[],
@@ -726,13 +754,6 @@ function app() {
       lastSync: localStorage.getItem('dgt_last_sync')||'',
       synced:false
     },
-    denomColorsClass:{1:'bg-emerald-600',5:'bg-sky-600',10:'bg-violet-600',20:'bg-orange-600',50:'bg-pink-600',100:'bg-amber-500'},
-    numpadGrid:[
-      [{type:'num',val:7},{type:'num',val:8},{type:'num',val:9},{type:'denom',val:1}],
-      [{type:'num',val:4},{type:'num',val:5},{type:'num',val:6},{type:'denom',val:5}],
-      [{type:'num',val:1},{type:'num',val:2},{type:'num',val:3},{type:'denom',val:10}],
-      [{type:'denom',val:20},{type:'num',val:0},{type:'denom',val:50},{type:'denom',val:100}]
-    ],
     visibleCount:20,
     authModal:{open:false,email:'',password:'',error:null},
     user:null,
@@ -767,17 +788,20 @@ function app() {
     get queryFirst4(){ return this.userDigits.slice(0,4).join(''); },
     get isEmailValid(){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.profile.email); },
     get profileComplete(){ return this.user && this.profile.country && this.profile.alias && this.isEmailValid; },
+    get anySerialLetter(){ return this.serialLetters.some(l => l); },
+    get currentCurrencyInfo(){ return this.CURRENCIES.find(c => c.code === this.serialCurrency) || this.CURRENCIES[0]; },
+    get currentCurrencyDenoms(){ return this.currentCurrencyInfo.denoms; },
+    get currentCurrencySymbol(){ return this.currentCurrencyInfo.symbol; },
     get fullSerialPreview(){
+      const letters = this.serialLetters.filter(l => l).join('');
       const parts = [];
-      if (this.serialPrefix) parts.push(this.serialPrefix.toUpperCase());
+      if (letters) parts.push(letters);
       if (this.userDigits.length) parts.push(this.userDigits.join(''));
-      if (this.serialSuffix) parts.push(this.serialSuffix.toUpperCase());
       return parts.join(' ') || 'Ingresa datos';
     },
     get canPublish(){
       return this.user && this.globalActive && this.profileComplete &&
-             this.serialPrefix.trim().length >= 1 &&
-             this.serialSuffix.trim().length === 1 &&
+             this.anySerialLetter &&
              this.userDigits.length >= 3 &&
              this.serialYear && this.serialYear >= 1800 && this.serialYear <= 2026;
     },
@@ -838,6 +862,13 @@ function app() {
         this.setupNotifications();
         this.updateStreak();
         setInterval(()=>this.loadToques(), 30000);
+        // Cuando el usuario vuelve de la pestaña de Stripe, revisamos si el
+        // webhook ya activó la membresía, sin que tenga que tocar ningún botón.
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible' && this.user && !this.globalActive) {
+            this.loadMembership();
+          }
+        });
       } catch (error) {
         console.error('Init error:', error);
         this.showToast('Error inicial');
@@ -956,9 +987,16 @@ function app() {
       this.stripeModal.open = true;
     },
     redirectToStripe() {
-      window.open(STRIPE_PAYMENT_LINK, '_blank');
+      // FIX SEGURIDAD: se agrega client_reference_id con el uuid del usuario logueado.
+      // El webhook de Stripe (server-side) lo usa para saber a quién activar la
+      // membresía cuando el pago se confirma — sin esto, el webhook no sabría
+      // qué fila de 'members' actualizar.
+      const url = new URL(STRIPE_PAYMENT_LINK);
+      url.searchParams.set('client_reference_id', this.user.id);
+      if (this.profile.email) url.searchParams.set('prefilled_email', this.profile.email);
+      window.open(url.toString(), '_blank');
       this.stripeModal.open = false;
-      this.showToast('Completa el pago en Stripe y vuelve');
+      this.showToast('Completa el pago en Stripe y vuelve — se activa solo');
     },
     async cancelMembership() {
       // FIX: antes esto solo limpiaba localStorage y el usuario seguía
@@ -977,22 +1015,28 @@ function app() {
       }
       this.cancellingMembership = false;
     },
-    async manualActivateMembership() {
+    // FIX SEGURIDAD: reemplaza a manualActivateMembership(). Esta función
+    // SOLO LEE el estado de 'members' — nunca inserta ni actualiza. La única
+    // vía para que 'active' pase a true es el webhook de Stripe (server-side,
+    // con service_role key). Si el pago ya se procesó, esto simplemente
+    // refresca el estado local; si Stripe aún no notificó, avisa que espere.
+    async checkMembershipStatus() {
       if (!this.user) { this.authModal.open = true; return; }
-      const { error } = await supabaseClient.from('members').upsert({
-        user_id: this.user.id,
-        active: true,
-        paid_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' });
-      if (!error) {
-        this.globalActive = true;
-        localStorage.setItem('dgt_global_active', 'true');
-        this.showToast('Membresía activada ✓');
-        this.stripeModal.open = false;
-      } else {
-        console.error(error);
-        this.showToast('Error al activar membresía: ' + error.message);
+      this.checkingMembership = true;
+      try {
+        const { data } = await supabaseClient.from('members').select('*').eq('user_id', this.user.id).eq('active', true).single();
+        if (data) {
+          this.globalActive = true;
+          localStorage.setItem('dgt_global_active', 'true');
+          this.showToast('Membresía activa ✓');
+          this.stripeModal.open = false;
+        } else {
+          this.showToast('Aún no vemos el pago confirmado. Si acabas de pagar, espera unos segundos y vuelve a intentar.');
+        }
+      } catch (e) {
+        this.showToast('Aún no vemos el pago confirmado. Si acabas de pagar, espera unos segundos y vuelve a intentar.');
       }
+      this.checkingMembership = false;
     },
 
     async loadVault() {
@@ -1268,6 +1312,15 @@ function app() {
       }
       this.scheduleGlobalSearch();
     },
+    // FIX UX: al cambiar de país/moneda, aseguramos que 'denom' sea un valor
+    // válido para esa moneda (antes podía quedar con un número que no
+    // correspondía a ninguna denominación real de la nueva moneda elegida).
+    onCurrencyChange() {
+      if (!this.currentCurrencyDenoms.includes(this.denom)) {
+        this.denom = this.currentCurrencyDenoms[0];
+      }
+      this.updateRarity();
+    },
     setDenom(d) {
       const oldDenom = this.denom;
       this.denom = d;
@@ -1419,7 +1472,7 @@ function app() {
           p_country: this.profile.country,
           p_contact: this.encodeSensitive(`${this.profile.phone || ''}|${this.profile.email}`),
           p_email: this.encodeSensitive(this.profile.email),
-          p_letters_snapshot: `${this.serialPrefix} ${this.serialSuffix}`,
+          p_letters_snapshot: this.serialLetters.filter(l => l).join(''),
           p_value_snapshot: this.value
         });
         if (error) throw error;
