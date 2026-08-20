@@ -13,29 +13,143 @@
   <!-- Stripe.js para el checkout embebido -->
   <script src="https://js.stripe.com/v3/"></script>
   <style>
-    /* ===== FIX: evita scroll horizontal / "deslizamiento lateral" en móviles ===== */
+    /* ===== BASE / ANTI-SCROLL LATERAL ===== */
     *, *::before, *::after { box-sizing: border-box; }
     html, body { overflow-x: hidden; width: 100%; max-width: 100vw; }
     main { overflow-x: hidden; max-width: 100vw; }
     img, svg, video { max-width: 100%; }
 
-    body{background:#050707;touch-action:manipulation;-webkit-text-size-adjust:100%}
-    .kbtn:active{transform:translateY(1px) scale(.98)}
-    .soft-settle{animation:settleIn .28s ease-out} @keyframes settleIn{0%{opacity:.6;transform:translateY(2px)}100%{opacity:1;transform:none}}
-    .slot-rolling{animation:slotRoll .11s infinite linear;filter:blur(1px)} @keyframes slotRoll{0%{transform:translateY(-40%)}100%{transform:translateY(40%)}}
-    .settle{animation:settlePop .35s cubic-bezier(.2,1.4,.4,1)} @keyframes settlePop{0%{transform:scale(.75) translateY(10px)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
-    .digit-box{border-color:rgba(255,255,255,.2)!important;background:#000!important;box-shadow:none}
-    .digit-pop{animation:digitPress .25s ease-out} @keyframes digitPress{0%{transform:scale(1)}50%{transform:scale(1.12);box-shadow:0 0 20px rgba(255,255,255,.3)}100%{transform:scale(1)}}
-    .flip{animation:flipIn .32s cubic-bezier(.2,1.4,.4,1)} @keyframes flipIn{0%{transform:rotateX(90deg) scale(.8);opacity:0}100%{transform:rotateX(0) scale(1);opacity:1}}
-    .pop{animation:popIn .28s cubic-bezier(.2,1.4,.4,1)} @keyframes popIn{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
-    .value-glow{animation:valuePulse .4s ease-out} @keyframes valuePulse{0%{transform:scale(.9);text-shadow:0 0 0 rgba(16,185,129,0)}50%{transform:scale(1.08);text-shadow:0 0 18px rgba(16,185,129,.6)}100%{transform:scale(1);text-shadow:none}}
-    .tab-active{background:#FBBF24;color:#000;border-color:#FBBF24} .tab-idle{background:rgba(255,255,255,.05);color:#a1a1aa;border-color:rgba(255,255,255,.1)}
-    /* FIX: font-size 16px en inputs evita el auto-zoom de iOS que causa el "salto" lateral al enfocar */
+    /* ===== TOKENS ===== */
+    :root{
+      --amber:#FBBF24;
+      --amber-soft:rgba(251,191,36,.15);
+      --violet:#8B5CF6;
+      --bg-0:#050707;
+      --surface-1:#0C1214;
+      --surface-2:#111616;
+      --border-subtle:rgba(255,255,255,.07);
+      --border-strong:rgba(255,255,255,.12);
+      --text-primary:#F5F5F5;
+      --text-secondary:#A1A1AA;
+      --text-tertiary:#71717A;
+      --shadow-card:0 1px 0 rgba(255,255,255,.04) inset,0 10px 30px -12px rgba(0,0,0,.7);
+      --shadow-float:0 24px 70px -20px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05);
+      --glow-amber:0 0 0 1px rgba(251,191,36,.25),0 12px 40px -12px rgba(251,191,36,.35);
+      --glow-violet:0 0 0 1px rgba(139,92,246,.25),0 12px 40px -12px rgba(139,92,246,.35);
+    }
+
+    /* ===== FONDO PREMIUM ===== */
+    body{
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(251,191,36,.10), transparent 60%),
+        radial-gradient(800px 500px at 100% 0%, rgba(139,92,246,.08), transparent 55%),
+        var(--bg-0);
+      background-attachment:fixed;
+      touch-action:manipulation;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar{width:8px;height:8px}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:999px}
+    ::-webkit-scrollbar-thumb:hover{background:rgba(251,191,36,.35)}
+    ::-webkit-scrollbar-track{background:transparent}
+    *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.16) transparent}
+
+    /* ===== TARJETAS (secciones) ===== */
+    section{
+      position:relative;
+      background:linear-gradient(180deg, rgba(255,255,255,.02) 0%, rgba(255,255,255,0) 100%), var(--surface-1);
+      box-shadow:var(--shadow-card);
+      border-radius:24px;
+      overflow:hidden;
+      backdrop-filter:blur(6px);
+      transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,border-color .25s;
+    }
+    section::before{
+      content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+      background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 32%);opacity:.6;
+      z-index:0;
+    }
+    section > *{ position:relative; z-index:1; }
+    section:hover{
+      box-shadow:var(--shadow-card),0 24px 50px -24px rgba(0,0,0,.7);
+      transform:translateY(-1px);
+    }
+
+    /* ===== TÍTULO CON DEGRADADO ===== */
+    h1.font-display{
+      background:linear-gradient(135deg,#FDE68A,#FBBF24,#D97706);
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 2px 12px rgba(251,191,36,.25));
+    }
+
+    /* ===== BOTONES ===== */
+    button{transition:transform .15s ease,box-shadow .2s,filter .2s,background-color .2s}
+    button:active{transform:translateY(1px) scale(.99)}
+    button:hover{filter:brightness(1.05)}
+
+    /* ===== MODALES ===== */
+    .modal-backdrop,[class*="bg-black/"].fixed,.fixed.inset-0>.absolute.inset-0{
+      backdrop-filter:blur(10px) saturate(120%);
+    }
+    .modal-panel{
+      box-shadow:var(--shadow-float);
+      animation:modalIn .32s cubic-bezier(.2,1,.3,1);
+      background:linear-gradient(160deg, #161A1C 0%, #0C1214 100%);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    @keyframes modalIn{
+      0%{opacity:0;transform:translateY(14px) scale(.97)}
+      100%{opacity:1;transform:none}
+    }
+
+    /* ===== ENCABEZADO DE MODAL ===== */
+    .modal-header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding-bottom:12px;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .modal-title{
+      font-size:15px;font-weight:900;color:var(--text-primary);letter-spacing:-.01em;
+      display:flex;align-items:center;gap:8px;
+    }
+    .modal-close{
+      width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.05);
+      display:grid;place-items:center;color:var(--text-secondary);
+      transition:background .2s,color .2s;border:none;cursor:pointer;
+    }
+    .modal-close:hover{background:rgba(255,255,255,.1);color:#fff}
+
+    /* ===== INPUTS REFINADOS ===== */
     .input-base{width:100%;height:44px;border-radius:12px;background:#000;border:1px solid rgba(255,255,255,.1);padding:0 12px;color:#fff;font-size:16px;outline:none}
     .input-base:focus{border-color:rgba(251,191,36,.5)} .input-base.invalid{border-color:rgba(244,63,94,.6)}
     select.input-base{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a1a1aa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .6rem center;background-size:1rem;padding-right:2rem}
-    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite} @keyframes spin{to{transform:rotate(360deg)}}
-    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }
+    input:focus,select:focus,textarea:focus{
+      border-color:rgba(251,191,36,.55)!important;
+      box-shadow:0 0 0 3px rgba(251,191,36,.12)!important;
+    }
+
+    /* ===== UTILIDADES ORIGINALES ===== */
+    .tab-active{background:#FBBF24;color:#000;border-color:#FBBF24}
+    .tab-idle{background:rgba(255,255,255,.05);color:#a1a1aa;border-color:rgba(255,255,255,.1)}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ===== FILAS DE LISTA ===== */
+    .list-row,[class*="hover:border-amber"]{transition:transform .18s ease,border-color .2s,background .2s}
+    [class*="hover:border-amber"]:hover{transform:translateY(-1px)}
+
+    /* ===== ACCESIBILIDAD ===== */
+    button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
+      outline:2px solid var(--amber);outline-offset:2px;
+    }
+
+    /* ===== ANIMACIONES ORIGINALES ===== */
+    .soft-settle{animation:settleIn .28s ease-out}@keyframes settleIn{0%{opacity:.6;transform:translateY(2px)}100%{opacity:1;transform:none}}
+    .slot-rolling{animation:slotRoll .11s infinite linear;filter:blur(1px)}@keyframes slotRoll{0%{transform:translateY(-40%)}100%{transform:translateY(40%)}}
+    .settle{animation:settlePop .35s cubic-bezier(.2,1.4,.4,1)}@keyframes settlePop{0%{transform:scale(.75) translateY(10px)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+    .digit-box{border-color:rgba(255,255,255,.18)!important;background:linear-gradient(180deg,#0a0a0a,#000)!important;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 6px 16px -8px rgba(0,0,0,.9)}
+    .digit-pop{animation:digitPress .25s ease-out}@keyframes digitPress{0%{transform:scale(1)}50%{transform:scale(1.12);box-shadow:0 0 24px rgba(251,191,36,.4)}100%{transform:scale(1)}}
+    .value-glow{animation:valuePulse .4s ease-out}@keyframes valuePulse{0%{transform:scale(.9)}50%{transform:scale(1.08);text-shadow:0 0 18px rgba(16,185,129,.6)}100%{transform:scale(1);text-shadow:none}}
   </style>
 </head>
 <body class="min-h-dvh antialiased text-white flex justify-center px-3 py-4" x-data="app()" x-init="init()">
@@ -79,7 +193,7 @@
   <div x-show="tab==='explorar'" class="flex flex-col gap-4">
 
     <!-- SERIE LÍDER -->
-    <section class="rounded-[20px] border border-amber-400/20 bg-[#1E1A0A] p-3">
+    <section class="rounded-[24px] border border-amber-400/20 bg-[#1E1A0A] p-3">
       <div class="flex justify-between items-center">
         <span class="text-[10px] font-black tracking-widest text-amber-200 uppercase truncate">Serie Líder · <span x-text="leader.owner"></span></span>
         <span class="font-mono text-[10px] text-amber-300 bg-black/40 border border-amber-500/20 px-2 py-0.5 rounded-lg shrink-0" x-text="leaderCountdownFormatted"></span>
@@ -109,10 +223,7 @@
         <button @click="clearInput()" class="text-[9px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-500 shrink-0">LIMPIAR</button>
       </div>
 
-      <!-- Letras del serial: 2 van SIEMPRE antes de los dígitos (prefijo) y la
-           3ra va SIEMPRE después (sufijo) — así es como se arman los seriales
-           reales (ej. USD: AB 12345678 C). Si el país usa menos letras, se
-           dejan las que sobran en — (blanco). -->
+      <!-- Letras del serial -->
       <div class="mt-4">
         <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Letras del serial (deja en — la que no uses)</label>
         <div class="mt-1 grid grid-cols-3 gap-2">
@@ -162,7 +273,7 @@
         </div>
       </div>
 
-      <!-- Denominación: solo muestra las que existen para la moneda elegida -->
+      <!-- Denominación -->
       <div class="mt-3">
         <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Denominación *</label>
         <select x-model.number="denom" @change="updateRarity()" class="input-base mt-1">
@@ -172,7 +283,7 @@
         </select>
       </div>
 
-      <!-- Vista previa del serial completo + rareza -->
+      <!-- Vista previa -->
       <div x-show="anySerialLetter || userDigits.length" class="mt-3 rounded-xl bg-black border border-amber-500/20 p-2.5">
         <div class="flex items-center justify-between gap-2">
           <div class="min-w-0">
@@ -186,7 +297,6 @@
           </div>
         </div>
       </div>
-
 
       <!-- SLOT SOLO TUS DIGITOS -->
       <div class="mt-4 min-h-[68px] rounded-2xl bg-black border border-white/10 p-3 flex flex-wrap gap-1.5 justify-center items-center" :class="digitsSettled?'soft-settle':''">
@@ -205,7 +315,7 @@
         <div class="text-[10px] font-bold shrink-0" :class="userDigits.length>=10?'text-rose-400':'text-zinc-500'" x-text="userDigits.length+'/10 MAX'"></div>
       </div>
 
-      <!-- NUMPAD (0-9) -->
+      <!-- NUMPAD -->
       <section class="mt-4">
         <div class="grid grid-cols-3 gap-2">
           <template x-for="n in [7,8,9,4,5,6,1,2,3]" :key="n">
@@ -220,7 +330,7 @@
         <div class="mt-2 text-[9px] text-zinc-600 text-center">Máximo 10 dígitos · solo tus dígitos · sin cola extra</div>
       </section>
 
-      <!-- ACCIÓN: BAJAR A BÓVEDA -->
+      <!-- ACCIÓN -->
       <div class="mt-4">
         <button @click="handleRegister()" :disabled="loadingPublish" class="kbtn w-full h-[48px] rounded-[14px] font-black text-[13px] border disabled:opacity-40" :class="user && globalActive && profileComplete ? 'bg-violet-500 text-white border-violet-400' : 'bg-amber-400 text-black border-amber-300'">
           <span x-show="!loadingPublish" x-text="!user ? 'LOGIN PARA BAJAR A BÓVEDA' : (globalActive ? 'BAJAR SERIAL COMPLETO A BÓVEDA' : 'ACTIVAR MEMBRESÍA $5 PARA BAJAR')"></span>
@@ -231,7 +341,7 @@
     </section>
 
     <!-- SIMILITUDES GLOBALES -->
-    <section class="rounded-[20px] border border-amber-500/20 bg-[#0C1214] p-4">
+    <section class="rounded-[24px] border border-amber-500/20 bg-[#0C1214] p-4">
       <div class="flex justify-between items-center mb-3 gap-2">
         <span class="text-[11px] font-black tracking-widest text-amber-300 uppercase shrink-0">Similitudes Globales</span>
         <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-400 text-black font-black truncate" x-text="queryFull ? (searchLoading ? 'Buscando...' : queryFull+' · '+globalResults.length+' similares') : 'Ingresa dígitos'"></span>
@@ -264,7 +374,7 @@
       </div>
     </section>
 
-    <section class="rounded-[20px] border border-white/10 bg-[#0C1214] p-4">
+    <section class="rounded-[24px] border border-white/10 bg-[#0C1214] p-4">
       <div class="flex justify-between mb-2"><span class="text-[11px] font-black tracking-widest text-zinc-300 uppercase">Historial local</span><button @click="clearLastMatches()" class="text-[10px] text-zinc-500">Limpiar</button></div>
       <div class="space-y-1.5"><template x-for="m in lastMatches" :key="m.id"><div class="flex justify-between items-center rounded-lg bg-white/[0.03] border border-white/5 px-2.5 py-2 gap-2"><span class="font-mono text-[11px] text-white truncate" x-text="m.serial"></span><span class="text-[9px] text-zinc-500 shrink-0" x-text="m.rarity"></span></div></template><div x-show="!lastMatches.length" class="text-[11px] text-zinc-500 text-center py-2">Tus búsquedas aparecerán aquí</div></div>
     </section>
@@ -272,7 +382,7 @@
 
   <!-- BÓVEDA -->
   <div x-show="tab==='boveda'" class="flex flex-col gap-4">
-    <section class="rounded-[20px] border border-white/10 bg-[#0C1214] p-4">
+    <section class="rounded-[24px] border border-white/10 bg-[#0C1214] p-4">
       <div class="flex justify-between mb-3 gap-2"><span class="text-[11px] font-black tracking-widest text-white uppercase truncate">Bóveda viva · <span x-text="filteredHistory.length"></span></span><span class="text-[9px] text-emerald-400 shrink-0" x-text="supabaseStatus"></span></div>
       <input x-model="searchQuery" placeholder="Buscar serie similar, alias, país" class="w-full h-10 rounded-xl bg-black border border-white/10 px-3 text-[16px] text-white outline-none">
       <div class="mt-2 flex flex-wrap gap-1.5"><template x-for="r in ['','SOLID','RADAR','LADDER','REPEATER','BINARY']"><button @click="filters.rarity=r" class="text-[9px] px-2.5 py-1 rounded-full border font-bold" :class="filters.rarity===r?'bg-amber-500/20 border-amber-400/30 text-amber-300':'border-white/10 text-zinc-500'" x-text="r||'Todas'"></button></template></div>
@@ -287,7 +397,7 @@
                   <button @click="shareSerial(h.serial)" class="text-[8px] px-1 py-0.5 rounded bg-white/5 text-zinc-400 shrink-0">COMPARTIR</button>
                 </div>
                 <div class="flex gap-1.5 mt-1.5 flex-wrap">
-                  <span x-show="h.isDemo" class="text-[8px] px-1.5 py-0.5 rounded-full border border-zinc-500/40 text-zinc-400 font-bold" title="Dato de ejemplo, no es un billete real publicado por un usuario">DEMO</span>
+                  <span x-show="h.isDemo" class="text-[8px] px-1.5 py-0.5 rounded-full border border-zinc-500/40 text-zinc-400 font-bold">DEMO</span>
                   <span class="text-[8px] px-1.5 py-0.5 rounded-full border font-bold" :class="h.rarity?.badgeClass" x-text="h.rarity?.label"></span>
                   <span class="text-[9px] text-zinc-500" x-text="h.country"></span>
                   <span class="text-[9px] text-zinc-500" x-text="'· $'+(h.nom||h.denom)"></span>
@@ -330,9 +440,6 @@
       </div>
       <div class="mt-3">
         <p x-show="globalActive" class="text-[11px] text-emerald-300">✓ Acceso completo a bóveda global, toques privados y chat.</p>
-        <!-- UX: si el usuario acaba de volver de pagar, no le mostramos el botón
-             de pago otra vez (confunde: "¿me robaron?") — mostramos que estamos
-             verificando, con reintentos automáticos por ~1 minuto. -->
         <div x-show="!globalActive && awaitingPayment" class="rounded-xl bg-amber-500/5 border border-amber-500/20 p-3 flex items-center gap-3">
           <span class="spinner shrink-0"></span>
           <p class="text-[11px] text-amber-200">Confirmando tu pago con Stripe… esto puede tardar unos segundos. No hace falta que hagas nada.</p>
@@ -445,7 +552,7 @@
       <div class="mt-3 text-[9px] text-zinc-600 text-center">Sistema privado: solo si aceptas se abre chat. Nadie te escribe sin permiso.</div>
     </section>
 
-    <section class="rounded-[20px] border border-white/10 bg-[#0C1214] p-4"><div class="text-[11px] font-black tracking-widest text-zinc-300 uppercase mb-2">Tus números en bóveda · <span x-text="mySearches.length"></span></div><template x-for="s in mySearches.slice(0,10)"><div class="flex justify-between items-center py-2 border-b border-white/5 gap-2"><span class="font-mono text-[11px] truncate" x-text="s.serial"></span><span class="text-[9px] text-zinc-500 shrink-0" x-text="s.country"></span></div></template><div x-show="!mySearches.length" class="text-[11px] text-zinc-600">Aún no publicaste</div></section>
+    <section class="rounded-[24px] border border-white/10 bg-[#0C1214] p-4"><div class="text-[11px] font-black tracking-widest text-zinc-300 uppercase mb-2">Tus números en bóveda · <span x-text="mySearches.length"></span></div><template x-for="s in mySearches.slice(0,10)"><div class="flex justify-between items-center py-2 border-b border-white/5 gap-2"><span class="font-mono text-[11px] truncate" x-text="s.serial"></span><span class="text-[9px] text-zinc-500 shrink-0" x-text="s.country"></span></div></template><div x-show="!mySearches.length" class="text-[11px] text-zinc-600">Aún no publicaste</div></section>
   </div>
 
   <!-- FOOTER LEGAL -->
@@ -466,10 +573,13 @@
 <!-- MODAL AUTH -->
 <div x-show="authModal.open" class="fixed inset-0 z-[75] flex items-center justify-center p-3">
   <div class="absolute inset-0 bg-black/80" @click="authModal.open=false"></div>
-  <div class="relative w-full max-w-[360px] rounded-[20px] bg-[#0E1212] border border-amber-500/30 p-5">
-    <h3 class="font-black text-white text-[14px]">Acceso a $DOLLARDGT</h3>
-    <p class="text-[10px] text-zinc-500 mt-1">Regístrate gratis para guardar tus datos y activar la membresía.</p>
-    <div class="mt-4 space-y-2">
+  <div class="modal-panel relative w-full max-w-[360px] rounded-[24px] p-5">
+    <div class="modal-header">
+      <h3 class="modal-title"><span class="text-2xl">🔐</span> Acceso a $DOLLARDGT</h3>
+      <button @click="authModal.open=false" class="modal-close">✕</button>
+    </div>
+    <p class="text-[11px] text-zinc-500 mb-4">Regístrate gratis para guardar tus datos y activar la membresía.</p>
+    <div class="space-y-2">
       <input x-model="authModal.email" type="email" placeholder="Email" class="input-base">
       <input x-model="authModal.password" type="password" placeholder="Contraseña" class="input-base">
       <div class="flex gap-2">
@@ -485,10 +595,10 @@
 <!-- MODAL TÉRMINOS/PRIVACIDAD -->
 <div x-show="showTerms" class="fixed inset-0 z-[85] flex items-center justify-center p-3">
   <div class="absolute inset-0 bg-black/80" @click="showTerms=false"></div>
-  <div class="relative w-full max-w-[400px] rounded-[20px] bg-[#0E1212] border border-white/10 p-5 max-h-[70vh] overflow-y-auto overflow-x-hidden">
-    <div class="flex justify-between items-center sticky top-0 bg-[#0E1212] pb-2 border-b border-white/10">
-      <h3 class="font-black text-white text-[13px]" x-text="showTerms==='terms'?'Términos y Condiciones':'Política de Privacidad'"></h3>
-      <button @click="showTerms=false" class="h-7 w-7 rounded-full bg-white/5 grid place-items-center">✕</button>
+  <div class="modal-panel relative w-full max-w-[400px] rounded-[24px] p-5 max-h-[70vh] overflow-y-auto overflow-x-hidden">
+    <div class="modal-header sticky top-0 bg-[#0C1214]/95 backdrop-blur z-10 -mx-5 -mt-5 px-5 py-4 mb-2 rounded-t-[24px]">
+      <h3 class="modal-title" x-text="showTerms==='terms'?'Términos y Condiciones':'Política de Privacidad'"></h3>
+      <button @click="showTerms=false" class="modal-close">✕</button>
     </div>
     <div class="mt-3 text-[11px] text-zinc-400 leading-relaxed space-y-4">
       <template x-if="showTerms==='terms'">
@@ -527,27 +637,29 @@
   </div>
 </div>
 
-<!-- MODAL MEMBRESÍA STRIPE (con scroll y estilo) -->
+<!-- MODAL MEMBRESÍA STRIPE -->
 <div x-show="stripeModal.open" class="fixed inset-0 z-[80] flex items-center justify-center p-3">
   <div class="absolute inset-0 bg-black/80" @click="closeStripeModal()"></div>
-  <div class="relative w-full max-w-[360px] max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-[20px] bg-[#111616] border border-amber-500/20 p-5">
-    <h3 class="font-black">Membresía $5 de por vida</h3>
-    <p class="text-[11px] text-zinc-400 mt-1">Publicar en bóveda global, enviar toques privados y chatear con coleccionistas.</p>
-    <div class="mt-4 bg-black border border-white/10 rounded-xl p-3 text-[11px] text-zinc-300">
+  <div class="modal-panel relative w-full max-w-[500px] max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-[24px] p-5">
+    <div class="modal-header">
+      <h3 class="modal-title"><span class="text-2xl">💳</span> Membresía $5 de por vida</h3>
+      <button @click="closeStripeModal()" class="modal-close">✕</button>
+    </div>
+    <p class="text-[11px] text-zinc-400 mb-4">Publicar en bóveda global, enviar toques privados y chatear con coleccionistas.</p>
+    <div class="bg-black border border-white/10 rounded-xl p-3 text-[11px] text-zinc-300 mb-4">
       <label class="flex items-start gap-2 cursor-pointer">
         <input type="checkbox" x-model="acceptStripeTerms" class="mt-0.5 h-4 w-4">
         <span>Acepto los <a href="#" @click.prevent="showTerms='terms'; closeStripeModal()" class="text-amber-300 underline">Términos</a> y la <a href="#" @click.prevent="showTerms='privacy'; closeStripeModal()" class="text-amber-300 underline">Privacidad</a>.</span>
       </label>
     </div>
 
-    <!-- Contenedor estilizado para el elemento de pago -->
-    <div class="mt-4 rounded-xl border border-white/10 bg-black p-3">
+    <div class="rounded-xl border border-white/10 bg-black p-3 mb-4">
       <div class="text-[9px] text-zinc-500 uppercase mb-2">Datos de pago</div>
       <div x-show="!stripeLoading" id="payment-element"></div>
       <div x-show="stripeLoading" class="text-center py-4"><span class="spinner"></span></div>
     </div>
 
-    <button @click="payNow()" :disabled="!acceptStripeTerms || !stripe || paying" class="mt-4 w-full h-11 rounded-xl bg-amber-400 text-black font-black disabled:opacity-40 disabled:cursor-not-allowed">PAGAR $5</button>
+    <button @click="payNow()" :disabled="!acceptStripeTerms || !stripe || paying" class="w-full h-11 rounded-xl bg-amber-400 text-black font-black disabled:opacity-40 disabled:cursor-not-allowed">PAGAR $5</button>
     <p class="text-[9px] text-zinc-600 text-center mt-2">Pago único procesado por Stripe. La membresía se activa automáticamente al confirmarse el pago.</p>
     <button @click="checkMembershipStatus()" :disabled="checkingMembership" class="mt-2 w-full h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-bold text-[10px] disabled:opacity-50">
       <span x-show="!checkingMembership">¿Ya pagaste? Verificar estado</span>
@@ -560,10 +672,10 @@
 <!-- MODAL CHAT -->
 <div x-show="chatModal.open" class="fixed inset-0 z-[95] flex items-end sm:items-center justify-center p-0 sm:p-3">
   <div class="absolute inset-0 bg-black/85" @click="chatModal.open=false"></div>
-  <div class="relative w-full max-w-[380px] h-[75vh] sm:h-[520px] rounded-t-[20px] sm:rounded-[20px] bg-[#0E1212] border border-violet-500/30 flex flex-col overflow-hidden">
+  <div class="modal-panel relative w-full max-w-[380px] h-[75vh] sm:h-[520px] rounded-t-[24px] sm:rounded-[24px] border border-violet-500/30 flex flex-col overflow-hidden">
     <div class="p-4 border-b border-white/10 flex justify-between items-center bg-[#15101F] gap-2">
       <div class="min-w-0"><div class="font-black text-[12px] text-white truncate" x-text="'Chat con '+ (chatModal.toque?.from_alias===profile.alias ? chatModal.toque?.to_owner : chatModal.toque?.from_alias)"></div><div class="font-mono text-[10px] text-violet-300 truncate" x-text="chatModal.toque?.serial"></div></div>
-      <button @click="chatModal.open=false" class="h-8 w-8 rounded-full bg-white/5 grid place-items-center shrink-0">✕</button>
+      <button @click="chatModal.open=false" class="modal-close">✕</button>
     </div>
     <div class="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-2 bg-black/30">
       <div x-show="chatModal.loading" class="text-[11px] text-zinc-500 text-center py-4">Cargando chat privado...</div>
@@ -591,8 +703,11 @@
 <!-- ONBOARDING INTERACTIVO -->
 <div x-show="showOnboarding" class="fixed inset-0 z-50 flex items-center justify-center p-3">
   <div class="absolute inset-0 bg-black/85" @click="showOnboarding=false"></div>
-  <div class="relative w-full max-w-[360px] rounded-[20px] bg-[#111616] border border-amber-500/20 p-5">
-    <h3 class="font-black text-white text-[14px]">Bienvenido a $DOLLARDGT</h3>
+  <div class="modal-panel relative w-full max-w-[360px] rounded-[24px] p-5">
+    <div class="modal-header">
+      <h3 class="modal-title"><span class="text-2xl">🚀</span> Bienvenido a $DOLLARDGT</h3>
+      <button @click="showOnboarding=false" class="modal-close">✕</button>
+    </div>
     <div x-show="onboardingStep === 1" class="mt-4 space-y-3 text-[12px] text-zinc-400">
       <div class="text-center">
         <div class="text-[40px]">🔢</div>
@@ -642,10 +757,13 @@
 <!-- MODAL PERFIL RÁPIDO -->
 <div x-show="quickProfileModal.open" class="fixed inset-0 z-[82] flex items-center justify-center p-3">
   <div class="absolute inset-0 bg-black/80" @click="quickProfileModal.open=false"></div>
-  <div class="relative w-full max-w-[360px] rounded-[20px] bg-[#0E1212] border border-amber-500/30 p-5">
-    <h3 class="font-black text-white text-[14px]">Editar perfil rápido</h3>
-    <p class="text-[10px] text-zinc-500 mt-1">Completa estos datos para publicar y contactar.</p>
-    <div class="mt-4 space-y-2">
+  <div class="modal-panel relative w-full max-w-[360px] rounded-[24px] p-5">
+    <div class="modal-header">
+      <h3 class="modal-title"><span class="text-2xl">👤</span> Editar perfil rápido</h3>
+      <button @click="quickProfileModal.open=false" class="modal-close">✕</button>
+    </div>
+    <p class="text-[10px] text-zinc-500 mb-4">Completa estos datos para publicar y contactar.</p>
+    <div class="space-y-2">
       <div>
         <label class="text-[9px] font-bold tracking-widest text-zinc-400 uppercase">Alias *</label>
         <input x-model="quickProfileModal.alias" placeholder="Escribe tu alias" class="input-base mt-1">
@@ -767,7 +885,6 @@ function app() {
     _paymentPollAttempts: 0,
     stripeModal:{open:false},
     acceptStripeTerms:false,
-    // Variables para Stripe Elements
     stripe: null,
     elements: null,
     clientSecret: null,
@@ -830,7 +947,6 @@ function app() {
       { id:'ten_digits', name:'Coleccionista completo', description:'Ingresa 10 dígitos', icon:'🔟', unlocked:false },
     ],
     get unlockedAchievements(){ return this.achievements.filter(a=>a.unlocked); },
-
     get queryFull(){ return this.userDigits.join(''); },
     get queryFirst4(){ return this.userDigits.slice(0,4).join(''); },
     get isEmailValid(){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.profile.email); },
@@ -1033,7 +1149,6 @@ function app() {
       this.saving = false;
     },
 
-    // ===== NUEVO FLUJO STRIPE EMBEBIDO (con estilo personalizado) =====
     async openStripeModal() {
       if (!this.user) { this.authModal.open = true; return; }
       this.acceptStripeTerms = false;
@@ -1059,20 +1174,13 @@ function app() {
               fontSize: '16px',
               fontWeight: '500',
               backgroundColor: 'transparent',
-              '::placeholder': {
-                color: '#71717A'
-              },
+              '::placeholder': { color: '#71717A' },
               borderRadius: '8px',
               padding: '10px 12px',
               border: '1px solid rgba(255,255,255,0.1)'
             },
-            invalid: {
-              color: '#F43F5E',
-              iconColor: '#F43F5E'
-            },
-            complete: {
-              color: '#34D399'
-            }
+            invalid: { color: '#F43F5E', iconColor: '#F43F5E' },
+            complete: { color: '#34D399' }
           }
         }).mount('#payment-element');
         this.stripeLoading = false;
@@ -1118,11 +1226,9 @@ function app() {
       }
       this.stripe = null;
     },
-    // ===== FIN NUEVO FLUJO =====
 
-    // Reintenta chequear la membresía cada pocos segundos durante ~1 minuto.
     startPaymentPolling() {
-      if (this._paymentPollInterval) return; // ya está corriendo
+      if (this._paymentPollInterval) return;
       this._paymentPollAttempts = 0;
       this._paymentPollInterval = setInterval(async () => {
         this._paymentPollAttempts++;
@@ -1136,10 +1242,8 @@ function app() {
             this.stopPaymentPolling();
             return;
           }
-        } catch (e) { /* aún no hay fila activa; seguimos intentando */ }
-        if (this._paymentPollAttempts >= 15) { // ~15 x 4s = 60s
-          this.stopPaymentPolling();
-        }
+        } catch (e) {}
+        if (this._paymentPollAttempts >= 15) { this.stopPaymentPolling(); }
       }, 4000);
     },
     stopPaymentPolling() {
@@ -1367,7 +1471,6 @@ function app() {
       try {
         supabaseClient.channel('public:dgt_toques')
           .on('postgres_changes', {event:'*', schema:'public', table:'dgt_toques'}, (payload) => {
-            console.log('Toque realtime:', payload);
             this.loadToques();
             if (payload.eventType === 'INSERT' && payload.new.to_email === this.encodeSensitive(this.profile.email)) {
               this.showToast(`👋 ${payload.new.from_alias} te tocó!`);
@@ -1381,7 +1484,7 @@ function app() {
             }
           }).subscribe();
         supabaseClient.channel('public:boveda_jugadas')
-          .on('postgres_changes', {event:'*', schema:'public', table:'boveda_jugadas'}, (payload) => {
+          .on('postgres_changes', {event:'*', schema:'public', table:'boveda_jugadas'}, () => {
             this.loadVault();
           }).subscribe();
       } catch(e) { console.error(e); }
