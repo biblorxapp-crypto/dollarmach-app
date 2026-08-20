@@ -527,7 +527,7 @@
   </div>
 </div>
 
-<!-- MODAL MEMBRESÍA STRIPE (actualizado con Stripe Elements) -->
+<!-- MODAL MEMBRESÍA STRIPE (con estilo personalizado) -->
 <div x-show="stripeModal.open" class="fixed inset-0 z-[80] flex items-center justify-center p-3">
   <div class="absolute inset-0 bg-black/80" @click="closeStripeModal()"></div>
   <div class="relative w-full max-w-[360px] rounded-[20px] bg-[#111616] border border-amber-500/20 p-5">
@@ -539,10 +539,14 @@
         <span>Acepto los <a href="#" @click.prevent="showTerms='terms'; closeStripeModal()" class="text-amber-300 underline">Términos</a> y la <a href="#" @click.prevent="showTerms='privacy'; closeStripeModal()" class="text-amber-300 underline">Privacidad</a>.</span>
       </label>
     </div>
-    <!-- Contenedor para el elemento de pago -->
-    <div id="payment-element" class="mt-4"></div>
-    <!-- Indicador de carga -->
-    <div x-show="stripeLoading" class="text-center py-4"><span class="spinner"></span></div>
+
+    <!-- Contenedor estilizado para el elemento de pago -->
+    <div class="mt-4 rounded-xl border border-white/10 bg-black p-3">
+      <div class="text-[9px] text-zinc-500 uppercase mb-2">Datos de pago</div>
+      <div x-show="!stripeLoading" id="payment-element"></div>
+      <div x-show="stripeLoading" class="text-center py-4"><span class="spinner"></span></div>
+    </div>
+
     <button @click="payNow()" :disabled="!acceptStripeTerms || !stripe || paying" class="mt-4 w-full h-11 rounded-xl bg-amber-400 text-black font-black disabled:opacity-40 disabled:cursor-not-allowed">PAGAR $5</button>
     <p class="text-[9px] text-zinc-600 text-center mt-2">Pago único procesado por Stripe. La membresía se activa automáticamente al confirmarse el pago.</p>
     <button @click="checkMembershipStatus()" :disabled="checkingMembership" class="mt-2 w-full h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-bold text-[10px] disabled:opacity-50">
@@ -763,7 +767,7 @@ function app() {
     _paymentPollAttempts: 0,
     stripeModal:{open:false},
     acceptStripeTerms:false,
-    // Nuevas variables para Stripe Elements
+    // Variables para Stripe Elements
     stripe: null,
     elements: null,
     clientSecret: null,
@@ -1029,7 +1033,7 @@ function app() {
       this.saving = false;
     },
 
-    // ===== NUEVO FLUJO STRIPE EMBEBIDO =====
+    // ===== NUEVO FLUJO STRIPE EMBEBIDO (con estilo personalizado) =====
     async openStripeModal() {
       if (!this.user) { this.authModal.open = true; return; }
       this.acceptStripeTerms = false;
@@ -1047,7 +1051,30 @@ function app() {
         this.clientSecret = data.client_secret;
         this.stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
         this.elements = this.stripe.elements({ clientSecret: this.clientSecret });
-        this.elements.create('payment').mount('#payment-element');
+        this.elements.create('payment', {
+          style: {
+            base: {
+              color: '#FFFFFF',
+              fontFamily: '"Inter", sans-serif',
+              fontSize: '16px',
+              fontWeight: '500',
+              backgroundColor: 'transparent',
+              '::placeholder': {
+                color: '#71717A'
+              },
+              borderRadius: '8px',
+              padding: '10px 12px',
+              border: '1px solid rgba(255,255,255,0.1)'
+            },
+            invalid: {
+              color: '#F43F5E',
+              iconColor: '#F43F5E'
+            },
+            complete: {
+              color: '#34D399'
+            }
+          }
+        }).mount('#payment-element');
         this.stripeLoading = false;
       } catch(e) {
         this.stripeLoading = false;
@@ -1085,7 +1112,6 @@ function app() {
       this.stripeLoading = false;
       this.paying = false;
       if (this.elements) {
-        // Limpiamos el contenedor y soltamos la instancia
         const el = document.getElementById('payment-element');
         if (el) el.innerHTML = '';
         this.elements = null;
