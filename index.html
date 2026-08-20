@@ -10,6 +10,8 @@
   <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter'],display:['Fraunces'],mono:['JetBrains Mono']}}}}</script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+  <!-- Stripe.js para el checkout embebido -->
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
     /* ===== FIX: evita scroll horizontal / "deslizamiento lateral" en móviles ===== */
     *, *::before, *::after { box-sizing: border-box; }
@@ -525,23 +527,31 @@
   </div>
 </div>
 
-<!-- MODAL MEMBRESÍA STRIPE -->
-<div x-show="stripeModal.open" class="fixed inset-0 z-[80] flex items-center justify-center p-3"><div class="absolute inset-0 bg-black/80" @click="stripeModal.open=false"></div><div class="relative w-full max-w-[360px] rounded-[20px] bg-[#111616] border border-amber-500/20 p-5">
-  <h3 class="font-black">Membresía $5 de por vida</h3>
-  <p class="text-[11px] text-zinc-400 mt-1">Publicar en bóveda global, enviar toques privados y chatear con coleccionistas.</p>
-  <div class="mt-4 bg-black border border-white/10 rounded-xl p-3 text-[11px] text-zinc-300">
-    <label class="flex items-start gap-2 cursor-pointer">
-      <input type="checkbox" x-model="acceptStripeTerms" class="mt-0.5 h-4 w-4">
-      <span>Acepto los <a href="#" @click.prevent="showTerms='terms'; stripeModal.open=false" class="text-amber-300 underline">Términos</a> y la <a href="#" @click.prevent="showTerms='privacy'; stripeModal.open=false" class="text-amber-300 underline">Privacidad</a>.</span>
-    </label>
+<!-- MODAL MEMBRESÍA STRIPE (actualizado con Stripe Elements) -->
+<div x-show="stripeModal.open" class="fixed inset-0 z-[80] flex items-center justify-center p-3">
+  <div class="absolute inset-0 bg-black/80" @click="closeStripeModal()"></div>
+  <div class="relative w-full max-w-[360px] rounded-[20px] bg-[#111616] border border-amber-500/20 p-5">
+    <h3 class="font-black">Membresía $5 de por vida</h3>
+    <p class="text-[11px] text-zinc-400 mt-1">Publicar en bóveda global, enviar toques privados y chatear con coleccionistas.</p>
+    <div class="mt-4 bg-black border border-white/10 rounded-xl p-3 text-[11px] text-zinc-300">
+      <label class="flex items-start gap-2 cursor-pointer">
+        <input type="checkbox" x-model="acceptStripeTerms" class="mt-0.5 h-4 w-4">
+        <span>Acepto los <a href="#" @click.prevent="showTerms='terms'; closeStripeModal()" class="text-amber-300 underline">Términos</a> y la <a href="#" @click.prevent="showTerms='privacy'; closeStripeModal()" class="text-amber-300 underline">Privacidad</a>.</span>
+      </label>
+    </div>
+    <!-- Contenedor para el elemento de pago -->
+    <div id="payment-element" class="mt-4"></div>
+    <!-- Indicador de carga -->
+    <div x-show="stripeLoading" class="text-center py-4"><span class="spinner"></span></div>
+    <button @click="payNow()" :disabled="!acceptStripeTerms || !stripe || paying" class="mt-4 w-full h-11 rounded-xl bg-amber-400 text-black font-black disabled:opacity-40 disabled:cursor-not-allowed">PAGAR $5</button>
+    <p class="text-[9px] text-zinc-600 text-center mt-2">Pago único procesado por Stripe. La membresía se activa automáticamente al confirmarse el pago.</p>
+    <button @click="checkMembershipStatus()" :disabled="checkingMembership" class="mt-2 w-full h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-bold text-[10px] disabled:opacity-50">
+      <span x-show="!checkingMembership">¿Ya pagaste? Verificar estado</span>
+      <span x-show="checkingMembership" class="spinner"></span>
+    </button>
+    <button @click="closeStripeModal()" class="mt-2 w-full h-9 rounded-xl bg-white/5 text-zinc-400 font-bold text-[10px]">CANCELAR</button>
   </div>
-  <button @click="redirectToStripe()" :disabled="!acceptStripeTerms" class="mt-4 w-full h-11 rounded-xl bg-amber-400 text-black font-black disabled:opacity-40 disabled:cursor-not-allowed">IR A PAGAR $5</button>
-  <p class="text-[9px] text-zinc-600 text-center mt-2">Pago único procesado por Stripe. La membresía se activa automáticamente al confirmarse el pago (puede tardar unos segundos).</p>
-  <button @click="checkMembershipStatus()" :disabled="checkingMembership" class="mt-2 w-full h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-bold text-[10px] disabled:opacity-50">
-    <span x-show="!checkingMembership">¿Ya pagaste? Verificar estado</span>
-    <span x-show="checkingMembership" class="spinner"></span>
-  </button>
-</div></div>
+</div>
 
 <!-- MODAL CHAT -->
 <div x-show="chatModal.open" class="fixed inset-0 z-[95] flex items-end sm:items-center justify-center p-0 sm:p-3">
@@ -662,7 +672,8 @@
 // ===== CONFIGURACIÓN =====
 const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
-const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/14AdRa8BagNr2GegAbenS01';
+const SUPABASE_EDGE_FUNCTION = 'https://hvdaitsnvwigqbizirbi.supabase.co/functions/v1/stripe-lifetime';
+const STRIPE_PUBLISHABLE_KEY = 'pk_live_51U0o31IPKX7lMjR6jorRtUXLX4QbhnVkrZaSnBVFioWRhiTZKAu8p4OR0WyPWOLiTrH0toQGzrShEoVmwW82El7w00l2e179li';
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -675,10 +686,6 @@ const RARITY_TIPS = {
   Común: 'Sin patrón'
 };
 
-// FIX UX: antes la denominación era un único <select> con países mezclados
-// y valores duplicados (ej. value="5" para $5 USD, €5 y £5 a la vez), lo que
-// hacía imposible saber cuál estaba realmente elegido. Ahora cada moneda
-// tiene su propia lista de denominaciones reales.
 const CURRENCIES = [
   { code:'USD', flag:'🇺🇸', symbol:'$', denoms:[1,2,5,10,20,50,100] },
   { code:'EUR', flag:'🇪🇺', symbol:'€', denoms:[5,10,20,50,100,200] },
@@ -690,9 +697,6 @@ const CURRENCIES = [
   { code:'PEN', flag:'🇵🇪', symbol:'S/', denoms:[10,20,50,100,200] },
   { code:'CLP', flag:'🇨🇱', symbol:'$', denoms:[1000,2000,5000,10000,20000] },
   { code:'BRL', flag:'🇧🇷', symbol:'R$', denoms:[2,5,10,20,50,100,200] },
-  // "Otros": para cualquier país/moneda no listada arriba. Lista unificada
-  // que cubre prácticamente todas las denominaciones numéricas usadas en
-  // billetes del mundo (pasados y presentes), de menor a mayor.
   { code:'OTROS', flag:'🌎', symbol:'', denoms:[1,2,3,4,5,10,20,25,50,100,200,250,500,1000,2000,5000,10000,20000,50000,100000] },
 ];
 
@@ -730,9 +734,6 @@ function app() {
     showOnboarding: localStorage.getItem('dgt_onboarding_done') !== '1',
     onboardingStep: 1,
     userDigits:[],
-    // FIX UX: antes eran 2 inputs de texto (Prefijo/Sufijo) que exigían teclado.
-    // Ahora son 3 selectores independientes; cada país usa entre 1 y 3 letras,
-    // los slots que no se usan quedan en '' (—).
     serialLetters: ['', '', ''],
     ALPHABET: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
     serialCurrency: 'USD',
@@ -757,16 +758,17 @@ function app() {
     globalActive: localStorage.getItem('dgt_global_active')==='true',
     cancellingMembership:false,
     checkingMembership:false,
-    // UX: cuando el usuario vuelve de pagar en Stripe, el webhook puede tardar
-    // unos segundos en llegar a Supabase. Sin este estado, un refresh
-    // "temprano" muestra 'NO MIEMBRO' + botón de pago otra vez, lo cual
-    // asusta al usuario (parece que el pago no sirvió / se perdió el dinero).
-    // Con esto mostramos "Confirmando tu pago..." y reintentamos solos.
     awaitingPayment: localStorage.getItem('dgt_awaiting_payment') === '1',
     _paymentPollInterval: null,
     _paymentPollAttempts: 0,
     stripeModal:{open:false},
     acceptStripeTerms:false,
+    // Nuevas variables para Stripe Elements
+    stripe: null,
+    elements: null,
+    clientSecret: null,
+    stripeLoading: false,
+    paying: false,
     toquesRecibidos:[],
     toquesEnviados:[],
     toquesLoading:false,
@@ -837,8 +839,6 @@ function app() {
     get serialSuffix(){ return this.serialLetters[2] || ''; },
     get fullSerialPreview(){
       const digits = this.userDigits.join('');
-      // Espacio solo entre prefijo y dígitos (legible); el sufijo va pegado,
-      // igual que en un billete real (ej. AB 12345678C).
       if (!this.serialPrefix && !digits && !this.serialSuffix) return 'Ingresa datos';
       return (this.serialPrefix ? this.serialPrefix + ' ' : '') + digits + this.serialSuffix;
     },
@@ -905,12 +905,6 @@ function app() {
         this.setupNotifications();
         this.updateStreak();
         setInterval(()=>this.loadToques(), 30000);
-        // Cuando el usuario vuelve de la pestaña de Stripe, revisamos si el
-        // webhook ya activó la membresía, sin que tenga que tocar ningún botón.
-        // Si veníamos de "IR A PAGAR" (awaitingPayment), usamos reintentos
-        // automáticos en vez de un solo chequeo, porque el webhook de Stripe
-        // puede tardar unos segundos y un solo intento temprano mostraría
-        // "NO MIEMBRO" de forma confusa justo después de pagar.
         document.addEventListener('visibilitychange', () => {
           if (document.visibilityState === 'visible' && this.user && !this.globalActive) {
             if (this.awaitingPayment) {
@@ -920,9 +914,6 @@ function app() {
             }
           }
         });
-        // Si la página se recargó mientras esperábamos confirmación (ej. el
-        // usuario refrescó manualmente), retomamos el polling en vez de
-        // mostrar el botón de pago desde cero.
         if (this.awaitingPayment && this.user && !this.globalActive) {
           this.startPaymentPolling();
         }
@@ -1038,31 +1029,72 @@ function app() {
       this.saving = false;
     },
 
-    openStripeModal() {
+    // ===== NUEVO FLUJO STRIPE EMBEBIDO =====
+    async openStripeModal() {
       if (!this.user) { this.authModal.open = true; return; }
       this.acceptStripeTerms = false;
+      this.stripeLoading = true;
       this.stripeModal.open = true;
+      await this.$nextTick();
+      try {
+        const res = await fetch(SUPABASE_EDGE_FUNCTION, {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` },
+          body: JSON.stringify({ action: 'create', user_id: this.user.id })
+        });
+        const data = await res.json();
+        if (!data.client_secret) throw new Error(data.error || 'No se pudo crear pago');
+        this.clientSecret = data.client_secret;
+        this.stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        this.elements = this.stripe.elements({ clientSecret: this.clientSecret });
+        this.elements.create('payment').mount('#payment-element');
+        this.stripeLoading = false;
+      } catch(e) {
+        this.stripeLoading = false;
+        this.showToast('Error: '+e.message);
+      }
     },
-    redirectToStripe() {
-      // FIX SEGURIDAD: se agrega client_reference_id con el uuid del usuario logueado.
-      // El webhook de Stripe (server-side) lo usa para saber a quién activar la
-      // membresía cuando el pago se confirma — sin esto, el webhook no sabría
-      // qué fila de 'members' actualizar.
-      const url = new URL(STRIPE_PAYMENT_LINK);
-      url.searchParams.set('client_reference_id', this.user.id);
-      if (this.profile.email) url.searchParams.set('prefilled_email', this.profile.email);
-      window.open(url.toString(), '_blank');
+    async payNow() {
+      if (!this.acceptStripeTerms) { this.showToast('Acepta términos'); return; }
+      if (!this.stripe || !this.elements) { this.showToast('Cargando pago...'); return; }
+      this.paying = true;
+      try {
+        const { error, paymentIntent } = await this.stripe.confirmPayment({ elements: this.elements, redirect: 'if_required' });
+        if (error) throw new Error(error.message);
+        if (paymentIntent.status === 'succeeded') {
+          await fetch(SUPABASE_EDGE_FUNCTION, {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` },
+            body: JSON.stringify({ action: 'confirm', payment_intent_id: paymentIntent.id, user_id: this.user.id })
+          });
+          this.globalActive = true;
+          localStorage.setItem('dgt_global_active','true');
+          this.closeStripeModal();
+          this.showToast('✅ Membresía $5 activada de por vida');
+          this.stopPaymentPolling();
+        }
+      } catch(e) {
+        this.showToast(e.message);
+      }
+      this.paying = false;
+    },
+    closeStripeModal() {
       this.stripeModal.open = false;
-      // Se guarda en localStorage (no solo en memoria) porque si el usuario
-      // refresca la página al volver, este estado debe sobrevivir para seguir
-      // mostrando "Confirmando..." en vez de "NO MIEMBRO" desde cero.
-      this.awaitingPayment = true;
-      localStorage.setItem('dgt_awaiting_payment', '1');
-      this.showToast('Completa el pago en Stripe y vuelve — se activa solo');
+      this.acceptStripeTerms = false;
+      this.clientSecret = null;
+      this.stripeLoading = false;
+      this.paying = false;
+      if (this.elements) {
+        // Limpiamos el contenedor y soltamos la instancia
+        const el = document.getElementById('payment-element');
+        if (el) el.innerHTML = '';
+        this.elements = null;
+      }
+      this.stripe = null;
     },
+    // ===== FIN NUEVO FLUJO =====
+
     // Reintenta chequear la membresía cada pocos segundos durante ~1 minuto.
-    // Se detiene solo si: (a) ya se activó, (b) se agotan los intentos, o
-    // (c) el usuario cancela/cierra sesión mientras tanto.
     startPaymentPolling() {
       if (this._paymentPollInterval) return; // ya está corriendo
       this._paymentPollAttempts = 0;
@@ -1090,8 +1122,6 @@ function app() {
       localStorage.removeItem('dgt_awaiting_payment');
     },
     async cancelMembership() {
-      // FIX: antes esto solo limpiaba localStorage y el usuario seguía
-      // siendo miembro en el servidor. Ahora borra la fila real en 'members'.
       if (!this.user) return;
       this.cancellingMembership = true;
       try {
@@ -1106,11 +1136,6 @@ function app() {
       }
       this.cancellingMembership = false;
     },
-    // FIX SEGURIDAD: reemplaza a manualActivateMembership(). Esta función
-    // SOLO LEE el estado de 'members' — nunca inserta ni actualiza. La única
-    // vía para que 'active' pase a true es el webhook de Stripe (server-side,
-    // con service_role key). Si el pago ya se procesó, esto simplemente
-    // refresca el estado local; si Stripe aún no notificó, avisa que espere.
     async checkMembershipStatus() {
       if (!this.user) { this.authModal.open = true; return; }
       this.checkingMembership = true;
@@ -1121,7 +1146,7 @@ function app() {
           localStorage.setItem('dgt_global_active', 'true');
           this.stopPaymentPolling();
           this.showToast('Membresía activa ✓');
-          this.stripeModal.open = false;
+          this.closeStripeModal();
         } else {
           this.showToast('Aún no vemos el pago confirmado. Si acabas de pagar, espera unos segundos y vuelve a intentar.');
         }
@@ -1215,9 +1240,6 @@ function app() {
       if (h.isDemo) { this.showToast('Este billete es un dato de ejemplo, no tiene dueño real'); return; }
       if (!this.globalActive) { this.openStripeModal(); this.showToast('Requiere membresía $5'); return; }
       if ((h.owner || '').toLowerCase() === this.profile.alias.toLowerCase()) { this.showToast('No puedes tocar tu propio billete'); return; }
-      // El chequeo de abajo es solo para feedback instantáneo en la UI;
-      // el límite real (que no se puede saltar desde DevTools) vive en la
-      // función enviar_toque() del servidor, que revisa dgt_toques por auth.uid().
       const last = this.lastToqueTimes[h.owner] || 0;
       const now = Date.now();
       if (now - last < this.rateLimitToqueMs) { this.showToast('Espera unos segundos antes de tocar de nuevo a ' + h.owner); return; }
@@ -1239,7 +1261,6 @@ function app() {
         this.loadToques();
       } catch (e) {
         console.error(e);
-        // el mensaje de la excepción de Postgres (ej. rate limit) viaja en e.message
         this.showToast(e.message && e.message.includes('Espera') ? e.message : 'Error al enviar toque');
       }
       this.loadingToque = false;
@@ -1404,9 +1425,6 @@ function app() {
       }
       this.scheduleGlobalSearch();
     },
-    // FIX UX: al cambiar de país/moneda, aseguramos que 'denom' sea un valor
-    // válido para esa moneda (antes podía quedar con un número que no
-    // correspondía a ninguna denominación real de la nueva moneda elegida).
     onCurrencyChange() {
       if (!this.currentCurrencyDenoms.includes(this.denom)) {
         this.denom = this.currentCurrencyDenoms[0];
@@ -1547,8 +1565,6 @@ function app() {
     },
     async publishSearchToVault() {
       if (!this.canPublish) return;
-      // Chequeo local para feedback instantáneo; el límite real (imposible de saltar
-      // desde DevTools) lo aplica la función publicar_serial() en el servidor.
       const now = Date.now();
       if (now - this.lastPublishTime < this.rateLimitPublishMs) { this.showToast('Espera un minuto antes de publicar otro número'); return; }
       this.lastPublishTime = now;
@@ -1584,10 +1600,6 @@ function app() {
       this.loadingPublish = false;
     },
     similarityPercent(h) { return h._sim || 0; },
-    // FIX SEGURIDAD: escapa cualquier HTML antes de construir el marcado.
-    // serial/digits vienen de datos publicados por usuarios (prefijo/sufijo libres);
-    // sin este escape, un serial malicioso tipo "<img src=x onerror=...>" se ejecutaría
-    // como XSS almacenado para todo el que vea la lista (ver x-html en el template).
     escapeHtml(str) {
       return String(str)
         .replace(/&/g, '&amp;')
@@ -1652,9 +1664,6 @@ function app() {
         this.showToast(`🏆 Logro desbloqueado: ${ach.name}`);
       }
     },
-    // FIX: toDateString() ("Wed Aug 19 2026") no es un formato fiable para
-    // Date.parse en todos los navegadores y puede dar NaN o desfases de timezone.
-    // Se usa un key YYYY-MM-DD local y se compara por días-desde-epoch enteros.
     dayKey(d) {
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     },
