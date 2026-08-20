@@ -227,7 +227,8 @@
               </div>
               <div class="text-right shrink-0"><div class="text-[10px] text-emerald-300 font-mono" x-text="(h.points||0).toLocaleString()+' pts'"></div><div class="text-[8px] px-1.5 py-0.5 rounded-full border mt-1" :class="h.rarity?.badgeClass" x-text="h.rarity?.label"></div></div>
             </div>
-            <div class="flex gap-1.5 mt-2 flex-wrap">
+            <div class="flex gap-1.5 mt-2 flex-wrap items-center">
+              <span x-show="h.isDemo" class="text-[8px] px-1.5 py-0.5 rounded-full border border-zinc-500/40 text-zinc-400 font-bold" title="Dato de ejemplo, no es un billete real publicado por un usuario">DEMO</span>
               <span class="text-[9px] text-zinc-500" x-text="h.country+' · $'+(h.nom||h.denom)+' · '+h.yr"></span>
               <span class="text-[9px] text-amber-300/70" x-text="'· '+h.owner"></span>
               <span x-show="h.email" class="text-[8px] text-zinc-600" x-text="'· '+decodeSensitive(h.email)"></span>
@@ -264,6 +265,7 @@
                   <button @click="shareSerial(h.serial)" class="text-[8px] px-1 py-0.5 rounded bg-white/5 text-zinc-400 shrink-0">COMPARTIR</button>
                 </div>
                 <div class="flex gap-1.5 mt-1.5 flex-wrap">
+                  <span x-show="h.isDemo" class="text-[8px] px-1.5 py-0.5 rounded-full border border-zinc-500/40 text-zinc-400 font-bold" title="Dato de ejemplo, no es un billete real publicado por un usuario">DEMO</span>
                   <span class="text-[8px] px-1.5 py-0.5 rounded-full border font-bold" :class="h.rarity?.badgeClass" x-text="h.rarity?.label"></span>
                   <span class="text-[9px] text-zinc-500" x-text="h.country"></span>
                   <span class="text-[9px] text-zinc-500" x-text="'· $'+(h.nom||h.denom)"></span>
@@ -309,7 +311,10 @@
         <p x-show="!globalActive" class="text-[11px] text-zinc-400">Activa la membresía para publicar tus números, enviar toques y chatear con otros coleccionistas.</p>
         <button x-show="!globalActive" @click="openStripeModal()" class="mt-2 w-full h-11 rounded-xl bg-amber-400 text-black font-black text-[12px]">ACTIVAR MEMBRESÍA $5</button>
         <button x-show="!globalActive" @click="manualActivateMembership()" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px]">¿Ya pagaste? Activar ahora</button>
-        <button x-show="globalActive" @click="globalActive=false; localStorage.removeItem('dgt_global_active'); showToast('Membresía desactivada (demo)')" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px]">Cancelar membresía (demo)</button>
+        <button x-show="globalActive" @click="cancelMembership()" :disabled="cancellingMembership" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px] disabled:opacity-50">
+          <span x-show="!cancellingMembership">Cancelar membresía (demo)</span>
+          <span x-show="cancellingMembership" class="spinner"></span>
+        </button>
       </div>
     </section>
 
@@ -659,7 +664,7 @@ const Engine = {
     const u=Array.from({length:4},()=>Math.floor(Math.random()*10)).join('');
     const t=Array.from({length:4},()=>Math.floor(Math.random()*10)).join('');
     const full=(u+t).slice(0,10);
-    return { id:'g'+i, serial:`${pre} ${full} ${r()}`, digits:full, points:Engine.calcPoints(Engine.checkRarity(full),den), rarity:Engine.checkRarity(full), denom:den, nom:den, yr:Engine.genYear(), country:['🇦🇷 Argentina $','🇺🇸 USA $','🇲🇽 México $'][i%3], owner:'Collector_'+(100+i), contact: btoa('1555|ghost@example.com'), email: btoa('ghost@example.com'), created_at:new Date().toISOString() };
+    return { id:'g'+i, serial:`${pre} ${full} ${r()}`, digits:full, points:Engine.calcPoints(Engine.checkRarity(full),den), rarity:Engine.checkRarity(full), denom:den, nom:den, yr:Engine.genYear(), country:['🇦🇷 Argentina $','🇺🇸 USA $','🇲🇽 México $'][i%3], owner:'Collector_'+(100+i), contact: btoa('1555|ghost@example.com'), email: btoa('ghost@example.com'), created_at:new Date().toISOString(), isDemo:true };
   }
 };
 
@@ -690,6 +695,7 @@ function app() {
     debouncedFull:'',
     _debounceTimer:null,
     globalActive: localStorage.getItem('dgt_global_active')==='true',
+    cancellingMembership:false,
     stripeModal:{open:false},
     acceptStripeTerms:false,
     toquesRecibidos:[],
@@ -954,6 +960,23 @@ function app() {
       this.stripeModal.open = false;
       this.showToast('Completa el pago en Stripe y vuelve');
     },
+    async cancelMembership() {
+      // FIX: antes esto solo limpiaba localStorage y el usuario seguía
+      // siendo miembro en el servidor. Ahora borra la fila real en 'members'.
+      if (!this.user) return;
+      this.cancellingMembership = true;
+      try {
+        const { error } = await supabaseClient.from('members').delete().eq('user_id', this.user.id);
+        if (error) throw error;
+        this.globalActive = false;
+        localStorage.removeItem('dgt_global_active');
+        this.showToast('Membresía desactivada');
+      } catch (e) {
+        console.error(e);
+        this.showToast('Error al cancelar membresía: ' + e.message);
+      }
+      this.cancellingMembership = false;
+    },
     async manualActivateMembership() {
       if (!this.user) { this.authModal.open = true; return; }
       const { error } = await supabaseClient.from('members').upsert({
@@ -983,6 +1006,7 @@ function app() {
           const ghosts = Array.from({length:90}, (_,i) => Engine.genGhost(i));
           this.history = ghosts.slice(0,40);
           this.jugadasPool = ghosts.slice(40);
+          this.supabaseStatus = 'Modo demo (sin datos reales aún)';
         }
         this.updateLeader();
       } catch (e) {
@@ -1052,33 +1076,36 @@ function app() {
 
     async enviarToqueReal(h) {
       if (!this.user) { this.authModal.open = true; return; }
+      if (h.isDemo) { this.showToast('Este billete es un dato de ejemplo, no tiene dueño real'); return; }
       if (!this.globalActive) { this.openStripeModal(); this.showToast('Requiere membresía $5'); return; }
       if ((h.owner || '').toLowerCase() === this.profile.alias.toLowerCase()) { this.showToast('No puedes tocar tu propio billete'); return; }
+      // El chequeo de abajo es solo para feedback instantáneo en la UI;
+      // el límite real (que no se puede saltar desde DevTools) vive en la
+      // función enviar_toque() del servidor, que revisa dgt_toques por auth.uid().
       const last = this.lastToqueTimes[h.owner] || 0;
       const now = Date.now();
       if (now - last < this.rateLimitToqueMs) { this.showToast('Espera unos segundos antes de tocar de nuevo a ' + h.owner); return; }
       this.lastToqueTimes[h.owner] = now;
       this.loadingToque = true;
-      const payload = {
-        from_alias: this.profile.alias,
-        from_email: this.encodeSensitive(this.profile.email),
-        from_country: this.profile.country,
-        to_owner: h.owner,
-        to_email: h.email ? this.decodeSensitive(h.email) : '',
-        serial: h.serial,
-        digits: h.digits || h.serial.replace(/\D/g, ''),
-        status: 'pending',
-        created_at: new Date().toISOString()
-      };
       try {
-        const { error } = await supabaseClient.from('dgt_toques').insert(payload);
+        const { error } = await supabaseClient.rpc('enviar_toque', {
+          p_to_owner: h.owner,
+          p_to_email: h.email ? this.decodeSensitive(h.email) : '',
+          p_serial: h.serial,
+          p_digits: h.digits || h.serial.replace(/\D/g, ''),
+          p_from_country: this.profile.country
+        });
         if (error) throw error;
         this.showToast(`👋 Toque enviado a ${h.owner}`);
-        this.toquesEnviados.unshift({...payload, id: 'local_' + Date.now()});
         this.showLocalNotification(`Toque enviado a ${h.owner}`);
         this.addPoints(10, 'Toque enviado');
         this.unlockAchievement('first_touch');
-      } catch (e) { console.error(e); this.showToast('Error al enviar toque'); }
+        this.loadToques();
+      } catch (e) {
+        console.error(e);
+        // el mensaje de la excepción de Postgres (ej. rate limit) viaja en e.message
+        this.showToast(e.message && e.message.includes('Espera') ? e.message : 'Error al enviar toque');
+      }
       this.loadingToque = false;
     },
     usarDigitos(h) {
@@ -1371,61 +1398,71 @@ function app() {
     },
     async publishSearchToVault() {
       if (!this.canPublish) return;
+      // Chequeo local para feedback instantáneo; el límite real (imposible de saltar
+      // desde DevTools) lo aplica la función publicar_serial() en el servidor.
       const now = Date.now();
       if (now - this.lastPublishTime < this.rateLimitPublishMs) { this.showToast('Espera un minuto antes de publicar otro número'); return; }
       this.lastPublishTime = now;
       this.loadingPublish = true;
       const fullSerial = this.fullSerialPreview;
       const full = this.userDigits.join('');
-      const first4 = full.slice(0,4);
       const rarity = Engine.checkRarity(full);
       const points = Engine.calcPoints(rarity, parseInt(this.profile.denom));
-      const payload = {
-        user_id: this.user.id,
-        serial: fullSerial,
-        serial_display: fullSerial,
-        digits: full,
-        search_key: first4,
-        points: points,
-        rarity: rarity,
-        denom: this.denom,
-        nom: this.denom,
-        yr: parseInt(this.serialYear) || this.yr,
-        country: this.profile.country,
-        owner: this.profile.alias,
-        contact: this.encodeSensitive(`${this.profile.phone || ''}|${this.profile.email}`),
-        email: this.encodeSensitive(this.profile.email),
-        alias: this.profile.alias,
-        letters_snapshot: `${this.serialPrefix} ${this.serialSuffix}`,
-        value_snapshot: this.value,
-        created_at: new Date().toISOString()
-      };
       try {
-        const { error } = await supabaseClient.from('boveda_jugadas').insert(payload);
+        const { error } = await supabaseClient.rpc('publicar_serial', {
+          p_serial: fullSerial,
+          p_digits: full,
+          p_points: points,
+          p_rarity: rarity,
+          p_denom: this.denom,
+          p_yr: parseInt(this.serialYear) || this.yr,
+          p_country: this.profile.country,
+          p_contact: this.encodeSensitive(`${this.profile.phone || ''}|${this.profile.email}`),
+          p_email: this.encodeSensitive(this.profile.email),
+          p_letters_snapshot: `${this.serialPrefix} ${this.serialSuffix}`,
+          p_value_snapshot: this.value
+        });
         if (error) throw error;
         this.showToast(`✅ Serial ${fullSerial} bajado a bóveda · $${this.value.toFixed(2)} · ${rarity.label}`);
         await this.loadVault();
         this.tab = 'boveda';
         this.addPoints(50, 'Publicación');
         this.unlockAchievement('first_publish');
-      } catch (e) { console.error(e); this.showToast('Error al publicar'); }
+      } catch (e) {
+        console.error(e);
+        this.showToast(e.message && e.message.includes('Espera') ? e.message : 'Error al publicar');
+      }
       this.loadingPublish = false;
     },
     similarityPercent(h) { return h._sim || 0; },
+    // FIX SEGURIDAD: escapa cualquier HTML antes de construir el marcado.
+    // serial/digits vienen de datos publicados por usuarios (prefijo/sufijo libres);
+    // sin este escape, un serial malicioso tipo "<img src=x onerror=...>" se ejecutaría
+    // como XSS almacenado para todo el que vea la lista (ver x-html en el template).
+    escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    },
     highlightSimilar(serial, digits) {
-      const q = this.queryFull;
-      if (!q) return serial;
+      const safeSerial = this.escapeHtml(serial || '');
+      const safeDigits = this.escapeHtml(digits || '');
+      const q = this.escapeHtml(this.queryFull);
+      if (!q) return safeSerial;
       try {
-        let highlighted = serial;
-        if (digits.includes(q) || serial.includes(q)) {
+        let highlighted = safeSerial;
+        if (safeDigits.includes(q) || safeSerial.includes(q)) {
           const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           highlighted = highlighted.replace(new RegExp(esc, 'g'), m => `<span class='bg-amber-400 text-black px-0.5 rounded'>${m}</span>`);
         } else {
-          highlighted = digits.split('').map((c,i) => q.includes(c) ? `<span class='bg-amber-400/30 text-amber-200 px-0.5 rounded'>${c}</span>` : c).join('');
-          return `<span class='font-mono'>${highlighted}</span> <span class='text-[9px] text-zinc-500'>(${serial})</span>`;
+          highlighted = safeDigits.split('').map((c,i) => q.includes(c) ? `<span class='bg-amber-400/30 text-amber-200 px-0.5 rounded'>${c}</span>` : c).join('');
+          return `<span class='font-mono'>${highlighted}</span> <span class='text-[9px] text-zinc-500'>(${safeSerial})</span>`;
         }
         return highlighted;
-      } catch(e) { return serial; }
+      } catch(e) { return safeSerial; }
     },
     showToast(m) { this.toast = {visible:true, message:m, classes:'bg-amber-400 text-black'}; setTimeout(() => this.toast.visible = false, 3000); },
     copySerial(serial) { navigator.clipboard.writeText(serial); this.showToast('Serial copiado'); },
@@ -1466,18 +1503,25 @@ function app() {
         this.showToast(`🏆 Logro desbloqueado: ${ach.name}`);
       }
     },
+    // FIX: toDateString() ("Wed Aug 19 2026") no es un formato fiable para
+    // Date.parse en todos los navegadores y puede dar NaN o desfases de timezone.
+    // Se usa un key YYYY-MM-DD local y se compara por días-desde-epoch enteros.
+    dayKey(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    },
+    daysBetween(key1, key2) {
+      const toUTC = k => { const [y,m,d] = k.split('-').map(Number); return Date.UTC(y, m-1, d); };
+      return Math.round((toUTC(key2) - toUTC(key1)) / 86400000);
+    },
     updateStreak() {
-      const last = localStorage.getItem('dgt_last_login');
-      const today = new Date().toDateString();
+      const last = localStorage.getItem('dgt_last_login_key');
+      const todayKey = this.dayKey(new Date());
       let streak = parseInt(localStorage.getItem('dgt_streak') || '0');
-      if (last !== today) {
-        if (last && (new Date(today) - new Date(last)) / (1000*60*60*24) > 1) {
-          streak = 1;
-        } else {
-          streak++;
-        }
+      if (last !== todayKey) {
+        const gap = last ? this.daysBetween(last, todayKey) : null;
+        streak = (gap === 1) ? streak + 1 : 1;
         localStorage.setItem('dgt_streak', streak);
-        localStorage.setItem('dgt_last_login', today);
+        localStorage.setItem('dgt_last_login_key', todayKey);
       }
       this.userStreak = streak;
       if (this.user) {
