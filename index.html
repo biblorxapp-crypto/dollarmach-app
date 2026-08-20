@@ -324,16 +324,24 @@
           <div class="text-[12px] font-black tracking-[0.18em] text-amber-300 uppercase">Membresía $DOLLARDGT</div>
           <div class="text-[10px] text-zinc-500 mt-1">Pago único de por vida</div>
         </div>
-        <div class="text-[10px] px-3 py-1 rounded-full border font-bold shrink-0" :class="globalActive?'bg-emerald-500/15 border-emerald-500/30 text-emerald-300':'bg-rose-500/15 border-rose-500/30 text-rose-300'" x-text="globalActive?'MIEMBRO ACTIVO':'NO MIEMBRO'"></div>
+        <div class="text-[10px] px-3 py-1 rounded-full border font-bold shrink-0" :class="globalActive?'bg-emerald-500/15 border-emerald-500/30 text-emerald-300': (awaitingPayment?'bg-amber-500/15 border-amber-500/30 text-amber-300':'bg-rose-500/15 border-rose-500/30 text-rose-300')" x-text="globalActive?'MIEMBRO ACTIVO':(awaitingPayment?'CONFIRMANDO PAGO...':'NO MIEMBRO')"></div>
       </div>
       <div class="mt-3">
         <p x-show="globalActive" class="text-[11px] text-emerald-300">✓ Acceso completo a bóveda global, toques privados y chat.</p>
-        <p x-show="!globalActive" class="text-[11px] text-zinc-400">Activa la membresía para publicar tus números, enviar toques y chatear con otros coleccionistas.</p>
-        <button x-show="!globalActive" @click="openStripeModal()" class="mt-2 w-full h-11 rounded-xl bg-amber-400 text-black font-black text-[12px]">ACTIVAR MEMBRESÍA $5</button>
+        <!-- UX: si el usuario acaba de volver de pagar, no le mostramos el botón
+             de pago otra vez (confunde: "¿me robaron?") — mostramos que estamos
+             verificando, con reintentos automáticos por ~1 minuto. -->
+        <div x-show="!globalActive && awaitingPayment" class="rounded-xl bg-amber-500/5 border border-amber-500/20 p-3 flex items-center gap-3">
+          <span class="spinner shrink-0"></span>
+          <p class="text-[11px] text-amber-200">Confirmando tu pago con Stripe… esto puede tardar unos segundos. No hace falta que hagas nada.</p>
+        </div>
+        <p x-show="!globalActive && !awaitingPayment" class="text-[11px] text-zinc-400">Activa la membresía para publicar tus números, enviar toques y chatear con otros coleccionistas.</p>
+        <button x-show="!globalActive && !awaitingPayment" @click="openStripeModal()" class="mt-2 w-full h-11 rounded-xl bg-amber-400 text-black font-black text-[12px]">ACTIVAR MEMBRESÍA $5</button>
         <button x-show="!globalActive" @click="checkMembershipStatus()" :disabled="checkingMembership" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px] disabled:opacity-50">
-          <span x-show="!checkingMembership">¿Ya pagaste? Verificar estado</span>
+          <span x-show="!checkingMembership">¿Ya pagaste? Verificar estado ahora</span>
           <span x-show="checkingMembership" class="spinner"></span>
         </button>
+        <button x-show="!globalActive && awaitingPayment" @click="stopPaymentPolling()" class="mt-2 w-full h-8 rounded-xl bg-white/5 border border-white/10 text-zinc-500 font-bold text-[9px]">Cancelar espera / no acabo de pagar</button>
         <button x-show="globalActive" @click="cancelMembership()" :disabled="cancellingMembership" class="mt-2 w-full h-9 rounded-xl bg-white/5 border border-white/10 text-zinc-400 font-bold text-[10px] disabled:opacity-50">
           <span x-show="!cancellingMembership">Cancelar membresía (demo)</span>
           <span x-show="cancellingMembership" class="spinner"></span>
@@ -749,6 +757,14 @@ function app() {
     globalActive: localStorage.getItem('dgt_global_active')==='true',
     cancellingMembership:false,
     checkingMembership:false,
+    // UX: cuando el usuario vuelve de pagar en Stripe, el webhook puede tardar
+    // unos segundos en llegar a Supabase. Sin este estado, un refresh
+    // "temprano" muestra 'NO MIEMBRO' + botón de pago otra vez, lo cual
+    // asusta al usuario (parece que el pago no sirvió / se perdió el dinero).
+    // Con esto mostramos "Confirmando tu pago..." y reintentamos solos.
+    awaitingPayment: localStorage.getItem('dgt_awaiting_payment') === '1',
+    _paymentPollInterval: null,
+    _paymentPollAttempts: 0,
     stripeModal:{open:false},
     acceptStripeTerms:false,
     toquesRecibidos:[],
@@ -891,11 +907,25 @@ function app() {
         setInterval(()=>this.loadToques(), 30000);
         // Cuando el usuario vuelve de la pestaña de Stripe, revisamos si el
         // webhook ya activó la membresía, sin que tenga que tocar ningún botón.
+        // Si veníamos de "IR A PAGAR" (awaitingPayment), usamos reintentos
+        // automáticos en vez de un solo chequeo, porque el webhook de Stripe
+        // puede tardar unos segundos y un solo intento temprano mostraría
+        // "NO MIEMBRO" de forma confusa justo después de pagar.
         document.addEventListener('visibilitychange', () => {
           if (document.visibilityState === 'visible' && this.user && !this.globalActive) {
-            this.loadMembership();
+            if (this.awaitingPayment) {
+              this.startPaymentPolling();
+            } else {
+              this.loadMembership();
+            }
           }
         });
+        // Si la página se recargó mientras esperábamos confirmación (ej. el
+        // usuario refrescó manualmente), retomamos el polling en vez de
+        // mostrar el botón de pago desde cero.
+        if (this.awaitingPayment && this.user && !this.globalActive) {
+          this.startPaymentPolling();
+        }
       } catch (error) {
         console.error('Init error:', error);
         this.showToast('Error inicial');
@@ -1023,7 +1053,41 @@ function app() {
       if (this.profile.email) url.searchParams.set('prefilled_email', this.profile.email);
       window.open(url.toString(), '_blank');
       this.stripeModal.open = false;
+      // Se guarda en localStorage (no solo en memoria) porque si el usuario
+      // refresca la página al volver, este estado debe sobrevivir para seguir
+      // mostrando "Confirmando..." en vez de "NO MIEMBRO" desde cero.
+      this.awaitingPayment = true;
+      localStorage.setItem('dgt_awaiting_payment', '1');
       this.showToast('Completa el pago en Stripe y vuelve — se activa solo');
+    },
+    // Reintenta chequear la membresía cada pocos segundos durante ~1 minuto.
+    // Se detiene solo si: (a) ya se activó, (b) se agotan los intentos, o
+    // (c) el usuario cancela/cierra sesión mientras tanto.
+    startPaymentPolling() {
+      if (this._paymentPollInterval) return; // ya está corriendo
+      this._paymentPollAttempts = 0;
+      this._paymentPollInterval = setInterval(async () => {
+        this._paymentPollAttempts++;
+        if (!this.user) { this.stopPaymentPolling(); return; }
+        try {
+          const { data } = await supabaseClient.from('members').select('*').eq('user_id', this.user.id).eq('active', true).single();
+          if (data) {
+            this.globalActive = true;
+            localStorage.setItem('dgt_global_active', 'true');
+            this.showToast('✅ ¡Membresía activada!');
+            this.stopPaymentPolling();
+            return;
+          }
+        } catch (e) { /* aún no hay fila activa; seguimos intentando */ }
+        if (this._paymentPollAttempts >= 15) { // ~15 x 4s = 60s
+          this.stopPaymentPolling();
+        }
+      }, 4000);
+    },
+    stopPaymentPolling() {
+      if (this._paymentPollInterval) { clearInterval(this._paymentPollInterval); this._paymentPollInterval = null; }
+      this.awaitingPayment = false;
+      localStorage.removeItem('dgt_awaiting_payment');
     },
     async cancelMembership() {
       // FIX: antes esto solo limpiaba localStorage y el usuario seguía
@@ -1055,6 +1119,7 @@ function app() {
         if (data) {
           this.globalActive = true;
           localStorage.setItem('dgt_global_active', 'true');
+          this.stopPaymentPolling();
           this.showToast('Membresía activa ✓');
           this.stripeModal.open = false;
         } else {
