@@ -35,6 +35,12 @@
     button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }
 
     .modal-backdrop { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+
+    /* Gráfica: barras horizontales + donut de rarezas */
+    .bar-fill{transform-origin:left;animation:barGrow .9s cubic-bezier(.2,.8,.2,1) both}
+    @keyframes barGrow{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
+    .donut{width:76px;height:76px;border-radius:50%;position:relative;flex-shrink:0}
+    .donut::after{content:'';position:absolute;inset:11px;border-radius:50%;background:#0C1214}
     #payment-element { min-height: 140px; }
     #payment-element iframe { border-radius: 12px !important; }
   </style>
@@ -255,24 +261,40 @@
       </div>
     </section>
 
+    <!-- PULSO DE LA BÓVEDA (gráfica) -->
     <section class="rounded-[20px] border border-white/10 bg-[#0C1214] p-4">
-      <div class="flex justify-between mb-2">
-        <span class="text-[11px] font-black tracking-widest text-zinc-300 uppercase" x-text="lastMatches.length ? 'Historial local' : 'Actividad reciente en la bóveda'"></span>
-        <button x-show="lastMatches.length" @click="clearLastMatches()" class="text-[10px] text-zinc-500">Limpiar</button>
+      <div class="flex justify-between items-center mb-1">
+        <span class="text-[11px] font-black tracking-widest text-zinc-300 uppercase">Pulso de la Bóveda</span>
+        <span class="text-[9px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-zinc-400 font-bold" x-text="(history.length+jugadasPool.length)+' billetes'"></span>
       </div>
-      <div class="space-y-1.5" x-show="lastMatches.length">
-        <template x-for="m in lastMatches" :key="m.id">
-          <div class="flex justify-between items-center rounded-lg bg-white/[0.03] border border-white/5 px-2.5 py-2 gap-2"><span class="font-mono text-[11px] text-white truncate" x-text="m.serial"></span><span class="text-[9px] text-zinc-500 shrink-0" x-text="m.rarity"></span></div>
-        </template>
-      </div>
-      <div class="space-y-1.5" x-show="!lastMatches.length">
-        <template x-for="h in recentActivity" :key="h.id||h.serial">
-          <div class="flex justify-between items-center rounded-lg bg-white/[0.03] border border-white/5 px-2.5 py-2 gap-2">
-            <span class="font-mono text-[11px] text-white truncate" x-text="h.serial"></span>
-            <span class="text-[9px] text-zinc-500 shrink-0 truncate" x-text="h.owner"></span>
+      <div class="text-[10px] text-zinc-500 mb-4">Los más valiosos ahora mismo, por puntos</div>
+
+      <div class="space-y-3">
+        <template x-for="h in chartTop" :key="h.id||h.serial">
+          <div class="min-w-0">
+            <div class="flex justify-between items-baseline gap-2 mb-1">
+              <span class="font-mono text-[11px] text-white truncate" x-text="h.serial"></span>
+              <span class="text-[10px] font-mono font-black text-emerald-300 shrink-0" x-text="(h.points||0).toLocaleString()"></span>
+            </div>
+            <div class="h-2.5 rounded-full bg-white/5 overflow-hidden">
+              <div class="h-full rounded-full bar-fill" :style="'width:'+Math.max(6,Math.round((h.points||0)/chartMaxPoints*100))+'%; background:'+rarityColor(h.rarity?.label)"></div>
+            </div>
           </div>
         </template>
-        <div x-show="!recentActivity.length" class="text-[11px] text-zinc-500 text-center py-2">Tus búsquedas aparecerán aquí</div>
+        <div x-show="!chartTop.length" class="text-[11px] text-zinc-500 text-center py-4">Aún no hay datos suficientes</div>
+      </div>
+
+      <div class="mt-5 pt-4 border-t border-white/5 flex items-center gap-4" x-show="rarityBreakdown.length">
+        <div class="donut" :style="'background:'+rarityConicGradient"></div>
+        <div class="flex-1 min-w-0 grid grid-cols-2 gap-x-3 gap-y-1.5">
+          <template x-for="r in rarityBreakdown" :key="r.label">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="h-2 w-2 rounded-full shrink-0" :style="'background:'+r.color"></span>
+              <span class="text-[9px] text-zinc-400 truncate" x-text="r.label"></span>
+              <span class="text-[9px] text-zinc-600 shrink-0" x-text="r.pct+'%'"></span>
+            </div>
+          </template>
+        </div>
       </div>
     </section>
   </div>
@@ -749,6 +771,16 @@ const RARITY_TIPS = {
   Común: 'Sin patrón'
 };
 
+const RARITY_COLORS = {
+  SOLID: '#FBBF24',
+  RADAR: '#A78BFA',
+  LADDER: '#38BDF8',
+  REPEATER: '#E879F9',
+  BINARY: '#22D3EE',
+  'SEMI-SOLID': '#34D399',
+  'Común': '#52525B'
+};
+
 const CURRENCIES = [
   { code:'USD', flag:'🇺🇸', symbol:'$', denoms:[1,2,5,10,20,50,100] },
   { code:'EUR', flag:'🇪🇺', symbol:'€', denoms:[5,10,20,50,100,200] },
@@ -927,6 +959,25 @@ function app() {
       const pool = [...(this.history||[]), ...(this.jugadasPool||[])];
       return [...pool].sort((a,b)=> new Date(b.created_at||0) - new Date(a.created_at||0)).slice(0,8);
     },
+    get chartTop(){ return this.featuredResults.slice(0,6); },
+    get chartMaxPoints(){ return Math.max(1, ...this.chartTop.map(h=>h.points||0), 1); },
+    get rarityBreakdown(){
+      const pool = [...(this.history||[]), ...(this.jugadasPool||[])];
+      const counts = {};
+      pool.forEach(h => { const l = h.rarity?.label || 'Común'; counts[l] = (counts[l]||0) + 1; });
+      const total = pool.length || 1;
+      return Object.entries(counts)
+        .map(([label,count]) => ({ label, count, pct: Math.round(count/total*100), color: RARITY_COLORS[label]||RARITY_COLORS['Común'] }))
+        .sort((a,b) => b.count - a.count);
+    },
+    get rarityConicGradient(){
+      const parts = this.rarityBreakdown;
+      if(!parts.length) return 'conic-gradient(#27272a 0% 100%)';
+      let acc = 0;
+      const segs = parts.map(p => { const start = acc; acc += p.pct; return `${p.color} ${start}% ${acc}%`; });
+      if(acc < 100) segs.push(`${parts[parts.length-1].color} ${acc}% 100%`);
+      return `conic-gradient(${segs.join(', ')})`;
+    },
     get mySearches(){
       const alias = this.profile.alias.toLowerCase();
       const email = this.encodeSensitive(this.profile.email);
@@ -944,6 +995,7 @@ function app() {
       if (!data) return '';
       try { return decodeURIComponent(escape(atob(data))); } catch(e) { console.error(e); return data; }
     },
+    rarityColor(label) { return RARITY_COLORS[label] || RARITY_COLORS['Común']; },
 
     async init() {
       try {
