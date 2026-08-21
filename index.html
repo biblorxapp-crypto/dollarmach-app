@@ -223,19 +223,20 @@
     <!-- SIMILITUDES GLOBALES -->
     <section class="rounded-[20px] border border-amber-500/20 bg-[#0C1214] p-4">
       <div class="flex justify-between items-center mb-3 gap-2">
-        <span class="text-[11px] font-black tracking-widest text-amber-300 uppercase shrink-0">Similitudes Globales</span>
-        <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-400 text-black font-black truncate" x-text="queryFull ? (searchLoading ? 'Buscando...' : queryFull+' · '+globalResults.length+' similares') : 'Ingresa dígitos'"></span>
+        <span class="text-[11px] font-black tracking-widest text-amber-300 uppercase shrink-0" x-text="queryFull.length>=3 ? 'Similitudes Globales' : 'Destacados de la Bóveda'"></span>
+        <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-400 text-black font-black truncate" x-text="queryFull.length>=3 ? (searchLoading ? 'Buscando...' : queryFull+' · '+globalResults.length+' similares') : 'top '+featuredResults.length"></span>
       </div>
-      <div x-show="queryFull.length<3" class="text-[11px] text-zinc-600 text-center py-6">Ingresa al menos 3 dígitos para buscar similitudes</div>
+      <div x-show="queryFull.length<3" class="text-[10px] text-zinc-500 mb-3">Lo más buscado en la bóveda ahora mismo. Ingresa tus dígitos arriba para comparar tu billete.</div>
       <div x-show="queryFull.length>=3 && !searchLoading && globalResults.length===0" class="text-[11px] text-zinc-500 text-center py-6">No hay similares para <b class="text-white" x-text="queryFull"></b> aún</div>
       <div x-show="searchLoading && queryFull.length>=3" class="text-center py-6"><span class="spinner"></span></div>
       <div class="space-y-2 max-h-[460px] overflow-y-auto overflow-x-hidden" x-show="!searchLoading">
-        <template x-for="h in globalResults.slice(0,50)" :key="h.id||h.serial">
+        <template x-for="h in (queryFull.length>=3 ? globalResults.slice(0,50) : featuredResults)" :key="h.id||h.serial">
           <div class="rounded-xl border p-3 border-white/10 bg-white/[0.02] hover:border-amber-500/20 transition min-w-0">
             <div class="flex justify-between items-start gap-2">
               <div class="min-w-0">
-                <div class="font-mono font-black text-[12px] text-white truncate" x-html="highlightSimilar(h.serial, h.digits)"></div>
-                <div class="text-[9px] text-zinc-500 mt-1" x-text="'Similitud: '+similarityPercent(h)+'%'"></div>
+                <div class="font-mono font-black text-[12px] text-white truncate" x-html="queryFull.length>=3 ? highlightSimilar(h.serial, h.digits) : escapeHtml(h.serial)"></div>
+                <div class="text-[9px] text-zinc-500 mt-1" x-show="queryFull.length>=3" x-text="'Similitud: '+similarityPercent(h)+'%'"></div>
+                <div class="text-[9px] text-amber-300/70 mt-1" x-show="queryFull.length<3">🔥 Popular en la bóveda</div>
               </div>
               <div class="text-right shrink-0"><div class="text-[10px] text-emerald-300 font-mono" x-text="(h.points||0).toLocaleString()+' pts'"></div><div class="text-[8px] px-1.5 py-0.5 rounded-full border mt-1" :class="h.rarity?.badgeClass" x-text="h.rarity?.label"></div></div>
             </div>
@@ -255,8 +256,24 @@
     </section>
 
     <section class="rounded-[20px] border border-white/10 bg-[#0C1214] p-4">
-      <div class="flex justify-between mb-2"><span class="text-[11px] font-black tracking-widest text-zinc-300 uppercase">Historial local</span><button @click="clearLastMatches()" class="text-[10px] text-zinc-500">Limpiar</button></div>
-      <div class="space-y-1.5"><template x-for="m in lastMatches" :key="m.id"><div class="flex justify-between items-center rounded-lg bg-white/[0.03] border border-white/5 px-2.5 py-2 gap-2"><span class="font-mono text-[11px] text-white truncate" x-text="m.serial"></span><span class="text-[9px] text-zinc-500 shrink-0" x-text="m.rarity"></span></div></template><div x-show="!lastMatches.length" class="text-[11px] text-zinc-500 text-center py-2">Tus búsquedas aparecerán aquí</div></div>
+      <div class="flex justify-between mb-2">
+        <span class="text-[11px] font-black tracking-widest text-zinc-300 uppercase" x-text="lastMatches.length ? 'Historial local' : 'Actividad reciente en la bóveda'"></span>
+        <button x-show="lastMatches.length" @click="clearLastMatches()" class="text-[10px] text-zinc-500">Limpiar</button>
+      </div>
+      <div class="space-y-1.5" x-show="lastMatches.length">
+        <template x-for="m in lastMatches" :key="m.id">
+          <div class="flex justify-between items-center rounded-lg bg-white/[0.03] border border-white/5 px-2.5 py-2 gap-2"><span class="font-mono text-[11px] text-white truncate" x-text="m.serial"></span><span class="text-[9px] text-zinc-500 shrink-0" x-text="m.rarity"></span></div>
+        </template>
+      </div>
+      <div class="space-y-1.5" x-show="!lastMatches.length">
+        <template x-for="h in recentActivity" :key="h.id||h.serial">
+          <div class="flex justify-between items-center rounded-lg bg-white/[0.03] border border-white/5 px-2.5 py-2 gap-2">
+            <span class="font-mono text-[11px] text-white truncate" x-text="h.serial"></span>
+            <span class="text-[9px] text-zinc-500 shrink-0 truncate" x-text="h.owner"></span>
+          </div>
+        </template>
+        <div x-show="!recentActivity.length" class="text-[11px] text-zinc-500 text-center py-2">Tus búsquedas aparecerán aquí</div>
+      </div>
     </section>
   </div>
 
@@ -902,6 +919,14 @@ function app() {
     },
     get paginatedHistory(){ return this.filteredHistory.slice(0, this.visibleCount); },
     get globalResults(){ return this.globalResultsCache; },
+    get featuredResults(){
+      const pool = [...(this.history||[]), ...(this.jugadasPool||[])];
+      return [...pool].sort((a,b)=>(b.points||0)-(a.points||0)).slice(0,8);
+    },
+    get recentActivity(){
+      const pool = [...(this.history||[]), ...(this.jugadasPool||[])];
+      return [...pool].sort((a,b)=> new Date(b.created_at||0) - new Date(a.created_at||0)).slice(0,8);
+    },
     get mySearches(){
       const alias = this.profile.alias.toLowerCase();
       const email = this.encodeSensitive(this.profile.email);
