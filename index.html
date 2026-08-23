@@ -70,7 +70,12 @@
   </header>
 
   <!-- Saludo usuario -->
-  <p class="text-sm text-zinc-400 mb-5">Hola, <span id="greet-alias" class="text-emerald-400 font-semibold">invitado</span> 👋</p>
+  <div class="flex items-center justify-between mb-5">
+    <p class="text-sm text-zinc-400">Hola, <span id="greet-alias" class="text-emerald-400 font-semibold">invitado</span> 👋</p>
+    <button id="session-action-btn" onclick="onSessionActionClick()" class="text-xs font-bold px-3 py-1.5 rounded-full bg-zinc-800/70 border border-zinc-700 text-zinc-200 hover:border-zinc-500 transition">
+      Iniciar sesión
+    </button>
+  </div>
 
   <!-- ============ SECCIÓN SERIE LÍDER (Leader Board) ============ -->
   <div class="flex items-center gap-2 mb-3">
@@ -166,16 +171,16 @@
     <h4 class="text-sm font-bold text-zinc-300 mb-4">Registrar mi billete</h4>
 
     <div class="grid grid-cols-2 gap-2 mb-5">
-      <button id="rb-tab-btn-sd" onclick="rbSwitchTab('sd')" class="rb-tab-btn active rounded-xl py-3 text-sm font-bold flex items-center justify-center gap-2">
+      <button id="rb-tab-btn-sd" onclick="rbSwitchTab('sd')" class="rb-tab-btn rounded-xl py-3 text-sm font-bold flex items-center justify-center gap-2">
         🏷️ Datos SD
       </button>
-      <button id="rb-tab-btn-serie" onclick="rbSwitchTab('serie')" class="rb-tab-btn rounded-xl py-3 text-sm font-bold flex items-center justify-center gap-2">
+      <button id="rb-tab-btn-serie" onclick="rbSwitchTab('serie')" class="rb-tab-btn active rounded-xl py-3 text-sm font-bold flex items-center justify-center gap-2">
         🔢 Serie DGT
       </button>
     </div>
 
     <!-- ===== PANEL 1: DATOS SD ===== -->
-    <div id="rb-panel-sd" class="rb-panel active space-y-4">
+    <div id="rb-panel-sd" class="rb-panel space-y-4">
       <div>
         <p class="text-xs text-zinc-500 mb-2">Letras del billete <span class="text-zinc-600">(solo la 1ª es obligatoria — algunos países, como el Euro, usan una sola)</span></p>
         <div class="grid grid-cols-3 gap-2">
@@ -215,7 +220,7 @@
     </div>
 
     <!-- ===== PANEL 2: SERIE DGT ===== -->
-    <div id="rb-panel-serie" class="rb-panel space-y-4">
+    <div id="rb-panel-serie" class="rb-panel active space-y-4">
       <div class="flex items-center justify-between">
         <p class="text-xs text-zinc-500">Número de serie</p>
         <span id="rb-digit-count" class="text-xs text-zinc-500">0 / 10 dígitos (mín. 6)</span>
@@ -350,19 +355,21 @@
 <div id="auth-modal" class="dgt-modal">
   <div class="dgt-modal-card">
     <div class="flex items-center justify-between mb-4">
-      <h3 id="auth-title" class="text-lg font-black text-emerald-400">Iniciar sesión</h3>
+      <h3 class="text-lg font-black text-emerald-400">Accede a tu cuenta</h3>
       <button onclick="closeModal('auth-modal')" class="text-zinc-500 text-xl">✕</button>
     </div>
     <div class="space-y-3">
       <input id="auth-email" type="email" placeholder="Correo electrónico" class="dgt-select" />
       <input id="auth-password" type="password" placeholder="Contraseña" class="dgt-select" />
       <p id="auth-error" class="text-xs text-red-400 hidden"></p>
-      <button id="auth-submit-btn" onclick="handleAuthSubmit()" class="w-full bg-gradient-to-b from-emerald-400 to-emerald-600 text-zinc-950 font-bold py-3 rounded-xl">
-        Entrar
-      </button>
-      <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="w-full text-xs text-zinc-500 py-2">
-        ¿No tienes cuenta? Crear cuenta
-      </button>
+      <div class="grid grid-cols-2 gap-3 pt-1">
+        <button id="auth-signin-btn" onclick="handleAuthSubmit('signin')" class="w-full bg-gradient-to-b from-emerald-400 to-emerald-600 text-zinc-950 font-bold py-3.5 rounded-xl">
+          Iniciar sesión
+        </button>
+        <button id="auth-signup-btn" onclick="handleAuthSubmit('signup')" class="w-full bg-zinc-800 border border-zinc-700 text-white font-bold py-3.5 rounded-xl">
+          Registrarse
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -499,7 +506,6 @@
   let profile = null;
   let globalActive = false;
   let stripe = null, elements = null;
-  let authMode = 'signin'; // signin | signup
   let pendingAction = null; // 'register' | 'stripe' -> se reanuda tras login/perfil/consentimiento/pago
 
   // =========================================================
@@ -569,13 +575,7 @@
     document.getElementById('auth-error').classList.add('hidden');
     openModal('auth-modal');
   }
-  function toggleAuthMode(){
-    authMode = authMode === 'signin' ? 'signup' : 'signin';
-    document.getElementById('auth-title').textContent = authMode === 'signin' ? 'Iniciar sesión' : 'Crear cuenta';
-    document.getElementById('auth-submit-btn').textContent = authMode === 'signin' ? 'Entrar' : 'Crear cuenta';
-    document.getElementById('auth-toggle-btn').textContent = authMode === 'signin' ? '¿No tienes cuenta? Crear cuenta' : '¿Ya tienes cuenta? Iniciar sesión';
-  }
-  async function handleAuthSubmit(){
+  async function handleAuthSubmit(mode){
     const email = document.getElementById('auth-email').value.trim();
     const password = document.getElementById('auth-password').value;
     const errEl = document.getElementById('auth-error');
@@ -585,19 +585,25 @@
       errEl.classList.remove('hidden');
       return;
     }
+    const signinBtn = document.getElementById('auth-signin-btn');
+    const signupBtn = document.getElementById('auth-signup-btn');
+    signinBtn.disabled = true; signupBtn.disabled = true;
     try {
-      const { data, error } = authMode === 'signin'
+      const { data, error } = mode === 'signin'
         ? await sb.auth.signInWithPassword({ email, password })
         : await sb.auth.signUp({ email, password });
       if (error) throw error;
       closeModal('auth-modal');
       user = data.user || data.session?.user || null;
-      showToast(authMode === 'signin' ? 'Sesión iniciada' : 'Cuenta creada, revisa tu correo si se requiere confirmación');
+      showToast(mode === 'signin' ? 'Sesión iniciada' : 'Cuenta creada, revisa tu correo si se requiere confirmación');
       await loadUserContext();
+      updateSessionActionBtn();
       runPendingAction();
     } catch (e){
       errEl.textContent = e.message || 'Error de autenticación';
       errEl.classList.remove('hidden');
+    } finally {
+      signinBtn.disabled = false; signupBtn.disabled = false;
     }
   }
   async function signOut(){
@@ -605,7 +611,15 @@
     user = null; profile = null; globalActive = false;
     updateMembershipBadge();
     document.getElementById('greet-alias').textContent = 'invitado';
+    updateSessionActionBtn();
     showToast('Sesión cerrada');
+  }
+  function onSessionActionClick(){
+    if (user) signOut();
+    else openAuthModal();
+  }
+  function updateSessionActionBtn(){
+    document.getElementById('session-action-btn').textContent = user ? 'Salir' : 'Iniciar sesión';
   }
 
   sb.auth.onAuthStateChange((_event, session) => {
@@ -627,6 +641,7 @@
     const { data: mem } = await sb.from('members').select('active').eq('user_id', user.id).maybeSingle();
     globalActive = !!mem?.active;
     updateMembershipBadge();
+    updateSessionActionBtn();
     loadToquesCounts();
   }
 
