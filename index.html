@@ -991,7 +991,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#10b98
     const sel = document.getElementById('rb-pais');
     rbPaises.forEach(([bandera, nombre]) => {
       const opt = document.createElement('option');
-      opt.value = nombre; opt.textContent = `${bandera} ${nombre}`;
+      opt.value = `${bandera} ${nombre}`; opt.textContent = `${bandera} ${nombre}`;
       sel.appendChild(opt);
     });
   })();
@@ -1130,6 +1130,10 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#10b98
     const denomNumeric = Math.round(parseDenomNumeric(denominacionTxt));
     const points = calcPoints(rarity, denomNumeric);
     const valueSnapshot = Math.round(denomNumeric * (10 + rarity.score) * 100) / 100;
+    // El símbolo de moneda (€, $, £, ¥) viaja pegado al país, igual que en tus datos reales
+    // (ej. "🇲🇽 México $"), porque la columna `denom` en Supabase es solo el número.
+    const currencyMatch = denominacionTxt.match(/[$€£¥]/);
+    const paisConMoneda = currencyMatch ? `${pais} ${currencyMatch[0]}` : pais;
 
     const phone = profile?.phone || '';
     const email = user.email || '';
@@ -1153,7 +1157,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#10b98
         p_rarity: rarity,
         p_denom: denomNumeric,
         p_yr: parseInt(anio, 10),
-        p_country: pais,
+        p_country: paisConMoneda,
         p_contact: contactB64,
         p_email: emailB64,
         p_letters_snapshot: lettersSnapshot,
@@ -1806,11 +1810,15 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#10b98
     const ownerAlias = row.owner || row.alias || '';
     const favs = rbGetFavorites();
     const isFav = favs.includes(serial);
+    // El símbolo de moneda viaja pegado al país (ej. "🇲🇽 México $"); lo reutilizamos
+    // junto con `denom` para mostrar algo como "$200" sin necesitar una columna aparte.
+    const currencyMatch = (row.country || '').match(/[$€£¥]/);
+    const denomDisplay = row.denom ? ` · ${currencyMatch ? currencyMatch[0] : ''}${row.denom}` : '';
     return `
     <div class="result-row">
       <div style="min-width:0;overflow:hidden;">
         <div class="result-serial">${serial}</div>
-        <div class="result-meta">${row.country || ''} · ${rarityLabel}${extraTag || ''}</div>
+        <div class="result-meta">${row.country || ''} · ${rarityLabel}${denomDisplay}${extraTag || ''}</div>
       </div>
       <div class="result-right">
         <div class="result-points">${row.points || 0} pts</div>
