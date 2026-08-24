@@ -1841,6 +1841,11 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#10b98
     if (arrayName === 'nativeSearchRows') performCompactSearch();
     if (arrayName === 'nativeRarityRows' && nativeRarityActive) nativeFilterByRarity(nativeRarityActive);
     if (arrayName === 'nativeFavRows') loadFavoritesScreen();
+    if (arrayName === 'nativeSeeMoreRows'){
+      loadFavoritesScreen();
+      const title = document.getElementById('see-more-title').textContent;
+      document.getElementById('see-more-body').innerHTML = nativeSeeMoreRows.map((r, i) => nativeCompactRow(r, i, 'nativeSeeMoreRows')).join('');
+    }
   }
   function nativeToqueRow(arrayName, idx){
     const row = nativeRowsFor(arrayName)[idx];
@@ -1921,7 +1926,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#10b98
   }
 
   function openSeeMoreModal(kind, title){
-    nativeSeeMoreRows = kind === 'search' ? nativeSearchFullRows : nativeRarityFullRows;
+    nativeSeeMoreRows = kind === 'search' ? nativeSearchFullRows : kind === 'rareza' ? nativeRarityFullRows : nativeFavFullRows;
     document.getElementById('see-more-title').textContent = title;
     document.getElementById('see-more-body').innerHTML = nativeSeeMoreRows.map((row, idx) => nativeCompactRow(row, idx, 'nativeSeeMoreRows')).join('');
     openModal('see-more-modal');
@@ -1930,6 +1935,8 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#10b98
   // =========================================================
   // 17. PANTALLA FAVORITOS (nativa)
   // =========================================================
+  let nativeFavFullRows = [];
+
   async function loadFavoritesScreen(){
     const container = document.getElementById('fav-list-native');
     const favs = rbGetFavorites();
@@ -1938,12 +1945,17 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#10b98
       return;
     }
     if (rbPool.length === 0) await rbFetchPool();
-    nativeFavRows = rbPool.filter(r => favs.includes(r.serial || r.serial_display || r.digits)).slice(0, 5);
-    if (nativeFavRows.length === 0){
+    nativeFavFullRows = rbPool.filter(r => favs.includes(r.serial || r.serial_display || r.digits)).slice(0, 25);
+    nativeFavRows = nativeFavFullRows.slice(0, 3);
+    if (nativeFavFullRows.length === 0){
       container.innerHTML = '<div class="compact-empty">Aún no marcaste favoritos.<br>Toca el ♥ en cualquier resultado.</div>';
       return;
     }
-    container.innerHTML = nativeFavRows.map((row, idx) => nativeCompactRow(row, idx, 'nativeFavRows')).join('');
+    let html = nativeFavRows.map((row, idx) => nativeCompactRow(row, idx, 'nativeFavRows')).join('');
+    if (nativeFavFullRows.length > 3){
+      html += `<button style="flex-shrink:0;height:44px;border:1.5px dashed #3a3a41;border-radius:14px;background:transparent;color:var(--yellow);font-weight:800;font-size:12px;width:100%;" onclick="openSeeMoreModal('fav','Todos tus favoritos')">🔽 Ver más resultados (${nativeFavFullRows.length - 3})</button>`;
+    }
+    container.innerHTML = html;
   }
 
   // =========================================================
