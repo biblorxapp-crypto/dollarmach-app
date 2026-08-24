@@ -91,7 +91,7 @@
     </div>
     <hr class="border-zinc-800 mb-5">
 
-    <div class="grid grid-cols-2 gap-y-6 gap-x-4">
+    <div class="grid grid-cols-2 gap-y-4 gap-x-4">
       <div>
         <p class="text-zinc-500 text-sm mb-1">Letras:</p>
         <p id="leader-letters" class="text-xl font-bold">—</p>
@@ -118,11 +118,17 @@
       </div>
     </div>
 
-    <div class="mt-6 pt-5 border-t border-zinc-800 flex flex-col items-center gap-3">
-      <p class="text-sm"><span class="text-zinc-500">País:</span> <span id="leader-country">—</span></p>
-      <span class="flex items-center gap-2 text-xs text-zinc-400 bg-zinc-800/60 px-4 py-1.5 rounded-full">
-        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> <span id="leader-updated">Sin datos aún</span>
+    <div class="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between gap-2">
+      <p class="text-xs"><span class="text-zinc-500">País:</span> <span id="leader-country">—</span></p>
+      <span class="flex items-center gap-1.5 text-[10px] text-zinc-400 bg-zinc-800/60 px-3 py-1 rounded-full shrink-0">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> <span id="leader-updated">Sin datos aún</span>
       </span>
+    </div>
+
+    <!-- Barra de probabilidades por rareza (compuesta en vivo desde la Bóveda) -->
+    <div class="mt-3">
+      <p class="text-[9px] text-zinc-600 uppercase tracking-wide mb-1">Probabilidad de rareza en la Bóveda</p>
+      <div id="leader-probability-bar" class="flex h-2.5 rounded-full overflow-hidden bg-zinc-800/60"></div>
     </div>
   </section>
 
@@ -1118,7 +1124,7 @@
       rbClearInput();
       loadBovedaViva();
       loadLeader();
-      rbFetchPool().then(renderRarityChips);
+      rbFetchPool().then(() => { renderRarityChips(); renderLeaderProbabilityBar(); });
     } catch (e){
       // La función lanza 'Perfil incompleto' o 'Espera un minuto antes de publicar otro número'
       showToast('Error al registrar: ' + e.message);
@@ -1695,6 +1701,31 @@
       ? `#${rbLeaderIndex + 1} de ${rbLeaderCandidates.length} en tendencia`
       : 'Actualizado';
     document.getElementById('leader-updated').textContent = rankLabel;
+    updateLeaderProbabilityBar();
+  }
+
+  // Barra de probabilidades: qué tan común/rara es cada categoría en toda la Bóveda
+  const RB_LEADER_BAR_COLORS = {
+    SOLID: '#facc15', RADAR: '#facc15', LADDER: '#facc15',
+    REPEATER: '#38bdf8', BINARY: '#38bdf8', 'SEMI-SOLID': '#38bdf8',
+    COMUN: '#52525b'
+  };
+  function renderLeaderProbabilityBar(){
+    const bar = document.getElementById('leader-probability-bar');
+    if (!bar || rbPool.length === 0) return;
+    const counts = {};
+    rbPool.forEach(row => { const k = rarityKeyFallback(row.rarity); counts[k] = (counts[k]||0) + 1; });
+    const total = rbPool.length || 1;
+    bar.innerHTML = RB_RARITY_DEFS.filter(d => d.key !== '').map(def => {
+      const count = counts[def.key] || 0;
+      if (count === 0) return '';
+      const pct = Math.max(Math.round((count / total) * 100), 2);
+      return `<div title="${def.label}: ${count} (${pct}%)" style="width:${pct}%; background:${RB_LEADER_BAR_COLORS[def.key] || '#52525b'}"></div>`;
+    }).join('');
+  }
+  async function updateLeaderProbabilityBar(){
+    if (rbPool.length === 0) await rbFetchPool();
+    renderLeaderProbabilityBar();
   }
 
   function rotateLeader(){
@@ -1728,9 +1759,9 @@
     user = sessionData?.session?.user || null;
     if (user) await loadUserContext();
     loadBovedaViva();
-    await loadLeaderCandidates();
     await rbFetchPool();
     renderRarityChips();
+    await loadLeaderCandidates();
     setInterval(rotateLeader, RB_LEADER_ROTATE_MS);
     setInterval(loadLeaderCandidates, RB_LEADER_REFRESH_MS);
     maybeShowHookCard();
