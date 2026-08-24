@@ -2,360 +2,370 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>DollarDGT — Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>$DOLLARDGT — App Nativa</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.stripe.com/v3/"></script>
 <style>
-  body{background:#0a0a0b;}
-  .glass{background:linear-gradient(180deg,rgba(24,24,27,.9),rgba(15,15,17,.9));}
-  .gold-border{border:1px solid rgba(234,179,8,.35);}
-  ::-webkit-scrollbar{width:6px}
-  ::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:8px}
+:root{
+    --bg:#09090b; --card:#151519; --line:#29292f; --text:#f4f4f6; --muted:#7d7d86;
+    --green:#42d9a1; --green-dark:#07382d; --yellow:#ffc719; --blue:#3db9ec; --violet:#a78bfa;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;min-height:100%;overflow:hidden !important;overscroll-behavior:none;background:var(--bg);}
+body{color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;}
+.app{position:relative;width:100%;height:100dvh;min-height:100dvh;max-height:100dvh;overflow:hidden;background:var(--bg);max-width:480px;margin:0 auto;border-left:1px solid #1a1a1e;border-right:1px solid #1a1a1e;}
 
-  /* ---- Tabs Registrar mi billete ---- */
-  .rb-tab-btn{transition:all .15s ease;}
-  .rb-tab-btn.active{background:linear-gradient(180deg,#34d399,#059669);color:#022c22;box-shadow:0 6px 16px -4px rgba(16,185,129,.4);}
-  .rb-tab-btn:not(.active){background:rgba(39,39,42,.6);color:#a1a1aa;}
-  .rb-panel{display:none;}
-  .rb-panel.active{display:block;}
+/* ===== NOTA DE PROTOTIPO (se puede borrar) ===== */
+.proto-badge{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:999;background:#000;border:1px solid var(--yellow);color:var(--yellow);font-size:10px;font-weight:800;padding:4px 10px;border-radius:999px;letter-spacing:.5px;pointer-events:none;}
 
-  select.dgt-select, input.dgt-select{
-    background:rgba(9,9,11,.7);
-    border:1px solid #3f3f46;
-    color:#f4f4f5;
-    border-radius:.75rem;
-    padding:.65rem .75rem;
-    font-size:16px;
-    font-weight:600;
-    width:100%;
-    appearance:none;
-  }
-  select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#10b981;}
+/* ===== PANTALLAS: solo una visible a la vez ===== */
+.screen-view{position:absolute;inset:0;padding:env(safe-area-inset-top) 24px calc(76px + env(safe-area-inset-bottom)) 24px;overflow:hidden;display:none;flex-direction:column;}
+.screen-view.active{display:flex;}
 
-  /* ---- Modales genéricos ---- */
-  .dgt-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;z-index:60;backdrop-filter:blur(4px);}
-  .dgt-modal.active{display:flex;}
-  .dgt-modal-card{background:#111113;border:1px solid #27272a;border-radius:24px 24px 0 0;width:100%;max-width:28rem;max-height:88vh;overflow-y:auto;padding:1.5rem;}
-  @media(min-width:480px){ .dgt-modal{align-items:center;} .dgt-modal-card{border-radius:24px;} }
+/* ===== HEADER (compartido) ===== */
+header{height:9.5%;min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;}
+.logo-area{min-width:0;display:flex;align-items:baseline;gap:7px;}
+.logo{color:#f3f3f5;font-size:clamp(23px,7vw,34px);line-height:1;font-weight:900;letter-spacing:-1.6px;white-space:nowrap;}
+.logo-green{color:var(--green);}
+.version{color:#62626b;font-size:clamp(9px,2.5vw,12px);white-space:nowrap;}
+.pro{flex-shrink:0;height:clamp(34px,6.5vw,44px);padding:0 clamp(10px,2.8vw,16px);border-radius:999px;background:var(--yellow);color:#080808;display:flex;align-items:center;justify-content:center;font-size:clamp(11px,3vw,15px);font-weight:850;white-space:nowrap;}
 
-  .dgt-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#18181b;border:1px solid #3f3f46;color:#f4f4f5;padding:.75rem 1.25rem;border-radius:9999px;font-size:.8rem;z-index:80;opacity:0;transition:opacity .2s;}
-  .dgt-toast.show{opacity:1;}
+/* ===== WELCOME (compartido) ===== */
+.welcome{height:8.5%;min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;}
+.welcome-text{color:#9c9ca5;font-size:clamp(15px,4.3vw,21px);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.welcome-text strong{color:var(--green);font-weight:750;}
+.login{flex-shrink:0;height:clamp(34px,6.5vw,42px);padding:0 clamp(12px,3.4vw,18px);border:1.5px solid #3c3c43;border-radius:999px;background:#1c1c20;color:#eeeeef;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.2vw,15px);font-weight:750;white-space:nowrap;}
 
-  /* Pop-up gancho de bienvenida — centrado, sólido, llamativo */
-  #hook-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:89;display:none;align-items:center;justify-content:center;padding:1.25rem;opacity:0;transition:opacity .3s ease;}
-  #hook-backdrop.show{display:flex;opacity:1;}
-  #hook-card{width:100%;max-width:24rem;background:#0a0a0b;border:1.5px solid rgba(234,179,8,.55);border-radius:20px;padding:1.75rem 1.5rem;transform:scale(.85);transition:transform .4s cubic-bezier(.2,1.6,.35,1);box-shadow:0 25px 60px -12px rgba(0,0,0,.9), 0 0 0 1px rgba(234,179,8,.08);}
-  #hook-backdrop.show #hook-card{transform:scale(1);}
-  @keyframes hookPulse{0%,100%{box-shadow:0 0 0 0 rgba(234,179,8,.35)}50%{box-shadow:0 0 0 10px rgba(234,179,8,0)}}
-  #hook-card{animation:hookPulse 2.2s ease-in-out infinite;}
+/* ===== SECTION TITLE (compartido) ===== */
+.section-title{height:6.5%;min-height:26px;flex-shrink:0;display:flex;align-items:center;gap:10px;color:#d5d5da;font-size:clamp(13px,3.6vw,17px);line-height:1;font-weight:800;letter-spacing:1.1px;white-space:nowrap;}
+.live-dot{width:10px;height:10px;flex-shrink:0;border-radius:50%;background:var(--green);}
+
+/* ===== INICIO: LEADER CARD ===== */
+.leader-card{flex:1;min-height:0;margin-top:10px;padding:clamp(17px,4.5vw,25px) clamp(16px,4.8vw,24px) clamp(14px,4vw,20px);border:1.5px solid #655014;border-radius:clamp(22px,6vw,32px);background:linear-gradient(145deg,#17171a 0%,#111114 100%);display:flex;flex-direction:column;overflow:hidden;}
+.leader-heading{display:flex;align-items:center;gap:clamp(8px,2.8vw,13px);min-width:0;}
+.badge{flex-shrink:0;padding:clamp(5px,1.5vw,7px) clamp(9px,2.6vw,13px);border:1.5px solid #075743;border-radius:999px;background:var(--green-dark);color:var(--green);font-size:clamp(10px,2.9vw,13px);line-height:1;font-weight:800;white-space:nowrap;}
+.serial{min-width:0;color:#f4f4f6;font-size:clamp(19px,5.4vw,27px);line-height:1;font-weight:900;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;}
+.divider{width:100%;height:1px;flex-shrink:0;background:var(--line);}
+.divider.top{margin:clamp(11px,3vw,16px) 0;}
+.info-grid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:6px;}
+.info-item{min-width:0;display:flex;flex-direction:column;justify-content:center;}
+.info-label{color:var(--muted);font-size:clamp(11px,3.1vw,14px);line-height:1;margin-bottom:4px;}
+.info-value{color:#eeeef1;font-size:clamp(15px,4.2vw,20px);line-height:1;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.info-value.points{color:var(--yellow);font-size:clamp(20px,5.2vw,26px);font-weight:850;}
+.info-value.owner{color:var(--green);}
+.divider.bottom{margin:clamp(9px,2.4vw,13px) 0 clamp(7px,2vw,10px);}
+.meta{min-height:8%;display:flex;align-items:center;justify-content:space-between;gap:7px;}
+.country{min-width:0;display:flex;align-items:center;gap:5px;color:#dedee2;font-size:clamp(11px,3.1vw,14px);white-space:nowrap;}
+.country-label{color:#777781;}
+.trend{flex-shrink:0;min-height:26px;padding:0 clamp(7px,2.1vw,10px);border-radius:999px;background:#202024;color:#9999a2;display:flex;align-items:center;gap:5px;font-size:clamp(8px,2.3vw,10px);white-space:nowrap;}
+.trend-dot{width:6px;height:6px;flex-shrink:0;border-radius:50%;background:var(--green);}
+.probability{margin-top:clamp(6px,1.8vw,9px);}
+.probability-label{display:block;margin-bottom:4px;color:#5e5e68;font-size:clamp(7px,2vw,9px);letter-spacing:.6px;line-height:1;white-space:nowrap;overflow:hidden;}
+.bar{width:100%;height:clamp(11px,3vw,14px);display:flex;overflow:hidden;border-radius:999px;background:#202025;}
+.bar-yellow{width:14%;background:var(--yellow);}
+.bar-blue{width:17%;background:var(--blue);}
+.bar-gray{width:2%;background:#686870;}
+.bar-rest{flex:1;}
+
+/* ===== INICIO: QUICK ACTIONS ===== */
+.quick{height:29%;min-height:0;margin-top:12px;display:flex;flex-direction:column;flex-shrink:0;}
+.quick-title{height:22%;min-height:22px;display:flex;align-items:center;color:#aaaab3;font-size:clamp(13px,3.6vw,16px);line-height:1;font-weight:800;letter-spacing:1.5px;white-space:nowrap;}
+.actions{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:clamp(9px,3vw,14px);}
+.action{min-width:0;min-height:0;border:1.5px solid #29292f;border-radius:clamp(18px,5.5vw,26px);background:linear-gradient(145deg,#17171a,#101013);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(9px,2.8vw,14px);text-align:center;}
+.icon{width:clamp(42px,12vw,56px);height:clamp(42px,12vw,56px);flex-shrink:0;border:1.5px solid #3a3a41;border-radius:clamp(14px,4vw,18px);background:#202024;display:flex;align-items:center;justify-content:center;}
+.icon svg{width:46%;height:46%;fill:none;stroke:#eeeeef;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.action-title{padding:0 6px;color:#eeeef1;font-size:clamp(12px,3.3vw,15px);line-height:1.1;font-weight:750;}
+
+/* ===== GLOBAL: BUSCADOR ===== */
+.search-box{margin-top:12px;flex-shrink:0;}
+.search-input{width:100%;height:clamp(46px,11vw,56px);border-radius:16px;background:#151519;border:1.5px solid #29292f;padding:0 16px;color:#f4f4f6;font-size:16px;font-weight:600;outline:none;}
+.search-input:focus{border-color:var(--green);}
+.results-wrap{flex:1;min-height:0;margin-top:14px;display:flex;flex-direction:column;gap:8px;overflow:hidden;}
+.result-row{flex:1;min-height:0;border:1.5px solid #29292f;border-radius:16px;background:#151519;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.result-serial{font-family:monospace;font-weight:800;font-size:clamp(13px,3.6vw,16px);color:#f4f4f6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.result-meta{font-size:clamp(9px,2.5vw,11px);color:var(--muted);margin-top:2px;}
+.result-right{text-align:right;flex-shrink:0;}
+.result-points{color:var(--yellow);font-weight:800;font-size:clamp(12px,3.3vw,15px);}
+.result-sim{font-size:clamp(8px,2.3vw,10px);color:var(--green);}
+.result-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.result-icon-btn{width:28px;height:28px;border-radius:9px;background:#202024;border:1px solid #33333a;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.result-icon-btn.fav-active{color:#ef4444;border-color:rgba(239,68,68,.4);}
+.results-cap-note{text-align:center;color:#5e5e68;font-size:11px;margin-top:10px;flex-shrink:0;}
+
+/* ===== REGISTRAR ===== */
+.reg-tabs{display:flex;gap:8px;margin-top:12px;flex-shrink:0;}
+.reg-tab{flex:1;height:clamp(40px,9.5vw,48px);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.4vw,14px);font-weight:800;border:1.5px solid #29292f;background:#151519;color:#9c9ca5;}
+.reg-tab.active{background:linear-gradient(180deg,var(--green),#12b981);color:#04231a;border-color:transparent;}
+.reg-panel{flex:1;min-height:0;margin-top:14px;display:flex;flex-direction:column;}
+.digit-display{flex-shrink:0;height:clamp(58px,15vw,74px);border-radius:16px;background:#0c0c0e;border:1.5px solid #29292f;display:flex;align-items:center;justify-content:center;font-family:monospace;font-weight:900;font-size:clamp(24px,7vw,32px);color:var(--green);}
+.digit-display.empty{color:#4a4a52;font-size:clamp(13px,3.6vw,15px);font-weight:600;font-family:inherit;}
+.rarity-preview{flex-shrink:0;margin-top:10px;height:clamp(38px,9vw,46px);border-radius:14px;border:1.5px solid rgba(255,199,25,.3);background:rgba(255,199,25,.08);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:clamp(14px,4vw,17px);color:var(--yellow);}
+.keypad{flex:1;min-height:0;margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:8px;}
+.key{border:1.5px solid #29292f;border-radius:14px;background:#17171a;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4.5vw,20px);font-weight:800;color:#eeeef1;}
+.key.wide{grid-column:span 1;font-size:clamp(11px,3vw,13px);color:var(--muted);}
+.reg-submit{flex-shrink:0;margin-top:10px;height:clamp(48px,11vw,56px);border-radius:16px;background:linear-gradient(180deg,var(--green),#12b981);color:#04231a;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(13px,3.6vw,15px);}
+
+/* ===== FAVORITOS ===== */
+.fav-list{flex:1;min-height:0;margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+.fav-row{flex:1;min-height:0;border:1.5px solid #29292f;border-radius:16px;background:#151519;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.fav-heart{color:#ef4444;font-size:16px;flex-shrink:0;}
+.fav-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);text-align:center;padding:0 20px;}
+.fav-empty-icon{font-size:38px;opacity:.5;}
+
+/* ===== PERFIL ===== */
+.profile-card{flex-shrink:0;margin-top:14px;border:1.5px solid #29292f;border-radius:22px;background:linear-gradient(145deg,#17171a,#111114);padding:20px;display:flex;align-items:center;gap:14px;}
+.avatar{width:56px;height:56px;border-radius:50%;background:rgba(66,217,161,.15);border:1.5px solid rgba(66,217,161,.35);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:var(--green);flex-shrink:0;}
+.profile-alias{font-weight:800;font-size:17px;color:#f4f4f6;}
+.profile-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.stat-grid{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;}
+.stat-box{border:1.5px solid #29292f;border-radius:16px;background:#151519;padding:14px;text-align:center;}
+.stat-num{font-size:22px;font-weight:900;color:#f4f4f6;}
+.stat-label{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.5px;}
+.logout-btn{margin-top:auto;flex-shrink:0;height:48px;border-radius:16px;border:1.5px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);color:#f87171;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
+
+/* ===== BOTTOM NAV (compartido) ===== */
+.bottom-nav{position:absolute;left:0;right:0;bottom:0;z-index:100;width:100%;height:calc(76px + env(safe-area-inset-bottom));padding:6px 10px env(safe-area-inset-bottom);border-top:1px solid #29292f;background:#111115;display:grid;grid-template-columns:repeat(5,1fr);}
+.nav-item{min-width:0;color:#70707a;text-decoration:none;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:clamp(9px,2.7vw,12px);white-space:nowrap;}
+.nav-item.active{color:var(--green);}
+.nav-icon{width:27px;height:27px;display:flex;align-items:center;justify-content:center;}
+.nav-icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ===== Reutilizado del dashboard largo: modales, toasts, gancho, tabs, inputs ===== */
+.rb-tab-btn{transition:all .15s ease;}
+.rb-tab-btn.active{background:linear-gradient(180deg,#34d399,#059669);color:#022c22;box-shadow:0 6px 16px -4px rgba(16,185,129,.4);}
+.rb-tab-btn:not(.active){background:rgba(39,39,42,.6);color:#a1a1aa;}
+.rb-panel{display:none;}
+.rb-panel.active{display:block;}
+#rb-panel-sd.active{display:block;}
+#rb-panel-serie.active{display:flex;}
+select.dgt-select, input.dgt-select{background:rgba(9,9,11,.7);border:1px solid #3f3f46;color:#f4f4f5;border-radius:.75rem;padding:.65rem .75rem;font-size:16px;font-weight:600;width:100%;appearance:none;}
+select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#10b981;}
+.dgt-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;z-index:160;backdrop-filter:blur(4px);}
+.dgt-modal.active{display:flex;}
+.dgt-modal-card{background:#111113;border:1px solid #27272a;border-radius:24px 24px 0 0;width:100%;max-width:28rem;max-height:88vh;overflow-y:auto;padding:1.5rem;}
+@media(min-width:480px){ .dgt-modal{align-items:center;} .dgt-modal-card{border-radius:24px;} }
+.dgt-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#18181b;border:1px solid #3f3f46;color:#f4f4f5;padding:.75rem 1.25rem;border-radius:9999px;font-size:.8rem;z-index:180;opacity:0;transition:opacity .2s;}
+.dgt-toast.show{opacity:1;}
+#hook-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:170;display:none;align-items:center;justify-content:center;padding:1.25rem;opacity:0;transition:opacity .3s ease;}
+#hook-backdrop.show{display:flex;opacity:1;}
+#hook-card{width:100%;max-width:24rem;background:#0a0a0b;border:1.5px solid rgba(234,179,8,.55);border-radius:20px;padding:1.75rem 1.5rem;transform:scale(.85);transition:transform .4s cubic-bezier(.2,1.6,.35,1);box-shadow:0 25px 60px -12px rgba(0,0,0,.9), 0 0 0 1px rgba(234,179,8,.08);}
+#hook-backdrop.show #hook-card{transform:scale(1);}
+@keyframes hookPulse{0%,100%{box-shadow:0 0 0 0 rgba(234,179,8,.35)}50%{box-shadow:0 0 0 10px rgba(234,179,8,0)}}
+#hook-card{animation:hookPulse 2.2s ease-in-out infinite;}
+.glass{background:linear-gradient(180deg,rgba(24,24,27,.9),rgba(15,15,17,.9));}
+.gold-border{border:1px solid rgba(234,179,8,.35);}
+
+/* ===== Sub-tabs de la pantalla Global (Buscar / Por Rareza) ===== */
+.global-tabs{display:flex;gap:8px;margin-top:12px;flex-shrink:0;}
+.global-tab{flex:1;height:clamp(38px,9vw,44px);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(11px,3.2vw,13px);font-weight:800;border:1.5px solid #29292f;background:#151519;color:#9c9ca5;}
+.global-tab.active{background:linear-gradient(180deg,var(--yellow),#e0a80f);color:#1a1400;border-color:transparent;}
+.rarity-chip-row{display:flex;gap:6px;overflow-x:auto;flex-shrink:0;margin-top:10px;padding-bottom:2px;}
+.rarity-chip{flex-shrink:0;font-size:10px;font-weight:800;padding:6px 10px;border-radius:999px;background:#151519;border:1.5px solid #29292f;color:#9c9ca5;white-space:nowrap;}
+.rarity-chip.active{background:rgba(255,199,25,.15);border-color:rgba(255,199,25,.4);color:var(--yellow);}
+.compact-empty{flex:1;display:flex;align-items:center;justify-content:center;color:#5e5e68;font-size:12px;text-align:center;padding:0 20px;}
 </style>
 </head>
-<body class="text-zinc-100 font-sans antialiased">
+<body>
 
-<div class="min-h-screen max-w-md mx-auto px-4 pb-28 pt-6">
+<div class="app">
 
-  <!-- ============ HEADER ============ -->
-  <header class="flex items-center justify-between mb-6">
-    <div class="flex items-baseline gap-1">
-      <span class="text-3xl font-black text-emerald-400">$DOLLAR</span>
-      <span class="text-3xl font-black text-zinc-100">DGT</span>
-      <span class="text-[10px] text-zinc-500 ml-1">v2.4.1</span>
-    </div>
-    <!-- Badge estado membresía: refleja globalActive real -->
-    <button id="membership-badge" onclick="onMembershipBadgeClick()" class="flex items-center gap-1.5 bg-gradient-to-b from-yellow-300 to-yellow-500 text-zinc-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg shadow-yellow-500/20">
-      👑 $5 VIDA
-    </button>
-  </header>
-
-  <!-- Saludo usuario -->
-  <div class="flex items-center justify-between mb-5">
-    <p class="text-sm text-zinc-400">Hola, <span id="greet-alias" class="text-emerald-400 font-semibold">invitado</span> 👋</p>
-    <button id="session-action-btn" onclick="onSessionActionClick()" class="text-xs font-bold px-3 py-1.5 rounded-full bg-zinc-800/70 border border-zinc-700 text-zinc-200 hover:border-zinc-500 transition">
-      Iniciar sesión
-    </button>
+  <!-- ============ INICIO ============ -->
+  <div class="screen-view active" id="screen-inicio">
+    <header>
+      <div class="logo-area"><div class="logo"><span class="logo-green">$DOLLAR</span>DGT</div><span class="version">v3.0</span></div>
+      <div class="pro membership-badge-clone" id="membership-badge" onclick="onMembershipBadgeClick()">👑 $5 VIDA</div>
+    </header>
+    <section class="welcome">
+      <div class="welcome-text">Hola, <strong id="greet-alias">invitado</strong> 👋</div>
+      <button id="session-action-btn" class="login" onclick="onSessionActionClick()" style="cursor:pointer;">Iniciar sesión</button>
+    </section>
+    <div class="section-title"><span class="live-dot"></span><span>SERIE LÍDER · TOP 5 EN VIVO</span></div>
+    <article class="leader-card" id="leader-card">
+      <div class="leader-heading"><div class="badge">BILLETE</div><div class="serial" id="leader-serial">— cargando —</div></div>
+      <div class="divider top"></div>
+      <div class="info-grid">
+        <div class="info-item"><div class="info-label">Letras:</div><div class="info-value" id="leader-letters">—</div></div>
+        <div class="info-item"><div class="info-label">Dígitos:</div><div class="info-value" id="leader-digits">—</div></div>
+        <div class="info-item"><div class="info-label">Año:</div><div class="info-value" id="leader-year">—</div></div>
+        <div class="info-item"><div class="info-label">Puntos:</div><div class="info-value points" id="leader-points">—</div></div>
+        <div class="info-item"><div class="info-label">Rareza:</div><div class="info-value" id="leader-rarity">—</div></div>
+        <div class="info-item"><div class="info-label">Dueño:</div><div class="info-value owner" id="leader-owner">—</div></div>
+      </div>
+      <div class="divider bottom"></div>
+      <div class="meta">
+        <div class="country"><span class="country-label">País:</span><span id="leader-country">—</span></div>
+        <div class="trend"><span class="trend-dot"></span><span id="leader-updated">Sin datos aún</span></div>
+      </div>
+      <div class="probability">
+        <span class="probability-label">PROBABILIDAD DE RAREZA EN LA BÓVEDA</span>
+        <div class="bar" id="leader-probability-bar"></div>
+      </div>
+    </article>
+    <section class="quick">
+      <div class="quick-title">ACCIONES RÁPIDAS</div>
+      <div class="actions">
+        <article class="action" onclick="goTo('registrar')">
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg></div>
+          <div class="action-title">Ingresar Serie</div>
+        </article>
+        <article class="action" onclick="goTo('global')">
+          <div class="icon"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></div>
+          <div class="action-title">Búsqueda Global</div>
+        </article>
+        <article class="action" onclick="openToquesModal()" style="position:relative;">
+          <span id="toques-badge" class="hidden" style="display:none;position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;height:18px;width:18px;border-radius:999px;align-items:center;justify-content:center;">0</span>
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M8 10V6.5a1.75 1.75 0 0 1 3.5 0v3M11.5 9.25V5a1.75 1.75 0 0 1 3.5 0v4.5M15 9.5V7a1.75 1.75 0 0 1 3.5 0v6.5c0 3.73-2.5 6.5-6 6.5-2.2 0-3.53-.86-4.83-2.4l-3.1-3.7c-.6-.72-.5-1.8.24-2.38a1.7 1.7 0 0 1 2.2.07L8 12.5"/></svg></div>
+          <div class="action-title">Toques Privados</div>
+        </article>
+        <article class="action" onclick="goTo('favoritos')">
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M20.8 8.7c0 5.5-8.8 10.3-8.8 10.3S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"/></svg></div>
+          <div class="action-title">Mis Favoritos</div>
+        </article>
+      </div>
+    </section>
   </div>
 
-  <!-- ============ SECCIÓN SERIE LÍDER (Leader Board) ============ -->
-  <div class="flex items-center gap-2 mb-3">
-    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-    <h2 class="text-sm font-bold tracking-widest text-zinc-300">SERIE LÍDER · TOP 5 EN VIVO</h2>
+  <!-- ============ GLOBAL (BÚSQUEDA) ============ -->
+  <div class="screen-view" id="screen-global">
+    <header>
+      <div class="logo-area"><div class="logo"><span class="logo-green">$DOLLAR</span>DGT</div><span class="version">v3.0</span></div>
+      <div class="pro membership-badge-clone">👑 $5 VIDA</div>
+    </header>
+    <div class="section-title" style="margin-top:6px;"><span class="live-dot"></span><span>BÚSQUEDA GLOBAL</span></div>
+    <div class="global-tabs">
+      <div class="global-tab active" id="globalTabBuscar" onclick="setGlobalTab('buscar')">🔎 Buscar</div>
+      <div class="global-tab" id="globalTabRareza" onclick="setGlobalTab('rareza')">💎 Por Rareza</div>
+    </div>
+
+    <!-- Sub-pantalla: Buscar por dígitos -->
+    <div id="globalPanelBuscar" style="display:flex;flex-direction:column;flex:1;min-height:0;">
+      <div class="search-box">
+        <input id="global-search-input" class="search-input" placeholder="Ej. 1234 o 5555" inputmode="numeric" maxlength="10" oninput="this.value=this.value.replace(/\D/g,''); scheduleCompactSearch()">
+      </div>
+      <div class="results-wrap" id="global-search-results">
+        <div class="compact-empty">Escribe al menos 2 dígitos para buscar</div>
+      </div>
+    </div>
+
+    <!-- Sub-pantalla: Por Rareza -->
+    <div id="globalPanelRareza" style="display:none;flex-direction:column;flex:1;min-height:0;">
+      <div class="rarity-chip-row" id="global-rarity-chips"></div>
+      <div class="results-wrap" id="global-rarity-results" style="margin-top:10px;">
+        <div class="compact-empty">Elige una rareza para ver ejemplos</div>
+      </div>
+    </div>
   </div>
 
-  <!-- Tarjeta Líder: poblada por loadLeader() desde vault -->
-  <section id="leader-card" class="glass gold-border rounded-3xl p-6 shadow-2xl shadow-black/40 mb-8">
-    <div class="flex items-center gap-4 mb-5">
-      <span class="bg-emerald-900/40 text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-700/40">BILLETE</span>
-      <span id="leader-serial" class="text-3xl font-black tracking-tight">— cargando —</span>
-    </div>
-    <hr class="border-zinc-800 mb-5">
-
-    <div class="grid grid-cols-2 gap-y-4 gap-x-4">
-      <div>
-        <p class="text-zinc-500 text-sm mb-1">Letras:</p>
-        <p id="leader-letters" class="text-xl font-bold">—</p>
-      </div>
-      <div>
-        <p class="text-zinc-500 text-sm mb-1">Dígitos:</p>
-        <p id="leader-digits" class="text-xl font-bold">—</p>
-      </div>
-      <div>
-        <p class="text-zinc-500 text-sm mb-1">Año:</p>
-        <p id="leader-year" class="text-sm font-bold">—</p>
-      </div>
-      <div>
-        <p class="text-zinc-500 text-sm mb-1">Puntos:</p>
-        <p id="leader-points" class="text-2xl font-black text-yellow-400">—</p>
-      </div>
-      <div>
-        <p class="text-zinc-500 text-sm mb-1">Rareza:</p>
-        <p id="leader-rarity" class="text-lg font-bold text-yellow-400">—</p>
-      </div>
-      <div>
-        <p class="text-zinc-500 text-sm mb-1">Dueño:</p>
-        <p id="leader-owner" class="text-lg font-bold text-emerald-400">—</p>
-      </div>
+  <!-- ============ REGISTRAR ============ -->
+  <div class="screen-view" id="screen-registrar">
+    <header>
+      <div class="logo-area"><div class="logo"><span class="logo-green">$DOLLAR</span>DGT</div><span class="version">v3.0</span></div>
+      <div class="pro membership-badge-clone">👑 $5 VIDA</div>
+    </header>
+    <div class="section-title" style="margin-top:6px;"><span class="live-dot"></span><span>REGISTRAR MI BILLETE</span></div>
+    <div class="reg-tabs">
+      <div class="reg-tab" onclick="rbSwitchTab('sd')" id="rb-tab-btn-sd">🏷️ Datos SD</div>
+      <div class="reg-tab active" onclick="rbSwitchTab('serie')" id="rb-tab-btn-serie">🔢 Serie DGT</div>
     </div>
 
-    <div class="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between gap-2">
-      <p class="text-xs"><span class="text-zinc-500">País:</span> <span id="leader-country">—</span></p>
-      <span class="flex items-center gap-1.5 text-[10px] text-zinc-400 bg-zinc-800/60 px-3 py-1 rounded-full shrink-0">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> <span id="leader-updated">Sin datos aún</span>
-      </span>
-    </div>
+    <div class="reg-panel" style="flex:1;min-height:0;position:relative;">
 
-    <!-- Barra de probabilidades por rareza (compuesta en vivo desde la Bóveda) -->
-    <div class="mt-3">
-      <p class="text-[9px] text-zinc-600 uppercase tracking-wide mb-1">Probabilidad de rareza en la Bóveda</p>
-      <div id="leader-probability-bar" class="flex h-2.5 rounded-full overflow-hidden bg-zinc-800/60"></div>
-    </div>
-  </section>
+      <!-- Panel Datos SD: único con scroll interno propio (es un formulario) -->
+      <div id="rb-panel-sd" class="rb-panel" style="height:100%;overflow-y:auto;padding-top:2px;">
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Letras del billete <span style="color:#5e5e68;">(solo la 1ª es obligatoria)</span></p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+          <select class="dgt-select" id="rb-letra1"><option value="">A-Z *</option></select>
+          <select class="dgt-select" id="rb-letra2"><option value="">—</option></select>
+          <select class="dgt-select" id="rb-letra3"><option value="">—</option></select>
+        </div>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:6px;">País</label>
+        <select class="dgt-select" id="rb-pais" style="margin-bottom:12px;"><option value="">Selecciona país</option></select>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:6px;">Año de emisión</label>
+        <select class="dgt-select" id="rb-anio" style="margin-bottom:12px;"><option value="">Selecciona año</option></select>
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:6px;">Denominación</label>
+        <select class="dgt-select" id="rb-denominacion" onchange="rbToggleDenomOtro()"><option value="">Selecciona denominación</option></select>
+        <input id="rb-denom-otro" type="text" placeholder="Especifica denominación (ej. 200)" class="dgt-select hidden" style="margin-top:8px;" />
+      </div>
 
-  <!-- ============ ACCIONES RÁPIDAS (Bento Grid) ============ -->
-  <h3 class="text-sm font-bold tracking-widest text-zinc-400 mb-4">ACCIONES RÁPIDAS</h3>
-  <div class="grid grid-cols-2 gap-4 mb-8">
-    <button onclick="rbSwitchTab('serie')" class="glass rounded-2xl p-6 flex flex-col items-center gap-3 border border-zinc-800 hover:border-zinc-600 transition">
-      <span class="h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6 text-zinc-200">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75h6M9 15.75h6M9 8.75h1.5M13.5 3H7.8c-.98 0-1.8.82-1.8 1.8v14.4c0 .98.82 1.8 1.8 1.8h8.4c.98 0 1.8-.82 1.8-1.8V8.25L13.5 3Z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13.25 3v4.5c0 .69.56 1.25 1.25 1.25h4"/>
-        </svg>
-      </span>
-      <span class="text-sm font-semibold text-center">Ingresar N.º de Serie</span>
-    </button>
-    <button onclick="rbGoToSimilarSearch()" class="glass rounded-2xl p-6 flex flex-col items-center gap-3 border border-zinc-800 hover:border-zinc-600 transition">
-      <span class="h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6 text-zinc-200">
-          <circle cx="10.5" cy="10.5" r="6.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M20 20l-4.7-4.7"/>
-        </svg>
-      </span>
-      <span class="text-sm font-semibold text-center">Búsqueda Global</span>
-    </button>
-    <button onclick="openToquesModal()" class="glass rounded-2xl p-6 flex flex-col items-center gap-3 border border-zinc-800 hover:border-zinc-600 transition relative">
-      <span id="toques-badge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black h-5 w-5 rounded-full items-center justify-center">0</span>
-      <span class="h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6 text-zinc-200">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8 10V6.5a1.75 1.75 0 0 1 3.5 0v3M11.5 9.25V5a1.75 1.75 0 0 1 3.5 0v4.5M15 9.5V7a1.75 1.75 0 0 1 3.5 0v6.5c0 3.73-2.5 6.5-6 6.5-2.2 0-3.53-.86-4.83-2.4l-3.1-3.7c-.6-.72-.5-1.8.24-2.38a1.7 1.7 0 0 1 2.2.07L8 12.5"/>
-        </svg>
-      </span>
-      <span class="text-sm font-semibold text-center">Toques Privados</span>
-    </button>
-    <button onclick="rbToggleFavoritesView()" class="glass rounded-2xl p-6 flex flex-col items-center gap-3 border border-zinc-800 hover:border-zinc-600 transition">
-      <span class="h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6 text-zinc-200">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.5s-7.5-4.6-9.7-9.1C.9 8.2 2 5 5.3 4.2c2-.5 3.9.4 5.2 2.1l1.5 1.9 1.5-1.9c1.3-1.7 3.2-2.6 5.2-2.1C22 5 23.1 8.2 21.7 11.4 19.5 15.9 12 20.5 12 20.5Z"/>
-        </svg>
-      </span>
-      <span id="favorites-tile-label" class="text-sm font-semibold text-center">Mis Favoritos</span>
-    </button>
-  </div>
-
-  <!-- ============ PANEL: REGISTRAR MI BILLETE ============ -->
-  <section class="glass gold-border rounded-3xl p-5 mb-8 shadow-xl shadow-black/40">
-    <h4 class="text-sm font-bold text-zinc-300 mb-4">Registrar mi billete</h4>
-
-    <div class="grid grid-cols-2 gap-2 mb-5">
-      <button id="rb-tab-btn-sd" onclick="rbSwitchTab('sd')" class="rb-tab-btn rounded-xl py-3 text-sm font-bold flex items-center justify-center gap-2">
-        🏷️ Datos SD
-      </button>
-      <button id="rb-tab-btn-serie" onclick="rbSwitchTab('serie')" class="rb-tab-btn active rounded-xl py-3 text-sm font-bold flex items-center justify-center gap-2">
-        🔢 Serie DGT
-      </button>
-    </div>
-
-    <!-- ===== PANEL 1: DATOS SD ===== -->
-    <div id="rb-panel-sd" class="rb-panel space-y-4">
-      <div>
-        <p class="text-xs text-zinc-500 mb-2">Letras del billete <span class="text-zinc-600">(solo la 1ª es obligatoria — algunos países, como el Euro, usan una sola)</span></p>
-        <div class="grid grid-cols-3 gap-2">
-          <div>
-            <label class="text-[10px] text-zinc-600 block mb-1">Prefijo 1 *</label>
-            <select class="dgt-select" id="rb-letra1"><option value="">A-Z</option></select>
-          </div>
-          <div>
-            <label class="text-[10px] text-zinc-600 block mb-1">Prefijo 2 (opc.)</label>
-            <select class="dgt-select" id="rb-letra2"><option value="">—</option></select>
-          </div>
-          <div>
-            <label class="text-[10px] text-zinc-600 block mb-1">Sufijo (opc.)</label>
-            <select class="dgt-select" id="rb-letra3"><option value="">—</option></select>
-          </div>
+      <!-- Panel Serie DGT: teclado, sin scroll, ocupa toda la pantalla disponible -->
+      <div id="rb-panel-serie" class="rb-panel active" style="flex-direction:column;height:100%;">
+        <div class="digit-display empty" id="rb-digit-display">Ingresa hasta 10 dígitos</div>
+        <p style="text-align:right;font-size:10px;color:var(--muted);margin-top:4px;" id="rb-digit-count">0 / 10 dígitos (mín. 6)</p>
+        <div class="rarity-preview" id="rb-rarity-preview" style="margin-top:6px;">Ingresa dígitos para ver la rareza en vivo</div>
+        <div class="keypad">
+          <div class="key" onclick="rbPressNum(1)">1</div><div class="key" onclick="rbPressNum(2)">2</div><div class="key" onclick="rbPressNum(3)">3</div>
+          <div class="key" onclick="rbPressNum(4)">4</div><div class="key" onclick="rbPressNum(5)">5</div><div class="key" onclick="rbPressNum(6)">6</div>
+          <div class="key" onclick="rbPressNum(7)">7</div><div class="key" onclick="rbPressNum(8)">8</div><div class="key" onclick="rbPressNum(9)">9</div>
+          <div class="key wide" onclick="rbClearInput()">C</div><div class="key" onclick="rbPressNum(0)">0</div><div class="key wide" onclick="rbDeleteDigit()">⌫</div>
         </div>
       </div>
-
-      <div>
-        <label class="text-xs text-zinc-500 block mb-2">País</label>
-        <select class="dgt-select" id="rb-pais"><option value="">Selecciona país</option></select>
-      </div>
-
-      <div>
-        <label class="text-xs text-zinc-500 block mb-2">Año de emisión</label>
-        <select class="dgt-select" id="rb-anio"><option value="">Selecciona año</option></select>
-      </div>
-
-      <div>
-        <label class="text-xs text-zinc-500 block mb-2">Denominación</label>
-        <select class="dgt-select" id="rb-denominacion" onchange="rbToggleDenomOtro()">
-          <option value="">Selecciona denominación</option>
-        </select>
-        <input id="rb-denom-otro" type="text" placeholder="Especifica denominación (ej. 200)"
-               class="dgt-select mt-2 hidden" />
-      </div>
     </div>
 
-    <!-- ===== PANEL 2: SERIE DGT ===== -->
-    <div id="rb-panel-serie" class="rb-panel active space-y-4">
-      <div class="flex items-center justify-between">
-        <p class="text-xs text-zinc-500">Número de serie</p>
-        <span id="rb-digit-count" class="text-xs text-zinc-500">0 / 10 dígitos (mín. 6)</span>
-      </div>
-      <div id="rb-digit-display" class="bg-zinc-950/70 rounded-xl min-h-14 flex items-center justify-center px-3 py-3 text-3xl font-mono font-black text-emerald-400 border border-zinc-800">
-        <span class="text-zinc-700 text-base font-semibold">Ingresa hasta 10 dígitos</span>
-      </div>
-      <div class="grid grid-cols-3 gap-2">
-        <button onclick="rbPressNum(1)" class="bg-zinc-800/60 hover:bg-zinc-700 rounded-xl py-3 text-lg font-bold">1</button>
-        <button onclick="rbPressNum(2)" class="bg-zinc-800/60 hover:bg-zinc-700 rounded-xl py-3 text-lg font-bold">2</button>
-        <button onclick="rbPressNum(3)" class="bg-zinc-800/60 hover:bg-zinc-700 rounded-xl py-3 text-lg font-bold">3</button>
-        <button onclick="rbPressNum(4)" class="bg-zinc-800/60 hover:bg-zinc-700 rounded-xl py-3 text-lg font-bold">4</button>
-        <button onclick="rbPressNum(5)" class="bg-zinc-800/60 hover:bg-zinc-700 rounded-xl py-3 text-lg font-bold">5</button>
-        <button onclick="rbPressNum(6)" class="bg-zinc-800/60 hover:bg-zinc-700 rounded-xl py-3 text-lg font-bold">6</button>
-        <button onclick="rbPressNum(7)" class="bg-zinc-800/60 hover:bg-zinc-700 rounded-xl py-3 text-lg font-bold">7</button>
-        <button onclick="rbPressNum(8)" class="bg-zinc-800/60 hover:bg-zinc-700 rounded-xl py-3 text-lg font-bold">8</button>
-        <button onclick="rbPressNum(9)" class="bg-zinc-800/60 hover:bg-zinc-700 rounded-xl py-3 text-lg font-bold">9</button>
-        <button onclick="rbClearInput()" class="bg-zinc-800/40 hover:bg-zinc-700 rounded-xl py-3 text-sm font-bold text-yellow-400">C</button>
-        <button onclick="rbPressNum(0)" class="bg-zinc-800/60 hover:bg-zinc-700 rounded-xl py-3 text-lg font-bold">0</button>
-        <button onclick="rbDeleteDigit()" class="bg-zinc-800/40 hover:bg-zinc-700 rounded-xl py-3 text-lg">⌫</button>
-      </div>
-      <div id="rb-rarity-preview" class="mt-3 rounded-xl border border-zinc-800 bg-zinc-950/50 px-4 py-2.5 text-center text-xs text-zinc-600">
-        Ingresa dígitos para ver la rareza en vivo
-      </div>
-    </div>
-
-    <button id="rb-submit-btn" onclick="handleRegister()" class="w-full mt-5 bg-gradient-to-b from-emerald-400 to-emerald-600 text-zinc-950 font-bold py-3 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
-      🔐 Registrar a Bóveda
-    </button>
-  </section>
-
-  <!-- ============ EXPLORAR POR RAREZA ============ -->
-  <section class="glass gold-border rounded-3xl p-5 mb-8 shadow-xl shadow-black/40">
-    <h4 class="text-sm font-bold text-zinc-300 mb-1">🔍 Explorar por rareza</h4>
-    <p class="text-xs text-zinc-500 mb-4">Descubre qué tan raros son los billetes ya registrados en la Bóveda.</p>
-    <div id="rarity-chips" class="flex flex-wrap gap-2 mb-4"></div>
-    <div id="rarity-results" class="space-y-2 max-h-72 overflow-y-auto pr-1">
-      <p class="text-xs text-zinc-600 text-center py-6">Elige una rareza para ver ejemplos.</p>
-    </div>
-  </section>
-
-  <!-- ============ BUSCAR SERIES SEMEJANTES ============ -->
-  <section class="glass gold-border rounded-3xl p-5 mb-8 shadow-xl shadow-black/40">
-    <h4 class="text-sm font-bold text-zinc-300 mb-1">🧬 Buscar combinaciones semejantes</h4>
-    <p class="text-xs text-zinc-500 mb-4">Ingresa algunos dígitos y encuentra billetes parecidos ya registrados por otros coleccionistas.</p>
-    <input id="similar-input" type="text" inputmode="numeric" maxlength="10" placeholder="Ej. 1234 o 5555"
-           class="dgt-select mb-4" oninput="this.value=this.value.replace(/\D/g,''); rbScheduleSimilarSearch()" />
-    <div id="similar-results" class="space-y-2 max-h-72 overflow-y-auto pr-1">
-      <p class="text-xs text-zinc-600 text-center py-6">Escribe al menos 2 dígitos para buscar.</p>
-    </div>
-  </section>
-
-  <!-- ============ BÓVEDA VIVA (poblada por loadBovedaViva) ============ -->
-  <div class="flex items-center justify-between mb-3">
-    <h3 id="boveda-heading" class="text-sm font-bold tracking-widest text-zinc-400">BÓVEDA VIVA</h3>
-    <span id="boveda-heading-action" onclick="rbShowingFavorites && rbToggleFavoritesView()" class="text-xs text-emerald-400 cursor-pointer"></span>
+    <div class="reg-submit" id="rb-submit-btn" onclick="handleRegister()">🔐 Registrar a Bóveda</div>
   </div>
-  <section id="boveda-list" class="space-y-3 max-h-96 overflow-y-auto pr-1">
-    <p class="text-xs text-zinc-600 text-center py-6">Cargando bóveda...</p>
-  </section>
 
-  <!-- ============ TARJETA UPSELL STRIPE ($5 Lifetime) ============ -->
-  <section id="membership-upsell-card" class="mt-8 rounded-3xl p-6 bg-gradient-to-br from-yellow-500/15 to-zinc-900 gold-border shadow-xl">
-    <h4 class="text-lg font-black text-yellow-400 mb-1">👑 Membresía de por vida</h4>
-    <p class="text-sm text-zinc-400 mb-4">Desbloquea Búsqueda Global, Series Raras ilimitadas y mensajería privada. Pago único.</p>
-    <div class="flex items-baseline gap-2 mb-4">
-      <span class="text-3xl font-black text-white">$5</span>
-      <span class="text-sm text-zinc-500">único · para siempre</span>
+  <!-- ============ FAVORITOS ============ -->
+  <div class="screen-view" id="screen-favoritos">
+    <header>
+      <div class="logo-area"><div class="logo"><span class="logo-green">$DOLLAR</span>DGT</div><span class="version">v3.0</span></div>
+      <div class="pro membership-badge-clone">👑 $5 VIDA</div>
+    </header>
+    <div class="section-title" style="margin-top:6px;"><span class="live-dot"></span><span>MIS FAVORITOS</span></div>
+    <div class="fav-list" id="fav-list-native">
+      <div class="compact-empty">Cargando...</div>
     </div>
-    <button onclick="openStripeDirect()" class="w-full bg-gradient-to-b from-yellow-300 to-yellow-500 text-zinc-900 font-bold py-3 rounded-xl shadow-lg shadow-yellow-500/20">
-      Pagar $5 y activar
+  </div>
+
+  <!-- ============ PERFIL ============ -->
+  <div class="screen-view" id="screen-perfil">
+    <header>
+      <div class="logo-area"><div class="logo"><span class="logo-green">$DOLLAR</span>DGT</div><span class="version">v3.0</span></div>
+      <div class="pro membership-badge-clone">👑 $5 VIDA</div>
+    </header>
+    <div class="section-title" style="margin-top:6px;"><span class="live-dot"></span><span>MI PERFIL</span></div>
+    <div class="profile-card">
+      <div class="avatar" id="profile-avatar-letter">?</div>
+      <div><div class="profile-alias" id="profile-alias-native">invitado</div><div class="profile-sub" id="profile-sub-native">Inicia sesión para continuar</div></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num" id="stats-mine">—</div><div class="stat-label">Billetes tuyos</div></div>
+      <div class="stat-box"><div class="stat-num" id="stats-total">—</div><div class="stat-label">Billetes en la Bóveda</div></div>
+    </div>
+    <div id="stats-rarity-bars" style="margin-top:12px;flex-shrink:0;"></div>
+    <div style="margin-top:14px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;">
+      <div class="reg-tab" style="background:#151519;" onclick="openLegalModal('terms')">Términos y Condiciones</div>
+      <div class="reg-tab" style="background:#151519;" onclick="openLegalModal('privacy')">Política de Privacidad</div>
+    </div>
+    <div class="logout-btn" style="margin-top:auto;" onclick="onSessionActionClick()" id="perfil-session-btn">Iniciar sesión</div>
+  </div>
+
+  <!-- ============ BOTTOM NAV (compartido, siempre visible) ============ -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="navBtn-inicio" onclick="goTo('inicio')">
+      <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg></span>
+      <span>Inicio</span>
     </button>
-  </section>
+    <button class="nav-item" id="navBtn-global" onclick="goTo('global')">
+      <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></span>
+      <span>Global</span>
+    </button>
+    <button class="nav-item" id="navBtn-registrar" onclick="goTo('registrar')">
+      <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg></span>
+      <span>Registrar</span>
+    </button>
+    <button class="nav-item" id="navBtn-favoritos" onclick="goTo('favoritos')">
+      <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20.8 8.7c0 5.5-8.8 10.3-8.8 10.3S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"/></svg></span>
+      <span>Favoritos</span>
+    </button>
+    <button class="nav-item" id="navBtn-perfil" onclick="goTo('perfil')">
+      <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4.2 3.6-7 8-7s8 2.8 8 7"/></svg></span>
+      <span>Perfil</span>
+    </button>
+  </nav>
 
-  <!-- ============ ESTADÍSTICAS DE LA BÓVEDA (reemplaza el upsell tras activar membresía) ============ -->
-  <section id="membership-stats-card" class="mt-8 rounded-3xl p-6 bg-gradient-to-br from-emerald-500/10 to-zinc-900 gold-border shadow-xl hidden">
-    <div class="flex items-center justify-between mb-1">
-      <h4 class="text-lg font-black text-emerald-300">✅ Miembro vitalicio</h4>
-      <span class="text-[10px] px-2 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold">ACTIVO</span>
-    </div>
-    <p class="text-sm text-zinc-400 mb-4">Aquí tienes un vistazo rápido de toda la Bóveda.</p>
-    <div class="grid grid-cols-2 gap-3 mb-4">
-      <div class="rounded-xl bg-black/30 border border-white/10 p-3 text-center">
-        <p id="stats-total" class="text-2xl font-black text-white">—</p>
-        <p class="text-[10px] text-zinc-500 uppercase tracking-wide">Billetes en la Bóveda</p>
-      </div>
-      <div class="rounded-xl bg-black/30 border border-white/10 p-3 text-center">
-        <p id="stats-mine" class="text-2xl font-black text-emerald-400">—</p>
-        <p class="text-[10px] text-zinc-500 uppercase tracking-wide">Tuyos registrados</p>
-      </div>
-    </div>
-    <p class="text-[10px] text-zinc-500 uppercase tracking-wide mb-2">Distribución por rareza</p>
-    <div id="stats-rarity-bars" class="space-y-1.5"></div>
-  </section>
-
-  <!-- ============ FOOTER ============ -->
-  <footer class="mt-10 flex flex-col items-center gap-2 text-xs text-zinc-600">
-    <a href="mailto:support@dollardgt.com" class="hover:text-emerald-400">Soporte técnico</a>
-    <div class="flex gap-4">
-      <a href="#" onclick="event.preventDefault(); openLegalModal('terms')" class="hover:text-zinc-300 underline">Términos y Condiciones</a>
-      <a href="#" onclick="event.preventDefault(); openLegalModal('privacy')" class="hover:text-zinc-300 underline">Política de Privacidad</a>
-    </div>
-    <p class="mt-2">© 2026 DollarDGT · v2.4.1</p>
-  </footer>
 </div>
-
-<!-- ============ NAV INFERIOR ============ -->
-<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md glass border-t border-zinc-800 flex justify-around py-3 backdrop-blur-lg">
-  <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center gap-1 text-emerald-400">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 11.5 12 4l9 7.5M5.5 10v8.5c0 .55.45 1 1 1H9.5v-5.5c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v5.5h3a1 1 0 0 0 1-1V10"/></svg>
-    <span class="text-[10px]">Inicio</span>
-  </button>
-  <button onclick="rbGoToSimilarSearch()" class="flex flex-col items-center gap-1 text-zinc-500">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5"><circle cx="10.5" cy="10.5" r="6.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M20 20l-4.7-4.7"/></svg>
-    <span class="text-[10px]">Global</span>
-  </button>
-  <button onclick="rbGoToRegister()" class="flex flex-col items-center gap-1 text-zinc-500">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75h6M9 15.75h4M13.5 3H7.8c-.98 0-1.8.82-1.8 1.8v14.4c0 .98.82 1.8 1.8 1.8h8.4c.98 0 1.8-.82 1.8-1.8V8.25L13.5 3Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13.25 3v4.5c0 .69.56 1.25 1.25 1.25h4"/></svg>
-    <span class="text-[10px]">Registrar</span>
-  </button>
-  <button onclick="rbGoToFavorites()" class="flex flex-col items-center gap-1 text-zinc-500">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.5s-7.5-4.6-9.7-9.1C.9 8.2 2 5 5.3 4.2c2-.5 3.9.4 5.2 2.1l1.5 1.9 1.5-1.9c1.3-1.7 3.2-2.6 5.2-2.1C22 5 23.1 8.2 21.7 11.4 19.5 15.9 12 20.5 12 20.5Z"/></svg>
-    <span class="text-[10px]">Favoritos</span>
-  </button>
-  <button onclick="onProfileNavClick()" class="flex flex-col items-center gap-1 text-zinc-500">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5"><circle cx="12" cy="8" r="3.25"/><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20c1.2-3.6 4.2-5.5 7.5-5.5s6.3 1.9 7.5 5.5"/></svg>
-    <span class="text-[10px]">Perfil</span>
-  </button>
-</nav>
 
 <!-- ============ MODAL: AUTH ============ -->
 <div id="auth-modal" class="dgt-modal">
@@ -497,7 +507,9 @@
 
 <div id="dgt-toast" class="dgt-toast"></div>
 
+
 <script>
+
   // =========================================================
   // 1. CONFIGURACIÓN SUPABASE + STRIPE (credenciales reales)
   // =========================================================
@@ -618,6 +630,7 @@
     updateMembershipBadge();
     document.getElementById('greet-alias').textContent = 'invitado';
     updateSessionActionBtn();
+    updateProfileScreen();
     showToast('Sesión cerrada');
   }
   function onSessionActionClick(){
@@ -625,7 +638,25 @@
     else openAuthModal();
   }
   function updateSessionActionBtn(){
-    document.getElementById('session-action-btn').textContent = user ? 'Salir' : 'Iniciar sesión';
+    const label = user ? 'Salir' : 'Iniciar sesión';
+    document.getElementById('session-action-btn').textContent = label;
+    const perfilBtn = document.getElementById('perfil-session-btn');
+    if (perfilBtn) perfilBtn.textContent = label;
+  }
+  function updateProfileScreen(){
+    const avatar = document.getElementById('profile-avatar-letter');
+    const aliasEl = document.getElementById('profile-alias-native');
+    const subEl = document.getElementById('profile-sub-native');
+    if (!user){
+      avatar.textContent = '?';
+      aliasEl.textContent = 'invitado';
+      subEl.textContent = 'Inicia sesión para continuar';
+      return;
+    }
+    const alias = profile?.alias || user.email.split('@')[0];
+    avatar.textContent = alias[0].toUpperCase();
+    aliasEl.textContent = '@' + alias;
+    subEl.textContent = `${profile?.country || 'País no definido'} · ${globalActive ? 'Miembro activo' : 'No miembro'}`;
   }
 
   sb.auth.onAuthStateChange((_event, session) => {
@@ -648,36 +679,40 @@
     globalActive = !!mem?.active;
     updateMembershipBadge();
     updateSessionActionBtn();
+    updateProfileScreen();
     loadToquesCounts();
   }
 
   function updateMembershipBadge(){
-    const badge = document.getElementById('membership-badge');
-    if (globalActive){
-      badge.textContent = '✅ MIEMBRO';
-      badge.classList.remove('from-yellow-300','to-yellow-500');
-      badge.classList.add('from-emerald-400','to-emerald-600');
-    } else {
-      badge.textContent = '👑 $5 VIDA';
-      badge.classList.add('from-yellow-300','to-yellow-500');
-      badge.classList.remove('from-emerald-400','to-emerald-600');
-    }
+    document.querySelectorAll('.membership-badge-clone').forEach(badge => {
+      if (globalActive){
+        badge.textContent = '✅ MIEMBRO';
+        badge.classList.remove('from-yellow-300','to-yellow-500');
+        badge.classList.add('from-emerald-400','to-emerald-600');
+      } else {
+        badge.textContent = '👑 $5 VIDA';
+        badge.classList.add('from-yellow-300','to-yellow-500');
+        badge.classList.remove('from-emerald-400','to-emerald-600');
+      }
+    });
     renderMembershipCard();
   }
 
-  // Alterna entre la tarjeta de upsell ($5) y el panel de estadísticas de la Bóveda,
-  // según el estado real de membresía.
+  // Panel de estadísticas de la Bóveda (pantalla Perfil) + botón de activar membresía si aún no lo es
   async function renderMembershipCard(){
-    const upsell = document.getElementById('membership-upsell-card');
-    const stats = document.getElementById('membership-stats-card');
-    if (!globalActive){
-      upsell.classList.remove('hidden');
-      stats.classList.add('hidden');
-      return;
-    }
-    upsell.classList.add('hidden');
-    stats.classList.remove('hidden');
     await rbRenderMembershipStats();
+    let upsellBtn = document.getElementById('perfil-upsell-btn');
+    if (!upsellBtn){
+      upsellBtn = document.createElement('div');
+      upsellBtn.id = 'perfil-upsell-btn';
+      upsellBtn.className = 'reg-submit';
+      upsellBtn.style.marginTop = '10px';
+      upsellBtn.onclick = openStripeDirect;
+      document.getElementById('stats-rarity-bars').insertAdjacentElement('afterend', upsellBtn);
+    }
+    upsellBtn.textContent = globalActive ? '✅ Miembro vitalicio activo' : '👑 Activar membresía $5';
+    upsellBtn.style.background = globalActive ? 'linear-gradient(180deg,#42d9a1,#12b981)' : 'linear-gradient(180deg,#ffc719,#e0a80f)';
+    upsellBtn.style.cursor = globalActive ? 'default' : 'pointer';
   }
 
   async function rbRenderMembershipStats(){
@@ -734,6 +769,7 @@
       if (error) throw error;
       profile = { ...(profile||{}), id: user.id, email: user.email, nickname, alias, country };
       document.getElementById('greet-alias').textContent = '@' + alias;
+      updateProfileScreen();
       closeModal('profile-modal');
       showToast('Perfil guardado');
       runPendingAction();
@@ -873,7 +909,6 @@
           updateMembershipBadge();
           closeModal('stripe-sim-modal');
           showToast('✅ Membresía activada');
-          loadBovedaViva();
           runPendingAction();
         } else {
           // No confirmamos aún: dejamos el modal abierto con opción de reintentar
@@ -889,7 +924,6 @@
               updateMembershipBadge();
               closeModal('stripe-sim-modal');
               showToast('✅ Membresía activada');
-              loadBovedaViva();
               runPendingAction();
             } else {
               showToast('Tu pago se cobró. Si no se activa en un minuto, contáctanos a support@dollardgt.com');
@@ -1122,9 +1156,10 @@
 
       showToast('¡Billete registrado en la Bóveda!');
       rbClearInput();
-      loadBovedaViva();
-      loadLeader();
-      rbFetchPool().then(() => { renderRarityChips(); renderLeaderProbabilityBar(); });
+      await rbFetchPool();
+      await loadLeaderCandidates();
+      renderLeaderProbabilityBar();
+      renderMembershipCard();
     } catch (e){
       // La función lanza 'Perfil incompleto' o 'Espera un minuto antes de publicar otro número'
       showToast('Error al registrar: ' + e.message);
@@ -1425,24 +1460,9 @@
     } catch (e){ showToast('Error al enviar: ' + e.message); }
   }
 
-  let rbShowingFavorites = false;
-
-  async function rbToggleFavoritesView(){
-    rbShowingFavorites = !rbShowingFavorites;
-    await loadBovedaViva();
-  }
-  function rbGoToSimilarSearch(){
-    document.getElementById('similar-input').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    document.getElementById('similar-input').focus();
-  }
-  function rbGoToRegister(){
-    rbSwitchTab('serie');
-    document.getElementById('rb-panel-serie').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-  async function rbGoToFavorites(){
-    if (!rbShowingFavorites) await rbToggleFavoritesView();
-    document.getElementById('boveda-heading').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+  function rbGoToSimilarSearch(){ goTo('global'); }
+  function rbGoToRegister(){ goTo('registrar'); rbSwitchTab('serie'); }
+  function rbGoToFavorites(){ goTo('favoritos'); }
 
   async function loadBovedaViva(){
     const container = document.getElementById('boveda-list');
@@ -1754,18 +1774,176 @@
   // =========================================================
   // 13. INIT
   // =========================================================
+  // =========================================================
+  // 16. PANTALLA GLOBAL (nativa) — Buscar / Por Rareza, capado a 5 resultados
+  // =========================================================
+  let nativeSearchRows = [];
+  let nativeRarityRows = [];
+  let nativeFavRows = [];
+  let nativeRarityActive = '';
+
+  function setGlobalTab(tab){
+    document.getElementById('globalTabBuscar').classList.toggle('active', tab === 'buscar');
+    document.getElementById('globalTabRareza').classList.toggle('active', tab === 'rareza');
+    document.getElementById('globalPanelBuscar').style.display = tab === 'buscar' ? 'flex' : 'none';
+    document.getElementById('globalPanelRareza').style.display = tab === 'rareza' ? 'flex' : 'none';
+    if (tab === 'rareza' && !document.getElementById('global-rarity-chips').innerHTML){
+      renderNativeRarityChips();
+    }
+  }
+
+  function nativeCompactRow(row, idx, arrayName, extraTag){
+    const rarityKey = rarityKeyFallback(row.rarity);
+    const rarityLabel = rarityLabelFallback(row.rarity);
+    const serial = row.serial || row.serial_display || row.digits || '';
+    const ownerAlias = row.owner || row.alias || '';
+    const favs = rbGetFavorites();
+    const isFav = favs.includes(serial);
+    return `
+    <div class="result-row">
+      <div style="min-width:0;overflow:hidden;">
+        <div class="result-serial">${serial}</div>
+        <div class="result-meta">${row.country || ''} · ${rarityLabel}${extraTag || ''}</div>
+      </div>
+      <div class="result-right">
+        <div class="result-points">${row.points || 0} pts</div>
+        <div class="result-sim">${ownerAlias ? '@'+ownerAlias : ''}</div>
+      </div>
+      <div class="result-actions">
+        <button class="result-icon-btn ${isFav ? 'fav-active' : ''}" onclick="event.stopPropagation(); nativeToggleFavorite('${arrayName}', ${idx})">♥</button>
+        <button class="result-icon-btn" onclick="event.stopPropagation(); nativeToqueRow('${arrayName}', ${idx})">✋</button>
+      </div>
+    </div>`;
+  }
+  function nativeRowsFor(arrayName){
+    if (arrayName === 'nativeSearchRows') return nativeSearchRows;
+    if (arrayName === 'nativeRarityRows') return nativeRarityRows;
+    if (arrayName === 'nativeFavRows') return nativeFavRows;
+    return [];
+  }
+  function nativeToggleFavorite(arrayName, idx){
+    const row = nativeRowsFor(arrayName)[idx];
+    if (!row) return;
+    const serial = row.serial || row.serial_display || row.digits;
+    let favs = rbGetFavorites();
+    if (favs.includes(serial)) favs = favs.filter(s => s !== serial);
+    else favs.push(serial);
+    localStorage.setItem('dgt_favorites_v1', JSON.stringify(favs));
+    // Re-pinta la vista activa donde se tocó el corazón
+    if (arrayName === 'nativeSearchRows') performCompactSearch();
+    if (arrayName === 'nativeRarityRows' && nativeRarityActive) nativeFilterByRarity(nativeRarityActive);
+    if (arrayName === 'nativeFavRows') loadFavoritesScreen();
+  }
+  function nativeToqueRow(arrayName, idx){
+    const row = nativeRowsFor(arrayName)[idx];
+    if (!row) return;
+    const toOwner = row.owner || row.alias;
+    if (user && profile && toOwner === profile.alias){ showToast('No puedes tocar tu propio billete'); return; }
+    const payload = {
+      toOwner,
+      toEmail: decodeEmailIfNeeded(row.email),
+      serial: row.serial || row.serial_display || row.digits,
+      digits: row.digits,
+      country: profile?.country || ''
+    };
+    if (!gate('toque', payload)) return;
+    executeToque(payload);
+  }
+
+  // --- Sub-pestaña Buscar ---
+  let nativeSearchTimer = null;
+  function scheduleCompactSearch(){
+    clearTimeout(nativeSearchTimer);
+    nativeSearchTimer = setTimeout(performCompactSearch, 280);
+  }
+  async function performCompactSearch(){
+    const q = document.getElementById('global-search-input').value.trim();
+    const container = document.getElementById('global-search-results');
+    if (q.length < 2){
+      container.innerHTML = '<div class="compact-empty">Escribe al menos 2 dígitos para buscar</div>';
+      return;
+    }
+    if (rbPool.length === 0) await rbFetchPool();
+    const scored = rbPool
+      .map(row => ({ row, score: rbSimilarityScore(q, (row.digits || '').replace(/\D/g,'')) }))
+      .filter(x => x.score >= 30)
+      .sort((a,b) => b.score - a.score)
+      .slice(0, 5);
+    nativeSearchRows = scored.map(x => x.row);
+    if (scored.length === 0){
+      container.innerHTML = `<div class="compact-empty">Sin coincidencias para <b>${q}</b> todavía</div>`;
+      return;
+    }
+    container.innerHTML = scored.map((x, idx) => nativeCompactRow(x.row, idx, 'nativeSearchRows', ` · ${x.score}% similar`)).join('');
+  }
+
+  // --- Sub-pestaña Por Rareza ---
+  function renderNativeRarityChips(){
+    const container = document.getElementById('global-rarity-chips');
+    container.innerHTML = RB_RARITY_DEFS.filter(d => d.key !== '').map(def => {
+      const active = nativeRarityActive === def.key;
+      return `<div class="rarity-chip ${active ? 'active' : ''}" onclick="nativeFilterByRarity('${def.key}')">${def.label}</div>`;
+    }).join('');
+  }
+  async function nativeFilterByRarity(key){
+    nativeRarityActive = key;
+    if (rbPool.length === 0) await rbFetchPool();
+    renderNativeRarityChips();
+    const container = document.getElementById('global-rarity-results');
+    nativeRarityRows = rbPool.filter(r => rarityKeyFallback(r.rarity) === key).slice(0, 5);
+    if (nativeRarityRows.length === 0){
+      container.innerHTML = '<div class="compact-empty">Sin billetes con esta rareza todavía</div>';
+      return;
+    }
+    container.innerHTML = nativeRarityRows.map((row, idx) => nativeCompactRow(row, idx, 'nativeRarityRows')).join('');
+  }
+
+  // =========================================================
+  // 17. PANTALLA FAVORITOS (nativa)
+  // =========================================================
+  async function loadFavoritesScreen(){
+    const container = document.getElementById('fav-list-native');
+    const favs = rbGetFavorites();
+    if (favs.length === 0){
+      container.innerHTML = '<div class="compact-empty">Aún no marcaste favoritos.<br>Toca el ♥ en cualquier resultado.</div>';
+      return;
+    }
+    if (rbPool.length === 0) await rbFetchPool();
+    nativeFavRows = rbPool.filter(r => favs.includes(r.serial || r.serial_display || r.digits)).slice(0, 5);
+    if (nativeFavRows.length === 0){
+      container.innerHTML = '<div class="compact-empty">Aún no marcaste favoritos.<br>Toca el ♥ en cualquier resultado.</div>';
+      return;
+    }
+    container.innerHTML = nativeFavRows.map((row, idx) => nativeCompactRow(row, idx, 'nativeFavRows')).join('');
+  }
+
+  // =========================================================
+  // 13. INIT
+  // =========================================================
   (async function init(){
     const { data: sessionData } = await sb.auth.getSession();
     user = sessionData?.session?.user || null;
     if (user) await loadUserContext();
-    loadBovedaViva();
     await rbFetchPool();
-    await rbFilterByRarity('SOLID');
     await loadLeaderCandidates();
+    renderMembershipCard();
+    updateProfileScreen();
     setInterval(rotateLeader, RB_LEADER_ROTATE_MS);
     setInterval(loadLeaderCandidates, RB_LEADER_REFRESH_MS);
     maybeShowHookCard();
   })();
+
+  // ============ Navegación entre pantallas (SIN scroll, una a la vez) ============
+  const SCREENS = ['inicio','global','registrar','favoritos','perfil'];
+  function goTo(name){
+    SCREENS.forEach(s => {
+      document.getElementById('screen-'+s).classList.toggle('active', s === name);
+      document.getElementById('navBtn-'+s).classList.toggle('active', s === name);
+    });
+    if (name === 'favoritos') loadFavoritesScreen();
+    if (name === 'perfil') renderMembershipCard();
+  }
+
 </script>
 
 </body>
