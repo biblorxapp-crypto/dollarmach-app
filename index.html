@@ -1760,7 +1760,7 @@
     if (user) await loadUserContext();
     loadBovedaViva();
     await rbFetchPool();
-    renderRarityChips();
+    await rbFilterByRarity('SOLID');
     await loadLeaderCandidates();
     setInterval(rotateLeader, RB_LEADER_ROTATE_MS);
     setInterval(loadLeaderCandidates, RB_LEADER_REFRESH_MS);
