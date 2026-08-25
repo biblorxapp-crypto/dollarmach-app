@@ -246,7 +246,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     <!-- Sub-pantalla: Buscar por dígitos -->
     <div id="globalPanelBuscar" style="display:flex;flex-direction:column;flex:1;min-height:0;">
       <div class="search-box">
-        <input id="global-search-input" class="search-input" placeholder="Ej. 1234 o 5555" inputmode="numeric" maxlength="10" oninput="this.value=this.value.replace(/\D/g,''); scheduleCompactSearch()">
+        <input id="global-search-input" class="search-input" placeholder="Ej. 1234, AF o 5555" maxlength="12" value="A" oninput="scheduleCompactSearch()">
       </div>
       <div class="results-wrap" id="global-search-results">
         <div class="compact-empty">Escribe al menos 2 dígitos para buscar</div>
@@ -1914,16 +1914,19 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
   let nativeSeeMoreRows = [];
 
   async function performCompactSearch(){
-    const q = document.getElementById('global-search-input').value.trim();
+    const q = document.getElementById('global-search-input').value.trim().toUpperCase();
     const container = document.getElementById('global-search-results');
-    if (q.length < 2){
-      container.innerHTML = '<div class="compact-empty">Escribe al menos 2 dígitos para buscar</div>';
+    if (q.length < 1){
+      container.innerHTML = '<div class="compact-empty">Escribe al menos 1 carácter para buscar</div>';
       return;
     }
     if (rbPool.length === 0) await rbFetchPool();
     const scored = rbPool
-      .map(row => ({ row, score: rbSimilarityScore(q, (row.digits || '').replace(/\D/g,'')) }))
-      .filter(x => x.score >= 30)
+      .map(row => {
+        const target = (row.serial || row.serial_display || row.digits || '').replace(/\s/g, '').toUpperCase();
+        return { row, score: rbSimilarityScore(q, target) };
+      })
+      .filter(x => x.score >= 20)
       .sort((a,b) => b.score - a.score)
       .slice(0, 25);
     nativeSearchFullRows = scored.map(x => x.row);
@@ -2009,6 +2012,8 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     await loadLeaderCandidates();
     renderMembershipCard();
     updateProfileScreen();
+    performCompactSearch();
+    nativeFilterByRarity('SOLID');
     setInterval(rotateLeader, RB_LEADER_ROTATE_MS);
     setInterval(loadLeaderCandidates, RB_LEADER_REFRESH_MS);
     maybeShowHookCard();
