@@ -61,12 +61,12 @@ header{height:9.5%;min-height:52px;display:flex;align-items:center;justify-conte
 .country-label{color:#798a9d;}
 .trend{flex-shrink:0;min-height:26px;padding:0 clamp(7px,2.1vw,10px);border-radius:999px;background:#16293f;color:#96a5b5;display:flex;align-items:center;gap:5px;font-size:clamp(8px,2.3vw,10px);white-space:nowrap;}
 .trend-dot{width:6px;height:6px;flex-shrink:0;border-radius:50%;background:var(--green);}
-.digit-histogram{margin-top:clamp(8px,2.2vw,12px);flex:1;min-height:0;display:flex;flex-direction:column;background:rgba(62,131,104,.06);border:1px solid rgba(62,131,104,.2);border-radius:14px;padding:12px 12px 10px;}
-.hist-bars{flex:1;min-height:0;display:flex;align-items:flex-end;gap:6px;margin-top:8px;}
+.digit-histogram{margin-top:clamp(8px,2.2vw,12px);flex:1;min-height:0;display:flex;flex-direction:column;background:rgba(62,131,104,.06);border:1px solid rgba(62,131,104,.2);border-radius:14px;padding:14px 14px 12px;}
+.hist-bars{flex:1;min-height:0;display:flex;align-items:flex-end;gap:7px;margin-top:10px;}
 .hist-bar-wrap{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
-.hist-count{font-size:11px;font-weight:800;color:var(--green);margin-bottom:4px;line-height:1;}
-.hist-bar{width:100%;max-width:24px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--green),rgba(62,131,104,.12));min-height:3px;box-shadow:0 0 14px rgba(62,131,104,.45);}
-.hist-digit{margin-top:6px;font-size:11px;font-weight:700;color:var(--muted);font-family:monospace;}
+.hist-count{font-size:13px;font-weight:800;color:var(--green);margin-bottom:5px;line-height:1;}
+.hist-bar{width:100%;max-width:28px;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--green),rgba(62,131,104,.12));min-height:3px;box-shadow:0 0 16px rgba(62,131,104,.5);}
+.hist-digit{margin-top:7px;font-size:12px;font-weight:700;color:var(--muted);font-family:monospace;}
 .probability{margin-top:clamp(6px,1.8vw,9px);}
 .probability-label{display:block;margin-bottom:4px;color:#5f7186;font-size:clamp(7px,2vw,9px);letter-spacing:.6px;line-height:1;white-space:nowrap;overflow:hidden;}
 .bar{width:100%;height:clamp(11px,3vw,14px);display:flex;overflow:hidden;border-radius:999px;background:#16293f;}
@@ -129,7 +129,7 @@ header{height:9.5%;min-height:52px;display:flex;align-items:center;justify-conte
 .stat-box{border:1.5px solid #223349;border-radius:16px;background:#101f35;padding:14px;text-align:center;}
 .stat-num{font-size:22px;font-weight:900;color:#eef2f5;}
 .stat-label{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.5px;}
-.logout-btn{margin-top:auto;flex-shrink:0;height:48px;border-radius:16px;border:1.5px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);color:#f87171;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
+.logout-btn{margin-top:auto;flex-shrink:0;height:48px;border-radius:16px;border:1.5px solid rgba(62,131,104,.4);background:rgba(62,131,104,.1);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
 
 /* ===== BOTTOM NAV (compartido) ===== */
 .bottom-nav{position:absolute;left:0;right:0;bottom:0;z-index:100;width:100%;height:calc(76px + env(safe-area-inset-bottom));padding:6px 10px env(safe-area-inset-bottom);background:var(--bg);display:grid;grid-template-columns:repeat(5,1fr);}
@@ -338,11 +338,11 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
       <div class="stat-box"><div class="stat-num" id="stats-total">—</div><div class="stat-label">Billetes en la Bóveda</div></div>
     </div>
     <div id="stats-rarity-bars" style="margin-top:12px;flex-shrink:0;"></div>
-    <div style="margin-top:14px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;">
-      <div class="reg-tab" style="background:#101f35;" onclick="openLegalModal('terms')">Términos y Condiciones</div>
-      <div class="reg-tab" style="background:#101f35;" onclick="openLegalModal('privacy')">Política de Privacidad</div>
-    </div>
     <div class="logout-btn" style="margin-top:auto;" onclick="onSessionActionClick()" id="perfil-session-btn">Iniciar sesión</div>
+    <div style="flex-shrink:0;display:flex;justify-content:center;gap:16px;margin-top:12px;padding-bottom:2px;">
+      <a href="#" onclick="event.preventDefault(); openLegalModal('terms')" style="color:var(--yellow);font-size:11px;font-weight:700;text-decoration:underline;">Términos y Condiciones</a>
+      <a href="#" onclick="event.preventDefault(); openLegalModal('privacy')" style="color:var(--yellow);font-size:11px;font-weight:700;text-decoration:underline;">Política de Privacidad</a>
+    </div>
   </div>
 
   <!-- ============ BOTTOM NAV (compartido, siempre visible) ============ -->
