@@ -9,13 +9,21 @@
 <script src="https://js.stripe.com/v3/"></script>
 <style>
 :root{
-    --bg:#0a1626; --card:#101f35; --line:#223349; --text:#eef2f5; --muted:#7e8fa0;
-    --green:#3e8368; --green-dark:#16241d; --yellow:#c9a961; --blue:#4a90b8; --violet:#8a97c9;
+    --bg:#0a0a0a;              /* negro carbón */
+    --card:#161616;            /* gris grafito */
+    --line:#2a2a2a;            /* gris grafito claro para bordes */
+    --text:#f0f0f0;            /* blanco frío */
+    --muted:#9a9a9a;           /* blanco frío tenue */
+    --green:#00ff87;           /* verde neón */
+    --green-dark:#0d2b1a;      /* verde neón oscuro para fondos sutiles */
+    --yellow:#00bfff;          /* acento principal: azul neón */
+    --blue:#4da6ff;            /* azul claro secundario */
+    --violet:#ff2a2a;          /* rojo digital para alertas */
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{width:100%;height:100%;min-height:100%;overflow:hidden !important;overscroll-behavior:none;background:var(--bg);}
 body{color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;}
-.app{position:relative;width:100%;height:100dvh;min-height:100dvh;max-height:100dvh;overflow:hidden;background:var(--bg);max-width:480px;margin:0 auto;border-left:1px solid #142944;border-right:1px solid #142944;}
+.app{position:relative;width:100%;height:100dvh;min-height:100dvh;max-height:100dvh;overflow:hidden;background:var(--bg);max-width:480px;margin:0 auto;border-left:1px solid #1a1a1a;border-right:1px solid #1a1a1a;}
 
 /* ===== NOTA DE PROTOTIPO (se puede borrar) ===== */
 .proto-badge{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:999;background:#000;border:1px solid var(--yellow);color:var(--yellow);font-size:10px;font-weight:800;padding:4px 10px;border-radius:999px;letter-spacing:.5px;pointer-events:none;}
@@ -27,150 +35,150 @@ body{color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Disp
 /* ===== HEADER (compartido) ===== */
 header{height:9.5%;min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;}
 .logo-area{min-width:0;display:flex;align-items:baseline;gap:7px;}
-.logo{color:#eef2f5;font-size:clamp(23px,7vw,34px);line-height:1;font-weight:900;letter-spacing:-1.6px;white-space:nowrap;}
+.logo{color:var(--text);font-size:clamp(23px,7vw,34px);line-height:1;font-weight:900;letter-spacing:-1.6px;white-space:nowrap;}
 .logo-green{color:var(--green);}
-.version{color:#63758a;font-size:clamp(9px,2.5vw,12px);white-space:nowrap;}
-.pro{flex-shrink:0;height:clamp(34px,6.5vw,44px);padding:0 clamp(10px,2.8vw,16px);border-radius:999px;background:var(--yellow);color:#0a1626;display:flex;align-items:center;justify-content:center;font-size:clamp(11px,3vw,15px);font-weight:850;white-space:nowrap;}
+.version{color:#888;font-size:clamp(9px,2.5vw,12px);white-space:nowrap;}
+.pro{flex-shrink:0;height:clamp(34px,6.5vw,44px);padding:0 clamp(10px,2.8vw,16px);border-radius:999px;background:var(--yellow);color:#0a0a0a;display:flex;align-items:center;justify-content:center;font-size:clamp(11px,3vw,15px);font-weight:850;white-space:nowrap;}
 
 /* ===== WELCOME (compartido) ===== */
 .welcome{height:8.5%;min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;}
-.welcome-text{color:#96a5b5;font-size:clamp(15px,4.3vw,21px);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.welcome-text{color:#c0c0c0;font-size:clamp(15px,4.3vw,21px);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .welcome-text strong{color:var(--green);font-weight:750;}
-.login{flex-shrink:0;height:clamp(34px,6.5vw,42px);padding:0 clamp(12px,3.4vw,18px);border:1.5px solid #35495e;border-radius:999px;background:#142944;color:#e7ecef;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.2vw,15px);font-weight:750;white-space:nowrap;}
+.login{flex-shrink:0;height:clamp(34px,6.5vw,42px);padding:0 clamp(12px,3.4vw,18px);border:1.5px solid #3a3a3a;border-radius:999px;background:#1f1f1f;color:var(--text);display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.2vw,15px);font-weight:750;white-space:nowrap;}
 
 /* ===== SECTION TITLE (compartido) ===== */
-.section-title{height:6.5%;min-height:26px;flex-shrink:0;display:flex;align-items:center;gap:10px;color:#d3dbe3;font-size:clamp(13px,3.6vw,17px);line-height:1;font-weight:800;letter-spacing:1.1px;white-space:nowrap;}
+.section-title{height:6.5%;min-height:26px;flex-shrink:0;display:flex;align-items:center;gap:10px;color:#d0d0d0;font-size:clamp(13px,3.6vw,17px);line-height:1;font-weight:800;letter-spacing:1.1px;white-space:nowrap;}
 .live-dot{width:10px;height:10px;flex-shrink:0;border-radius:50%;background:var(--green);}
 
 /* ===== INICIO: LEADER CARD ===== */
-.leader-card{flex:1;min-height:0;margin-top:10px;padding:clamp(17px,4.5vw,25px) clamp(16px,4.8vw,24px) clamp(14px,4vw,20px);border:1.5px solid #6b5934;border-radius:clamp(22px,6vw,32px);background:linear-gradient(145deg,#12233a 0%,#0c1b2c 100%);display:flex;flex-direction:column;overflow:hidden;}
+.leader-card{flex:1;min-height:0;margin-top:10px;padding:clamp(17px,4.5vw,25px) clamp(16px,4.8vw,24px) clamp(14px,4vw,20px);border:1.5px solid #3a3a3a;border-radius:clamp(22px,6vw,32px);background:linear-gradient(145deg,#1f1f1f 0%,#141414 100%);display:flex;flex-direction:column;overflow:hidden;}
 .leader-heading{display:flex;align-items:center;gap:clamp(8px,2.8vw,13px);min-width:0;}
 .badge{flex-shrink:0;padding:clamp(5px,1.5vw,7px) clamp(9px,2.6vw,13px);border:1.5px solid #1d3d31;border-radius:999px;background:var(--green-dark);color:var(--green);font-size:clamp(10px,2.9vw,13px);line-height:1;font-weight:800;white-space:nowrap;}
-.serial{min-width:0;color:#eef2f5;font-size:clamp(19px,5.4vw,27px);line-height:1;font-weight:900;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;}
+.serial{min-width:0;color:var(--text);font-size:clamp(19px,5.4vw,27px);line-height:1;font-weight:900;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;}
 .divider{width:100%;height:1px;flex-shrink:0;background:var(--line);}
 .divider.top{margin:clamp(11px,3vw,16px) 0;}
 .info-grid{flex-shrink:0;display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:5px;}
 .info-item{min-width:0;display:flex;flex-direction:column;justify-content:center;}
 .info-label{color:var(--muted);font-size:clamp(9px,2.5vw,11px);line-height:1;margin-bottom:2px;}
-.info-value{color:#e7ecef;font-size:clamp(12px,3.3vw,15px);line-height:1;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.info-value{color:var(--text);font-size:clamp(12px,3.3vw,15px);line-height:1;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .info-value.points{color:var(--yellow);font-size:clamp(15px,4vw,19px);font-weight:850;}
 .info-value.owner{color:var(--green);}
 .divider.bottom{margin:clamp(9px,2.4vw,13px) 0 clamp(7px,2vw,10px);}
 .meta{min-height:8%;display:flex;align-items:center;justify-content:space-between;gap:7px;}
-.country{min-width:0;display:flex;align-items:center;gap:5px;color:#dbe2e8;font-size:clamp(11px,3.1vw,14px);white-space:nowrap;}
-.country-label{color:#798a9d;}
-.trend{flex-shrink:0;min-height:26px;padding:0 clamp(7px,2.1vw,10px);border-radius:999px;background:#16293f;color:#96a5b5;display:flex;align-items:center;gap:5px;font-size:clamp(8px,2.3vw,10px);white-space:nowrap;}
+.country{min-width:0;display:flex;align-items:center;gap:5px;color:#d0d0d0;font-size:clamp(11px,3.1vw,14px);white-space:nowrap;}
+.country-label{color:#888;}
+.trend{flex-shrink:0;min-height:26px;padding:0 clamp(7px,2.1vw,10px);border-radius:999px;background:#1f1f1f;color:#c0c0c0;display:flex;align-items:center;gap:5px;font-size:clamp(8px,2.3vw,10px);white-space:nowrap;}
 .trend-dot{width:6px;height:6px;flex-shrink:0;border-radius:50%;background:var(--green);}
-.digit-histogram{margin-top:clamp(8px,2.2vw,12px);flex:1;min-height:0;display:flex;flex-direction:column;background:rgba(62,131,104,.06);border:1px solid rgba(62,131,104,.2);border-radius:14px;padding:14px 14px 12px;}
+.digit-histogram{margin-top:clamp(8px,2.2vw,12px);flex:1;min-height:0;display:flex;flex-direction:column;background:rgba(0,255,135,.06);border:1px solid rgba(0,255,135,.2);border-radius:14px;padding:14px 14px 12px;}
 .hist-bars{flex:1;min-height:0;display:flex;align-items:flex-end;gap:7px;margin-top:10px;}
 .hist-bar-wrap{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
 .hist-count{font-size:13px;font-weight:800;color:var(--green);margin-bottom:5px;line-height:1;}
-.hist-bar{width:100%;max-width:28px;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--green),rgba(62,131,104,.12));min-height:3px;box-shadow:0 0 16px rgba(62,131,104,.5);}
+.hist-bar{width:100%;max-width:28px;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--green),rgba(0,255,135,.12));min-height:3px;box-shadow:0 0 16px rgba(0,255,135,.5);}
 .hist-digit{margin-top:7px;font-size:12px;font-weight:700;color:var(--muted);font-family:monospace;}
 .probability{margin-top:clamp(6px,1.8vw,9px);}
-.probability-label{display:block;margin-bottom:4px;color:#5f7186;font-size:clamp(7px,2vw,9px);letter-spacing:.6px;line-height:1;white-space:nowrap;overflow:hidden;}
-.bar{width:100%;height:clamp(11px,3vw,14px);display:flex;overflow:hidden;border-radius:999px;background:#16293f;}
+.probability-label{display:block;margin-bottom:4px;color:#888;font-size:clamp(7px,2vw,9px);letter-spacing:.6px;line-height:1;white-space:nowrap;overflow:hidden;}
+.bar{width:100%;height:clamp(11px,3vw,14px);display:flex;overflow:hidden;border-radius:999px;background:#1f1f1f;}
 .bar-yellow{width:14%;background:var(--yellow);}
 .bar-blue{width:17%;background:var(--blue);}
-.bar-gray{width:2%;background:#6c7d90;}
+.bar-gray{width:2%;background:#888;}
 .bar-rest{flex:1;}
 
 /* ===== INICIO: QUICK ACTIONS ===== */
 .quick{height:19%;min-height:0;margin-top:12px;display:flex;flex-direction:column;flex-shrink:0;}
-.quick-title{height:22%;min-height:22px;display:flex;align-items:center;color:#a3b1c0;font-size:clamp(13px,3.6vw,16px);line-height:1;font-weight:800;letter-spacing:1.5px;white-space:nowrap;}
+.quick-title{height:22%;min-height:22px;display:flex;align-items:center;color:#c0c0c0;font-size:clamp(13px,3.6vw,16px);line-height:1;font-weight:800;letter-spacing:1.5px;white-space:nowrap;}
 .actions{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:clamp(9px,3vw,14px);}
-.action{min-width:0;min-height:0;border:1.5px solid #223349;border-radius:clamp(18px,5.5vw,26px);background:linear-gradient(145deg,#12233a,#0c1b2c);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(9px,2.8vw,14px);text-align:center;}
-.icon{width:clamp(42px,12vw,56px);height:clamp(42px,12vw,56px);flex-shrink:0;border:1.5px solid #33495e;border-radius:clamp(14px,4vw,18px);background:#16293f;display:flex;align-items:center;justify-content:center;}
-.icon svg{width:46%;height:46%;fill:none;stroke:#e7ecef;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-.action-title{padding:0 6px;color:#e7ecef;font-size:clamp(12px,3.3vw,15px);line-height:1.1;font-weight:750;}
+.action{min-width:0;min-height:0;border:1.5px solid #2a2a2a;border-radius:clamp(18px,5.5vw,26px);background:linear-gradient(145deg,#1f1f1f,#141414);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(9px,2.8vw,14px);text-align:center;}
+.icon{width:clamp(42px,12vw,56px);height:clamp(42px,12vw,56px);flex-shrink:0;border:1.5px solid #3a3a3a;border-radius:clamp(14px,4vw,18px);background:#1f1f1f;display:flex;align-items:center;justify-content:center;}
+.icon svg{width:46%;height:46%;fill:none;stroke:var(--text);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.action-title{padding:0 6px;color:var(--text);font-size:clamp(12px,3.3vw,15px);line-height:1.1;font-weight:750;}
 
 /* ===== GLOBAL: BUSCADOR ===== */
 .search-box{margin-top:12px;flex-shrink:0;}
-.search-input{width:100%;height:clamp(46px,11vw,56px);border-radius:16px;background:#101f35;border:1.5px solid #223349;padding:0 16px;color:#eef2f5;font-size:16px;font-weight:600;outline:none;}
+.search-input{width:100%;height:clamp(46px,11vw,56px);border-radius:16px;background:var(--card);border:1.5px solid var(--line);padding:0 16px;color:var(--text);font-size:16px;font-weight:600;outline:none;}
 .search-input:focus{border-color:var(--green);}
 .results-wrap{flex:1;min-height:0;margin-top:14px;display:flex;flex-direction:column;gap:8px;overflow:hidden;}
-.result-row{flex:1;min-height:0;border:1.5px solid #223349;border-radius:16px;background:#101f35;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.result-serial{font-family:monospace;font-weight:800;font-size:clamp(13px,3.6vw,16px);color:#eef2f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.result-row{flex:1;min-height:0;border:1.5px solid var(--line);border-radius:16px;background:var(--card);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.result-serial{font-family:monospace;font-weight:800;font-size:clamp(13px,3.6vw,16px);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .result-meta{font-size:clamp(9px,2.5vw,11px);color:var(--muted);margin-top:2px;}
 .result-right{text-align:right;flex-shrink:0;}
 .result-points{color:var(--yellow);font-weight:800;font-size:clamp(12px,3.3vw,15px);}
 .result-sim{font-size:clamp(8px,2.3vw,10px);color:var(--green);}
 .result-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.result-icon-btn{width:28px;height:28px;border-radius:9px;background:#16293f;border:1px solid #2a4155;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
-.result-icon-btn.fav-active{color:#ef4444;border-color:rgba(239,68,68,.4);}
-.results-cap-note{text-align:center;color:#5f7186;font-size:11px;margin-top:10px;flex-shrink:0;}
+.result-icon-btn{width:28px;height:28px;border-radius:9px;background:#1f1f1f;border:1px solid #3a3a3a;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.result-icon-btn.fav-active{color:var(--violet);border-color:rgba(255,42,42,.4);}
+.results-cap-note{text-align:center;color:#888;font-size:11px;margin-top:10px;flex-shrink:0;}
 
 /* ===== REGISTRAR ===== */
 .reg-tabs{display:flex;gap:8px;margin-top:12px;flex-shrink:0;}
-.reg-tab{flex:1;height:clamp(40px,9.5vw,48px);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.4vw,14px);font-weight:800;border:1.5px solid #223349;background:#101f35;color:#96a5b5;}
-.reg-tab.active{background:linear-gradient(180deg,var(--green),#2c6650);color:#0a1712;border-color:transparent;}
+.reg-tab{flex:1;height:clamp(40px,9.5vw,48px);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.4vw,14px);font-weight:800;border:1.5px solid var(--line);background:var(--card);color:#c0c0c0;}
+.reg-tab.active{background:linear-gradient(180deg,var(--green),#00cc6a);color:#0a0a0a;border-color:transparent;}
 .reg-panel{flex:1;min-height:0;margin-top:14px;display:flex;flex-direction:column;}
-.digit-display{flex-shrink:0;height:clamp(60px,16vw,76px);border-radius:16px;background:#081420;border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-family:monospace;font-weight:900;font-size:clamp(34px,10.5vw,46px);letter-spacing:1px;color:#ffffff;text-shadow:0 0 10px rgba(62,131,104,.5);}
-.digit-display.empty{color:#4a5a6e;font-size:clamp(13px,3.6vw,15px);font-weight:600;font-family:inherit;}
-.rarity-preview{flex-shrink:0;margin-top:10px;height:clamp(38px,9vw,46px);border-radius:14px;border:1.5px solid rgba(255,199,25,.3);background:rgba(255,199,25,.08);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:clamp(14px,4vw,17px);color:var(--yellow);}
+.digit-display{flex-shrink:0;height:clamp(60px,16vw,76px);border-radius:16px;background:#0a0a0a;border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-family:monospace;font-weight:900;font-size:clamp(34px,10.5vw,46px);letter-spacing:1px;color:#fff;text-shadow:0 0 10px rgba(0,255,135,.5);}
+.digit-display.empty{color:#666;font-size:clamp(13px,3.6vw,15px);font-weight:600;font-family:inherit;}
+.rarity-preview{flex-shrink:0;margin-top:10px;height:clamp(38px,9vw,46px);border-radius:14px;border:1.5px solid rgba(0,191,255,.3);background:rgba(0,191,255,.08);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:clamp(14px,4vw,17px);color:var(--yellow);}
 .keypad{flex:1;min-height:0;margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:8px;}
-.key{border:1.5px solid #223349;border-radius:14px;background:#12233a;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4.5vw,20px);font-weight:800;color:#e7ecef;}
+.key{border:1.5px solid var(--line);border-radius:14px;background:#1f1f1f;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4.5vw,20px);font-weight:800;color:var(--text);}
 .key.wide{grid-column:span 1;font-size:clamp(11px,3vw,13px);color:var(--muted);}
-.reg-submit{flex-shrink:0;margin-top:10px;height:clamp(48px,11vw,56px);border-radius:16px;background:linear-gradient(180deg,var(--green),#2c6650);color:#0a1712;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(13px,3.6vw,15px);}
+.reg-submit{flex-shrink:0;margin-top:10px;height:clamp(48px,11vw,56px);border-radius:16px;background:linear-gradient(180deg,var(--green),#00cc6a);color:#0a0a0a;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(13px,3.6vw,15px);}
 
 /* ===== FAVORITOS ===== */
 .fav-list{flex:1;min-height:0;margin-top:12px;display:flex;flex-direction:column;gap:8px;}
-.fav-row{flex:1;min-height:0;border:1.5px solid #223349;border-radius:16px;background:#101f35;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.fav-heart{color:#ef4444;font-size:16px;flex-shrink:0;}
+.fav-row{flex:1;min-height:0;border:1.5px solid var(--line);border-radius:16px;background:var(--card);padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.fav-heart{color:var(--violet);font-size:16px;flex-shrink:0;}
 .fav-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);text-align:center;padding:0 20px;}
 .fav-empty-icon{font-size:38px;opacity:.5;}
 
 /* ===== PERFIL ===== */
-.profile-card{flex-shrink:0;margin-top:14px;border:1.5px solid #223349;border-radius:22px;background:linear-gradient(145deg,#12233a,#0c1b2c);padding:20px;display:flex;align-items:center;gap:14px;}
-.avatar{width:56px;height:56px;border-radius:50%;background:rgba(62,131,104,.15);border:1.5px solid rgba(62,131,104,.35);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:var(--green);flex-shrink:0;}
-.profile-alias{font-weight:800;font-size:17px;color:#eef2f5;}
+.profile-card{flex-shrink:0;margin-top:14px;border:1.5px solid var(--line);border-radius:22px;background:linear-gradient(145deg,#1f1f1f,#141414);padding:20px;display:flex;align-items:center;gap:14px;}
+.avatar{width:56px;height:56px;border-radius:50%;background:rgba(0,255,135,.15);border:1.5px solid rgba(0,255,135,.35);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:var(--green);flex-shrink:0;}
+.profile-alias{font-weight:800;font-size:17px;color:var(--text);}
 .profile-sub{font-size:12px;color:var(--muted);margin-top:2px;}
 .stat-grid{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;}
-.stat-box{border:1.5px solid #223349;border-radius:16px;background:#101f35;padding:14px;text-align:center;}
-.stat-num{font-size:22px;font-weight:900;color:#eef2f5;}
+.stat-box{border:1.5px solid var(--line);border-radius:16px;background:var(--card);padding:14px;text-align:center;}
+.stat-num{font-size:22px;font-weight:900;color:var(--text);}
 .stat-label{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.5px;}
-.logout-btn{margin-top:auto;flex-shrink:0;height:48px;border-radius:16px;border:1.5px solid rgba(62,131,104,.4);background:rgba(62,131,104,.1);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
+.logout-btn{margin-top:auto;flex-shrink:0;height:48px;border-radius:16px;border:1.5px solid rgba(0,255,135,.4);background:rgba(0,255,135,.1);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
 
 /* ===== BOTTOM NAV (compartido) ===== */
 .bottom-nav{position:absolute;left:0;right:0;bottom:0;z-index:100;width:100%;height:calc(76px + env(safe-area-inset-bottom));padding:6px 10px env(safe-area-inset-bottom);background:var(--bg);display:grid;grid-template-columns:repeat(5,1fr);}
-.nav-item{min-width:0;color:#718294;text-decoration:none;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:clamp(9px,2.7vw,12px);white-space:nowrap;}
+.nav-item{min-width:0;color:#888;text-decoration:none;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:clamp(9px,2.7vw,12px);white-space:nowrap;}
 .nav-item.active{color:var(--green);}
 .nav-icon{width:27px;height:27px;display:flex;align-items:center;justify-content:center;}
 .nav-icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 
 /* ===== Reutilizado del dashboard largo: modales, toasts, gancho, tabs, inputs ===== */
 .rb-tab-btn{transition:all .15s ease;}
-.rb-tab-btn.active{background:linear-gradient(180deg,#3e8368,#2c6650);color:#0f2019;box-shadow:0 6px 16px -4px rgba(16,185,129,.4);}
-.rb-tab-btn:not(.active){background:rgba(39,39,42,.6);color:#9aa9b8;}
+.rb-tab-btn.active{background:linear-gradient(180deg,var(--green),#00cc6a);color:#0a0a0a;box-shadow:0 6px 16px -4px rgba(0,255,135,.4);}
+.rb-tab-btn:not(.active){background:rgba(22,22,22,.6);color:#c0c0c0;}
 .rb-panel{display:none;}
 .rb-panel.active{display:block;}
 #rb-panel-sd.active{display:block;}
 #rb-panel-serie.active{display:flex;}
-select.dgt-select, input.dgt-select{background:rgba(9,9,11,.7);border:1px solid #354a60;color:#eef2f5;border-radius:.75rem;padding:.65rem .75rem;font-size:16px;font-weight:600;width:100%;appearance:none;}
-select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e8368;}
+select.dgt-select, input.dgt-select{background:rgba(10,10,10,.7);border:1px solid #3a3a3a;color:var(--text);border-radius:.75rem;padding:.65rem .75rem;font-size:16px;font-weight:600;width:100%;appearance:none;}
+select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--green);}
 .dgt-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;z-index:160;backdrop-filter:blur(4px);}
 .dgt-modal.active{display:flex;}
-.dgt-modal-card{background:#0c1b2c;border:1px solid #1c3049;border-radius:24px 24px 0 0;width:100%;max-width:28rem;max-height:88vh;overflow-y:auto;padding:1.5rem;}
+.dgt-modal-card{background:#141414;border:1px solid #2a2a2a;border-radius:24px 24px 0 0;width:100%;max-width:28rem;max-height:88vh;overflow-y:auto;padding:1.5rem;}
 @media(min-width:480px){ .dgt-modal{align-items:center;} .dgt-modal-card{border-radius:24px;} }
-.dgt-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#101f35;border:1px solid #354a60;color:#eef2f5;padding:.75rem 1.25rem;border-radius:9999px;font-size:.8rem;z-index:180;opacity:0;transition:opacity .2s;}
+.dgt-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid #3a3a3a;color:var(--text);padding:.75rem 1.25rem;border-radius:9999px;font-size:.8rem;z-index:180;opacity:0;transition:opacity .2s;}
 .dgt-toast.show{opacity:1;}
 #hook-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:170;display:none;align-items:center;justify-content:center;padding:1.25rem;opacity:0;transition:opacity .3s ease;}
 #hook-backdrop.show{display:flex;opacity:1;}
-#hook-card{width:100%;max-width:24rem;background:#0a1626;border:1.5px solid rgba(201,169,97,.55);border-radius:20px;padding:1.75rem 1.5rem;transform:scale(.85);transition:transform .4s cubic-bezier(.2,1.6,.35,1);box-shadow:0 25px 60px -12px rgba(0,0,0,.9), 0 0 0 1px rgba(201,169,97,.08);}
+#hook-card{width:100%;max-width:24rem;background:#0a0a0a;border:1.5px solid rgba(0,191,255,.55);border-radius:20px;padding:1.75rem 1.5rem;transform:scale(.85);transition:transform .4s cubic-bezier(.2,1.6,.35,1);box-shadow:0 25px 60px -12px rgba(0,0,0,.9), 0 0 0 1px rgba(0,191,255,.08);}
 #hook-backdrop.show #hook-card{transform:scale(1);}
-@keyframes hookPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,169,97,.35)}50%{box-shadow:0 0 0 10px rgba(201,169,97,0)}}
+@keyframes hookPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,191,255,.35)}50%{box-shadow:0 0 0 10px rgba(0,191,255,0)}}
 #hook-card{animation:hookPulse 2.2s ease-in-out infinite;}
-.glass{background:linear-gradient(180deg,rgba(24,24,27,.9),rgba(15,15,17,.9));}
-.gold-border{border:1px solid rgba(201,169,97,.35);}
+.glass{background:linear-gradient(180deg,rgba(22,22,22,.9),rgba(10,10,10,.9));}
+.gold-border{border:1px solid rgba(0,191,255,.35);}
 
 /* ===== Sub-tabs de la pantalla Global (Buscar / Por Rareza) ===== */
 .global-tabs{display:flex;gap:8px;margin-top:12px;flex-shrink:0;}
-.global-tab{flex:1;height:clamp(38px,9vw,44px);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(11px,3.2vw,13px);font-weight:800;border:1.5px solid #223349;background:#101f35;color:#96a5b5;}
-.global-tab.active{background:linear-gradient(180deg,var(--yellow),#a3833f);color:#241c08;border-color:transparent;}
+.global-tab{flex:1;height:clamp(38px,9vw,44px);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(11px,3.2vw,13px);font-weight:800;border:1.5px solid var(--line);background:var(--card);color:#c0c0c0;}
+.global-tab.active{background:linear-gradient(180deg,var(--yellow),#0099cc);color:#0a0a0a;border-color:transparent;}
 .rarity-chip-row{display:flex;gap:6px;overflow-x:auto;flex-shrink:0;margin-top:10px;padding-bottom:2px;}
-.rarity-chip{flex-shrink:0;font-size:10px;font-weight:800;padding:6px 10px;border-radius:999px;background:#101f35;border:1.5px solid #223349;color:#96a5b5;white-space:nowrap;}
-.rarity-chip.active{background:rgba(255,199,25,.15);border-color:rgba(255,199,25,.4);color:var(--yellow);}
-.compact-empty{flex:1;display:flex;align-items:center;justify-content:center;color:#5f7186;font-size:12px;text-align:center;padding:0 20px;}
+.rarity-chip{flex-shrink:0;font-size:10px;font-weight:800;padding:6px 10px;border-radius:999px;background:var(--card);border:1.5px solid var(--line);color:#c0c0c0;white-space:nowrap;}
+.rarity-chip.active{background:rgba(0,191,255,.15);border-color:rgba(0,191,255,.4);color:var(--yellow);}
+.compact-empty{flex:1;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;text-align:center;padding:0 20px;}
 </style>
 </head>
 <body>
@@ -182,9 +190,9 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     <header>
       <div class="logo-area"><div class="logo"><span class="logo-green">$DOLLAR</span>DGT</div><span class="version">v3.0</span></div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-        <button onclick="openToquesModal()" style="position:relative;width:38px;height:38px;border-radius:12px;background:#101f35;border:1.5px solid #223349;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <span id="toques-badge" class="hidden" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:800;height:16px;width:16px;border-radius:999px;align-items:center;justify-content:center;">0</span>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#e7ecef" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V6.5a1.75 1.75 0 0 1 3.5 0v3M11.5 9.25V5a1.75 1.75 0 0 1 3.5 0v4.5M15 9.5V7a1.75 1.75 0 0 1 3.5 0v6.5c0 3.73-2.5 6.5-6 6.5-2.2 0-3.53-.86-4.83-2.4l-3.1-3.7c-.6-.72-.5-1.8.24-2.38a1.7 1.7 0 0 1 2.2.07L8 12.5"/></svg>
+        <button onclick="openToquesModal()" style="position:relative;width:38px;height:38px;border-radius:12px;background:var(--card);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span id="toques-badge" class="hidden" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--violet);color:#fff;font-size:9px;font-weight:800;height:16px;width:16px;border-radius:999px;align-items:center;justify-content:center;">0</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--text)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V6.5a1.75 1.75 0 0 1 3.5 0v3M11.5 9.25V5a1.75 1.75 0 0 1 3.5 0v4.5M15 9.5V7a1.75 1.75 0 0 1 3.5 0v6.5c0 3.73-2.5 6.5-6 6.5-2.2 0-3.53-.86-4.83-2.4l-3.1-3.7c-.6-.72-.5-1.8.24-2.38a1.7 1.7 0 0 1 2.2.07L8 12.5"/></svg>
         </button>
         <div class="pro membership-badge-clone" id="membership-badge" onclick="onMembershipBadgeClick()">👑 $5 VIDA</div>
       </div>
@@ -220,12 +228,12 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
       </div>
     </article>
     <div style="height:13%;flex-shrink:0;display:flex;gap:10px;margin-top:12px;margin-bottom:8px;align-items:flex-start;">
-      <button onclick="goTo('registrar')" style="flex:1;height:56px;border:none;border-radius:14px;background:linear-gradient(180deg,var(--yellow),#a3833f);color:#241c08;font-weight:800;font-size:clamp(12px,3.2vw,14px);display:flex;align-items:center;justify-content:center;gap:7px;">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#241c08" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+      <button onclick="goTo('registrar')" style="flex:1;height:56px;border:none;border-radius:14px;background:linear-gradient(180deg,var(--yellow),#0099cc);color:#0a0a0a;font-weight:800;font-size:clamp(12px,3.2vw,14px);display:flex;align-items:center;justify-content:center;gap:7px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
         Ingresar Serie
       </button>
-      <button onclick="goTo('global')" style="flex:1;height:56px;border:none;border-radius:14px;background:linear-gradient(180deg,var(--green),#2c6650);color:#0a1712;font-weight:800;font-size:clamp(12px,3.2vw,14px);display:flex;align-items:center;justify-content:center;gap:7px;">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#0a1712" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+      <button onclick="goTo('global')" style="flex:1;height:56px;border:none;border-radius:14px;background:linear-gradient(180deg,var(--green),#00cc6a);color:#0a0a0a;font-weight:800;font-size:clamp(12px,3.2vw,14px);display:flex;align-items:center;justify-content:center;gap:7px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
         Búsqueda Global
       </button>
     </div>
@@ -278,7 +286,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
 
       <!-- Panel Datos SD: único con scroll interno propio (es un formulario) -->
       <div id="rb-panel-sd" class="rb-panel" style="height:100%;overflow-y:auto;padding-top:2px;">
-        <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Letras del billete <span style="color:#5f7186;">(solo la 1ª es obligatoria)</span></p>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Letras del billete <span style="color:#888;">(solo la 1ª es obligatoria)</span></p>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
           <select class="dgt-select" id="rb-letra1"><option value="">A-Z *</option></select>
           <select class="dgt-select" id="rb-letra2"><option value="">—</option></select>
@@ -375,7 +383,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
 <div id="auth-modal" class="dgt-modal">
   <div class="dgt-modal-card">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-black text-emerald-400">Accede a tu cuenta</h3>
+      <h3 class="text-lg font-black text-green-400">Accede a tu cuenta</h3>
       <button onclick="closeModal('auth-modal')" class="text-zinc-500 text-xl">✕</button>
     </div>
     <div class="space-y-3">
@@ -383,7 +391,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
       <input id="auth-password" type="password" placeholder="Contraseña" class="dgt-select" />
       <p id="auth-error" class="text-xs text-red-400 hidden"></p>
       <div class="grid grid-cols-2 gap-3 pt-1">
-        <button id="auth-signin-btn" onclick="handleAuthSubmit('signin')" class="w-full bg-gradient-to-b from-emerald-400 to-emerald-600 text-zinc-950 font-bold py-3.5 rounded-xl">
+        <button id="auth-signin-btn" onclick="handleAuthSubmit('signin')" class="w-full bg-gradient-to-b from-green-400 to-green-600 text-black font-bold py-3.5 rounded-xl">
           Iniciar sesión
         </button>
         <button id="auth-signup-btn" onclick="handleAuthSubmit('signup')" class="w-full bg-zinc-800 border border-zinc-700 text-white font-bold py-3.5 rounded-xl">
@@ -398,7 +406,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
 <div id="profile-modal" class="dgt-modal">
   <div class="dgt-modal-card">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-black text-emerald-400">Completa tu perfil</h3>
+      <h3 class="text-lg font-black text-green-400">Completa tu perfil</h3>
       <button onclick="closeModal('profile-modal')" class="text-zinc-500 text-xl">✕</button>
     </div>
     <div class="space-y-3">
@@ -406,7 +414,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
       <input id="profile-alias" type="text" placeholder="Alias único (@usuario)" class="dgt-select" />
       <input id="profile-country" type="text" placeholder="País" class="dgt-select" />
       <p id="profile-error" class="text-xs text-red-400 hidden"></p>
-      <button onclick="handleSaveProfile()" class="w-full bg-gradient-to-b from-emerald-400 to-emerald-600 text-zinc-950 font-bold py-3 rounded-xl">
+      <button onclick="handleSaveProfile()" class="w-full bg-gradient-to-b from-green-400 to-green-600 text-black font-bold py-3 rounded-xl">
         Guardar perfil
       </button>
     </div>
@@ -416,13 +424,13 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
 <!-- ============ MODAL: CONSENTIMIENTO ============ -->
 <div id="consent-modal" class="dgt-modal">
   <div class="dgt-modal-card">
-    <h3 class="text-lg font-black text-emerald-400 mb-3">Antes de continuar</h3>
+    <h3 class="text-lg font-black text-green-400 mb-3">Antes de continuar</h3>
     <div class="space-y-3 text-sm">
-      <label class="flex items-start gap-2"><input type="checkbox" id="consent-terms" class="mt-1"> Acepto los <a href="#" onclick="event.preventDefault(); openLegalModal('terms')" class="text-emerald-400 underline">Términos y Condiciones</a></label>
-      <label class="flex items-start gap-2"><input type="checkbox" id="consent-privacy" class="mt-1"> Acepto la <a href="#" onclick="event.preventDefault(); openLegalModal('privacy')" class="text-emerald-400 underline">Política de Privacidad</a></label>
+      <label class="flex items-start gap-2"><input type="checkbox" id="consent-terms" class="mt-1"> Acepto los <a href="#" onclick="event.preventDefault(); openLegalModal('terms')" class="text-green-400 underline">Términos y Condiciones</a></label>
+      <label class="flex items-start gap-2"><input type="checkbox" id="consent-privacy" class="mt-1"> Acepto la <a href="#" onclick="event.preventDefault(); openLegalModal('privacy')" class="text-green-400 underline">Política de Privacidad</a></label>
       <label class="flex items-start gap-2"><input type="checkbox" id="consent-age" class="mt-1"> Confirmo que soy mayor de 18 años</label>
       <p id="consent-error" class="text-xs text-red-400 hidden"></p>
-      <button onclick="handleAcceptConsent()" class="w-full bg-gradient-to-b from-emerald-400 to-emerald-600 text-zinc-950 font-bold py-3 rounded-xl mt-2">
+      <button onclick="handleAcceptConsent()" class="w-full bg-gradient-to-b from-green-400 to-green-600 text-black font-bold py-3 rounded-xl mt-2">
         Aceptar y continuar
       </button>
     </div>
@@ -433,7 +441,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
 <div id="see-more-modal" class="dgt-modal">
   <div class="dgt-modal-card" style="max-height:85vh;">
     <div class="flex items-center justify-between mb-4">
-      <h3 id="see-more-title" class="text-lg font-black text-yellow-400">Más resultados</h3>
+      <h3 id="see-more-title" class="text-lg font-black text-blue-400">Más resultados</h3>
       <button onclick="closeModal('see-more-modal')" class="text-zinc-500 text-xl">✕</button>
     </div>
     <div id="see-more-body" class="space-y-3 max-h-[65vh] overflow-y-auto"></div>
@@ -443,7 +451,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
 <!-- ============ MODAL: LEGAL (Términos / Privacidad) ============ -->
 <div id="legal-modal" class="dgt-modal">
   <div class="dgt-modal-card" style="max-height:85vh; padding:0;">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800 sticky top-0 bg-[#0c1b2c] z-10">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800 sticky top-0 bg-[#141414] z-10">
       <h3 id="legal-modal-title" class="text-base font-black text-white">Términos y Condiciones</h3>
       <button onclick="closeModal('legal-modal')" class="text-zinc-500 text-xl">✕</button>
     </div>
@@ -455,7 +463,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
 <div id="toques-modal" class="dgt-modal">
   <div class="dgt-modal-card" style="max-height:88vh;">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-black text-violet-300">👋 Toques Privados</h3>
+      <h3 class="text-lg font-black text-red-400">👋 Toques Privados</h3>
       <button onclick="closeModal('toques-modal')" class="text-zinc-500 text-xl">✕</button>
     </div>
     <div class="flex gap-2 mb-4">
@@ -477,7 +485,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     <div class="flex items-center justify-between p-4 border-b border-zinc-800 shrink-0">
       <div>
         <p id="chat-with-label" class="font-black text-white text-sm">Chat</p>
-        <p id="chat-serial-label" class="font-mono text-xs text-violet-300"></p>
+        <p id="chat-serial-label" class="font-mono text-xs text-red-400"></p>
       </div>
       <button onclick="closeModal('chat-modal')" class="text-zinc-500 text-xl">✕</button>
     </div>
@@ -485,7 +493,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     </div>
     <div class="p-3 border-t border-zinc-800 flex gap-2 shrink-0">
       <input id="chat-input" type="text" placeholder="Mensaje privado..." class="dgt-select flex-1" onkeydown="if(event.key==='Enter') sendChatMessage()" />
-      <button onclick="sendChatMessage()" class="h-11 w-11 rounded-xl bg-violet-500 text-white font-black shrink-0">↑</button>
+      <button onclick="sendChatMessage()" class="h-11 w-11 rounded-xl bg-red-500 text-white font-black shrink-0">↑</button>
     </div>
   </div>
 </div>
@@ -494,13 +502,13 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
 <div id="stripe-sim-modal" class="dgt-modal">
   <div class="dgt-modal-card" style="max-height:92vh;">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-black text-yellow-400">👑 Membresía $5 de por vida</h3>
+      <h3 class="text-lg font-black text-blue-400">👑 Membresía $5 de por vida</h3>
       <button onclick="closeModal('stripe-sim-modal')" class="text-zinc-500 text-xl">✕</button>
     </div>
     <div id="stripe-form-body" class="hidden">
       <div id="real-payment-loading" class="text-center text-sm text-zinc-500 py-8">Cargando pasarela segura...</div>
       <div id="realPaymentElement" class="mb-4"></div>
-      <button id="stripe-sim-pay" onclick="handleStripePay()" class="w-full bg-gradient-to-b from-yellow-300 to-yellow-500 text-zinc-900 font-bold py-3 rounded-xl">
+      <button id="stripe-sim-pay" onclick="handleStripePay()" class="w-full bg-gradient-to-b from-blue-300 to-blue-500 text-black font-bold py-3 rounded-xl">
         Confirmar pago de $5
       </button>
     </div>
@@ -514,7 +522,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     <p class="text-5xl mb-3">💵</p>
     <p class="text-xl font-black text-white leading-snug mb-3">¿Tienes un billete de colección en tu bolsillo?</p>
     <p class="text-sm text-zinc-400 leading-relaxed mb-5">Un número de serie raro o un detalle oculto puede multiplicar el valor de tu dinero. Nunca sabes si un coleccionista lo está buscando justo hoy.</p>
-    <button onclick="dismissHookCard(); rbGoToRegister();" class="w-full bg-gradient-to-b from-yellow-300 to-yellow-500 text-zinc-900 text-sm font-black py-3.5 rounded-xl shadow-lg shadow-yellow-500/20">
+    <button onclick="dismissHookCard(); rbGoToRegister();" class="w-full bg-gradient-to-b from-blue-300 to-blue-500 text-black text-sm font-black py-3.5 rounded-xl shadow-lg shadow-blue-500/20">
       Revisar mi billete ahora
     </button>
   </div>
@@ -703,11 +711,11 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
       if (globalActive){
         badge.textContent = '✅ MIEMBRO';
         badge.classList.remove('from-yellow-300','to-yellow-500');
-        badge.classList.add('from-emerald-400','to-emerald-600');
+        badge.classList.add('from-green-400','to-green-600');
       } else {
         badge.textContent = '👑 $5 VIDA';
         badge.classList.add('from-yellow-300','to-yellow-500');
-        badge.classList.remove('from-emerald-400','to-emerald-600');
+        badge.classList.remove('from-green-400','to-green-600');
       }
     });
     renderMembershipCard();
@@ -726,7 +734,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
       document.getElementById('stats-rarity-bars').insertAdjacentElement('afterend', upsellBtn);
     }
     upsellBtn.textContent = globalActive ? '✅ Miembro vitalicio activo' : '👑 Activar membresía $5';
-    upsellBtn.style.background = globalActive ? 'linear-gradient(180deg,#3e8368,#2c6650)' : 'linear-gradient(180deg,#c9a961,#a3833f)';
+    upsellBtn.style.background = globalActive ? 'linear-gradient(180deg,var(--green),#00cc6a)' : 'linear-gradient(180deg,var(--yellow),#0099cc)';
     upsellBtn.style.cursor = globalActive ? 'default' : 'pointer';
   }
 
@@ -750,7 +758,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
           <span>${count} · ${pct}%</span>
         </div>
         <div class="h-1.5 rounded-full bg-white/5 overflow-hidden">
-          <div class="h-full rounded-full bg-emerald-400" style="width:${Math.max(pct, count > 0 ? 3 : 0)}%"></div>
+          <div class="h-full rounded-full bg-green-400" style="width:${Math.max(pct, count > 0 ? 3 : 0)}%"></div>
         </div>
       </div>`;
     }).join('');
@@ -882,7 +890,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
         clientSecret: data.client_secret,
         appearance: {
           theme: 'night',
-          variables: { colorPrimary: '#39c98b', colorBackground: '#0d1a14', colorText: '#eef4f1', borderRadius: '14px' }
+          variables: { colorPrimary: '#00ff87', colorBackground: '#0a0a0a', colorText: '#f0f0f0', borderRadius: '14px' }
         }
       });
       elements.create('payment').mount('#realPaymentElement');
@@ -1070,7 +1078,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
         : `Faltan ${RB_MIN_DIGITS - rbUserDigits.length} dígitos para calcular la rareza`;
     } else {
       const r = calcRarity(rbUserDigits.join(''));
-      const colorClass = r.key === 'COMUN' ? 'border-zinc-800 bg-zinc-950/50 text-zinc-300' : 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300';
+      const colorClass = r.key === 'COMUN' ? 'border-zinc-800 bg-zinc-950/50 text-zinc-300' : 'border-blue-500/30 bg-blue-500/10 text-blue-300';
       preview.className = `mt-3 rounded-xl border px-4 py-3 text-center text-lg font-black tracking-wide ${colorClass}`;
       preview.textContent = `${r.label}${r.key !== 'COMUN' ? ' ✨' : ''}`;
     }
@@ -1194,8 +1202,8 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
   // 12. BÓVEDA VIVA + LÍDER — datos reales desde Supabase
   // =========================================================
   function rarityColor(key){
-    if (key === 'SOLID' || key === 'RADAR' || key === 'LADDER') return 'text-yellow-400';
-    if (key === 'BINARY' || key === 'REPEATER') return 'text-sky-400';
+    if (key === 'SOLID' || key === 'RADAR' || key === 'LADDER') return 'text-blue-400';
+    if (key === 'BINARY' || key === 'REPEATER') return 'text-cyan-400';
     return 'text-zinc-300';
   }
   function rarityLabelFallback(r){
@@ -1363,16 +1371,16 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
       recPanel.innerHTML = toquesRecibidos.length === 0
         ? '<p class="text-xs text-zinc-600 text-center py-6">Sin toques recibidos aún.</p>'
         : toquesRecibidos.map((t, idx) => `
-          <div class="rounded-xl border p-3 ${t.status==='pending' ? 'border-yellow-500/30 bg-yellow-500/5' : 'border-zinc-800 bg-zinc-900/40'}">
+          <div class="rounded-xl border p-3 ${t.status==='pending' ? 'border-blue-500/30 bg-blue-500/5' : 'border-zinc-800 bg-zinc-900/40'}">
             <p class="text-sm font-bold text-white">👋 @${t.from_alias} te tocó</p>
-            <p class="font-mono text-xs text-yellow-400">${t.serial || ''}</p>
+            <p class="font-mono text-xs text-blue-400">${t.serial || ''}</p>
             <p class="text-[10px] text-zinc-500">${t.from_country || ''} · ${new Date(t.created_at).toLocaleString('es')}</p>
             ${t.status === 'pending' ? `
               <div class="flex gap-2 mt-2">
-                <button onclick="acceptToqueClick(${idx})" class="flex-1 h-8 rounded-full bg-emerald-500 text-black font-black text-[10px]">ACEPTAR → CHAT</button>
+                <button onclick="acceptToqueClick(${idx})" class="flex-1 h-8 rounded-full bg-green-500 text-black font-black text-[10px]">ACEPTAR → CHAT</button>
                 <button onclick="rejectToqueClick(${idx})" class="flex-1 h-8 rounded-full bg-zinc-800 text-zinc-400 font-bold text-[10px]">RECHAZAR</button>
               </div>` : t.status === 'accepted' ? `
-              <button onclick="openChatFromReceived(${idx})" class="w-full h-8 mt-2 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 font-bold text-[10px]">ABRIR CHAT</button>` : `
+              <button onclick="openChatFromReceived(${idx})" class="w-full h-8 mt-2 rounded-full bg-red-500/20 border border-red-500/30 text-red-300 font-bold text-[10px]">ABRIR CHAT</button>` : `
               <p class="text-[10px] text-zinc-600 mt-1">Rechazado</p>`}
           </div>`).join('');
 
@@ -1385,8 +1393,8 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
               <p class="text-[10px] text-zinc-500">a @${t.to_owner}</p>
             </div>
             <div class="text-right">
-              <span class="text-[10px] font-bold ${t.status==='accepted' ? 'text-emerald-400' : t.status==='pending' ? 'text-yellow-400' : 'text-zinc-600'}">${t.status}</span>
-              ${t.status === 'accepted' ? `<button onclick="openChatFromSent(${idx})" class="block mt-1 text-[10px] text-violet-300 underline">Abrir chat</button>` : ''}
+              <span class="text-[10px] font-bold ${t.status==='accepted' ? 'text-green-400' : t.status==='pending' ? 'text-blue-400' : 'text-zinc-600'}">${t.status}</span>
+              ${t.status === 'accepted' ? `<button onclick="openChatFromSent(${idx})" class="block mt-1 text-[10px] text-red-300 underline">Abrir chat</button>` : ''}
             </div>
           </div>`).join('');
     } catch (e){
@@ -1449,7 +1457,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
         const mine = m.from_alias === profile.alias;
         return `
         <div class="flex ${mine ? 'justify-end' : 'justify-start'}">
-          <div class="max-w-[78%] rounded-2xl px-3.5 py-2.5 text-xs ${mine ? 'bg-emerald-400 text-black rounded-br-sm' : 'bg-zinc-800 text-white rounded-bl-sm'}">
+          <div class="max-w-[78%] rounded-2xl px-3.5 py-2.5 text-xs ${mine ? 'bg-green-400 text-black rounded-br-sm' : 'bg-zinc-800 text-white rounded-bl-sm'}">
             <div>${m.message}</div>
             <div class="text-[9px] opacity-60 mt-1">${new Date(m.created_at).toLocaleTimeString('es')}</div>
           </div>
@@ -1530,7 +1538,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
               <button onclick="rbCopySerial(${idx})" class="text-[10px] bg-zinc-800/60 px-2 py-1 rounded-md text-zinc-400">COPIAR</button>
               <button onclick="rbShareSerial(${idx})" class="text-[10px] bg-zinc-800/60 px-2 py-1 rounded-md text-zinc-400">COMPARTIR</button>
             </div>
-            <span class="text-sm font-black text-emerald-400">${h.points || 0} pts</span>
+            <span class="text-sm font-black text-green-400">${h.points || 0} pts</span>
           </div>
           <p class="text-xs text-zinc-500 mb-1">
             <span class="font-bold ${rarityColor(rarityKey)}">${rarityLabel}</span>
@@ -1555,12 +1563,12 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
   // =========================================================
   const RB_RARITY_DEFS = [
     { key: '', label: 'Todas', chipClass: 'bg-zinc-800/60 text-zinc-300' },
-    { key: 'SOLID', label: 'SOLID', chipClass: 'bg-yellow-500/15 text-yellow-300 border border-yellow-500/30' },
-    { key: 'RADAR', label: 'RADAR', chipClass: 'bg-yellow-500/15 text-yellow-300 border border-yellow-500/30' },
-    { key: 'LADDER', label: 'LADDER', chipClass: 'bg-yellow-500/15 text-yellow-300 border border-yellow-500/30' },
-    { key: 'REPEATER', label: 'REPEATER', chipClass: 'bg-sky-500/15 text-sky-300 border border-sky-500/30' },
-    { key: 'BINARY', label: 'BINARY', chipClass: 'bg-sky-500/15 text-sky-300 border border-sky-500/30' },
-    { key: 'SEMI-SOLID', label: 'SEMI-SOLID', chipClass: 'bg-sky-500/15 text-sky-300 border border-sky-500/30' },
+    { key: 'SOLID', label: 'SOLID', chipClass: 'bg-blue-500/15 text-blue-300 border border-blue-500/30' },
+    { key: 'RADAR', label: 'RADAR', chipClass: 'bg-blue-500/15 text-blue-300 border border-blue-500/30' },
+    { key: 'LADDER', label: 'LADDER', chipClass: 'bg-blue-500/15 text-blue-300 border border-blue-500/30' },
+    { key: 'REPEATER', label: 'REPEATER', chipClass: 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30' },
+    { key: 'BINARY', label: 'BINARY', chipClass: 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30' },
+    { key: 'SEMI-SOLID', label: 'SEMI-SOLID', chipClass: 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30' },
     { key: 'COMUN', label: 'Común', chipClass: 'bg-zinc-800/60 text-zinc-400' }
   ];
   let rbPool = [];
@@ -1586,7 +1594,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     container.innerHTML = RB_RARITY_DEFS.map(def => {
       const count = def.key === '' ? rbPool.length : (counts[def.key] || 0);
       const active = rbActiveRarity === def.key;
-      return `<button onclick="rbFilterByRarity('${def.key}')" class="text-xs font-bold px-3 py-1.5 rounded-full ${def.chipClass} ${active ? 'ring-2 ring-emerald-400' : ''}">${def.label} <span class="opacity-70">(${count})</span></button>`;
+      return `<button onclick="rbFilterByRarity('${def.key}')" class="text-xs font-bold px-3 py-1.5 rounded-full ${def.chipClass} ${active ? 'ring-2 ring-green-400' : ''}">${def.label} <span class="opacity-70">(${count})</span></button>`;
     }).join('');
   }
 
@@ -1594,7 +1602,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     return `
       <div class="flex gap-2 mt-2">
         <button onclick="${arrayName}CopyClick(${idx})" class="text-[10px] bg-zinc-800/60 px-2 py-1 rounded-md text-zinc-400">COPIAR</button>
-        <button onclick="${arrayName}UseClick(${idx})" class="text-[10px] bg-zinc-800/60 px-2 py-1 rounded-md text-emerald-300">USAR DÍGITOS</button>
+        <button onclick="${arrayName}UseClick(${idx})" class="text-[10px] bg-zinc-800/60 px-2 py-1 rounded-md text-green-400">USAR DÍGITOS</button>
       </div>`;
   }
 
@@ -1607,7 +1615,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     <div class="glass rounded-2xl p-3 border border-zinc-800">
       <div class="flex items-center justify-between">
         <p class="font-mono font-bold text-white text-sm">${serial}</p>
-        <span class="text-sm font-black text-emerald-400">${row.points || 0} pts</span>
+        <span class="text-sm font-black text-green-400">${row.points || 0} pts</span>
       </div>
       <p class="text-xs text-zinc-500 mt-0.5">
         <span class="font-bold ${rarityColor(rarityKey)}">${rarityLabel}</span>
@@ -1665,7 +1673,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     if (!q) return safeSerial;
     const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     try {
-      if (safeSerial.includes(q)) return safeSerial.replace(new RegExp(esc, 'g'), m => `<span class="bg-emerald-400 text-black px-0.5 rounded">${m}</span>`);
+      if (safeSerial.includes(q)) return safeSerial.replace(new RegExp(esc, 'g'), m => `<span class="bg-green-400 text-black px-0.5 rounded">${m}</span>`);
     } catch {}
     return safeSerial;
   }
@@ -1690,7 +1698,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
       return;
     }
     container.innerHTML = scored.map((x, idx) => {
-      const extra = `<p class="text-[10px] text-emerald-400 mt-1">Similitud: ${x.score}%</p>`;
+      const extra = `<p class="text-[10px] text-green-400 mt-1">Similitud: ${x.score}%</p>`;
       const row = x.row;
       const html = rbRenderRow(row, idx, 'rbSimilar', extra);
       // Reinserta el serial con resaltado de coincidencia
@@ -1769,8 +1777,8 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
 
   // Barra de probabilidades: qué tan común/rara es cada categoría en toda la Bóveda
   const RB_LEADER_BAR_COLORS = {
-    SOLID: '#facc15', RADAR: '#facc15', LADDER: '#facc15',
-    REPEATER: '#38bdf8', BINARY: '#38bdf8', 'SEMI-SOLID': '#38bdf8',
+    SOLID: '#00bfff', RADAR: '#00bfff', LADDER: '#00bfff',
+    REPEATER: '#00e5ff', BINARY: '#00e5ff', 'SEMI-SOLID': '#00e5ff',
     COMUN: '#52525b'
   };
   function renderLeaderProbabilityBar(){
@@ -1937,7 +1945,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     }
     let html = scored.slice(0, 3).map((x, idx) => nativeCompactRow(x.row, idx, 'nativeSearchRows', ` · ${x.score}% similar`)).join('');
     if (nativeSearchFullRows.length > 3){
-      html += `<button style="flex-shrink:0;height:44px;border:1.5px dashed #33495e;border-radius:14px;background:transparent;color:var(--yellow);font-weight:800;font-size:12px;width:100%;" onclick="openSeeMoreModal('search','Más coincidencias')">🔽 Ver más resultados (${nativeSearchFullRows.length - 3})</button>`;
+      html += `<button style="flex-shrink:0;height:44px;border:1.5px dashed #3a3a3a;border-radius:14px;background:transparent;color:var(--yellow);font-weight:800;font-size:12px;width:100%;" onclick="openSeeMoreModal('search','Más coincidencias')">🔽 Ver más resultados (${nativeSearchFullRows.length - 3})</button>`;
     }
     container.innerHTML = html;
   }
@@ -1963,7 +1971,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     }
     let html = nativeRarityRows.map((row, idx) => nativeCompactRow(row, idx, 'nativeRarityRows')).join('');
     if (nativeRarityFullRows.length > 3){
-      html += `<button style="flex-shrink:0;height:44px;border:1.5px dashed #33495e;border-radius:14px;background:transparent;color:var(--yellow);font-weight:800;font-size:12px;width:100%;" onclick="openSeeMoreModal('rareza','Más billetes ${key}')">🔽 Ver más resultados (${nativeRarityFullRows.length - 3})</button>`;
+      html += `<button style="flex-shrink:0;height:44px;border:1.5px dashed #3a3a3a;border-radius:14px;background:transparent;color:var(--yellow);font-weight:800;font-size:12px;width:100%;" onclick="openSeeMoreModal('rareza','Más billetes ${key}')">🔽 Ver más resultados (${nativeRarityFullRows.length - 3})</button>`;
     }
     container.innerHTML = html;
   }
@@ -1996,7 +2004,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:#3e836
     }
     let html = nativeFavRows.map((row, idx) => nativeCompactRow(row, idx, 'nativeFavRows')).join('');
     if (nativeFavFullRows.length > 3){
-      html += `<button style="flex-shrink:0;height:44px;border:1.5px dashed #33495e;border-radius:14px;background:transparent;color:var(--yellow);font-weight:800;font-size:12px;width:100%;" onclick="openSeeMoreModal('fav','Todos tus favoritos')">🔽 Ver más resultados (${nativeFavFullRows.length - 3})</button>`;
+      html += `<button style="flex-shrink:0;height:44px;border:1.5px dashed #3a3a3a;border-radius:14px;background:transparent;color:var(--yellow);font-weight:800;font-size:12px;width:100%;" onclick="openSeeMoreModal('fav','Todos tus favoritos')">🔽 Ver más resultados (${nativeFavFullRows.length - 3})</button>`;
     }
     container.innerHTML = html;
   }
