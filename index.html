@@ -248,7 +248,7 @@ body{height:100dvh;
 .message strong{font-family:var(--font-mono);}
 
 /* ===================== BÚSQUEDA ===================== */
-.search-view{gap:10px;}
+.search-view{gap:10px;overflow:hidden;}
 .search-title{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-shrink:0;}
 .search-title-main{display:flex;align-items:center;gap:9px;min-width:0;}
 .search-title .dot{width:11px;height:11px;border-radius:50%;background:var(--green);
@@ -451,9 +451,10 @@ body{height:100dvh;
             <div class="login-prompt" id="loginPrompt" onclick="onSessionPillClick()">🔐 Área de miembro disponible · Inicia sesión para ver tu bóveda personal</div>
         </div>
 
-        <div style="flex-shrink:0;display:flex;justify-content:center;gap:16px;padding:2px 0 0;">
+        <div style="flex-shrink:0;display:flex;flex-wrap:wrap;justify-content:center;gap:12px;padding:2px 6px 0;">
             <a href="#" onclick="event.preventDefault();openLegalModal('terms')" style="color:var(--blue);font-size:10.5px;font-weight:700;text-decoration:underline;">Términos y Condiciones</a>
             <a href="#" onclick="event.preventDefault();openLegalModal('privacy')" style="color:var(--blue);font-size:10.5px;font-weight:700;text-decoration:underline;">Política de Privacidad</a>
+            <a href="#" onclick="event.preventDefault();openLegalModal('refunds')" style="color:var(--blue);font-size:10.5px;font-weight:700;text-decoration:underline;">Política de Reembolsos</a>
         </div>
     </div>
 
@@ -582,6 +583,7 @@ body{height:100dvh;
 <!-- MODAL: Legal (Términos / Privacidad) -->
 <div class="modal" id="legalModal">
     <div class="modal-card" style="max-height:85vh;">
+        <p style="color:var(--blue);font-size:9.5px;font-weight:900;letter-spacing:1.5px;margin-bottom:4px;">LEGAL • DOLLARDGT</p>
         <div class="modal-title"><span id="legalModalTitleText">Términos y Condiciones</span><button class="modal-close" onclick="closeModalId('legalModal')">✕</button></div>
         <div id="legalModalBody" style="font-size:12.5px;color:var(--gray);line-height:1.65;max-height:65vh;overflow-y:auto;padding-right:2px;"></div>
     </div>
@@ -594,6 +596,7 @@ body{height:100dvh;
         <div id="membershipLoading" style="text-align:center;color:var(--gray);font-size:12px;padding:20px 0;">Cargando pasarela segura...</div>
         <div id="realPaymentElement" style="margin-bottom:14px;"></div>
         <div class="modal-actions"><button class="btn-blue" id="membershipPayBtn" style="flex:none;width:100%;" onclick="handleStripePay()">Confirmar pago de $5</button></div>
+        <p style="text-align:center;margin-top:10px;font-size:10.5px;color:var(--gray-dim);">Pago único, sin renovaciones. <a href="#" onclick="event.preventDefault();openLegalModal('refunds')" style="color:var(--blue);text-decoration:underline;">Política de Reembolsos</a></p>
     </div>
 </div>
 
@@ -650,37 +653,33 @@ function closeModalId(id){ document.getElementById(id).classList.remove('open');
 // ---------------------------------------------------------------
 const LEGAL_CONTENT = {
     terms: {
-        title: 'Términos y Condiciones',
+        title: 'Términos y Condiciones de Uso',
         html: `
-            <p><b style="color:var(--white);">1. Aceptación</b><br>Al usar $DOLLARDGT aceptas estos términos. Debes ser mayor de 18 años.</p>
-            <p><b style="color:var(--white);">2. Servicio</b><br>Plataforma de coleccionismo de billetes que permite buscar similitudes, publicar series y contactar coleccionistas mediante toques privados. No es tasación oficial.</p>
-            <p><b style="color:var(--white);">3. Registro</b><br>Debes proporcionar datos veraces. Eres responsable de tu cuenta.</p>
-            <p><b style="color:var(--white);">4. Membresía $5</b><br>Pago único vitalicio por Stripe. Acceso a publicación, toques y chat. No reembolsable.</p>
-            <p><b style="color:var(--white);">5. Uso aceptable</b><br>No usar para fines ilegales, spam, acoso o manipulación. Podemos suspender cuentas.</p>
-            <p><b style="color:var(--white);">6. Propiedad intelectual</b><br>El contenido que publiques sigue siendo tuyo, pero otorgas licencia para mostrarlo en la app.</p>
-            <p><b style="color:var(--white);">7. Responsabilidad</b><br>La app se ofrece "tal cual". No garantizamos disponibilidad ni exactitud de valores.</p>
-            <p><b style="color:var(--white);">8. Terminación</b><br>Puedes cerrar tu cuenta en cualquier momento. Podemos cancelarla por incumplimiento.</p>
-            <p><b style="color:var(--white);">9. Modificaciones</b><br>Podemos actualizar estos términos; te notificaremos por email o en la app.</p>
-            <p><b style="color:var(--white);">10. Ley aplicable</b><br>Argentina. Contacto: support@dollardgt.com</p>
-            <p style="font-size:10px;color:var(--gray-dim);">Última actualización: 19 de agosto de 2026</p>
+            <p style="color:var(--gray-dim);font-size:10px;font-weight:800;letter-spacing:.5px;margin-bottom:8px;">TÉRMINOS Y CONDICIONES GENERALES · DollarDgt.com</p>
+            <p><b style="color:var(--white);">1. Naturaleza de la plataforma</b><br>DollarDgt.com es una herramienta digital de catálogo, entretenimiento y contacto entre coleccionistas particulares de billetes y numerología. La plataforma NO es una casa de cambio, institución financiera, casa de empeño ni intermediaria en transacciones comerciales.</p>
+            <p><b style="color:var(--white);">2. Membresía de por vida ($5 USD)</b><br>El pago único de $5 USD otorga acceso vitalicio a las funciones avanzadas de la Bóveda Global y registro de series. Este pago es definitivo y corresponde a un servicio digital de software y base de datos.</p>
+            <p><b style="color:var(--white);">3. Responsabilidad de los usuarios</b><br>Cualquier trato, intercambio, compra o venta de billetes físicos que los usuarios realicen por su cuenta se hace de manera estrictamente particular y bajo su propia y exclusiva responsabilidad. DollarDgt no interviene, supervisa ni garantiza los acuerdos entre particulares.</p>
+            <p style="font-size:10px;color:var(--gray-dim);margin-top:10px;">© 2026 DollarDgt.com</p>
         `
     },
     privacy: {
         title: 'Política de Privacidad',
         html: `
-            <p><b style="color:var(--white);">1. Responsable</b><br>$DOLLARDGT, support@dollardgt.com</p>
-            <p><b style="color:var(--white);">2. Datos recopilados</b><br>Registro (país, alias, email, WhatsApp), preferencias, uso (series, toques, chats), datos de pago (Stripe), técnicos.</p>
-            <p><b style="color:var(--white);">3. Finalidad</b><br>Gestionar cuenta, publicar en bóveda, facilitar toques/chat, procesar pagos, mejorar el servicio.</p>
-            <p><b style="color:var(--white);">4. Base legal</b><br>Consentimiento, ejecución del contrato, interés legítimo.</p>
-            <p><b style="color:var(--white);">5. Compartir datos</b><br>Supabase (almacenamiento), Stripe (pagos), otros usuarios (solo si aceptas toque), autoridades legales.</p>
-            <p><b style="color:var(--white);">6. Transferencias</b><br>Datos en EE. UU. con Supabase.</p>
-            <p><b style="color:var(--white);">7. Conservación</b><br>Mientras la cuenta esté activa o lo exija la ley.</p>
-            <p><b style="color:var(--white);">8. Derechos</b><br>Acceso, rectificación, supresión, oposición, portabilidad. Escríbenos para ejercerlos.</p>
-            <p><b style="color:var(--white);">9. Cookies</b><br>Usamos cookies para sesión. Puedes gestionarlas en tu navegador.</p>
-            <p><b style="color:var(--white);">10. Menores</b><br>No dirigida a menores de 18.</p>
-            <p><b style="color:var(--white);">11. Seguridad</b><br>Implementamos medidas técnicas, pero internet no es 100% seguro.</p>
-            <p><b style="color:var(--white);">12. Cambios</b><br>Te informaremos de cambios significativos.</p>
-            <p style="font-size:10px;color:var(--gray-dim);">Última actualización: 19 de agosto de 2026</p>
+            <p style="color:var(--gray-dim);font-size:10px;font-weight:800;letter-spacing:.5px;margin-bottom:8px;">POLÍTICA DE PRIVACIDAD · DollarDgt.com</p>
+            <p><b style="color:var(--white);">1. Datos que recopilamos</b><br>Recopilamos la información básica que el usuario proporciona voluntariamente: Alias (Nickname), Correo Electrónico (Email) y número de contacto (WhatsApp opcional), así como las series de billetes registradas y país de origen.</p>
+            <p><b style="color:var(--white);">2. Uso de la información</b><br>Los datos se utilizan exclusivamente para:<br>- Gestionar el acceso a la Bóveda Global y mostrar las series publicadas.<br>- Enviar alertas automáticas al correo electrónico cuando se detecten coincidencias (MATCH) con otras series.</p>
+            <p><b style="color:var(--white);">3. Protección de datos</b><br>No vendemos, alquilamos ni cedemos información personal a terceros. Los datos de contacto solo son visibles para otros usuarios según las configuraciones de la comunidad y la membresía activa.</p>
+            <p style="font-size:10px;color:var(--gray-dim);margin-top:10px;">© 2026 DollarDgt.com</p>
+        `
+    },
+    refunds: {
+        title: 'Política de Reembolsos',
+        html: `
+            <p style="color:var(--gray-dim);font-size:10px;font-weight:800;letter-spacing:.5px;margin-bottom:8px;">POLÍTICA DE REEMBOLSOS Y PAGOS · DollarDgt.com</p>
+            <p><b style="color:var(--white);">1. Pago único de por vida</b><br>La membresía de DollarDgt.com tiene un costo único de $5 USD. No existen mensualidades, cobros ocultos ni renovaciones automáticas.</p>
+            <p><b style="color:var(--white);">2. Condiciones de reembolso</b><br>Debido a la naturaleza digital e inmediata del acceso al software y base de datos de la Bóveda Global tras la confirmación del pago, no se realizan reembolsos una vez procesada la transacción.</p>
+            <p><b style="color:var(--white);">3. Soporte</b><br>Si experimentas algún problema técnico con la activación de tu cuenta tras realizar el pago, puedes contactar con nuestro soporte técnico para solucionarlo de inmediato.</p>
+            <p style="font-size:10px;color:var(--gray-dim);margin-top:10px;">© 2026 DollarDgt.com</p>
         `
     }
 };
@@ -983,7 +982,7 @@ function fillDenominationsForCountry(){
     if (!currency){ sel.innerHTML = '<option value="">Elige país primero</option>'; return; }
     const opt0 = document.createElement('option'); opt0.value=''; opt0.textContent='Denominación'; sel.appendChild(opt0);
     DENOMINATIONS.forEach(v => {
-        const opt = document.createElement('option'); opt.value = v; opt.textContent = `${currency}${v}`; sel.appendChild(opt);
+        const opt = document.createElement('option'); opt.value = v; opt.textContent = String(v); sel.appendChild(opt);
     });
     const optOtro = document.createElement('option'); optOtro.value='otro'; optOtro.textContent='Otra denominación'; sel.appendChild(optOtro);
 }
