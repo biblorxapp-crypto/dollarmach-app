@@ -2,1867 +2,1472 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>$DOLLARDGT — App Nativa</title>
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#050607">
+<title>DollarDGT</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.stripe.com/v3/"></script>
 <style>
 :root{
-    --bg:#0a0a0a;              /* negro carbón */
-    --card:#161616;            /* gris grafito */
-    --line:#2a2a2a;            /* gris grafito claro para bordes */
-    --text:#f0f0f0;            /* blanco frío */
-    --muted:#9a9a9a;           /* blanco frío tenue */
-    --green:#00ff87;           /* verde neón */
-    --green-dark:#0d2b1a;      /* verde neón oscuro para fondos sutiles */
-    --yellow:#00bfff;          /* acento principal: azul neón */
-    --blue:#4da6ff;            /* azul claro secundario */
-    --violet:#ff2a2a;          /* rojo digital para alertas */
+    /* base fintech carbón */
+    --bg:#050607; --bg-2:#0a0c0e; --card:#12161a; --card-2:#0d1114;
+    --field:#151a1e; --field-2:#0f1316; --border:#1e2429; --border-2:#2a3136;
+    --white:#eef4f7; --gray:#8b969d; --gray-dim:#5b666c;
+    /* acentos (paleta unificada: solo azul neón + verde neón + rojo digital) */
+    --green:#00ff88; --green-2:#00c96b; --green-dark:#067a44; --green-glow:rgba(0,255,136,.14);
+    --blue:#00c8ff; --blue-2:#12a5e8; --blue-dark:#0a6ea3; --blue-glow:rgba(0,200,255,.16);
+    --danger:#ff4d63; --red:#ff2843;
+    /* rarezas: familia fría azul-verde-cian, sin dorado/morado/naranja sueltos —
+       SOLID es la más brillante (icy cyan-blanco), el resto degrada en intensidad
+       dentro del mismo espectro azul→verde para que la paleta se sienta uniforme */
+    --r-solid:#a6faff; --r-radar:#00c8ff; --r-ladder:#00ff88; --r-repeater:#22e0c8;
+    --r-binary:#12a5e8; --r-semi:#6f9fc9; --r-comun:#7c878d; --r-star:#a6faff;
+    --radius:16px;
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+    --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono:ui-monospace,"SF Mono","JetBrains Mono","Roboto Mono",Menlo,Consolas,"Liberation Mono",monospace;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-html,body{width:100%;height:100%;min-height:100%;overflow:hidden !important;overscroll-behavior:none;background:var(--bg);}
-body{color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;}
-.app{position:relative;width:100%;height:100dvh;min-height:100dvh;max-height:100dvh;overflow:hidden;background:var(--bg);max-width:480px;margin:0 auto;border-left:1px solid #1a1a1a;border-right:1px solid #1a1a1a;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--white);
+    font-family:var(--font-sans);display:flex;flex-direction:column;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+body{height:100dvh;
+    background:
+        radial-gradient(1200px 480px at 50% -8%, rgba(0,255,136,.05), transparent 60%),
+        radial-gradient(900px 420px at 100% 110%, rgba(59,201,255,.045), transparent 55%),
+        var(--bg);}
+.app{flex:1;display:flex;flex-direction:column;width:100%;max-width:520px;margin:0 auto;
+    padding:10px 12px calc(6px + var(--safe-bottom));overflow:hidden;min-height:0;}
 
-/* ===== NOTA DE PROTOTIPO (se puede borrar) ===== */
-.proto-badge{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:999;background:#000;border:1px solid var(--yellow);color:var(--yellow);font-size:10px;font-weight:800;padding:4px 10px;border-radius:999px;letter-spacing:.5px;pointer-events:none;}
+/* ===== tipografía numérica global ===== */
+.serial,.serial-display,.leader-bill,.points,.stat-value,#serialPreview,#counter,
+.leader-details .value,.num-btn,.letter-select select,.result-meta,#leaderRankTag{
+    font-family:var(--font-mono);font-feature-settings:"tnum" 1,"ss01" 1;}
 
-/* ===== PANTALLAS: solo una visible a la vez ===== */
-.screen-view{position:absolute;inset:0;padding:env(safe-area-inset-top) 24px calc(76px + env(safe-area-inset-bottom)) 24px;overflow:hidden;display:none;flex-direction:column;}
-.screen-view.active{display:flex;}
+/* ===================== NAV ===================== */
+.bottom-nav{display:flex;justify-content:space-around;align-items:center;flex-shrink:0;gap:8px;
+    padding:9px 12px calc(9px + var(--safe-bottom));background:rgba(8,10,12,.92);
+    border-top:1px solid var(--border);z-index:10;backdrop-filter:blur(14px);
+    box-shadow:0 -8px 26px rgba(0,0,0,.55);}
+.nav-btn{flex:1;min-height:48px;border-radius:14px;background:var(--field-2);
+    border:1px solid var(--border);color:var(--gray);font-size:13px;font-weight:800;letter-spacing:.2px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;position:relative;
+    transition:background .18s,color .18s,border-color .18s,transform .1s;}
+.nav-btn.active{background:linear-gradient(180deg,rgba(0,255,136,.14),rgba(0,255,136,.04));
+    border-color:var(--green);color:var(--green);
+    box-shadow:0 0 0 1px rgba(0,255,136,.25),0 6px 18px rgba(0,255,136,.12);}
+.nav-btn:active{transform:scale(.96);}
+.nav-badge{position:absolute;top:-5px;right:8px;background:var(--red);color:#fff;font-size:9px;font-weight:900;
+    height:17px;min-width:17px;border-radius:999px;display:none;align-items:center;justify-content:center;
+    padding:0 4px;box-shadow:0 0 0 2px var(--bg);}
+.nav-badge.show{display:flex;}
 
-/* ===== HEADER (compartido) ===== */
-header{height:9.5%;min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;}
-.logo-area{min-width:0;display:flex;align-items:baseline;gap:7px;}
-.logo{color:var(--text);font-size:clamp(23px,7vw,34px);line-height:1;font-weight:900;letter-spacing:-1.6px;white-space:nowrap;}
-.logo-green{color:var(--green);}
-.version{color:#888;font-size:clamp(9px,2.5vw,12px);white-space:nowrap;}
-.pro{flex-shrink:0;height:clamp(34px,6.5vw,44px);padding:0 clamp(10px,2.8vw,16px);border-radius:999px;background:var(--yellow);color:#0a0a0a;display:flex;align-items:center;justify-content:center;font-size:clamp(11px,3vw,15px);font-weight:850;white-space:nowrap;}
+.view{display:none;flex:1;flex-direction:column;min-height:0;height:100%;overflow-y:auto;
+    -webkit-overflow-scrolling:touch;padding:6px 0 4px;}
+.view.active{display:flex;}
+.view::-webkit-scrollbar{width:0;}
 
-/* ===== WELCOME (compartido) ===== */
-.welcome{height:8.5%;min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;}
-.welcome-text{color:#c0c0c0;font-size:clamp(15px,4.3vw,21px);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.welcome-text strong{color:var(--green);font-weight:750;}
-.login{flex-shrink:0;height:clamp(34px,6.5vw,42px);padding:0 clamp(12px,3.4vw,18px);border:1.5px solid #3a3a3a;border-radius:999px;background:#1f1f1f;color:var(--text);display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.2vw,15px);font-weight:750;white-space:nowrap;}
+/* ===================== HEADER (CORREGIDO: sin desborde en pantallas angostas) ===================== */
+.app-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+    margin-bottom:clamp(8px,1.6vh,12px);gap:6px;flex-wrap:nowrap;max-width:100%;}
+.brand{display:flex;align-items:baseline;white-space:nowrap;min-width:0;overflow:hidden;flex-shrink:1;}
+.brand span{font-size:clamp(16px,5.2vw,30px);font-weight:900;letter-spacing:-1.5px;}
+.brand .dollar{color:var(--green);text-shadow:0 0 18px rgba(0,255,136,.4);}
+.brand .dgt-green{color:var(--green);}
+.brand .dgt-white{color:var(--white);}
+.brand .version{margin-left:9px;color:var(--gray-dim);font-size:11px;font-weight:700;letter-spacing:.5px;
+    font-family:var(--font-mono);align-self:center;padding:2px 7px;border:1px solid var(--border);
+    border-radius:6px;flex-shrink:0;}
+.member-btn{flex-shrink:0;min-height:40px;padding:0 12px;border:0;border-radius:12px;
+    background:linear-gradient(180deg,var(--blue),var(--blue-2));color:#031820;font-size:11.5px;font-weight:900;
+    letter-spacing:.2px;cursor:pointer;white-space:nowrap;transition:transform .1s,filter .15s;
+    box-shadow:0 6px 16px rgba(0,200,255,.22);}
+.member-btn:active{transform:scale(.96);}
+.member-btn.active-member{background:linear-gradient(180deg,var(--green),var(--green-2));color:#04140a;
+    box-shadow:0 6px 16px rgba(0,255,136,.22);}
+.greet{display:flex;align-items:center;gap:7px;flex-shrink:0;min-width:0;}
+.session-pill{min-height:40px;padding:0 11px;border-radius:11px;background:var(--field-2);
+    border:1px solid var(--border);color:var(--gray);font-size:11.5px;font-weight:800;display:flex;
+    align-items:center;cursor:pointer;white-space:nowrap;transition:border-color .15s,color .15s;
+    max-width:110px;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;}
+.session-pill:active{border-color:var(--green);color:var(--green);}
 
-/* ===== SECTION TITLE (compartido) ===== */
-.section-title{height:6.5%;min-height:26px;flex-shrink:0;display:flex;align-items:center;gap:10px;color:#d0d0d0;font-size:clamp(13px,3.6vw,17px);line-height:1;font-weight:800;letter-spacing:1.1px;white-space:nowrap;}
-.live-dot{width:10px;height:10px;flex-shrink:0;border-radius:50%;background:var(--green);}
-
-/* ===== INICIO: LEADER CARD ===== */
-.leader-card{flex:1;min-height:0;margin-top:10px;padding:clamp(17px,4.5vw,25px) clamp(16px,4.8vw,24px) clamp(14px,4vw,20px);border:1.5px solid #3a3a3a;border-radius:clamp(22px,6vw,32px);background:linear-gradient(145deg,#1f1f1f 0%,#141414 100%);display:flex;flex-direction:column;overflow:hidden;}
-.leader-heading{display:flex;align-items:center;gap:clamp(8px,2.8vw,13px);min-width:0;}
-.badge{flex-shrink:0;padding:clamp(5px,1.5vw,7px) clamp(9px,2.6vw,13px);border:1.5px solid #1d3d31;border-radius:999px;background:var(--green-dark);color:var(--green);font-size:clamp(10px,2.9vw,13px);line-height:1;font-weight:800;white-space:nowrap;}
-.serial{min-width:0;color:var(--text);font-size:clamp(19px,5.4vw,27px);line-height:1;font-weight:900;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;}
-.divider{width:100%;height:1px;flex-shrink:0;background:var(--line);}
-.divider.top{margin:clamp(11px,3vw,16px) 0;}
-.info-grid{flex-shrink:0;display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:5px;}
-.info-item{min-width:0;display:flex;flex-direction:column;justify-content:center;}
-.info-label{color:var(--muted);font-size:clamp(9px,2.5vw,11px);line-height:1;margin-bottom:2px;}
-.info-value{color:var(--text);font-size:clamp(12px,3.3vw,15px);line-height:1;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.info-value.points{color:var(--yellow);font-size:clamp(15px,4vw,19px);font-weight:850;}
-.info-value.owner{color:var(--green);}
-.divider.bottom{margin:clamp(9px,2.4vw,13px) 0 clamp(7px,2vw,10px);}
-.meta{min-height:8%;display:flex;align-items:center;justify-content:space-between;gap:7px;}
-.country{min-width:0;display:flex;align-items:center;gap:5px;color:#d0d0d0;font-size:clamp(11px,3.1vw,14px);white-space:nowrap;}
-.country-label{color:#888;}
-.trend{flex-shrink:0;min-height:26px;padding:0 clamp(7px,2.1vw,10px);border-radius:999px;background:#1f1f1f;color:#c0c0c0;display:flex;align-items:center;gap:5px;font-size:clamp(8px,2.3vw,10px);white-space:nowrap;}
-.trend-dot{width:6px;height:6px;flex-shrink:0;border-radius:50%;background:var(--green);}
-.digit-histogram{margin-top:clamp(8px,2.2vw,12px);flex:1;min-height:0;display:flex;flex-direction:column;background:rgba(0,255,135,.06);border:1px solid rgba(0,255,135,.2);border-radius:14px;padding:14px 14px 12px;}
-.hist-bars{flex:1;min-height:0;display:flex;align-items:flex-end;gap:7px;margin-top:10px;}
-.hist-bar-wrap{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
-.hist-count{font-size:13px;font-weight:800;color:var(--green);margin-bottom:5px;line-height:1;}
-.hist-bar{width:100%;max-width:28px;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--green),rgba(0,255,135,.12));min-height:3px;box-shadow:0 0 16px rgba(0,255,135,.5);}
-.hist-digit{margin-top:7px;font-size:12px;font-weight:700;color:var(--muted);font-family:monospace;}
-.probability{margin-top:clamp(6px,1.8vw,9px);}
-.probability-label{display:block;margin-bottom:4px;color:#888;font-size:clamp(7px,2vw,9px);letter-spacing:.6px;line-height:1;white-space:nowrap;overflow:hidden;}
-.bar{width:100%;height:clamp(11px,3vw,14px);display:flex;overflow:hidden;border-radius:999px;background:#1f1f1f;}
-.bar-yellow{width:14%;background:var(--yellow);}
-.bar-blue{width:17%;background:var(--blue);}
-.bar-gray{width:2%;background:#888;}
-.bar-rest{flex:1;}
-
-/* ===== INICIO: QUICK ACTIONS ===== */
-.quick{height:19%;min-height:0;margin-top:12px;display:flex;flex-direction:column;flex-shrink:0;}
-.quick-title{height:22%;min-height:22px;display:flex;align-items:center;color:#c0c0c0;font-size:clamp(13px,3.6vw,16px);line-height:1;font-weight:800;letter-spacing:1.5px;white-space:nowrap;}
-.actions{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:clamp(9px,3vw,14px);}
-.action{min-width:0;min-height:0;border:1.5px solid #2a2a2a;border-radius:clamp(18px,5.5vw,26px);background:linear-gradient(145deg,#1f1f1f,#141414);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(9px,2.8vw,14px);text-align:center;}
-.icon{width:clamp(42px,12vw,56px);height:clamp(42px,12vw,56px);flex-shrink:0;border:1.5px solid #3a3a3a;border-radius:clamp(14px,4vw,18px);background:#1f1f1f;display:flex;align-items:center;justify-content:center;}
-.icon svg{width:46%;height:46%;fill:none;stroke:var(--text);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-.action-title{padding:0 6px;color:var(--text);font-size:clamp(12px,3.3vw,15px);line-height:1.1;font-weight:750;}
-
-/* ===== GLOBAL: BUSCADOR ===== */
-.search-box{margin-top:12px;flex-shrink:0;}
-.search-input{width:100%;height:clamp(46px,11vw,56px);border-radius:16px;background:var(--card);border:1.5px solid var(--line);padding:0 16px;color:var(--text);font-size:16px;font-weight:600;outline:none;}
-.search-input:focus{border-color:var(--green);}
-.results-wrap{flex:1;min-height:0;margin-top:14px;display:flex;flex-direction:column;gap:8px;overflow:hidden;}
-.result-row{flex:1;min-height:0;border:1.5px solid var(--line);border-radius:16px;background:var(--card);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.result-serial{font-family:monospace;font-weight:800;font-size:clamp(13px,3.6vw,16px);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.result-meta{font-size:clamp(9px,2.5vw,11px);color:var(--muted);margin-top:2px;}
-.result-right{text-align:right;flex-shrink:0;}
-.result-points{color:var(--yellow);font-weight:800;font-size:clamp(12px,3.3vw,15px);}
-.result-sim{font-size:clamp(8px,2.3vw,10px);color:var(--green);}
-.result-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.result-icon-btn{width:28px;height:28px;border-radius:9px;background:#1f1f1f;border:1px solid #3a3a3a;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
-.result-icon-btn.fav-active{color:var(--violet);border-color:rgba(255,42,42,.4);}
-.results-cap-note{text-align:center;color:#888;font-size:11px;margin-top:10px;flex-shrink:0;}
-
-/* ===== REGISTRAR ===== */
-.reg-tabs{display:flex;gap:8px;margin-top:12px;flex-shrink:0;}
-.reg-tab{flex:1;height:clamp(40px,9.5vw,48px);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.4vw,14px);font-weight:800;border:1.5px solid var(--line);background:var(--card);color:#c0c0c0;}
-.reg-tab.active{background:linear-gradient(180deg,var(--green),#00cc6a);color:#0a0a0a;border-color:transparent;}
-.reg-panel{flex:1;min-height:0;margin-top:14px;display:flex;flex-direction:column;}
-.digit-display{flex-shrink:0;height:clamp(60px,16vw,76px);border-radius:16px;background:#0a0a0a;border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-family:monospace;font-weight:900;font-size:clamp(34px,10.5vw,46px);letter-spacing:1px;color:#fff;text-shadow:0 0 10px rgba(0,255,135,.5);}
-.digit-display.empty{color:#666;font-size:clamp(13px,3.6vw,15px);font-weight:600;font-family:inherit;}
-.rarity-preview{flex-shrink:0;margin-top:10px;height:clamp(38px,9vw,46px);border-radius:14px;border:1.5px solid rgba(0,191,255,.3);background:rgba(0,191,255,.08);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:clamp(14px,4vw,17px);color:var(--yellow);}
-.keypad{flex:1;min-height:0;margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:8px;}
-.key{border:1.5px solid var(--line);border-radius:14px;background:#1f1f1f;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4.5vw,20px);font-weight:800;color:var(--text);}
-.key.wide{grid-column:span 1;font-size:clamp(11px,3vw,13px);color:var(--muted);}
-.reg-submit{flex-shrink:0;margin-top:10px;height:clamp(48px,11vw,56px);border-radius:16px;background:linear-gradient(180deg,var(--green),#00cc6a);color:#0a0a0a;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(13px,3.6vw,15px);}
-
-/* ===== FAVORITOS ===== */
-.fav-list{flex:1;min-height:0;margin-top:12px;display:flex;flex-direction:column;gap:8px;}
-.fav-row{flex:1;min-height:0;border:1.5px solid var(--line);border-radius:16px;background:var(--card);padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.fav-heart{color:var(--violet);font-size:16px;flex-shrink:0;}
-.fav-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);text-align:center;padding:0 20px;}
-.fav-empty-icon{font-size:38px;opacity:.5;}
-
-/* ===== PERFIL ===== */
-.profile-card{flex-shrink:0;margin-top:14px;border:1.5px solid var(--line);border-radius:22px;background:linear-gradient(145deg,#1f1f1f,#141414);padding:20px;display:flex;align-items:center;gap:14px;}
-.avatar{width:56px;height:56px;border-radius:50%;background:rgba(0,255,135,.15);border:1.5px solid rgba(0,255,135,.35);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:var(--green);flex-shrink:0;}
-.profile-alias{font-weight:800;font-size:17px;color:var(--text);}
-.profile-sub{font-size:12px;color:var(--muted);margin-top:2px;}
-.stat-grid{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;}
-.stat-box{border:1.5px solid var(--line);border-radius:16px;background:var(--card);padding:14px;text-align:center;}
-.stat-num{font-size:22px;font-weight:900;color:var(--text);}
-.stat-label{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.5px;}
-.logout-btn{margin-top:auto;flex-shrink:0;height:48px;border-radius:16px;border:1.5px solid rgba(0,255,135,.4);background:rgba(0,255,135,.1);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
-
-/* ===== BOTTOM NAV (compartido) ===== */
-.bottom-nav{position:absolute;left:0;right:0;bottom:0;z-index:100;width:100%;height:calc(76px + env(safe-area-inset-bottom));padding:6px 10px env(safe-area-inset-bottom);background:var(--bg);display:grid;grid-template-columns:repeat(5,1fr);}
-.nav-item{min-width:0;color:#888;text-decoration:none;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:clamp(9px,2.7vw,12px);white-space:nowrap;}
-.nav-item.active{color:var(--green);}
-.nav-icon{width:27px;height:27px;display:flex;align-items:center;justify-content:center;}
-.nav-icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-
-/* ===== Reutilizado del dashboard largo: modales, toasts, gancho, tabs, inputs ===== */
-.rb-tab-btn{transition:all .15s ease;}
-.rb-tab-btn.active{background:linear-gradient(180deg,var(--green),#00cc6a);color:#0a0a0a;box-shadow:0 6px 16px -4px rgba(0,255,135,.4);}
-.rb-tab-btn:not(.active){background:rgba(22,22,22,.6);color:#c0c0c0;}
-.rb-panel{display:none;}
-.rb-panel.active{display:block;}
-#rb-panel-sd.active{display:block;}
-#rb-panel-serie.active{display:flex;}
-input.dgt-select{background:rgba(10,10,10,.7);border:1px solid #3a3a3a;color:var(--text);border-radius:.75rem;padding:.65rem .75rem;font-size:16px;font-weight:600;width:100%;}
-select.dgt-select{
-  background-color:rgba(10,10,10,.7);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300ff87' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:right 14px center;
-  background-size:14px;
-  border:1px solid var(--line);
-  color:var(--text);
-  border-radius:.75rem;
-  padding:.65rem 2.1rem .65rem .75rem;
-  font-size:14px;
-  font-weight:700;
-  width:100%;
-  appearance:none;
-  text-transform:uppercase;
-  letter-spacing:.4px;
+/* En pantallas muy angostas (iPhone SE y similares) se libera espacio extra
+   ocultando la etiqueta de versión y reduciendo aún más el pill/botón —
+   nunca se oculta la marca $DOLLARDGT ni se rompe el layout. */
+@media (max-width:360px){
+    .brand .version{display:none;}
+    .session-pill{max-width:82px;font-size:10.5px;padding:0 9px;}
+    .member-btn{font-size:10.5px;padding:0 10px;}
 }
-select.dgt-select:invalid, select.dgt-select option[value=""]{ color:var(--muted); }
-.field-label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
-select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--green);}
-.dgt-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;z-index:160;backdrop-filter:blur(4px);}
-.dgt-modal.active{display:flex;}
-.dgt-modal-card{background:#141414;border:1px solid #2a2a2a;border-radius:24px 24px 0 0;width:100%;max-width:28rem;max-height:88vh;overflow-y:auto;padding:1.5rem;}
-@media(min-width:480px){ .dgt-modal{align-items:center;} .dgt-modal-card{border-radius:24px;} }
-.dgt-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid #3a3a3a;color:var(--text);padding:.75rem 1.25rem;border-radius:9999px;font-size:.8rem;z-index:180;opacity:0;transition:opacity .2s;}
-.dgt-toast.show{opacity:1;}
-#hook-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:170;display:none;align-items:center;justify-content:center;padding:1.25rem;opacity:0;transition:opacity .3s ease;}
-#hook-backdrop.show{display:flex;opacity:1;}
-#hook-card{width:100%;max-width:24rem;background:#0a0a0a;border:1.5px solid rgba(0,191,255,.55);border-radius:20px;padding:1.75rem 1.5rem;transform:scale(.85);transition:transform .4s cubic-bezier(.2,1.6,.35,1);box-shadow:0 25px 60px -12px rgba(0,0,0,.9), 0 0 0 1px rgba(0,191,255,.08);}
-#hook-backdrop.show #hook-card{transform:scale(1);}
-@keyframes hookPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,191,255,.35)}50%{box-shadow:0 0 0 10px rgba(0,191,255,0)}}
-#hook-card{animation:hookPulse 2.2s ease-in-out infinite;}
-.glass{background:linear-gradient(180deg,rgba(22,22,22,.9),rgba(10,10,10,.9));}
-.gold-border{border:1px solid rgba(0,191,255,.35);}
 
-/* ===== Sub-tabs de la pantalla Global (Buscar / Por Rareza) ===== */
-.global-tabs{display:flex;gap:8px;margin-top:12px;flex-shrink:0;}
-.global-tab{flex:1;height:clamp(38px,9vw,44px);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(11px,3.2vw,13px);font-weight:800;border:1.5px solid var(--line);background:var(--card);color:#c0c0c0;}
-.global-tab.active{background:linear-gradient(180deg,var(--yellow),#0099cc);color:#0a0a0a;border-color:transparent;}
-.rarity-chip-row{display:flex;gap:6px;overflow-x:auto;flex-shrink:0;margin-top:10px;padding-bottom:2px;}
-.rarity-chip{flex-shrink:0;font-size:10px;font-weight:800;padding:6px 10px;border-radius:999px;background:var(--card);border:1.5px solid var(--line);color:#c0c0c0;white-space:nowrap;}
-.rarity-chip.active{background:rgba(0,191,255,.15);border-color:rgba(0,191,255,.4);color:var(--yellow);}
-.compact-empty{flex:1;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;text-align:center;padding:0 20px;}
+.card{background:linear-gradient(160deg,var(--card),var(--card-2));border:1px solid var(--border);
+    border-radius:var(--radius);box-shadow:0 12px 30px rgba(0,0,0,.4);}
+
+/* ===================== INICIO ===================== */
+.home-view{gap:clamp(9px,1.6vh,12px);}
+.leader-card{padding:clamp(13px,2vh,16px);flex-shrink:0;position:relative;overflow:hidden;
+    border-color:rgba(0,200,255,.28);
+    box-shadow:0 12px 30px rgba(0,0,0,.4),inset 0 0 0 1px rgba(0,200,255,.05);}
+.leader-card::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(420px 120px at 50% -20%,rgba(0,200,255,.12),transparent 70%);}
+.leader-title{color:var(--blue);font-size:11px;font-weight:900;letter-spacing:2.5px;text-align:center;
+    margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;}
+#leaderRankTag{font-family:var(--font-mono);color:var(--gray-dim)!important;font-weight:700!important;
+    font-size:10px;letter-spacing:.5px;}
+.leader-bill{background:var(--bg-2);border:1px solid rgba(0,200,255,.3);border-radius:12px;padding:12px 10px;
+    text-align:center;font-size:clamp(18px,5.4vw,24px);font-weight:800;letter-spacing:2px;color:var(--blue);
+    position:relative;text-shadow:0 0 18px rgba(0,200,255,.3);}
+.leader-details{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;font-size:11.5px;
+    color:var(--gray);position:relative;}
+.leader-details span{background:var(--field-2);padding:8px 10px;border-radius:9px;display:flex;
+    justify-content:space-between;gap:6px;border:1px solid var(--border);}
+.leader-details .value{color:var(--white);font-weight:800;}
+.leader-details .value[data-rarity]{color:var(--r-comun);}
+.leader-details .value[data-rarity="SOLID"]{color:var(--r-solid);}
+.leader-details .value[data-rarity="RADAR"]{color:var(--r-radar);}
+.leader-details .value[data-rarity="LADDER"]{color:var(--r-ladder);}
+.leader-details .value[data-rarity="REPEATER"]{color:var(--r-repeater);}
+.leader-details .value[data-rarity="BINARY"]{color:var(--r-binary);}
+.leader-details .value[data-rarity="SEMI-SOLID"]{color:var(--r-semi);}
+.leader-rank{text-align:center;margin-top:8px;color:var(--gray-dim);font-size:10px;}
+
+.stats-card{flex:1;padding:clamp(14px,2.4vh,18px);display:flex;flex-direction:column;gap:clamp(11px,1.8vh,14px);min-height:0;}
+.stats-title{color:var(--white);font-size:13px;font-weight:900;letter-spacing:2px;text-align:center;
+    text-transform:uppercase;}
+/* Barra de distribución de rareza en la bóveda — reemplaza la gráfica decorativa
+   sin significado; cada segmento representa el % real de billetes de esa rareza. */
+.rarity-dist-label{flex-shrink:0;color:var(--gray);font-size:9.5px;font-weight:850;letter-spacing:1.2px;
+    text-align:center;text-transform:uppercase;margin-top:-2px;}
+.rarity-dist-bar{flex-shrink:0;display:flex;width:100%;height:clamp(22px,3.6vh,28px);border-radius:999px;
+    overflow:hidden;background:var(--field-2);border:1px solid var(--border);}
+.rarity-dist-seg{height:100%;min-width:6px;transition:width .5s ease;}
+.rarity-dist-legend{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;
+    gap:6px 10px;align-content:center;}
+.rarity-dist-item{display:flex;align-items:center;gap:6px;color:var(--gray);font-size:10.5px;font-weight:700;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rarity-dist-item .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px currentColor;}
+.stats-row{display:flex;justify-content:space-around;gap:10px;flex-shrink:0;}
+.stat-item{background:var(--field-2);border-radius:13px;padding:12px 10px;text-align:center;flex:1;
+    border:1px solid var(--border);}
+.stat-value{color:var(--green);font-size:22px;font-weight:900;line-height:1.1;}
+.stat-label{color:var(--gray);font-size:9.5px;letter-spacing:1.2px;margin-top:3px;text-transform:uppercase;}
+.login-prompt{background:linear-gradient(180deg,rgba(0,255,136,.06),transparent);
+    border:1px solid rgba(0,255,136,.18);border-radius:12px;padding:12px;text-align:center;color:var(--gray);
+    font-size:11.5px;flex-shrink:0;cursor:pointer;line-height:1.5;transition:border-color .15s;}
+.login-prompt:active{border-color:var(--green);}
+
+/* ===================== REGISTRAR ===================== */
+/* ===================== REGISTRAR =====================
+   Layout vertical proporcional que cabe sin scroll de iPhone SE (375px)
+   a Pro Max (430px). Cada sección tiene un tamaño mínimo fijo y el teclado
+   es el único elemento flexible que absorbe el espacio sobrante, de modo
+   que nunca aplasta a los selects de año/país ni domina la pantalla. */
+.register-view{gap:clamp(5px,1.1vh,9px);}
+.serial-display{flex-shrink:0;min-height:clamp(46px,7vh,58px);display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--green);border-radius:14px;
+    background:linear-gradient(180deg,rgba(0,255,136,.06),var(--bg-2));color:var(--green);
+    font-size:clamp(20px,6vw,30px);font-weight:800;letter-spacing:5px;text-align:center;white-space:nowrap;
+    overflow:hidden;box-shadow:0 0 0 1px rgba(0,255,136,.15),inset 0 0 24px rgba(0,255,136,.06);
+    text-shadow:0 0 14px rgba(0,255,136,.3);}
+.serial-display.placeholder{color:var(--gray-dim);letter-spacing:1px;font-size:clamp(13px,4vw,17px);
+    font-weight:700;text-shadow:none;border-color:var(--border-2);background:var(--bg-2);}
+.counter-row{flex-shrink:0;display:flex;justify-content:space-between;color:var(--gray);font-size:11.5px;
+    font-weight:700;padding:0 2px;}
+#serialPreview{color:var(--gray-dim)!important;}
+.rarity-preview{flex-shrink:0;min-height:clamp(30px,4.4vh,36px);display:flex;align-items:center;justify-content:center;gap:8px;
+    border:1px solid var(--r-comun);border-radius:11px;background:rgba(124,135,141,.08);
+    color:var(--r-comun);font-size:13px;font-weight:850;letter-spacing:.6px;transition:all .2s;}
+.rarity-preview::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor;
+    box-shadow:0 0 10px currentColor;}
+.rarity-preview.empty{color:var(--gray-dim);border-color:var(--border);background:var(--field-2);
+    font-weight:600;font-size:11.5px;letter-spacing:.2px;}
+.rarity-preview.empty::before{display:none;}
+/* color por rareza en el preview en vivo */
+.rarity-preview[data-rarity="SOLID"]{color:var(--r-solid);border-color:var(--r-solid);background:rgba(166,250,255,.1);}
+.rarity-preview[data-rarity="RADAR"]{color:var(--r-radar);border-color:var(--r-radar);background:rgba(0,200,255,.08);}
+.rarity-preview[data-rarity="LADDER"]{color:var(--r-ladder);border-color:var(--r-ladder);background:rgba(0,255,136,.08);}
+.rarity-preview[data-rarity="REPEATER"]{color:var(--r-repeater);border-color:var(--r-repeater);background:rgba(34,224,200,.08);}
+.rarity-preview[data-rarity="BINARY"]{color:var(--r-binary);border-color:var(--r-binary);background:rgba(18,165,232,.08);}
+.rarity-preview[data-rarity="SEMI-SOLID"]{color:var(--r-semi);border-color:var(--r-semi);background:rgba(111,159,201,.08);}
+
+.letter-grid{flex-shrink:0;display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(6px,1.4vw,8px);}
+.letter-select{position:relative;}
+.letter-select .req{position:absolute;top:-7px;left:8px;background:var(--bg);color:var(--green);
+    font-size:9px;font-weight:900;padding:0 5px;letter-spacing:.5px;border-radius:4px;z-index:1;}
+.letter-select select{width:100%;min-height:clamp(42px,6vh,48px);padding:0 26px 0 8px;appearance:none;-webkit-appearance:none;
+    border:1px solid var(--border-2);border-radius:12px;background:var(--field);color:var(--green);font-size:19px;
+    font-weight:900;text-align:center;text-align-last:center;cursor:pointer;outline:none;transition:border-color .15s;}
+.letter-select select:focus{border-color:var(--green);}
+.letter-select::after{content:"";position:absolute;right:12px;top:50%;width:7px;height:7px;
+    border-right:2px solid var(--green);border-bottom:2px solid var(--green);
+    transform:translateY(-70%) rotate(45deg);pointer-events:none;}
+
+.keyboard{flex:1 1 auto;min-height:clamp(150px,26vh,320px);display:flex;flex-direction:column;padding:clamp(6px,1.2vh,10px);
+    border:1px solid var(--border);border-radius:14px;background:linear-gradient(160deg,var(--card),var(--card-2));}
+.keyboard-header{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;
+    color:var(--gray);font-size:10px;font-weight:900;letter-spacing:1.5px;}
+.keyboard-header .hash{color:var(--green);font-size:18px;font-family:var(--font-mono);}
+.number-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);
+    gap:clamp(6px,1.1vh,8px);min-height:0;}
+.num-btn{height:100%;min-height:0;border:1px solid var(--border-2);border-radius:11px;background:var(--field);
+    color:var(--white);font-size:clamp(18px,2.7vh,22px);font-weight:800;cursor:pointer;display:flex;align-items:center;
+    justify-content:center;transition:transform .08s,background .15s,border-color .15s;}
+.num-btn:active{transform:scale(.93);background:rgba(0,255,136,.1);border-color:var(--green);}
+.num-btn.delete{color:var(--danger);border-color:rgba(255,93,108,.3);}
+.num-btn.clear{color:var(--gray);}
+.info-grid{flex-shrink:0;display:grid;grid-template-columns:1fr 1fr;gap:clamp(6px,1.4vw,8px);}
+.select-card{position:relative;min-height:clamp(42px,6vh,48px);border:1px solid var(--border);border-radius:12px;
+    background:var(--field);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:6px 8px;transition:border-color .15s;}
+.select-card:focus-within{border-color:var(--green);}
+.select-card.full{flex-shrink:0;min-height:clamp(42px,6vh,48px);}
+.select-label{margin-bottom:2px;color:var(--gray);font-size:9px;font-weight:850;letter-spacing:.8px;
+    text-align:center;text-transform:uppercase;}
+.select-card select,.select-card input{width:100%;padding:0 24px 0 6px;appearance:none;-webkit-appearance:none;
+    border:0;outline:none;background:transparent;color:var(--white);font-size:15px;font-weight:800;
+    text-align:center;text-align-last:center;cursor:pointer;}
+.select-card::after{content:"";position:absolute;right:12px;top:60%;width:6px;height:6px;
+    border-right:2px solid var(--gray);border-bottom:2px solid var(--gray);
+    transform:translateY(-50%) rotate(45deg);pointer-events:none;}
+.select-card.no-arrow::after{content:"";border:0;}
+
+.register-button{flex-shrink:0;width:100%;min-height:clamp(46px,6.2vh,52px);border:0;border-radius:14px;
+    background:linear-gradient(135deg,var(--green-2),var(--green));color:#04140a;font-size:clamp(15px,2.4vh,17px);font-weight:900;
+    cursor:pointer;letter-spacing:.5px;transition:transform .1s,filter .15s;
+    box-shadow:0 10px 26px rgba(0,255,136,.22);display:flex;align-items:center;justify-content:center;gap:9px;}
+.register-button:active{transform:scale(.97);}
+/* ---- estado deshabilitado / procesando (aplicar clase .processing o [disabled] desde tu JS) ---- */
+.register-button:disabled,.register-button.processing{filter:grayscale(.5);opacity:.6;cursor:not-allowed;
+    box-shadow:none;background:linear-gradient(135deg,#1c2b22,#12241a);color:var(--gray);}
+.register-button.processing::before{content:"";width:17px;height:17px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.25);border-top-color:var(--green);animation:dgt-spin .7s linear infinite;}
+
+.message{flex-shrink:0;min-height:16px;color:var(--gray);font-size:11.5px;text-align:center;font-weight:600;
+    line-height:1.35;}
+.message strong{font-family:var(--font-mono);}
+
+/* ===================== BÚSQUEDA ===================== */
+.search-view{gap:10px;}
+.search-title{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-shrink:0;}
+.search-title-main{display:flex;align-items:center;gap:9px;min-width:0;}
+.search-title .dot{width:11px;height:11px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 12px rgba(0,255,136,.6);animation:dgt-pulse 2s ease-in-out infinite;}
+.search-title span:last-child{font-size:15px;font-weight:900;letter-spacing:1.5px;color:var(--white);}
+.toque-alert-btn{position:relative;flex-shrink:0;width:40px;height:40px;border-radius:12px;
+    background:var(--field-2);border:1px solid var(--border);display:flex;align-items:center;
+    justify-content:center;font-size:17px;cursor:pointer;color:var(--white);
+    transition:border-color .15s,transform .1s;}
+.toque-alert-btn:active{transform:scale(.92);border-color:var(--blue);}
+.search-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;}
+.search-btn,.rare-btn{min-height:50px;border-radius:14px;font-size:14px;font-weight:850;border:none;
+    cursor:pointer;transition:transform .1s,border-color .15s;}
+.search-btn:active,.rare-btn:active{transform:scale(.97);}
+.search-btn{border:1px solid var(--border-2);background:var(--field);color:var(--white);}
+.search-btn:active{border-color:var(--green);}
+.rare-btn{background:linear-gradient(180deg,var(--blue),var(--blue-2));color:#04141c;
+    box-shadow:0 8px 20px rgba(59,201,255,.2);}
+.filter-wrapper{flex-shrink:0;overflow-x:auto;scrollbar-width:none;margin:0 -2px;padding:0 2px;}
+.filter-wrapper::-webkit-scrollbar{display:none;}
+.filters{display:flex;gap:7px;width:max-content;padding:1px 0;}
+.filter-btn{min-height:38px;padding:0 14px;border:1px solid var(--border-2);border-radius:11px;
+    background:var(--field);color:var(--gray);font-size:11px;font-weight:850;white-space:nowrap;cursor:pointer;
+    letter-spacing:.4px;display:flex;align-items:center;gap:6px;transition:all .15s;}
+.filter-btn::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;
+    box-shadow:0 0 8px currentColor;opacity:.9;}
+/* color por rareza en cada chip (data-rarity ya existe en el JS) */
+.filter-btn[data-rarity="SOLID"]{color:var(--r-solid);}
+.filter-btn[data-rarity="RADAR"]{color:var(--r-radar);}
+.filter-btn[data-rarity="LADDER"]{color:var(--r-ladder);}
+.filter-btn[data-rarity="REPEATER"]{color:var(--r-repeater);}
+.filter-btn[data-rarity="BINARY"]{color:var(--r-binary);}
+.filter-btn[data-rarity="SEMI-SOLID"]{color:var(--r-semi);}
+.filter-btn[data-rarity="COMUN"]{color:var(--r-comun);}
+.filter-btn.active{border-color:currentColor;background:rgba(255,255,255,.04);
+    box-shadow:0 0 0 1px currentColor,0 6px 16px rgba(0,0,0,.3);}
+
+.results-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 2px 6px;min-height:0;
+    display:flex;flex-direction:column;gap:9px;}
+.results-scroll::-webkit-scrollbar{width:0;}
+.result-card{padding:14px;border:1px solid var(--border);border-radius:14px;
+    background:linear-gradient(160deg,var(--card),var(--card-2));flex-shrink:0;position:relative;
+    overflow:hidden;transition:border-color .15s,transform .1s;}
+.result-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--r-comun);
+    box-shadow:0 0 12px var(--r-comun);}
+.result-card:active{transform:scale(.995);}
+/* franja de color por rareza en cada tarjeta */
+.result-card[data-rarity="SOLID"]::before{background:var(--r-solid);box-shadow:0 0 12px var(--r-solid);}
+.result-card[data-rarity="RADAR"]::before{background:var(--r-radar);box-shadow:0 0 12px var(--r-radar);}
+.result-card[data-rarity="LADDER"]::before{background:var(--r-ladder);box-shadow:0 0 12px var(--r-ladder);}
+.result-card[data-rarity="REPEATER"]::before{background:var(--r-repeater);box-shadow:0 0 12px var(--r-repeater);}
+.result-card[data-rarity="BINARY"]::before{background:var(--r-binary);box-shadow:0 0 12px var(--r-binary);}
+.result-card[data-rarity="SEMI-SOLID"]::before{background:var(--r-semi);box-shadow:0 0 12px var(--r-semi);}
+.result-card[data-rarity="COMUN"]::before{background:var(--r-comun);box-shadow:none;}
+/* indicador especial billete ★ Estrella */
+.result-card[data-star="true"]{border-color:rgba(166,250,255,.4);
+    box-shadow:0 0 0 1px rgba(166,250,255,.22),0 10px 26px rgba(0,0,0,.4);}
+.result-card[data-star="true"] .serial{color:var(--r-star);text-shadow:0 0 14px rgba(166,250,255,.4);}
+.result-card[data-star="true"]::after{content:"★ ESTRELLA";position:absolute;top:9px;right:12px;
+    font-family:var(--font-sans);font-size:8.5px;font-weight:900;letter-spacing:1px;color:#00202a;
+    background:linear-gradient(180deg,var(--r-star),var(--blue));padding:3px 7px;border-radius:6px;
+    box-shadow:0 0 12px rgba(166,250,255,.4);}
+.result-content{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding-left:6px;}
+.serial{font-size:15px;font-weight:800;letter-spacing:1px;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;color:var(--white);}
+.points{color:var(--blue);font-weight:900;font-size:15px;white-space:nowrap;
+    text-shadow:0 0 12px rgba(59,201,255,.25);}
+.actions{display:flex;gap:7px;}
+.action{width:44px;height:44px;border:1px solid var(--border-2);border-radius:12px;background:var(--field);
+    font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:transform .1s,border-color .15s,background .15s;}
+.action:active{transform:scale(.9);}
+.action.favorite.active{border-color:rgba(255,59,82,.6);background:rgba(255,59,82,.1);color:var(--red);}
+.action.toque:active{border-color:var(--blue);background:var(--blue-glow);}
+.result-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;color:var(--gray);font-size:11px;
+    align-items:center;}
+.owner{margin-top:5px;color:var(--green);font-size:11px;font-weight:800;font-family:var(--font-mono);}
+.empty-note{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    color:var(--gray);font-size:13px;text-align:center;padding:36px 20px;font-weight:600;}
+.empty-note::before{content:"";width:48px;height:48px;border-radius:14px;border:1px dashed var(--border-2);
+    background:radial-gradient(circle at 50% 40%,rgba(59,201,255,.08),transparent 70%);}
+.more-btn{width:100%;min-height:48px;border:1px dashed var(--border-2);border-radius:14px;background:transparent;
+    color:var(--blue);font-size:13px;font-weight:900;cursor:pointer;flex-shrink:0;letter-spacing:.4px;
+    transition:border-color .15s,background .15s;}
+.more-btn:active{border-color:var(--blue);background:var(--blue-glow);}
+
+/* ===================== ESTADOS: CARGA / ERROR ===================== */
+.skeleton{position:relative;overflow:hidden;background:var(--field-2);border-radius:14px;
+    border:1px solid var(--border);}
+.skeleton.skeleton-card{min-height:78px;}
+.skeleton::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+    animation:dgt-shimmer 1.3s infinite;}
+.dgt-spinner{display:inline-block;width:20px;height:20px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.18);border-top-color:var(--green);animation:dgt-spin .7s linear infinite;}
+.loading-note{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    color:var(--gray);font-size:12px;padding:30px;}
+.error-banner{display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:12px;
+    border:1px solid rgba(255,59,82,.4);background:rgba(255,59,82,.08);color:var(--danger);font-size:12px;
+    font-weight:700;line-height:1.4;margin-bottom:10px;}
+.error-banner::before{content:"!";flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--red);
+    color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:13px;}
+
+/* ===================== MODALES ===================== */
+.modal{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;padding:14px;
+    background:rgba(2,4,5,.78);backdrop-filter:blur(10px);z-index:100;}
+.modal.open{display:flex;animation:dgt-fade .18s ease;}
+.modal-card{width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:22px;
+    border:1px solid var(--border-2);border-radius:20px 20px 16px 16px;
+    background:linear-gradient(180deg,var(--card),var(--card-2));
+    box-shadow:0 -12px 50px rgba(0,0,0,.6);animation:dgt-rise .24s cubic-bezier(.2,.8,.2,1);}
+.modal-card::before{content:"";display:block;width:40px;height:4px;border-radius:999px;background:var(--border-2);
+    margin:-6px auto 16px;}
+.modal-title{margin:0 0 16px;font-size:17px;font-weight:900;display:flex;align-items:center;
+    justify-content:space-between;gap:10px;letter-spacing:.2px;}
+.modal-close{background:none;border:0;color:var(--gray);font-size:20px;cursor:pointer;line-height:1;
+    width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;
+    flex-shrink:0;transition:background .15s;}
+.modal-close:active{background:var(--field);}
+.modal-field{width:100%;min-height:50px;padding:0 15px;border:1px solid var(--border-2);border-radius:13px;
+    background:var(--field);color:var(--white);font-size:16px;outline:none;margin-bottom:11px;
+    transition:border-color .15s;}
+.modal-field::placeholder{color:var(--gray-dim);}
+.modal-field:focus{border-color:var(--green);}
+.modal-actions{display:flex;gap:10px;margin-top:8px;}
+.modal-actions button{flex:1;min-height:48px;border:0;border-radius:13px;font-size:14px;font-weight:850;
+    cursor:pointer;letter-spacing:.3px;transition:transform .1s,filter .15s;}
+.modal-actions button:active{transform:scale(.97);}
+.btn-secondary{background:var(--field);color:var(--white);border:1px solid var(--border-2)!important;}
+.btn-primary{background:linear-gradient(135deg,var(--green-2),var(--green));color:#04140a;
+    box-shadow:0 8px 20px rgba(0,255,136,.2);}
+.btn-blue{background:linear-gradient(135deg,var(--blue-2),var(--blue));color:#04141c;
+    box-shadow:0 8px 20px rgba(59,201,255,.2);}
+.modal-error{color:var(--danger);font-size:12px;margin:-4px 0 10px;display:none;font-weight:700;
+    padding:9px 11px;border-radius:10px;border:1px solid rgba(255,59,82,.35);background:rgba(255,59,82,.08);}
+.modal-error.show{display:block;}
+.check-row{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--white);margin-bottom:12px;
+    line-height:1.5;padding:11px 12px;border:1px solid var(--border);border-radius:12px;background:var(--field-2);
+    cursor:pointer;}
+.check-row input{margin-top:2px;width:18px;height:18px;accent-color:var(--green);flex-shrink:0;}
+.stripe-fake-card{border:1px dashed rgba(59,201,255,.45);border-radius:14px;padding:18px;text-align:center;
+    color:var(--blue);font-size:12px;margin-bottom:14px;background:rgba(59,201,255,.06);line-height:1.6;}
+.toque-row{border:1px solid var(--border);border-radius:13px;padding:12px 14px;margin-bottom:9px;
+    background:var(--field-2);}
+.toque-row .serial{font-size:13px;}
+.toast{position:fixed;bottom:104px;left:50%;transform:translateX(-50%) translateY(8px);
+    background:rgba(20,24,28,.96);border:1px solid var(--border-2);color:var(--white);padding:12px 20px;
+    border-radius:999px;font-size:12.5px;font-weight:700;z-index:200;opacity:0;transition:opacity .2s,transform .2s;
+    pointer-events:none;max-width:90%;text-align:center;backdrop-filter:blur(10px);
+    box-shadow:0 12px 30px rgba(0,0,0,.5);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.hidden{display:none!important;}
+
+/* ===================== KEYFRAMES ===================== */
+@keyframes dgt-spin{to{transform:rotate(360deg);}}
+@keyframes dgt-shimmer{100%{transform:translateX(100%);}}
+@keyframes dgt-pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+@keyframes dgt-fade{from{opacity:0;}to{opacity:1;}}
+@keyframes dgt-rise{from{transform:translateY(30px);opacity:.4;}to{transform:translateY(0);opacity:1;}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
 </style>
 </head>
 <body>
-
 <div class="app">
 
-  <!-- ============ INICIO ============ -->
-  <div class="screen-view active" id="screen-inicio">
-    <header>
-      <div class="logo-area"><div class="logo"><span class="logo-green">$DOLLAR</span>DGT</div><span class="version">v3.0</span></div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-        <button onclick="openToquesModal()" style="position:relative;width:38px;height:38px;border-radius:12px;background:var(--card);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <span id="toques-badge" class="hidden" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--violet);color:#fff;font-size:9px;font-weight:800;height:16px;width:16px;border-radius:999px;align-items:center;justify-content:center;">0</span>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--text)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V6.5a1.75 1.75 0 0 1 3.5 0v3M11.5 9.25V5a1.75 1.75 0 0 1 3.5 0v4.5M15 9.5V7a1.75 1.75 0 0 1 3.5 0v6.5c0 3.73-2.5 6.5-6 6.5-2.2 0-3.53-.86-4.83-2.4l-3.1-3.7c-.6-.72-.5-1.8.24-2.38a1.7 1.7 0 0 1 2.2.07L8 12.5"/></svg>
-        </button>
-        <div class="pro membership-badge-clone" id="membership-badge" onclick="onMembershipBadgeClick()">👑 $5 VIDA</div>
-      </div>
-    </header>
-    <section class="welcome">
-      <div class="welcome-text">Hola, <strong id="greet-alias">invitado</strong> 👋</div>
-      <button id="session-action-btn" class="login" onclick="onSessionActionClick()" style="cursor:pointer;">Iniciar sesión</button>
-    </section>
-    <div class="section-title"><span class="live-dot"></span><span>SERIE LÍDER · TOP 5 EN VIVO</span></div>
-    <article class="leader-card" id="leader-card">
-      <div class="leader-heading"><div class="badge">BILLETE</div><div class="serial" id="leader-serial">— cargando —</div></div>
-      <div class="divider top"></div>
-      <div class="info-grid">
-        <div class="info-item"><div class="info-label">Letras:</div><div class="info-value" id="leader-letters">—</div></div>
-        <div class="info-item"><div class="info-label">Dígitos:</div><div class="info-value" id="leader-digits">—</div></div>
-        <div class="info-item"><div class="info-label">Año:</div><div class="info-value" id="leader-year">—</div></div>
-        <div class="info-item"><div class="info-label">Puntos:</div><div class="info-value points" id="leader-points">—</div></div>
-        <div class="info-item"><div class="info-label">Rareza:</div><div class="info-value" id="leader-rarity">—</div></div>
-        <div class="info-item"><div class="info-label">Dueño:</div><div class="info-value owner" id="leader-owner">—</div></div>
-      </div>
-      <div class="divider bottom"></div>
-      <div class="meta">
-        <div class="country"><span class="country-label">País:</span><span id="leader-country">—</span></div>
-        <div class="trend"><span class="trend-dot"></span><span id="leader-updated">Sin datos aún</span></div>
-      </div>
-      <div class="digit-histogram">
-        <span class="probability-label">DISTRIBUCIÓN DE DÍGITOS DE ESTE BILLETE</span>
-        <div class="hist-bars" id="leader-digit-histogram"></div>
-      </div>
-      <div class="probability">
-        <span class="probability-label">PROBABILIDAD DE RAREZA EN LA BÓVEDA</span>
-        <div class="bar" id="leader-probability-bar"></div>
-      </div>
-    </article>
-    <div style="height:13%;flex-shrink:0;display:flex;gap:10px;margin-top:12px;margin-bottom:8px;align-items:flex-start;">
-      <button onclick="goTo('registrar'); openSerieModal();" style="flex:1;height:56px;border:none;border-radius:14px;background:linear-gradient(180deg,var(--yellow),#0099cc);color:#0a0a0a;font-weight:800;font-size:clamp(12px,3.2vw,14px);display:flex;align-items:center;justify-content:center;gap:7px;">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
-        Ingresar Serie
-      </button>
-      <button onclick="goTo('global')" style="flex:1;height:56px;border:none;border-radius:14px;background:linear-gradient(180deg,var(--green),#00cc6a);color:#0a0a0a;font-weight:800;font-size:clamp(12px,3.2vw,14px);display:flex;align-items:center;justify-content:center;gap:7px;">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
-        Búsqueda Global
-      </button>
-    </div>
-  </div>
-
-  <!-- ============ GLOBAL (BÚSQUEDA) ============ -->
-  <div class="screen-view" id="screen-global">
-    <header>
-      <div class="logo-area"><div class="logo"><span class="logo-green">$DOLLAR</span>DGT</div><span class="version">v3.0</span></div>
-      <div class="pro membership-badge-clone">👑 $5 VIDA</div>
-    </header>
-    <div class="section-title" style="margin-top:6px;"><span class="live-dot"></span><span>BÚSQUEDA GLOBAL</span></div>
-    <div class="global-tabs">
-      <div class="global-tab active" id="globalTabBuscar" onclick="setGlobalTab('buscar')">🔎 Buscar</div>
-      <div class="global-tab" id="globalTabRareza" onclick="setGlobalTab('rareza')">💎 Por Rareza</div>
-    </div>
-
-    <!-- Sub-pantalla: Buscar por dígitos -->
-    <div id="globalPanelBuscar" style="display:flex;flex-direction:column;flex:1;min-height:0;">
-      <div class="search-box">
-        <input id="global-search-input" class="search-input" placeholder="Ej. 1234, AF o 5555" maxlength="12" value="A" oninput="scheduleCompactSearch()">
-      </div>
-      <div class="results-wrap" id="global-search-results">
-        <div class="compact-empty">Escribe al menos 2 dígitos para buscar</div>
-      </div>
-    </div>
-
-    <!-- Sub-pantalla: Por Rareza -->
-    <div id="globalPanelRareza" style="display:none;flex-direction:column;flex:1;min-height:0;">
-      <div class="rarity-chip-row" id="global-rarity-chips"></div>
-      <div class="results-wrap" id="global-rarity-results" style="margin-top:10px;">
-        <div class="compact-empty">Elige una rareza para ver ejemplos</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ REGISTRAR ============ -->
-  <div class="screen-view" id="screen-registrar">
-    <header>
-      <div class="logo-area"><div class="logo"><span class="logo-green">$DOLLAR</span>DGT</div><span class="version">v3.0</span></div>
-      <div class="pro membership-badge-clone">👑 $5 VIDA</div>
-    </header>
-    <div class="section-title" style="margin-top:6px;"><span class="live-dot"></span><span>REGISTRAR MI BILLETE</span></div>
-
-    <div style="flex:1;min-height:0;display:flex;flex-direction:column;margin-top:12px;overflow-y:auto;">
-      <div class="field-label">🏷️ LETRAS DEL BILLETE <span style="text-transform:none;font-weight:600;color:#666;">(solo la 1ª es obligatoria · ★ = billete estrella)</span></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;flex-shrink:0;">
-        <select class="dgt-select" id="rb-letra1"><option value="">A-Z *</option></select>
-        <select class="dgt-select" id="rb-letra2"><option value="">—</option></select>
-        <select class="dgt-select" id="rb-letra3"><option value="">—</option></select>
-      </div>
-
-      <button id="rb-open-serie-btn" onclick="openSerieModal()" style="flex-shrink:0;margin-top:14px;height:56px;border-radius:16px;border:1.5px solid rgba(0,255,135,.35);background:rgba(0,255,135,.08);color:var(--green);font-weight:900;font-size:clamp(15px,4.2vw,18px);display:flex;align-items:center;justify-content:center;gap:8px;">
-        🔢 Serie <span id="rb-serie-btn-count" style="color:var(--muted);font-weight:700;font-size:13px;">· 0/10</span>
-      </button>
-      <p id="rb-serie-preview-line" style="text-align:center;margin-top:5px;font-size:11px;color:#666;font-family:monospace;flex-shrink:0;min-height:14px;"></p>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;flex-shrink:0;">
-        <div>
-          <div class="field-label">🗓️ AÑO</div>
-          <select class="dgt-select" id="rb-anio"><option value="">Año</option></select>
+    <!-- ============ INICIO ============ -->
+    <div id="homeView" class="view active home-view">
+        <div class="app-header">
+            <div class="brand"><span class="dollar">$</span><span class="dgt-green">DOLLAR</span><span class="dgt-white">DGT</span><span class="version">v3.1</span></div>
+            <div class="greet">
+                <div class="session-pill" id="sessionPill" onclick="onSessionPillClick()">Iniciar sesión</div>
+                <button class="member-btn" id="homeMemberBtn" onclick="onMembershipClick()">👑 $5 VIDA</button>
+            </div>
         </div>
-        <div>
-          <div class="field-label">🌍 PAÍS</div>
-          <select class="dgt-select" id="rb-pais"><option value="">País</option></select>
+
+        <div class="card leader-card">
+            <div class="leader-title">🏆 SERIE LÍDER <span id="leaderRankTag" style="color:#666;font-weight:700;"></span></div>
+            <div class="leader-bill" id="leaderBill">— cargando —</div>
+            <div class="leader-details">
+                <span>Letras <span class="value" id="leaderLetters">—</span></span>
+                <span>Dígitos <span class="value" id="leaderDigits">—</span></span>
+                <span>Año <span class="value" id="leaderYear">—</span></span>
+                <span>Puntos <span class="value" id="leaderPoints">—</span></span>
+                <span>Rareza <span class="value" id="leaderRarity">—</span></span>
+                <span>Dueño <span class="value" id="leaderOwner">—</span></span>
+            </div>
         </div>
-      </div>
 
-      <div class="field-label" style="margin-top:14px;">💵 DENOMINACIÓN</div>
-      <select class="dgt-select" id="rb-denominacion" onchange="rbToggleDenomOtro()" style="flex-shrink:0;"><option value="">Selecciona denominación</option></select>
-      <input id="rb-denom-otro" type="text" placeholder="Especifica denominación (ej. 200)" class="dgt-select hidden" style="margin-top:8px;flex-shrink:0;" />
+        <div class="card stats-card">
+            <div class="stats-title">📊 ESTADÍSTICAS DE BÓVEDA</div>
+            <div class="rarity-dist-label">DISTRIBUCIÓN DE RAREZA</div>
+            <div class="rarity-dist-bar" id="statsChart"></div>
+            <div class="rarity-dist-legend" id="statsLegend"></div>
+            <div class="stats-row">
+                <div class="stat-item"><div class="stat-value" id="statSeries">—</div><div class="stat-label">SERIES</div></div>
+                <div class="stat-item"><div class="stat-value" id="statValue">—</div><div class="stat-label">VALOR</div></div>
+                <div class="stat-item"><div class="stat-value" id="statCountries">—</div><div class="stat-label">PAÍSES</div></div>
+            </div>
+            <div class="login-prompt" id="loginPrompt" onclick="onSessionPillClick()">🔐 Área de miembro disponible · Inicia sesión para ver tu bóveda personal</div>
+        </div>
+
+        <div style="flex-shrink:0;display:flex;justify-content:center;gap:16px;padding:2px 0 0;">
+            <a href="#" onclick="event.preventDefault();openLegalModal('terms')" style="color:var(--blue);font-size:10.5px;font-weight:700;text-decoration:underline;">Términos y Condiciones</a>
+            <a href="#" onclick="event.preventDefault();openLegalModal('privacy')" style="color:var(--blue);font-size:10.5px;font-weight:700;text-decoration:underline;">Política de Privacidad</a>
+        </div>
     </div>
 
-    <div class="reg-submit" id="rb-submit-btn" onclick="handleRegister()">🔐 Registrar a Bóveda</div>
-  </div>
+    <!-- ============ REGISTRAR ============ -->
+    <div id="registerView" class="view register-view">
+        <div class="app-header">
+            <div class="brand"><span class="dollar">$</span><span class="dgt-green">DOLLAR</span><span class="dgt-white">DGT</span><span class="version">v3.1</span></div>
+            <button class="member-btn" id="registerMemberBtn" onclick="onMembershipClick()">👑 $5 VIDA</button>
+        </div>
 
-  <!-- ============ MODAL: SERIE DGT (teclado numérico + rareza en vivo) ============ -->
-  <div id="serie-modal" class="dgt-modal">
-    <div class="dgt-modal-card" style="max-height:92vh;display:flex;flex-direction:column;">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-black text-green-400">🔢 Ingresar Serie DGT</h3>
-        <button onclick="closeSerieModal()" style="flex-shrink:0;height:34px;padding:0 14px;border-radius:999px;border:1.5px solid #3a3a3a;background:#1f1f1f;color:var(--text);font-weight:800;font-size:12px;">← Datos</button>
-      </div>
-      <div class="digit-display empty" id="rb-digit-display">Ingresa hasta 10 dígitos</div>
-      <p style="text-align:right;font-size:10px;color:var(--muted);margin-top:4px;" id="rb-digit-count">0 / 10 dígitos (mín. 6)</p>
-      <div class="rarity-preview" id="rb-rarity-preview" style="margin-top:6px;">Ingresa dígitos para ver la rareza en vivo</div>
-      <div class="keypad" style="height:280px;flex:none;margin-top:12px;">
-        <div class="key" onclick="rbPressNum(1)">1</div><div class="key" onclick="rbPressNum(2)">2</div><div class="key" onclick="rbPressNum(3)">3</div>
-        <div class="key" onclick="rbPressNum(4)">4</div><div class="key" onclick="rbPressNum(5)">5</div><div class="key" onclick="rbPressNum(6)">6</div>
-        <div class="key" onclick="rbPressNum(7)">7</div><div class="key" onclick="rbPressNum(8)">8</div><div class="key" onclick="rbPressNum(9)">9</div>
-        <div class="key wide" onclick="rbClearInput()">C</div><div class="key" onclick="rbPressNum(0)">0</div><div class="key wide" onclick="rbDeleteDigit()">⌫</div>
-      </div>
-      <button onclick="closeSerieModal()" style="flex-shrink:0;margin-top:12px;height:48px;border-radius:16px;background:linear-gradient(180deg,var(--green),#00cc6a);color:#0a0a0a;font-weight:900;font-size:14px;">✓ Listo, volver a Datos</button>
-    </div>
-  </div>
+        <div class="serial-display placeholder" id="serialDisplay">6 - 10 dígitos (0-9)</div>
+        <div class="counter-row"><span id="counter">0 / 10 (mín 6)</span><span id="serialPreview" style="font-family:monospace;color:#555;"></span></div>
+        <div class="rarity-preview empty" id="rarityPreview">Ingresa dígitos para ver la rareza en vivo</div>
 
-  <!-- ============ FAVORITOS ============ -->
-  <div class="screen-view" id="screen-favoritos">
-    <header>
-      <div class="logo-area"><div class="logo"><span class="logo-green">$DOLLAR</span>DGT</div><span class="version">v3.0</span></div>
-      <div class="pro membership-badge-clone">👑 $5 VIDA</div>
-    </header>
-    <div class="section-title" style="margin-top:6px;"><span class="live-dot"></span><span>MIS FAVORITOS</span></div>
-    <div class="fav-list" id="fav-list-native">
-      <div class="compact-empty">Cargando...</div>
-    </div>
-  </div>
+        <div class="letter-grid">
+            <div class="letter-select"><span class="req">1ª *</span><select id="letter1"><option value="">A-Z</option></select></div>
+            <div class="letter-select"><span class="req" style="color:#666;">2ª</span><select id="letter2"><option value="">—</option></select></div>
+            <div class="letter-select"><span class="req" style="color:#666;">final</span><select id="letter3"><option value="">—</option></select></div>
+        </div>
 
-  <!-- ============ PERFIL ============ -->
-  <div class="screen-view" id="screen-perfil">
-    <header>
-      <div class="logo-area"><div class="logo"><span class="logo-green">$DOLLAR</span>DGT</div><span class="version">v3.0</span></div>
-      <div class="pro membership-badge-clone">👑 $5 VIDA</div>
-    </header>
-    <div class="section-title" style="margin-top:6px;"><span class="live-dot"></span><span>MI PERFIL</span></div>
-    <div class="profile-card">
-      <div class="avatar" id="profile-avatar-letter">?</div>
-      <div><div class="profile-alias" id="profile-alias-native">invitado</div><div class="profile-sub" id="profile-sub-native">Inicia sesión para continuar</div></div>
-    </div>
-    <div class="stat-grid">
-      <div class="stat-box"><div class="stat-num" id="stats-mine">—</div><div class="stat-label">Billetes tuyos</div></div>
-      <div class="stat-box"><div class="stat-num" id="stats-total">—</div><div class="stat-label">Billetes en la Bóveda</div></div>
-    </div>
-    <div id="stats-rarity-bars" style="margin-top:12px;flex-shrink:0;"></div>
-    <div class="logout-btn" style="margin-top:auto;" onclick="onSessionActionClick()" id="perfil-session-btn">Iniciar sesión</div>
-    <div style="flex-shrink:0;display:flex;justify-content:center;gap:16px;margin-top:12px;padding-bottom:2px;">
-      <a href="#" onclick="event.preventDefault(); openLegalModal('terms')" style="color:var(--yellow);font-size:11px;font-weight:700;text-decoration:underline;">Términos y Condiciones</a>
-      <a href="#" onclick="event.preventDefault(); openLegalModal('privacy')" style="color:var(--yellow);font-size:11px;font-weight:700;text-decoration:underline;">Política de Privacidad</a>
-    </div>
-  </div>
+        <section class="keyboard">
+            <div class="keyboard-header hidden"><span># SERIE TECLADO 0-9</span><span class="hash">#</span></div>
+            <div class="number-grid">
+                <button class="num-btn" data-number="1">1</button><button class="num-btn" data-number="2">2</button><button class="num-btn" data-number="3">3</button>
+                <button class="num-btn" data-number="4">4</button><button class="num-btn" data-number="5">5</button><button class="num-btn" data-number="6">6</button>
+                <button class="num-btn" data-number="7">7</button><button class="num-btn" data-number="8">8</button><button class="num-btn" data-number="9">9</button>
+                <button class="num-btn clear" id="clearButton">C</button><button class="num-btn" data-number="0">0</button><button class="num-btn delete" id="deleteButton">⌫</button>
+            </div>
+        </section>
 
-  <!-- ============ BOTTOM NAV (compartido, siempre visible) ============ -->
-  <nav class="bottom-nav">
-    <button class="nav-item active" id="navBtn-inicio" onclick="goTo('inicio')">
-      <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg></span>
-      <span>Inicio</span>
+        <div class="info-grid">
+            <div class="select-card"><div class="select-label">AÑO</div><select id="yearSelect"><option value="">Año</option></select></div>
+            <div class="select-card"><div class="select-label">PAÍS</div><select id="countrySelect"><option value="">País</option></select></div>
+        </div>
+
+        <div class="select-card full" id="denomCard"><div class="select-label">DENOMINACIÓN</div><select id="denominationSelect"><option value="">Elige país primero</option></select></div>
+        <input id="denomOtroInput" class="modal-field hidden" style="display:none;margin-top:0;" placeholder="Especifica denominación (ej. 200)" />
+
+        <button id="registerButton" class="register-button" onclick="handleRegister()">🔒 Registrar a Bóveda</button>
+        <div id="message" class="message"></div>
+    </div>
+
+    <!-- ============ BÚSQUEDA ============ -->
+    <div id="searchView" class="view search-view">
+        <div class="app-header">
+            <div class="brand"><span class="dollar">$</span><span class="dgt-green">DOLLAR</span><span class="dgt-white">DGT</span><span class="version">v3.1</span></div>
+            <button class="member-btn" id="searchMemberBtn" onclick="onMembershipClick()">👑 $5 VIDA</button>
+        </div>
+
+        <div class="search-title">
+            <div class="search-title-main"><span class="dot"></span><span>BÚSQUEDA GLOBAL</span></div>
+            <button class="toque-alert-btn" id="openToquesBtn" onclick="openToquesModal()">👋
+                <span class="nav-badge" id="toquesBadgeGlobal">0</span>
+            </button>
+        </div>
+
+        <div class="search-controls">
+            <button class="search-btn" id="openSearch">🔎 Buscar</button>
+            <button class="rare-btn" id="rareButton">💎 Por Rareza</button>
+        </div>
+
+        <div class="filter-wrapper"><div class="filters" id="rarityFilters"></div></div>
+
+        <div class="results-scroll" id="resultsScroll"></div>
+    </div>
+</div>
+
+<nav class="bottom-nav">
+    <button class="nav-btn active" data-view="home">🏠 Inicio</button>
+    <button class="nav-btn" data-view="register">🔒 Registrar</button>
+    <button class="nav-btn" data-view="search">🔎 Búsqueda
+        <span class="nav-badge" id="toquesBadge">0</span>
     </button>
-    <button class="nav-item" id="navBtn-global" onclick="goTo('global')">
-      <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></span>
-      <span>Global</span>
-    </button>
-    <button class="nav-item" id="navBtn-registrar" onclick="goTo('registrar')">
-      <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg></span>
-      <span>Registrar</span>
-    </button>
-    <button class="nav-item" id="navBtn-favoritos" onclick="goTo('favoritos')">
-      <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20.8 8.7c0 5.5-8.8 10.3-8.8 10.3S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"/></svg></span>
-      <span>Favoritos</span>
-    </button>
-    <button class="nav-item" id="navBtn-perfil" onclick="goTo('perfil')">
-      <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4.2 3.6-7 8-7s8 2.8 8 7"/></svg></span>
-      <span>Perfil</span>
-    </button>
-  </nav>
+</nav>
 
+<!-- MODAL: Buscar -->
+<div class="modal" id="searchModal">
+    <div class="modal-card">
+        <div class="modal-title">Buscar serie <button class="modal-close" onclick="closeModalId('searchModal')">✕</button></div>
+        <input id="searchInput" class="modal-field" type="text" inputmode="numeric" maxlength="12" placeholder="Ej. 1234, AF o 5555" />
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="closeModalId('searchModal')">Cancelar</button>
+            <button class="btn-blue" id="executeSearch">🔎 Buscar</button>
+        </div>
+    </div>
 </div>
 
-<!-- ============ MODAL: AUTH ============ -->
-<div id="auth-modal" class="dgt-modal">
-  <div class="dgt-modal-card">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-black text-green-400">Accede a tu cuenta</h3>
-      <button onclick="closeModal('auth-modal')" class="text-zinc-500 text-xl">✕</button>
+<!-- MODAL: Auth -->
+<div class="modal" id="authModal">
+    <div class="modal-card">
+        <div class="modal-title">Accede a tu cuenta <button class="modal-close" onclick="closeModalId('authModal')">✕</button></div>
+        <input id="authEmail" class="modal-field" type="email" placeholder="Correo electrónico" />
+        <input id="authPassword" class="modal-field" type="password" placeholder="Contraseña" />
+        <p class="modal-error" id="authError"></p>
+        <div class="modal-actions">
+            <button class="btn-primary" onclick="handleAuthSubmit('signin')">Iniciar sesión</button>
+            <button class="btn-secondary" onclick="handleAuthSubmit('signup')">Registrarse</button>
+        </div>
     </div>
-    <div class="space-y-3">
-      <input id="auth-email" type="email" placeholder="Correo electrónico" class="dgt-select" />
-      <input id="auth-password" type="password" placeholder="Contraseña" class="dgt-select" />
-      <p id="auth-error" class="text-xs text-red-400 hidden"></p>
-      <div class="grid grid-cols-2 gap-3 pt-1">
-        <button id="auth-signin-btn" onclick="handleAuthSubmit('signin')" class="w-full bg-gradient-to-b from-green-400 to-green-600 text-black font-bold py-3.5 rounded-xl">
-          Iniciar sesión
-        </button>
-        <button id="auth-signup-btn" onclick="handleAuthSubmit('signup')" class="w-full bg-zinc-800 border border-zinc-700 text-white font-bold py-3.5 rounded-xl">
-          Registrarse
-        </button>
-      </div>
-    </div>
-  </div>
 </div>
 
-<!-- ============ MODAL: PERFIL RÁPIDO ============ -->
-<div id="profile-modal" class="dgt-modal">
-  <div class="dgt-modal-card">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-black text-green-400">Completa tu perfil</h3>
-      <button onclick="closeModal('profile-modal')" class="text-zinc-500 text-xl">✕</button>
+<!-- MODAL: Perfil rápido -->
+<div class="modal" id="profileModal">
+    <div class="modal-card">
+        <div class="modal-title">Completa tu perfil <button class="modal-close" onclick="closeModalId('profileModal')">✕</button></div>
+        <input id="profileNickname" class="modal-field" type="text" placeholder="Nombre para mostrar" />
+        <input id="profileAlias" class="modal-field" type="text" placeholder="Alias único (@usuario)" />
+        <input id="profileCountry" class="modal-field" type="text" placeholder="País" />
+        <p class="modal-error" id="profileError"></p>
+        <div class="modal-actions"><button class="btn-primary" style="flex:none;width:100%;" onclick="handleSaveProfile()">Guardar perfil</button></div>
     </div>
-    <div class="space-y-3">
-      <input id="profile-nickname" type="text" placeholder="Nombre para mostrar" class="dgt-select" />
-      <input id="profile-alias" type="text" placeholder="Alias único (@usuario)" class="dgt-select" />
-      <input id="profile-country" type="text" placeholder="País" class="dgt-select" />
-      <p id="profile-error" class="text-xs text-red-400 hidden"></p>
-      <button onclick="handleSaveProfile()" class="w-full bg-gradient-to-b from-green-400 to-green-600 text-black font-bold py-3 rounded-xl">
-        Guardar perfil
-      </button>
-    </div>
-  </div>
 </div>
 
-<!-- ============ MODAL: CONSENTIMIENTO ============ -->
-<div id="consent-modal" class="dgt-modal">
-  <div class="dgt-modal-card">
-    <h3 class="text-lg font-black text-green-400 mb-3">Antes de continuar</h3>
-    <div class="space-y-3 text-sm">
-      <label class="flex items-start gap-2"><input type="checkbox" id="consent-terms" class="mt-1"> Acepto los <a href="#" onclick="event.preventDefault(); openLegalModal('terms')" class="text-green-400 underline">Términos y Condiciones</a></label>
-      <label class="flex items-start gap-2"><input type="checkbox" id="consent-privacy" class="mt-1"> Acepto la <a href="#" onclick="event.preventDefault(); openLegalModal('privacy')" class="text-green-400 underline">Política de Privacidad</a></label>
-      <label class="flex items-start gap-2"><input type="checkbox" id="consent-age" class="mt-1"> Confirmo que soy mayor de 18 años</label>
-      <p id="consent-error" class="text-xs text-red-400 hidden"></p>
-      <button onclick="handleAcceptConsent()" class="w-full bg-gradient-to-b from-green-400 to-green-600 text-black font-bold py-3 rounded-xl mt-2">
-        Aceptar y continuar
-      </button>
+<!-- MODAL: Consentimiento -->
+<div class="modal" id="consentModal">
+    <div class="modal-card">
+        <div class="modal-title">Antes de continuar</div>
+        <label class="check-row"><input type="checkbox" id="consentTerms"> Acepto los <a href="#" onclick="event.preventDefault();event.stopPropagation();openLegalModal('terms')" style="color:var(--blue);text-decoration:underline;">Términos y Condiciones</a></label>
+        <label class="check-row"><input type="checkbox" id="consentPrivacy"> Acepto la <a href="#" onclick="event.preventDefault();event.stopPropagation();openLegalModal('privacy')" style="color:var(--blue);text-decoration:underline;">Política de Privacidad</a></label>
+        <label class="check-row"><input type="checkbox" id="consentAge"> Confirmo que soy mayor de 18 años</label>
+        <p class="modal-error" id="consentError"></p>
+        <div class="modal-actions"><button class="btn-primary" style="flex:none;width:100%;" onclick="handleAcceptConsent()">Aceptar y continuar</button></div>
     </div>
-  </div>
 </div>
 
-<!-- ============ MODAL: VER MÁS RESULTADOS ============ -->
-<div id="see-more-modal" class="dgt-modal">
-  <div class="dgt-modal-card" style="max-height:85vh;">
-    <div class="flex items-center justify-between mb-4">
-      <h3 id="see-more-title" class="text-lg font-black text-blue-400">Más resultados</h3>
-      <button onclick="closeModal('see-more-modal')" class="text-zinc-500 text-xl">✕</button>
+<!-- MODAL: Legal (Términos / Privacidad) -->
+<div class="modal" id="legalModal">
+    <div class="modal-card" style="max-height:85vh;">
+        <div class="modal-title"><span id="legalModalTitleText">Términos y Condiciones</span><button class="modal-close" onclick="closeModalId('legalModal')">✕</button></div>
+        <div id="legalModalBody" style="font-size:12.5px;color:var(--gray);line-height:1.65;max-height:65vh;overflow-y:auto;padding-right:2px;"></div>
     </div>
-    <div id="see-more-body" class="space-y-3 max-h-[65vh] overflow-y-auto"></div>
-  </div>
 </div>
 
-<!-- ============ MODAL: LEGAL (Términos / Privacidad) ============ -->
-<div id="legal-modal" class="dgt-modal">
-  <div class="dgt-modal-card" style="max-height:85vh; padding:0;">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800 sticky top-0 bg-[#141414] z-10">
-      <h3 id="legal-modal-title" class="text-base font-black text-white">Términos y Condiciones</h3>
-      <button onclick="closeModal('legal-modal')" class="text-zinc-500 text-xl">✕</button>
+<!-- MODAL: Membresía (placeholder de Stripe) -->
+<div class="modal" id="membershipModal">
+    <div class="modal-card">
+        <div class="modal-title">👑 Membresía $5 de por vida <button class="modal-close" onclick="closeModalId('membershipModal')">✕</button></div>
+        <div id="membershipLoading" style="text-align:center;color:var(--gray);font-size:12px;padding:20px 0;">Cargando pasarela segura...</div>
+        <div id="realPaymentElement" style="margin-bottom:14px;"></div>
+        <div class="modal-actions"><button class="btn-blue" id="membershipPayBtn" style="flex:none;width:100%;" onclick="handleStripePay()">Confirmar pago de $5</button></div>
     </div>
-    <div id="legal-modal-body" class="px-6 py-4 space-y-4 text-sm text-zinc-400 leading-relaxed overflow-y-auto"></div>
-  </div>
 </div>
 
-<!-- ============ MODAL: TOQUES PRIVADOS ============ -->
-<div id="toques-modal" class="dgt-modal">
-  <div class="dgt-modal-card" style="max-height:88vh;">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-black text-blue-400">👋 Toques Privados</h3>
-      <button onclick="closeModal('toques-modal')" class="text-zinc-500 text-xl">✕</button>
+<!-- MODAL: Toques privados -->
+<div class="modal" id="toquesModal">
+    <div class="modal-card">
+        <div class="modal-title">👋 Toques Privados <button class="modal-close" onclick="closeModalId('toquesModal')">✕</button></div>
+        <div id="toquesList"></div>
     </div>
-    <div class="flex gap-2 mb-4">
-      <button id="toques-tab-recibidos" onclick="rbSwitchToquesTab('recibidos')" class="rb-tab-btn active flex-1 rounded-xl py-2 text-xs font-bold">Recibidos</button>
-      <button id="toques-tab-enviados" onclick="rbSwitchToquesTab('enviados')" class="rb-tab-btn flex-1 rounded-xl py-2 text-xs font-bold">Enviados</button>
-    </div>
-    <div id="toques-panel-recibidos" class="space-y-2 max-h-[55vh] overflow-y-auto">
-      <p class="text-xs text-zinc-600 text-center py-6">Cargando...</p>
-    </div>
-    <div id="toques-panel-enviados" class="space-y-2 max-h-[55vh] overflow-y-auto hidden">
-      <p class="text-xs text-zinc-600 text-center py-6">Cargando...</p>
-    </div>
-  </div>
 </div>
 
-<!-- ============ MODAL: CHAT PRIVADO ============ -->
-<div id="chat-modal" class="dgt-modal">
-  <div class="dgt-modal-card" style="max-height:88vh; display:flex; flex-direction:column; padding:0;">
-    <div class="flex items-center justify-between p-4 border-b border-zinc-800 shrink-0">
-      <div>
-        <p id="chat-with-label" class="font-black text-white text-sm">Chat</p>
-        <p id="chat-serial-label" class="font-mono text-xs text-blue-400"></p>
-      </div>
-      <button onclick="closeModal('chat-modal')" class="text-zinc-500 text-xl">✕</button>
-    </div>
-    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3" style="min-height:40vh;">
-    </div>
-    <div class="p-3 border-t border-zinc-800 flex gap-2 shrink-0">
-      <input id="chat-input" type="text" placeholder="Mensaje privado..." class="dgt-select flex-1" onkeydown="if(event.key==='Enter') sendChatMessage()" />
-      <button onclick="sendChatMessage()" class="h-11 w-11 rounded-xl bg-blue-500 text-white font-black shrink-0">↑</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ MODAL: STRIPE ============ -->
-<div id="stripe-sim-modal" class="dgt-modal">
-  <div class="dgt-modal-card" style="max-height:92vh;">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-black text-blue-400">👑 Membresía $5 de por vida</h3>
-      <button onclick="closeModal('stripe-sim-modal')" class="text-zinc-500 text-xl">✕</button>
-    </div>
-    <div id="stripe-form-body" class="hidden">
-      <div id="real-payment-loading" class="text-center text-sm text-zinc-500 py-8">Cargando pasarela segura...</div>
-      <div id="realPaymentElement" class="mb-4"></div>
-      <button id="stripe-sim-pay" onclick="handleStripePay()" class="w-full bg-gradient-to-b from-blue-300 to-blue-500 text-black font-bold py-3 rounded-xl">
-        Confirmar pago de $5
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ POP-UP GANCHO DE BIENVENIDA ============ -->
-<div id="hook-backdrop" onclick="if(event.target===this) dismissHookCard()">
-  <div id="hook-card" class="relative text-center">
-    <button onclick="dismissHookCard()" class="absolute -top-1 -right-1 text-zinc-500 text-xl leading-none h-8 w-8 flex items-center justify-center">✕</button>
-    <p class="text-5xl mb-3">💵</p>
-    <p class="text-xl font-black text-white leading-snug mb-3">¿Tienes un billete de colección en tu bolsillo?</p>
-    <p class="text-sm text-zinc-400 leading-relaxed mb-5">Un número de serie raro o un detalle oculto puede multiplicar el valor de tu dinero. Nunca sabes si un coleccionista lo está buscando justo hoy.</p>
-    <button onclick="dismissHookCard(); rbGoToRegister();" class="w-full bg-gradient-to-b from-blue-300 to-blue-500 text-black text-sm font-black py-3.5 rounded-xl shadow-lg shadow-blue-500/20">
-      Revisar mi billete ahora
-    </button>
-  </div>
-</div>
-
-<div id="dgt-toast" class="dgt-toast"></div>
-
+<div class="toast" id="toast"></div>
 
 <script>
+/* =====================================================================
+   $DOLLARDGT — ESQUELETO DE LÓGICA
+   Cada bloque marcado "// TODO SUPABASE" / "// TODO STRIPE" es el punto
+   exacto donde se reemplaza la simulación por la llamada real, según
+   la documentación técnica ya extraída de v7.9.
+===================================================================== */
 
-  // =========================================================
-  // 1. CONFIGURACIÓN SUPABASE + STRIPE (credenciales reales)
-  // =========================================================
-  const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
-  const SUPABASE_EDGE_FUNCTION = 'https://hvdaitsnvwigqbizirbi.supabase.co/functions/v1/stripe-lifetime';
-  const STRIPE_PUBLISHABLE_KEY = 'pk_live_51U0o31IPKX7lMjR6jorRtUXLX4QbhnVkrZaSnBVFioWRhiTZKAu8p4OR0WyPWOLiTrH0toQGzrShEoVmwW82El7w00l2e179li';
+// ---------------------------------------------------------------
+// 0. CONEXIÓN REAL — Supabase + Stripe (mismas credenciales de producción)
+// ---------------------------------------------------------------
+const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
+const SUPABASE_EDGE_FUNCTION = 'https://hvdaitsnvwigqbizirbi.supabase.co/functions/v1/stripe-lifetime';
+const STRIPE_PUBLISHABLE_KEY = 'pk_live_51U0o31IPKX7lMjR6jorRtUXLX4QbhnVkrZaSnBVFioWRhiTZKAu8p4OR0WyPWOLiTrH0toQGzrShEoVmwW82El7w00l2e179li';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+let stripe = null, elements = null;
 
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+// ---------------------------------------------------------------
+// ESTADO GLOBAL
+// ---------------------------------------------------------------
+let session = null;        // usuario real de Supabase Auth
+let profile = null;        // fila real de `profiles`
+let membershipActive = false; // `members.active` real
+let pendingAction = null;  // { type:'register'|'membership'|'toque', payload }
 
-  let user = null;
-  let profile = null;
-  let globalActive = false;
-  let stripe = null, elements = null;
-  let pendingAction = null; // 'register' | 'stripe' -> se reanuda tras login/perfil/consentimiento/pago
+sb.auth.onAuthStateChange((_event, sessionObj) => { session = sessionObj?.user || session; });
 
-  // =========================================================
-  // 2. TOASTS
-  // =========================================================
-  function showToast(msg){
-    const t = document.getElementById('dgt-toast');
+function showToast(msg){
+    const t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2600);
-  }
+    setTimeout(()=>t.classList.remove('show'), 2400);
+}
+function openModalId(id){ document.getElementById(id).classList.add('open'); }
+function closeModalId(id){ document.getElementById(id).classList.remove('open'); }
 
-  function closeModal(id){ document.getElementById(id).classList.remove('active'); }
-  function openModal(id){ document.getElementById(id).classList.add('active'); }
-
-  // =========================================================
-  // TEXTO LEGAL — Términos y Condiciones / Política de Privacidad
-  // =========================================================
-  const LEGAL_CONTENT = {
+// ---------------------------------------------------------------
+// TEXTO LEGAL — Términos y Condiciones / Política de Privacidad
+// (mismo texto ya vigente en la app de producción)
+// ---------------------------------------------------------------
+const LEGAL_CONTENT = {
     terms: {
-      title: 'Términos y Condiciones',
-      html: `
-        <p><b class="text-white">1. Aceptación</b><br>Al usar $DOLLARDGT aceptas estos términos. Debes ser mayor de 18 años.</p>
-        <p><b class="text-white">2. Servicio</b><br>Plataforma de coleccionismo de billetes que permite buscar similitudes, publicar series y contactar coleccionistas mediante toques privados. No es tasación oficial.</p>
-        <p><b class="text-white">3. Registro</b><br>Debes proporcionar datos veraces. Eres responsable de tu cuenta.</p>
-        <p><b class="text-white">4. Membresía $5</b><br>Pago único vitalicio por Stripe. Acceso a publicación, toques y chat. No reembolsable.</p>
-        <p><b class="text-white">5. Uso aceptable</b><br>No usar para fines ilegales, spam, acoso o manipulación. Podemos suspender cuentas.</p>
-        <p><b class="text-white">6. Propiedad intelectual</b><br>El contenido que publiques sigue siendo tuyo, pero otorgas licencia para mostrarlo en la app.</p>
-        <p><b class="text-white">7. Responsabilidad</b><br>La app se ofrece "tal cual". No garantizamos disponibilidad ni exactitud de valores.</p>
-        <p><b class="text-white">8. Terminación</b><br>Puedes cerrar tu cuenta en cualquier momento. Podemos cancelarla por incumplimiento.</p>
-        <p><b class="text-white">9. Modificaciones</b><br>Podemos actualizar estos términos; te notificaremos por email o en la app.</p>
-        <p><b class="text-white">10. Ley aplicable</b><br>Argentina. Contacto: support@dollardgt.com</p>
-        <p class="text-xs text-zinc-600">Última actualización: 19 de agosto de 2026</p>
-      `
+        title: 'Términos y Condiciones',
+        html: `
+            <p><b style="color:var(--white);">1. Aceptación</b><br>Al usar $DOLLARDGT aceptas estos términos. Debes ser mayor de 18 años.</p>
+            <p><b style="color:var(--white);">2. Servicio</b><br>Plataforma de coleccionismo de billetes que permite buscar similitudes, publicar series y contactar coleccionistas mediante toques privados. No es tasación oficial.</p>
+            <p><b style="color:var(--white);">3. Registro</b><br>Debes proporcionar datos veraces. Eres responsable de tu cuenta.</p>
+            <p><b style="color:var(--white);">4. Membresía $5</b><br>Pago único vitalicio por Stripe. Acceso a publicación, toques y chat. No reembolsable.</p>
+            <p><b style="color:var(--white);">5. Uso aceptable</b><br>No usar para fines ilegales, spam, acoso o manipulación. Podemos suspender cuentas.</p>
+            <p><b style="color:var(--white);">6. Propiedad intelectual</b><br>El contenido que publiques sigue siendo tuyo, pero otorgas licencia para mostrarlo en la app.</p>
+            <p><b style="color:var(--white);">7. Responsabilidad</b><br>La app se ofrece "tal cual". No garantizamos disponibilidad ni exactitud de valores.</p>
+            <p><b style="color:var(--white);">8. Terminación</b><br>Puedes cerrar tu cuenta en cualquier momento. Podemos cancelarla por incumplimiento.</p>
+            <p><b style="color:var(--white);">9. Modificaciones</b><br>Podemos actualizar estos términos; te notificaremos por email o en la app.</p>
+            <p><b style="color:var(--white);">10. Ley aplicable</b><br>Argentina. Contacto: support@dollardgt.com</p>
+            <p style="font-size:10px;color:var(--gray-dim);">Última actualización: 19 de agosto de 2026</p>
+        `
     },
     privacy: {
-      title: 'Política de Privacidad',
-      html: `
-        <p><b class="text-white">1. Responsable</b><br>$DOLLARDGT, support@dollardgt.com</p>
-        <p><b class="text-white">2. Datos recopilados</b><br>Registro (país, alias, email, WhatsApp), preferencias, uso (series, toques, chats), datos de pago (Stripe), técnicos.</p>
-        <p><b class="text-white">3. Finalidad</b><br>Gestionar cuenta, publicar en bóveda, facilitar toques/chat, procesar pagos, mejorar el servicio.</p>
-        <p><b class="text-white">4. Base legal</b><br>Consentimiento, ejecución del contrato, interés legítimo.</p>
-        <p><b class="text-white">5. Compartir datos</b><br>Supabase (almacenamiento), Stripe (pagos), otros usuarios (solo si aceptas toque), autoridades legales.</p>
-        <p><b class="text-white">6. Transferencias</b><br>Datos en EE. UU. con Supabase.</p>
-        <p><b class="text-white">7. Conservación</b><br>Mientras la cuenta esté activa o lo exija la ley.</p>
-        <p><b class="text-white">8. Derechos</b><br>Acceso, rectificación, supresión, oposición, portabilidad. Escríbenos para ejercerlos.</p>
-        <p><b class="text-white">9. Cookies</b><br>Usamos cookies para sesión. Puedes gestionarlas en tu navegador.</p>
-        <p><b class="text-white">10. Menores</b><br>No dirigida a menores de 18.</p>
-        <p><b class="text-white">11. Seguridad</b><br>Implementamos medidas técnicas, pero internet no es 100% seguro.</p>
-        <p><b class="text-white">12. Cambios</b><br>Te informaremos de cambios significativos.</p>
-        <p class="text-xs text-zinc-600">Última actualización: 19 de agosto de 2026</p>
-      `
+        title: 'Política de Privacidad',
+        html: `
+            <p><b style="color:var(--white);">1. Responsable</b><br>$DOLLARDGT, support@dollardgt.com</p>
+            <p><b style="color:var(--white);">2. Datos recopilados</b><br>Registro (país, alias, email, WhatsApp), preferencias, uso (series, toques, chats), datos de pago (Stripe), técnicos.</p>
+            <p><b style="color:var(--white);">3. Finalidad</b><br>Gestionar cuenta, publicar en bóveda, facilitar toques/chat, procesar pagos, mejorar el servicio.</p>
+            <p><b style="color:var(--white);">4. Base legal</b><br>Consentimiento, ejecución del contrato, interés legítimo.</p>
+            <p><b style="color:var(--white);">5. Compartir datos</b><br>Supabase (almacenamiento), Stripe (pagos), otros usuarios (solo si aceptas toque), autoridades legales.</p>
+            <p><b style="color:var(--white);">6. Transferencias</b><br>Datos en EE. UU. con Supabase.</p>
+            <p><b style="color:var(--white);">7. Conservación</b><br>Mientras la cuenta esté activa o lo exija la ley.</p>
+            <p><b style="color:var(--white);">8. Derechos</b><br>Acceso, rectificación, supresión, oposición, portabilidad. Escríbenos para ejercerlos.</p>
+            <p><b style="color:var(--white);">9. Cookies</b><br>Usamos cookies para sesión. Puedes gestionarlas en tu navegador.</p>
+            <p><b style="color:var(--white);">10. Menores</b><br>No dirigida a menores de 18.</p>
+            <p><b style="color:var(--white);">11. Seguridad</b><br>Implementamos medidas técnicas, pero internet no es 100% seguro.</p>
+            <p><b style="color:var(--white);">12. Cambios</b><br>Te informaremos de cambios significativos.</p>
+            <p style="font-size:10px;color:var(--gray-dim);">Última actualización: 19 de agosto de 2026</p>
+        `
     }
-  };
-  function openLegalModal(which){
+};
+function openLegalModal(which){
     const content = LEGAL_CONTENT[which];
     if (!content) return;
-    document.getElementById('legal-modal-title').textContent = content.title;
-    document.getElementById('legal-modal-body').innerHTML = content.html;
-    openModal('legal-modal');
-  }
+    document.getElementById('legalModalTitleText').textContent = content.title;
+    document.getElementById('legalModalBody').innerHTML = content.html;
+    openModalId('legalModal');
+}
 
-  // =========================================================
-  // 3. AUTH
-  // =========================================================
-  function openAuthModal(){
-    document.getElementById('auth-error').classList.add('hidden');
-    openModal('auth-modal');
-  }
-  async function handleAuthSubmit(mode){
-    const email = document.getElementById('auth-email').value.trim();
-    const password = document.getElementById('auth-password').value;
-    const errEl = document.getElementById('auth-error');
-    errEl.classList.add('hidden');
-    if (!email || !password){
-      errEl.textContent = 'Completa correo y contraseña.';
-      errEl.classList.remove('hidden');
-      return;
-    }
-    const signinBtn = document.getElementById('auth-signin-btn');
-    const signupBtn = document.getElementById('auth-signup-btn');
-    signinBtn.disabled = true; signupBtn.disabled = true;
+// ---------------------------------------------------------------
+// 1. CONSENTIMIENTO — real en producción vía localStorage (igual aquí)
+// ---------------------------------------------------------------
+function hasConsent(){
     try {
-      const { data, error } = mode === 'signin'
-        ? await sb.auth.signInWithPassword({ email, password })
-        : await sb.auth.signUp({ email, password });
-      if (error) throw error;
-      closeModal('auth-modal');
-      user = data.user || data.session?.user || null;
-      showToast(mode === 'signin' ? 'Sesión iniciada' : 'Cuenta creada, revisa tu correo si se requiere confirmación');
-      await loadUserContext();
-      updateSessionActionBtn();
-      runPendingAction();
-    } catch (e){
-      errEl.textContent = e.message || 'Error de autenticación';
-      errEl.classList.remove('hidden');
-    } finally {
-      signinBtn.disabled = false; signupBtn.disabled = false;
-    }
-  }
-  async function signOut(){
-    await sb.auth.signOut();
-    user = null; profile = null; globalActive = false;
-    updateMembershipBadge();
-    document.getElementById('greet-alias').textContent = 'invitado';
-    updateSessionActionBtn();
-    updateProfileScreen();
-    showToast('Sesión cerrada');
-  }
-  function onSessionActionClick(){
-    if (user) signOut();
-    else openAuthModal();
-  }
-  function updateSessionActionBtn(){
-    const label = user ? 'Salir' : 'Iniciar sesión';
-    document.getElementById('session-action-btn').textContent = label;
-    const perfilBtn = document.getElementById('perfil-session-btn');
-    if (perfilBtn) perfilBtn.textContent = label;
-  }
-  function updateProfileScreen(){
-    const avatar = document.getElementById('profile-avatar-letter');
-    const aliasEl = document.getElementById('profile-alias-native');
-    const subEl = document.getElementById('profile-sub-native');
-    if (!user){
-      avatar.textContent = '?';
-      aliasEl.textContent = 'invitado';
-      subEl.textContent = 'Inicia sesión para continuar';
-      return;
-    }
-    const alias = profile?.alias || user.email.split('@')[0];
-    avatar.textContent = alias[0].toUpperCase();
-    aliasEl.textContent = '@' + alias;
-    subEl.textContent = `${profile?.country || 'País no definido'} · ${globalActive ? 'Miembro activo' : 'No miembro'}`;
-  }
-
-  sb.auth.onAuthStateChange((_event, session) => {
-    user = session?.user || null;
-  });
-
-  // =========================================================
-  // 4. PERFIL + MEMBRESÍA
-  // =========================================================
-  async function loadUserContext(){
-    if (!user) return;
-    const { data: sessionData } = await sb.auth.getSession();
-    user = sessionData?.session?.user || user;
-
-    const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
-    profile = prof || null;
-    document.getElementById('greet-alias').textContent = profile?.alias ? '@' + profile.alias : user.email.split('@')[0];
-
-    const { data: mem } = await sb.from('members').select('active').eq('user_id', user.id).maybeSingle();
-    globalActive = !!mem?.active;
-    updateMembershipBadge();
-    updateSessionActionBtn();
-    updateProfileScreen();
-    loadToquesCounts();
-  }
-
-  function updateMembershipBadge(){
-    document.querySelectorAll('.membership-badge-clone').forEach(badge => {
-      if (globalActive){
-        badge.textContent = '✅ MIEMBRO';
-        badge.classList.remove('from-yellow-300','to-yellow-500');
-        badge.classList.add('from-green-400','to-green-600');
-      } else {
-        badge.textContent = '👑 $5 VIDA';
-        badge.classList.add('from-yellow-300','to-yellow-500');
-        badge.classList.remove('from-green-400','to-green-600');
-      }
-    });
-    renderMembershipCard();
-  }
-
-  // Panel de estadísticas de la Bóveda (pantalla Perfil) + botón de activar membresía si aún no lo es
-  async function renderMembershipCard(){
-    await rbRenderMembershipStats();
-    let upsellBtn = document.getElementById('perfil-upsell-btn');
-    if (!upsellBtn){
-      upsellBtn = document.createElement('div');
-      upsellBtn.id = 'perfil-upsell-btn';
-      upsellBtn.className = 'reg-submit';
-      upsellBtn.style.marginTop = '10px';
-      upsellBtn.onclick = openStripeDirect;
-      document.getElementById('stats-rarity-bars').insertAdjacentElement('afterend', upsellBtn);
-    }
-    upsellBtn.textContent = globalActive ? '✅ Miembro vitalicio activo' : '👑 Activar membresía $5';
-    upsellBtn.style.background = globalActive ? 'linear-gradient(180deg,var(--green),#00cc6a)' : 'linear-gradient(180deg,var(--yellow),#0099cc)';
-    upsellBtn.style.cursor = globalActive ? 'default' : 'pointer';
-  }
-
-  async function rbRenderMembershipStats(){
-    if (rbPool.length === 0) await rbFetchPool();
-    document.getElementById('stats-total').textContent = rbPool.length;
-    const mineCount = profile?.alias ? rbPool.filter(r => (r.owner || r.alias) === profile.alias).length : 0;
-    document.getElementById('stats-mine').textContent = mineCount;
-
-    const counts = {};
-    rbPool.forEach(row => { const k = rarityKeyFallback(row.rarity); counts[k] = (counts[k]||0) + 1; });
-    const total = rbPool.length || 1;
-    const container = document.getElementById('stats-rarity-bars');
-    container.innerHTML = RB_RARITY_DEFS.filter(d => d.key !== '').map(def => {
-      const count = counts[def.key] || 0;
-      const pct = Math.round((count / total) * 100);
-      return `
-      <div>
-        <div class="flex justify-between text-[10px] text-zinc-400 mb-0.5">
-          <span class="font-bold">${def.label}</span>
-          <span>${count} · ${pct}%</span>
-        </div>
-        <div class="h-1.5 rounded-full bg-white/5 overflow-hidden">
-          <div class="h-full rounded-full bg-green-400" style="width:${Math.max(pct, count > 0 ? 3 : 0)}%"></div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-  function onMembershipBadgeClick(){
-    if (globalActive){ showToast('Ya eres miembro vitalicio'); return; }
-    openStripeDirect();
-  }
-  function onProfileNavClick(){
-    if (!user){ openAuthModal(); return; }
-    document.getElementById('profile-nickname').value = profile?.nickname || '';
-    document.getElementById('profile-alias').value = profile?.alias || '';
-    document.getElementById('profile-country').value = profile?.country || '';
-    openModal('profile-modal');
-  }
-  async function handleSaveProfile(){
-    const nickname = document.getElementById('profile-nickname').value.trim();
-    const alias = document.getElementById('profile-alias').value.trim();
-    const country = document.getElementById('profile-country').value.trim();
-    const errEl = document.getElementById('profile-error');
-    errEl.classList.add('hidden');
-    if (!nickname || !alias){
-      errEl.textContent = 'Nombre y alias son obligatorios.';
-      errEl.classList.remove('hidden');
-      return;
-    }
-    try {
-      const { error } = await sb.from('profiles').upsert({
-        id: user.id, email: user.email, nickname, alias, country, updated_at: new Date().toISOString()
-      });
-      if (error) throw error;
-      profile = { ...(profile||{}), id: user.id, email: user.email, nickname, alias, country };
-      document.getElementById('greet-alias').textContent = '@' + alias;
-      updateProfileScreen();
-      closeModal('profile-modal');
-      showToast('Perfil guardado');
-      runPendingAction();
-    } catch (e){
-      errEl.textContent = e.message || 'No se pudo guardar el perfil';
-      errEl.classList.remove('hidden');
-    }
-  }
-
-  // =========================================================
-  // 5. CONSENTIMIENTO (localStorage dgt_consent_v1)
-  // =========================================================
-  function hasConsent(){
-    try {
-      const c = JSON.parse(localStorage.getItem('dgt_consent_v1') || 'null');
-      return !!(c && c.terms && c.privacy && c.age);
+        const c = JSON.parse(localStorage.getItem('dgt_consent_v1') || 'null');
+        return !!(c && c.terms && c.privacy && c.age);
     } catch { return false; }
-  }
-  function handleAcceptConsent(){
-    const terms = document.getElementById('consent-terms').checked;
-    const privacy = document.getElementById('consent-privacy').checked;
-    const age = document.getElementById('consent-age').checked;
+}
+function handleAcceptConsent(){
+    const terms = document.getElementById('consentTerms').checked;
+    const privacy = document.getElementById('consentPrivacy').checked;
+    const age = document.getElementById('consentAge').checked;
+    const err = document.getElementById('consentError');
     if (!terms || !privacy || !age){
-      const e = document.getElementById('consent-error');
-      e.textContent = 'Debes aceptar los tres puntos para continuar.';
-      e.classList.remove('hidden');
-      return;
+        err.textContent = 'Debes aceptar los tres puntos para continuar.';
+        err.classList.add('show');
+        return;
     }
+    err.classList.remove('show');
     localStorage.setItem('dgt_consent_v1', JSON.stringify({ terms, privacy, age, ts: Date.now() }));
-    closeModal('consent-modal');
+    closeModalId('consentModal');
     runPendingAction();
-  }
+}
 
-  // =========================================================
-  // 6. GATE (user -> profile -> consent -> membresía)
-  // =========================================================
-  function gate(actionType, payload){
-    pendingAction = { type: actionType, payload: payload || null };
-    if (!user){ openAuthModal(); return false; }
-    if (!profile || !profile.nickname || !profile.alias){ onProfileNavClick(); return false; }
-    if (!hasConsent()){ openModal('consent-modal'); return false; }
-    if ((actionType === 'register' || actionType === 'toque') && !globalActive){ openStripeModal(); return false; }
-    return true;
-  }
-  function runPendingAction(){
-    if (!pendingAction) return;
-    const action = pendingAction;
-    pendingAction = null;
-    if (action.type === 'register') handleRegister();
-    if (action.type === 'stripe') openStripeModal();
-    if (action.type === 'toque') executeToque(action.payload);
-  }
+// ---------------------------------------------------------------
+// 2. AUTH + PERFIL — conexión real a Supabase
+// ---------------------------------------------------------------
+function onSessionPillClick(){
+    if (session) { signOut(); } else { openModalId('authModal'); }
+}
+async function handleAuthSubmit(mode){
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const err = document.getElementById('authError');
+    if (!email || !password){ err.textContent = 'Completa correo y contraseña.'; err.classList.add('show'); return; }
+    err.classList.remove('show');
 
-  // =========================================================
-  // 7. STRIPE — lógica real extraída (Edge Function stripe-lifetime)
-  // =========================================================
-  function openStripeDirect(){
-    pendingAction = { type: 'stripe' };
-    if (!user){ openAuthModal(); return; }
+    try {
+        const { data, error } = mode === 'signin'
+            ? await sb.auth.signInWithPassword({ email, password })
+            : await sb.auth.signUp({ email, password });
+        if (error) throw error;
+        session = data.user || data.session?.user || null;
+        closeModalId('authModal');
+        showToast(mode === 'signin' ? 'Sesión iniciada' : 'Cuenta creada, revisa tu correo si se requiere confirmación');
+        await loadUserContext();
+        runPendingAction();
+    } catch (e){
+        err.textContent = e.message || 'Error de autenticación';
+        err.classList.add('show');
+    }
+}
+async function signOut(){
+    await sb.auth.signOut();
+    session = null; profile = null; membershipActive = false;
+    updateSessionUI();
+    updateToquesBadges();
+    showToast('Sesión cerrada');
+}
+async function loadUserContext(){
+    if (!session) return;
+    const { data: sessionData } = await sb.auth.getSession();
+    session = sessionData?.session?.user || session;
+
+    const { data: prof } = await sb.from('profiles').select('*').eq('id', session.id).maybeSingle();
+    profile = prof || null;
+
+    const { data: mem } = await sb.from('members').select('active').eq('user_id', session.id).maybeSingle();
+    membershipActive = !!mem?.active;
+
+    updateSessionUI();
+    updateToquesBadges();
+}
+function onProfileNavClick(){
+    document.getElementById('profileNickname').value = profile?.nickname || '';
+    document.getElementById('profileAlias').value = profile?.alias || '';
+    document.getElementById('profileCountry').value = profile?.country || '';
+    openModalId('profileModal');
+}
+async function handleSaveProfile(){
+    const nickname = document.getElementById('profileNickname').value.trim();
+    const alias = document.getElementById('profileAlias').value.trim();
+    const country = document.getElementById('profileCountry').value.trim();
+    const err = document.getElementById('profileError');
+    if (!nickname || !alias){ err.textContent = 'Nombre y alias son obligatorios.'; err.classList.add('show'); return; }
+    err.classList.remove('show');
+    try {
+        const { error } = await sb.from('profiles').upsert({
+            id: session.id, email: session.email, nickname, alias, country, updated_at: new Date().toISOString()
+        });
+        if (error) throw error;
+        profile = { ...(profile||{}), id: session.id, email: session.email, nickname, alias, country };
+        closeModalId('profileModal');
+        showToast('Perfil guardado');
+        updateSessionUI();
+        runPendingAction();
+    } catch (e){
+        err.textContent = e.message || 'No se pudo guardar el perfil';
+        err.classList.add('show');
+    }
+}
+function updateSessionUI(){
+    document.getElementById('sessionPill').textContent = session ? (profile?.alias ? '@'+profile.alias : session.email) : 'Iniciar sesión';
+    renderMembershipBadges();
+}
+
+// ---------------------------------------------------------------
+// 3. MEMBRESÍA — Stripe real (Edge Function stripe-lifetime)
+// ---------------------------------------------------------------
+function renderMembershipBadges(){
+    document.querySelectorAll('.member-btn').forEach(btn => {
+        btn.textContent = membershipActive ? '✅ MIEMBRO' : '👑 $5 VIDA';
+        btn.classList.toggle('active-member', membershipActive);
+    });
+}
+function onMembershipClick(){
+    if (membershipActive){ showToast('Ya eres miembro vitalicio'); return; }
+    pendingAction = { type: 'membership' };
+    if (!session){ openModalId('authModal'); return; }
     if (!profile || !profile.nickname || !profile.alias){ onProfileNavClick(); return; }
-    if (!hasConsent()){ openModal('consent-modal'); return; }
-    openStripeModal();
-  }
-
-  async function openStripeModal(){
-    if (!user){ openAuthModal(); return; }
-    const stripeFormBody = document.getElementById('stripe-form-body');
-    const realPaymentLoading = document.getElementById('real-payment-loading');
-    const realPaymentElement = document.getElementById('realPaymentElement');
-    const payBtn = document.getElementById('stripe-sim-pay');
+    if (!hasConsent()){ openModalId('consentModal'); return; }
+    openMembershipModal();
+}
+async function openMembershipModal(){
+    if (!session){ openModalId('authModal'); return; }
+    const loading = document.getElementById('membershipLoading');
+    const mount = document.getElementById('realPaymentElement');
+    const payBtn = document.getElementById('membershipPayBtn');
     payBtn.disabled = false;
     payBtn.textContent = 'Confirmar pago de $5';
     payBtn.onclick = handleStripePay;
-
-    stripeFormBody.classList.remove('hidden');
-    realPaymentLoading.style.display = 'block';
-    realPaymentElement.innerHTML = '';
-    openModal('stripe-sim-modal');
+    loading.style.display = 'block';
+    loading.textContent = 'Cargando pasarela segura...';
+    mount.innerHTML = '';
+    openModalId('membershipModal');
 
     try {
-      const res = await fetch(SUPABASE_EDGE_FUNCTION, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON,
-          'Authorization': 'Bearer ' + SUPABASE_ANON
-        },
-        body: JSON.stringify({ action: 'create', user_id: user.id })
-      });
-      const data = await res.json();
-      if (!data.client_secret) throw new Error(data.error || 'No se pudo iniciar el pago');
+        const res = await fetch(SUPABASE_EDGE_FUNCTION, {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'apikey':SUPABASE_ANON, 'Authorization':'Bearer '+SUPABASE_ANON },
+            body: JSON.stringify({ action: 'create', user_id: session.id })
+        });
+        const data = await res.json();
+        if (!data.client_secret) throw new Error(data.error || 'No se pudo iniciar el pago');
 
-      stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-      elements = stripe.elements({
-        clientSecret: data.client_secret,
-        appearance: {
-          theme: 'night',
-          variables: { colorPrimary: '#00ff87', colorBackground: '#0a0a0a', colorText: '#f0f0f0', borderRadius: '14px' }
-        }
-      });
-      elements.create('payment').mount('#realPaymentElement');
-      realPaymentLoading.style.display = 'none';
+        stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        elements = stripe.elements({
+            clientSecret: data.client_secret,
+            appearance: { theme:'night', variables:{ colorPrimary:'#00c8ff', colorBackground:'#0d1013', colorText:'#eef4f7', borderRadius:'14px' } }
+        });
+        elements.create('payment').mount('#realPaymentElement');
+        loading.style.display = 'none';
     } catch (e){
-      realPaymentLoading.textContent = 'Error al cargar el pago: ' + e.message;
+        loading.textContent = 'Error al cargar el pago: ' + e.message;
     }
-  }
-
-  async function handleStripePay(){
+}
+async function handleStripePay(){
     if (!stripe || !elements) return;
-    const payBtn = document.getElementById('stripe-sim-pay');
+    const payBtn = document.getElementById('membershipPayBtn');
     payBtn.disabled = true;
     try {
-      const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect: 'if_required' });
-      if (error) throw new Error(error.message);
-      if (paymentIntent && paymentIntent.status === 'succeeded'){
-        payBtn.textContent = 'Confirmando con el servidor...';
-        const confirmRes = await fetch(SUPABASE_EDGE_FUNCTION, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON,
-            'Authorization': 'Bearer ' + SUPABASE_ANON
-          },
-          body: JSON.stringify({ action: 'confirm', payment_intent_id: paymentIntent.id, user_id: user.id })
-        });
-        if (!confirmRes.ok){
-          showToast('El pago se cobró, pero el servidor tardó en responder. Verificando...');
-        }
+        const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect: 'if_required' });
+        if (error) throw new Error(error.message);
+        if (paymentIntent && paymentIntent.status === 'succeeded'){
+            payBtn.textContent = 'Confirmando con el servidor...';
+            await fetch(SUPABASE_EDGE_FUNCTION, {
+                method: 'POST',
+                headers: { 'Content-Type':'application/json', 'apikey':SUPABASE_ANON, 'Authorization':'Bearer '+SUPABASE_ANON },
+                body: JSON.stringify({ action: 'confirm', payment_intent_id: paymentIntent.id, user_id: session.id })
+            });
 
-        payBtn.textContent = 'Verificando activación...';
-        const activated = await rbPollMembership();
-        if (activated){
-          globalActive = true;
-          updateMembershipBadge();
-          closeModal('stripe-sim-modal');
-          showToast('✅ Membresía activada');
-          runPendingAction();
-        } else {
-          payBtn.disabled = false;
-          payBtn.textContent = '¿Ya se activó? Verificar de nuevo';
-          payBtn.onclick = async () => {
-            payBtn.disabled = true;
-            payBtn.textContent = 'Verificando...';
-            const ok = await rbPollMembership(3);
-            if (ok){
-              globalActive = true;
-              updateMembershipBadge();
-              closeModal('stripe-sim-modal');
-              showToast('✅ Membresía activada');
-              runPendingAction();
+            payBtn.textContent = 'Verificando activación...';
+            const activated = await rbPollMembership();
+            if (activated){
+                membershipActive = true;
+                renderMembershipBadges();
+                closeModalId('membershipModal');
+                showToast('✅ Membresía activada');
+                renderStats();
+                runPendingAction();
             } else {
-              showToast('Tu pago se cobró. Si no se activa en un minuto, contáctanos a support@dollardgt.com');
-              payBtn.disabled = false;
+                payBtn.disabled = false;
+                payBtn.textContent = '¿Ya se activó? Verificar de nuevo';
+                payBtn.onclick = async () => {
+                    payBtn.disabled = true;
+                    payBtn.textContent = 'Verificando...';
+                    const ok = await rbPollMembership(3);
+                    if (ok){
+                        membershipActive = true;
+                        renderMembershipBadges();
+                        closeModalId('membershipModal');
+                        showToast('✅ Membresía activada');
+                        renderStats();
+                        runPendingAction();
+                    } else {
+                        showToast('Tu pago se cobró. Si no se activa en un minuto, contáctanos a support@dollardgt.com');
+                        payBtn.disabled = false;
+                    }
+                };
+                showToast('Pago cobrado. Confirmando activación con el servidor, un momento...');
             }
-          };
-          showToast('Pago cobrado. Confirmando activación con el servidor, un momento...');
         }
-      }
     } catch (e){
-      showToast('Error en el pago: ' + e.message);
-      payBtn.disabled = false;
-      payBtn.textContent = 'Confirmar pago de $5';
+        showToast('Error en el pago: ' + e.message);
+        payBtn.disabled = false;
+        payBtn.textContent = 'Confirmar pago de $5';
     }
-  }
-
-  async function rbPollMembership(attempts = 8, delayMs = 1500){
+}
+async function rbPollMembership(attempts = 8, delayMs = 1500){
     for (let i = 0; i < attempts; i++){
-      try {
-        const { data } = await sb.from('members').select('active').eq('user_id', user.id).maybeSingle();
-        if (data?.active) return true;
-      } catch {}
-      await new Promise(r => setTimeout(r, delayMs));
+        try {
+            const { data } = await sb.from('members').select('active').eq('user_id', session.id).maybeSingle();
+            if (data?.active) return true;
+        } catch {}
+        await new Promise(r => setTimeout(r, delayMs));
     }
     return false;
-  }
+}
 
-  // =========================================================
-  // 8. DATOS ESTÁTICOS PARA SELECTS
-  // =========================================================
-  (function fillLetters(){
-    ['rb-letra1','rb-letra2','rb-letra3'].forEach(id => {
-      const sel = document.getElementById(id);
-      for (let i = 65; i <= 90; i++){
-        const l = String.fromCharCode(i);
-        const opt = document.createElement('option');
-        opt.value = l; opt.textContent = l;
-        sel.appendChild(opt);
-      }
-      // Billete estrella (star note): billete de reemplazo, más raro/valorado por coleccionistas
-      const starOpt = document.createElement('option');
-      starOpt.value = '★'; starOpt.textContent = '★ Estrella';
-      sel.appendChild(starOpt);
-    });
-  })();
+// ---------------------------------------------------------------
+// 4. GATE — mismo orden de 4 pasos que la app real
+// ---------------------------------------------------------------
+function gate(actionType, payload){
+    pendingAction = { type: actionType, payload: payload || null };
+    if (!session){ openModalId('authModal'); return false; }
+    if (!profile || !profile.nickname || !profile.alias){ onProfileNavClick(); return false; }
+    if (!hasConsent()){ openModalId('consentModal'); return false; }
+    if ((actionType === 'register' || actionType === 'toque') && !membershipActive){ openMembershipModal(); return false; }
+    return true;
+}
+function runPendingAction(){
+    if (!pendingAction) return;
+    const action = pendingAction; pendingAction = null;
+    if (action.type === 'register') handleRegister();
+    if (action.type === 'membership') openMembershipModal();
+    if (action.type === 'toque') executeToque(action.payload);
+}
 
-  const rbPaises = [
-    ["🇺🇸","Estados Unidos"], ["🇲🇽","México"], ["🇨🇴","Colombia"], ["🇦🇷","Argentina"],
-    ["🇨🇱","Chile"], ["🇵🇪","Perú"], ["🇪🇨","Ecuador"], ["🇻🇪","Venezuela"],
-    ["🇧🇴","Bolivia"], ["🇵🇾","Paraguay"], ["🇺🇾","Uruguay"], ["🇧🇷","Brasil"],
-    ["🇵🇦","Panamá"], ["🇨🇷","Costa Rica"], ["🇬🇹","Guatemala"], ["🇭🇳","Honduras"],
-    ["🇸🇻","El Salvador"], ["🇳🇮","Nicaragua"], ["🇩🇴","Rep. Dominicana"], ["🇨🇺","Cuba"],
-    ["🇵🇷","Puerto Rico"], ["🇪🇸","España"], ["🇨🇦","Canadá"], ["🇬🇧","Reino Unido"],
-    ["🇫🇷","Francia"], ["🇩🇪","Alemania"], ["🇮🇹","Italia"], ["🇵🇹","Portugal"],
-    ["🇳🇱","Países Bajos"], ["🇨🇭","Suiza"], ["🇯🇵","Japón"], ["🇨🇳","China"],
-    ["🇰🇷","Corea del Sur"], ["🇮🇳","India"], ["🇦🇺","Australia"], ["🇳🇿","Nueva Zelanda"],
-    ["🇿🇦","Sudáfrica"], ["🇪🇬","Egipto"], ["🇳🇬","Nigeria"], ["🇦🇪","Emiratos Árabes Unidos"],
-    ["🇸🇦","Arabia Saudita"], ["🇹🇷","Turquía"], ["🇷🇺","Rusia"], ["🇮🇱","Israel"],
-    ["🇹🇭","Tailandia"], ["🇵🇭","Filipinas"], ["🇮🇩","Indonesia"], ["🇻🇳","Vietnam"]
-  ];
-  (function fillPaises(){
-    const sel = document.getElementById('rb-pais');
-    rbPaises.forEach(([bandera, nombre]) => {
-      const opt = document.createElement('option');
-      opt.value = `${bandera} ${nombre}`; opt.textContent = `${bandera} ${nombre}`;
-      sel.appendChild(opt);
-    });
-  })();
-
-  (function fillAnios(){
-    const sel = document.getElementById('rb-anio');
-    const actual = new Date().getFullYear();
-    for (let y = actual; y >= 1950; y--){
-      const opt = document.createElement('option');
-      opt.value = y; opt.textContent = y;
-      sel.appendChild(opt);
-    }
-  })();
-
-  const rbDenominaciones = [
-    "$1","$2","$5","$10","$20","$50","$100",
-    "€5","€10","€20","€50","€100","€200",
-    "£5","£10","£20","£50",
-    "¥1000","¥5000","¥10000",
-    "Otro (especificar)"
-  ];
-  (function fillDenom(){
-    const sel = document.getElementById('rb-denominacion');
-    rbDenominaciones.forEach(d => {
-      const opt = document.createElement('option');
-      opt.value = d; opt.textContent = d;
-      sel.appendChild(opt);
-    });
-  })();
-  function rbToggleDenomOtro(){
-    const sel = document.getElementById('rb-denominacion');
-    const otro = document.getElementById('rb-denom-otro');
-    otro.classList.toggle('hidden', sel.value !== 'Otro (especificar)');
-  }
-
-  // =========================================================
-  // 9. TABS + TECLADO NUMÉRICO
-  // =========================================================
-  // La pantalla Registrar ya no tiene pestañas: los dígitos se ingresan en un
-  // pop-up aparte (serie-modal) para no apretar todo en una sola vista.
-  function openSerieModal(){ openModal('serie-modal'); }
-  function closeSerieModal(){ closeModal('serie-modal'); }
-
-  let rbUserDigits = [];
-  const RB_MAX_DIGITS = 10;
-  const RB_MIN_DIGITS = 6;
-
-  function rbRenderDigits(){
-    const display = document.getElementById('rb-digit-display');
-    if (rbUserDigits.length === 0){
-      display.innerHTML = 'Ingresa hasta 10 dígitos';
-      display.classList.add('empty');
-    } else {
-      display.textContent = rbUserDigits.join('');
-      display.classList.remove('empty');
-    }
-    document.getElementById('rb-digit-count').textContent = `${rbUserDigits.length} / ${RB_MAX_DIGITS} dígitos (mín. ${RB_MIN_DIGITS})`;
-
-    const preview = document.getElementById('rb-rarity-preview');
-    if (rbUserDigits.length < RB_MIN_DIGITS){
-      preview.className = 'mt-3 rounded-xl border border-zinc-800 bg-zinc-950/50 px-4 py-3 text-center text-xs text-zinc-600';
-      preview.textContent = rbUserDigits.length === 0
-        ? 'Ingresa dígitos para ver la rareza en vivo'
-        : `Faltan ${RB_MIN_DIGITS - rbUserDigits.length} dígitos para calcular la rareza`;
-    } else {
-      const r = calcRarity(rbUserDigits.join(''));
-      const colorClass = r.key === 'COMUN' ? 'border-zinc-800 bg-zinc-950/50 text-zinc-300' : 'border-blue-500/30 bg-blue-500/10 text-blue-300';
-      preview.className = `mt-3 rounded-xl border px-4 py-3 text-center text-lg font-black tracking-wide ${colorClass}`;
-      preview.textContent = `${r.label}${r.key !== 'COMUN' ? ' ✨' : ''}`;
-    }
-
-    // Refleja el progreso en el botón "# Serie" y una vista previa chica en la
-    // pantalla principal, para que no se sienta "perdido" al cerrar el pop-up.
-    const countBtn = document.getElementById('rb-serie-btn-count');
-    const previewLine = document.getElementById('rb-serie-preview-line');
-    if (countBtn) countBtn.textContent = `· ${rbUserDigits.length}/10`;
-    if (previewLine) previewLine.textContent = rbUserDigits.length ? rbUserDigits.join('') : '';
-  }
-  function rbPressNum(n){ if (rbUserDigits.length >= RB_MAX_DIGITS) return; rbUserDigits.push(n); rbRenderDigits(); }
-  function rbDeleteDigit(){ rbUserDigits.pop(); rbRenderDigits(); }
-  function rbClearInput(){ rbUserDigits = []; rbRenderDigits(); }
-  rbRenderDigits();
-
-  // =========================================================
-  // 10. RAREZA + PUNTOS — motor real extraído de la app en producción (Engine)
-  // =========================================================
-  function calcRarity(digits){
+// ---------------------------------------------------------------
+// 5. MOTOR DE RAREZA Y PUNTOS — idéntico al de producción
+// ---------------------------------------------------------------
+function calcRarity(digits){
     const c = String(digits).replace(/\D/g,'');
-    if (/^(\d)\1+$/.test(c)) return { key: 'SOLID', label: 'SOLID', score: 100 };
-    if (c === c.split('').reverse().join('')) return { key: 'RADAR', label: 'RADAR', score: 82 };
-    if (/0123|1234|2345|4567|6789|9876/.test(c)) return { key: 'LADDER', label: 'LADDER', score: 88 };
-    if (/^(\d{2})\1+$/.test(c)) return { key: 'REPEATER', label: 'REPEATER', score: 78 };
-    if (/^[01]+$/.test(c)) return { key: 'BINARY', label: 'BINARY', score: 75 };
-    if (/(\d)\1{2,}/.test(c)) return { key: 'SEMI-SOLID', label: 'SEMI-SOLID', score: 62 };
-    return { key: 'COMUN', label: 'Común', score: 10 };
-  }
-  function calcPoints(rarity, denomNumeric){
+    if (/^(\d)\1+$/.test(c)) return { key:'SOLID', label:'SOLID', score:100 };
+    if (c === c.split('').reverse().join('')) return { key:'RADAR', label:'RADAR', score:82 };
+    if (/0123|1234|2345|4567|6789|9876/.test(c)) return { key:'LADDER', label:'LADDER', score:88 };
+    if (/^(\d{2})\1+$/.test(c)) return { key:'REPEATER', label:'REPEATER', score:78 };
+    if (/^[01]+$/.test(c)) return { key:'BINARY', label:'BINARY', score:75 };
+    if (/(\d)\1{2,}/.test(c)) return { key:'SEMI-SOLID', label:'SEMI-SOLID', score:62 };
+    return { key:'COMUN', label:'Común', score:10 };
+}
+function calcPoints(rarity, denomNumeric){
     let b = 100 + rarity.score*18 + (denomNumeric||0)*2 + Math.floor(Math.random()*200);
     if (rarity.label !== 'Común') b *= 3;
     return Math.floor(b);
-  }
-  function parseDenomNumeric(str){
-    if (!str) return 0;
-    const n = parseFloat(str.replace(/[^0-9.]/g,''));
-    return isNaN(n) ? 0 : n;
-  }
+}
+const RARITY_DEFS = [
+    { key:'', label:'Todas' }, { key:'SOLID', label:'SOLID' }, { key:'RADAR', label:'RADAR' },
+    { key:'LADDER', label:'LADDER' }, { key:'REPEATER', label:'REPEATER' }, { key:'BINARY', label:'BINARY' },
+    { key:'SEMI-SOLID', label:'SEMI' }, { key:'COMUN', label:'Común' }
+];
 
-  // =========================================================
-  // 11. REGISTRAR A BÓVEDA -> RPC publicar_serial
-  // =========================================================
-  async function handleRegister(){
-    const letra1 = document.getElementById('rb-letra1').value;
-    const letra2 = document.getElementById('rb-letra2').value;
-    const letra3 = document.getElementById('rb-letra3').value;
-    const pais = document.getElementById('rb-pais').value;
-    const anio = document.getElementById('rb-anio').value;
-    const denomSel = document.getElementById('rb-denominacion').value;
-    const denomOtro = document.getElementById('rb-denom-otro').value;
-    const denominacionTxt = denomSel === 'Otro (especificar)' ? denomOtro : denomSel;
-
-    if (!letra1 || !pais || !anio || !denominacionTxt){
-      showToast('Completa Letra 1, país, año y denominación (letras 2 y 3 son opcionales)');
-      return;
+// ---------------------------------------------------------------
+// 6. PAÍSES + MONEDA + DENOMINACIONES (relación real país↔moneda)
+// ---------------------------------------------------------------
+const COUNTRIES = [
+    ["🇺🇸","Estados Unidos","$"], ["🇲🇽","México","$"], ["🇨🇴","Colombia","$"], ["🇦🇷","Argentina","$"],
+    ["🇨🇱","Chile","$"], ["🇵🇪","Perú","S/"], ["🇪🇨","Ecuador","$"], ["🇻🇪","Venezuela","Bs"],
+    ["🇧🇷","Brasil","R$"], ["🇵🇦","Panamá","$"], ["🇪🇸","España","€"], ["🇫🇷","Francia","€"],
+    ["🇩🇪","Alemania","€"], ["🇮🇹","Italia","€"], ["🇵🇹","Portugal","€"], ["🇬🇧","Reino Unido","£"],
+    ["🇨🇭","Suiza","Fr"], ["🇯🇵","Japón","¥"], ["🇨🇳","China","¥"], ["🇮🇳","India","₹"],
+    ["🇦🇺","Australia","$"], ["🌎","Otro","$"]
+];
+const DENOMINATIONS = [1,2,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000];
+function fillCountries(){
+    const sel = document.getElementById('countrySelect');
+    COUNTRIES.forEach(([flag,name,currency]) => {
+        const opt = document.createElement('option');
+        opt.value = `${flag}|${name}|${currency}`;
+        opt.textContent = `${flag} ${name}`;
+        sel.appendChild(opt);
+    });
+}
+function fillDenominationsForCountry(){
+    const [,, currency] = (document.getElementById('countrySelect').value || '||').split('|');
+    const sel = document.getElementById('denominationSelect');
+    sel.innerHTML = '';
+    if (!currency){ sel.innerHTML = '<option value="">Elige país primero</option>'; return; }
+    const opt0 = document.createElement('option'); opt0.value=''; opt0.textContent='Denominación'; sel.appendChild(opt0);
+    DENOMINATIONS.forEach(v => {
+        const opt = document.createElement('option'); opt.value = v; opt.textContent = `${currency}${v}`; sel.appendChild(opt);
+    });
+    const optOtro = document.createElement('option'); optOtro.value='otro'; optOtro.textContent='Otra denominación'; sel.appendChild(optOtro);
+}
+document.addEventListener('change', e => {
+    if (e.target.id === 'countrySelect') fillDenominationsForCountry();
+    if (e.target.id === 'denominationSelect'){
+        document.getElementById('denomOtroInput').style.display = e.target.value === 'otro' ? 'block' : 'none';
     }
-    if (rbUserDigits.length < RB_MIN_DIGITS){
-      showToast(`La Serie DGT necesita mínimo ${RB_MIN_DIGITS} dígitos`);
-      openSerieModal();
-      return;
+});
+function fillYears(){
+    const sel = document.getElementById('yearSelect');
+    for (let y = new Date().getFullYear(); y >= 1900; y--){
+        const opt = document.createElement('option'); opt.value = y; opt.textContent = y; sel.appendChild(opt);
     }
+}
+function fillLetters(){
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    ['letter1','letter2','letter3'].forEach(id => {
+        const sel = document.getElementById(id);
+        letters.forEach(l => { const o=document.createElement('option'); o.value=l; o.textContent=l; sel.appendChild(o); });
+        const star = document.createElement('option'); star.value='★'; star.textContent='★ Estrella'; sel.appendChild(star);
+    });
+}
 
-    if (!gate('register')) return;
+// ---------------------------------------------------------------
+// 7. SERIE — teclado 0-9, formato real: {L1}{L2} dígitos {L3}
+// ---------------------------------------------------------------
+let serialDigits = "";
+const MIN_DIGITS = 6, MAX_DIGITS = 10;
 
-    const digits = rbUserDigits.join('');
-    const prefix = `${letra1}${letra2}`;
-    const serial = `${prefix} ${digits}${letra3 ? ' ' + letra3 : ''}`;
-    const rarity = calcRarity(digits);
-    const denomNumeric = Math.round(parseDenomNumeric(denominacionTxt));
+function renderSerial(){
+    const display = document.getElementById('serialDisplay');
+    display.textContent = serialDigits.length ? serialDigits : "6 - 10 dígitos (0-9)";
+    display.classList.toggle('placeholder', serialDigits.length === 0); // solo estilo: placeholder vs valor real
+    document.getElementById('counter').textContent = `${serialDigits.length} / ${MAX_DIGITS} (mín ${MIN_DIGITS})`;
+
+    const preview = document.getElementById('rarityPreview');
+    if (serialDigits.length < MIN_DIGITS){
+        preview.className = 'rarity-preview empty';
+        preview.removeAttribute('data-rarity'); // solo estilo
+        preview.textContent = serialDigits.length === 0
+            ? 'Ingresa dígitos para ver la rareza en vivo'
+            : `Faltan ${MIN_DIGITS - serialDigits.length} dígitos para calcular la rareza`;
+    } else {
+        const r = calcRarity(serialDigits);
+        preview.className = 'rarity-preview';
+        preview.setAttribute('data-rarity', r.key); // solo estilo: color por rareza
+        preview.textContent = `${r.label}${r.key !== 'COMUN' ? ' ✨' : ''}`;
+    }
+}
+document.addEventListener('click', e => {
+    const numBtn = e.target.closest('.num-btn[data-number]');
+    if (numBtn){ if (serialDigits.length < MAX_DIGITS){ serialDigits += numBtn.dataset.number; renderSerial(); } return; }
+    if (e.target.id === 'deleteButton'){ serialDigits = serialDigits.slice(0,-1); renderSerial(); }
+    if (e.target.id === 'clearButton'){ serialDigits = ''; renderSerial(); }
+});
+
+function buildSerialString(l1,l2,l3,digits){
+    const prefix = `${l1}${l2 || ''}`;
+    return `${prefix} ${digits}${l3 ? ' ' + l3 : ''}`.trim();
+}
+
+async function handleRegister(){
+    const letter1 = document.getElementById('letter1').value;
+    const letter2 = document.getElementById('letter2').value;
+    const letter3 = document.getElementById('letter3').value;
+    const year = document.getElementById('yearSelect').value;
+    const countryRaw = document.getElementById('countrySelect').value;
+    const denomSel = document.getElementById('denominationSelect').value;
+    const denomOtro = document.getElementById('denomOtroInput').value.trim();
+    const message = document.getElementById('message');
+
+    if (serialDigits.length < MIN_DIGITS){ message.textContent = `⚠️ Mínimo ${MIN_DIGITS} dígitos.`; message.style.color = 'var(--danger)'; return; }
+    if (!letter1){ message.textContent = '⚠️ La 1ª letra es obligatoria.'; message.style.color = 'var(--danger)'; return; }
+    if (!year){ message.textContent = '⚠️ Selecciona el año.'; message.style.color = 'var(--danger)'; return; }
+    if (!countryRaw){ message.textContent = '⚠️ Selecciona el país.'; message.style.color = 'var(--danger)'; return; }
+    if (!denomSel || (denomSel === 'otro' && !denomOtro)){ message.textContent = '⚠️ Indica la denominación.'; message.style.color = 'var(--danger)'; return; }
+
+    if (!gate('register')) return; // se reanuda solo via runPendingAction() tras login/perfil/consentimiento/membresía
+
+    const [flag, countryName, currency] = countryRaw.split('|');
+    const denomNumeric = denomSel === 'otro' ? parseFloat(denomOtro.replace(/[^0-9.]/g,'')) || 0 : parseFloat(denomSel);
+    const rarity = calcRarity(serialDigits);
     const points = calcPoints(rarity, denomNumeric);
+    const serial = buildSerialString(letter1, letter2, letter3, serialDigits);
     const valueSnapshot = Math.round(denomNumeric * (10 + rarity.score) * 100) / 100;
-    const currencyMatch = denominacionTxt.match(/[$€£¥]/);
-    const paisConMoneda = currencyMatch ? `${pais} ${currencyMatch[0]}` : pais;
-
+    const lettersSnapshot = `${letter1}${letter2 || ''}`;
     const phone = profile?.phone || '';
-    const email = user.email || '';
+    const email = session.email || '';
     const contactB64 = btoa(`${phone}|${email}`);
     const emailB64 = btoa(email);
-    const lettersSnapshot = prefix;
 
-    const submitBtn = document.getElementById('rb-submit-btn');
+    const submitBtn = document.getElementById('registerButton');
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Registrando...';
+    submitBtn.classList.add('processing');
 
     try {
-      const { error } = await sb.rpc('publicar_serial', {
-        p_serial: serial,
-        p_digits: digits,
-        p_points: points,
-        p_rarity: rarity,
-        p_denom: denomNumeric,
-        p_yr: parseInt(anio, 10),
-        p_country: paisConMoneda,
-        p_contact: contactB64,
-        p_email: emailB64,
-        p_letters_snapshot: lettersSnapshot,
-        p_value_snapshot: valueSnapshot
-      });
-      if (error) throw error;
+        const { error } = await sb.rpc('publicar_serial', {
+            p_serial: serial,
+            p_digits: serialDigits,
+            p_points: points,
+            p_rarity: rarity,
+            p_denom: denomNumeric,
+            p_yr: parseInt(year, 10),
+            p_country: `${flag} ${countryName} ${currency}`,
+            p_contact: contactB64,
+            p_email: emailB64,
+            p_letters_snapshot: lettersSnapshot,
+            p_value_snapshot: valueSnapshot
+        });
+        if (error) throw error;
 
-      showToast('¡Billete registrado en la Bóveda!');
-      rbClearInput();
-      await rbFetchPool();
-      await loadLeaderCandidates();
-      renderLeaderProbabilityBar();
-      renderMembershipCard();
+        message.innerHTML = `✓ Registrado: <strong>${serial}</strong> · ${points} pts · ${rarity.label}`;
+        message.style.color = 'var(--green)';
+        serialDigits = ''; renderSerial();
+        document.getElementById('letter1').value=''; document.getElementById('letter2').value=''; document.getElementById('letter3').value='';
+
+        await fetchPool();
+        refreshPoolDependentUI();
     } catch (e){
-      showToast('Error al registrar: ' + e.message);
+        message.textContent = '⚠️ Error al registrar: ' + (e.message || e);
+        message.style.color = 'var(--danger)';
     } finally {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '🔐 Registrar a Bóveda';
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('processing');
     }
-  }
+}
 
-  // =========================================================
-  // 12. BÓVEDA VIVA + LÍDER — datos reales desde Supabase
-  // =========================================================
-  function rarityColor(key){
-    if (key === 'SOLID' || key === 'RADAR' || key === 'LADDER') return 'text-blue-400';
-    if (key === 'BINARY' || key === 'REPEATER') return 'text-cyan-400';
-    return 'text-zinc-300';
-  }
-  function rarityLabelFallback(r){
-    if (!r) return '⭐ COMÚN';
-    if (typeof r === 'object') return r.label || '⭐ COMÚN';
-    if (typeof r === 'string' && r.trim().startsWith('{')){
-      try { return JSON.parse(r).label || r; } catch { return r; }
-    }
-    return r;
-  }
-  function rarityKeyFallback(r){
+// ---------------------------------------------------------------
+// 8. POOL DE DATOS — unión real vault + boveda_jugadas
+// (la variable conserva el nombre MOCK_POOL por compatibilidad con el resto
+//  del código; ahora la llena Supabase real, no datos de ejemplo)
+// ---------------------------------------------------------------
+let MOCK_POOL = [];
+const RARITY_SCORE_BY_KEY = { SOLID:100, RADAR:82, LADDER:88, REPEATER:78, BINARY:75, 'SEMI-SOLID':62, COMUN:10 };
+function rarityKeyFallback(r){
     if (!r) return 'COMUN';
     if (typeof r === 'object') return r.key || 'COMUN';
     if (typeof r === 'string' && r.trim().startsWith('{')){
-      try { return JSON.parse(r).key || 'COMUN'; } catch { return r.toUpperCase(); }
+        try { return JSON.parse(r).key || 'COMUN'; } catch { return r.toUpperCase(); }
     }
-    return r.toUpperCase();
-  }
-
-  const RB_SOURCE_TABLES = ['vault', 'boveda_jugadas'];
-
-  async function fetchFromFirstAvailable(orderCol, limit){
-    const results = await Promise.all(RB_SOURCE_TABLES.map(async table => {
-      try {
-        const { data, error } = await sb.from(table).select('*').order(orderCol, { ascending: false }).limit(limit);
-        return (!error && data) ? data : [];
-      } catch { return []; }
-    }));
-    const merged = results.flat();
-    merged.sort((a, b) => (b[orderCol] || 0) > (a[orderCol] || 0) ? 1 : -1);
-    return { data: merged.slice(0, limit) };
-  }
-
-  let rbBovedaRows = [];
-
-  function rbGetFavorites(){
-    try { return JSON.parse(localStorage.getItem('dgt_favorites_v1') || '[]'); } catch { return []; }
-  }
-  function rbToggleFavorite(idx){
-    const row = rbBovedaRows[idx];
-    if (!row) return;
-    const serial = row.serial || row.serial_display || row.digits;
-    let favs = rbGetFavorites();
-    if (favs.includes(serial)) favs = favs.filter(s => s !== serial);
-    else favs.push(serial);
-    localStorage.setItem('dgt_favorites_v1', JSON.stringify(favs));
-    loadBovedaViva();
-  }
-  function rbCopySerial(idx){
-    const row = rbBovedaRows[idx];
-    if (!row) return;
-    const serial = row.serial || row.serial_display || row.digits || '';
-    navigator.clipboard?.writeText(serial).then(
-      () => showToast('Serie copiada: ' + serial),
-      () => showToast('No se pudo copiar')
-    );
-  }
-  function rbShareSerial(idx){
-    const row = rbBovedaRows[idx];
-    if (!row) return;
-    const serial = row.serial || row.serial_display || row.digits || '';
-    const text = `Mira este billete en $DOLLARDGT: ${serial} (${row.points || 0} pts)`;
-    if (navigator.share){
-      navigator.share({ text }).catch(() => {});
-    } else {
-      navigator.clipboard?.writeText(text);
-      showToast('Copiado para compartir');
+    return String(r).toUpperCase();
+}
+function rarityLabelFallback(r){
+    if (!r) return 'Común';
+    if (typeof r === 'object') return r.label || 'Común';
+    if (typeof r === 'string' && r.trim().startsWith('{')){
+        try { return JSON.parse(r).label || r; } catch { return r; }
     }
-  }
-
-  function decodeEmailIfNeeded(v){
+    return r;
+}
+function normalizeRarity(r){
+    const key = rarityKeyFallback(r);
+    return { key, label: rarityLabelFallback(r), score: RARITY_SCORE_BY_KEY[key] ?? 10 };
+}
+function decodeEmailIfNeeded(v){
     if (!v) return '';
     if (v.includes('@')) return v;
-    try {
-      const d = atob(v);
-      if (d.includes('@')) return d;
-    } catch {}
+    try { const d = atob(v); if (d.includes('@')) return d; } catch {}
     return v;
-  }
+}
+const RB_SOURCE_TABLES = ['vault', 'boveda_jugadas'];
+async function fetchFromFirstAvailable(orderCol, limit){
+    const results = await Promise.all(RB_SOURCE_TABLES.map(async table => {
+        try {
+            const { data, error } = await sb.from(table).select('*').order(orderCol, { ascending:false }).limit(limit);
+            return (!error && data) ? data : [];
+        } catch { return []; }
+    }));
+    const merged = results.flat();
+    merged.sort((a,b) => (b[orderCol]||0) > (a[orderCol]||0) ? 1 : -1);
+    return merged.slice(0, limit);
+}
+async function fetchPool(){
+    const rows = await fetchFromFirstAvailable('points', 300);
+    MOCK_POOL = rows.map(row => ({
+        ...row,
+        serial: row.serial || row.serial_display || row.digits,
+        owner: row.owner || row.alias,
+        rarity: normalizeRarity(row.rarity)
+    }));
+    return MOCK_POOL;
+}
 
-  function rbToqueClick(idx){
-    const row = rbBovedaRows[idx];
-    if (!row) return;
-    const toOwner = row.owner || row.alias;
-    if (user && profile && toOwner === profile.alias){
-      showToast('No puedes tocar tu propio billete');
-      return;
-    }
-    const payload = {
-      toOwner,
-      toEmail: decodeEmailIfNeeded(row.email),
-      serial: row.serial || row.serial_display || row.digits,
-      digits: row.digits,
-      country: profile?.country || ''
-    };
-    if (!gate('toque', payload)) return;
-    executeToque(payload);
-  }
+function rbGetFavorites(){ try { return JSON.parse(localStorage.getItem('dgt_favorites_v1')||'[]'); } catch { return []; } }
+function rbToggleFavorite(serial){
+    let favs = rbGetFavorites();
+    favs = favs.includes(serial) ? favs.filter(s=>s!==serial) : [...favs, serial];
+    localStorage.setItem('dgt_favorites_v1', JSON.stringify(favs));
+}
 
-  async function executeToque(payload){
-    try {
-      const { error } = await sb.rpc('enviar_toque', {
-        p_to_owner: payload.toOwner,
-        p_to_email: payload.toEmail,
-        p_serial: payload.serial,
-        p_digits: payload.digits,
-        p_from_country: payload.country
-      });
-      if (error) throw error;
-      showToast(`Toque enviado a @${payload.toOwner}`);
-      loadToquesCounts();
-    } catch (e){
-      showToast('Error al enviar el toque: ' + e.message);
-    }
-  }
-
-  // =========================================================
-  // 12. TOQUES PRIVADOS — aceptar/rechazar (UPDATE directo en dgt_toques)
-  // =========================================================
-  let toquesRecibidos = [];
-  let toquesEnviados = [];
-
-  function rbSwitchToquesTab(t){
-    document.getElementById('toques-tab-recibidos').classList.toggle('active', t === 'recibidos');
-    document.getElementById('toques-tab-enviados').classList.toggle('active', t === 'enviados');
-    document.getElementById('toques-panel-recibidos').classList.toggle('hidden', t !== 'recibidos');
-    document.getElementById('toques-panel-enviados').classList.toggle('hidden', t !== 'enviados');
-  }
-
-  async function openToquesModal(){
-    if (!user){ openAuthModal(); return; }
-    if (!profile || !profile.alias){ onProfileNavClick(); return; }
-    openModal('toques-modal');
-    await loadToques();
-  }
-
-  async function loadToquesCounts(){
-    if (!user || !profile?.alias) return;
-    try {
-      const { data } = await sb.from('dgt_toques').select('id,status').eq('to_owner', profile.alias).eq('status', 'pending');
-      const badge = document.getElementById('toques-badge');
-      const count = data?.length || 0;
-      if (count > 0){ badge.textContent = count; badge.classList.remove('hidden'); badge.classList.add('flex'); }
-      else { badge.classList.add('hidden'); badge.classList.remove('flex'); }
-    } catch {}
-  }
-
-  async function loadToques(){
-    if (!user || !profile?.alias) return;
-    const recPanel = document.getElementById('toques-panel-recibidos');
-    const envPanel = document.getElementById('toques-panel-enviados');
-    try {
-      const [{ data: rec }, { data: env }] = await Promise.all([
-        sb.from('dgt_toques').select('*').eq('to_owner', profile.alias).order('created_at', { ascending: false }).limit(30),
-        sb.from('dgt_toques').select('*').eq('from_alias', profile.alias).order('created_at', { ascending: false }).limit(30)
-      ]);
-      toquesRecibidos = rec || [];
-      toquesEnviados = env || [];
-      loadToquesCounts();
-
-      recPanel.innerHTML = toquesRecibidos.length === 0
-        ? '<p class="text-xs text-zinc-600 text-center py-6">Sin toques recibidos aún.</p>'
-        : toquesRecibidos.map((t, idx) => `
-          <div class="rounded-xl border p-3 ${t.status==='pending' ? 'border-blue-500/30 bg-blue-500/5' : 'border-zinc-800 bg-zinc-900/40'}">
-            <p class="text-sm font-bold text-white">👋 @${t.from_alias} te tocó</p>
-            <p class="font-mono text-xs text-blue-400">${t.serial || ''}</p>
-            <p class="text-[10px] text-zinc-500">${t.from_country || ''} · ${new Date(t.created_at).toLocaleString('es')}</p>
-            ${t.status === 'pending' ? `
-              <div class="flex gap-2 mt-2">
-                <button onclick="acceptToqueClick(${idx})" class="flex-1 h-8 rounded-full bg-green-500 text-black font-black text-[10px]">ACEPTAR → CHAT</button>
-                <button onclick="rejectToqueClick(${idx})" class="flex-1 h-8 rounded-full bg-zinc-800 text-zinc-400 font-bold text-[10px]">RECHAZAR</button>
-              </div>` : t.status === 'accepted' ? `
-              <button onclick="openChatFromReceived(${idx})" class="w-full h-8 mt-2 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 font-bold text-[10px]">ABRIR CHAT</button>` : `
-              <p class="text-[10px] text-zinc-600 mt-1">Rechazado</p>`}
-          </div>`).join('');
-
-      envPanel.innerHTML = toquesEnviados.length === 0
-        ? '<p class="text-xs text-zinc-600 text-center py-6">No has enviado toques.</p>'
-        : toquesEnviados.map((t, idx) => `
-          <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-3 flex items-center justify-between">
-            <div>
-              <p class="font-mono text-xs text-white">${t.serial || ''}</p>
-              <p class="text-[10px] text-zinc-500">a @${t.to_owner}</p>
-            </div>
-            <div class="text-right">
-              <span class="text-[10px] font-bold ${t.status==='accepted' ? 'text-green-400' : t.status==='pending' ? 'text-blue-400' : 'text-zinc-600'}">${t.status}</span>
-              ${t.status === 'accepted' ? `<button onclick="openChatFromSent(${idx})" class="block mt-1 text-[10px] text-blue-300 underline">Abrir chat</button>` : ''}
-            </div>
-          </div>`).join('');
-    } catch (e){
-      recPanel.innerHTML = `<p class="text-xs text-red-400 text-center py-6">Error: ${e.message}</p>`;
-    }
-  }
-
-  async function acceptToqueClick(idx){
-    const t = toquesRecibidos[idx];
-    if (!t) return;
-    try {
-      const { error } = await sb.from('dgt_toques').update({ status: 'accepted' }).eq('id', t.id);
-      if (error) throw error;
-      t.status = 'accepted';
-      showToast(`Aceptaste el toque de @${t.from_alias}`);
-      loadToques();
-      openChat(t);
-    } catch (e){ showToast('Error: ' + e.message); }
-  }
-  async function rejectToqueClick(idx){
-    const t = toquesRecibidos[idx];
-    if (!t) return;
-    try {
-      const { error } = await sb.from('dgt_toques').update({ status: 'rejected' }).eq('id', t.id);
-      if (error) throw error;
-      showToast(`Rechazaste el toque de @${t.from_alias}`);
-      loadToques();
-    } catch (e){ showToast('Error: ' + e.message); }
-  }
-  function openChatFromReceived(idx){ openChat(toquesRecibidos[idx]); }
-  function openChatFromSent(idx){ openChat(toquesEnviados[idx]); }
-
-  // =========================================================
-  // 13. CHAT PRIVADO — dgt_chats (toque_id, from_alias, to_owner, message, created_at)
-  // =========================================================
-  let currentChatToque = null;
-
-  async function openChat(toque){
-    currentChatToque = toque;
-    const otherAlias = toque.from_alias === profile.alias ? toque.to_owner : toque.from_alias;
-    document.getElementById('chat-with-label').textContent = `Chat con @${otherAlias}`;
-    document.getElementById('chat-serial-label').textContent = toque.serial || '';
-    document.getElementById('chat-messages').innerHTML = '<p class="text-xs text-zinc-600 text-center py-6">Cargando...</p>';
-    closeModal('toques-modal');
-    openModal('chat-modal');
-    await loadChatMessages();
-  }
-
-  async function loadChatMessages(){
-    if (!currentChatToque) return;
-    const container = document.getElementById('chat-messages');
-    try {
-      const { data, error } = await sb.from('dgt_chats').select('*').eq('toque_id', currentChatToque.id).order('created_at', { ascending: true }).limit(100);
-      if (error) throw error;
-      if (!data || data.length === 0){
-        container.innerHTML = '<p class="text-xs text-zinc-600 text-center py-8">Chat privado iniciado.<br>Solo ustedes dos ven estos mensajes.</p>';
-        return;
-      }
-      container.innerHTML = data.map(m => {
-        const mine = m.from_alias === profile.alias;
-        return `
-        <div class="flex ${mine ? 'justify-end' : 'justify-start'}">
-          <div class="max-w-[78%] rounded-2xl px-3.5 py-2.5 text-xs ${mine ? 'bg-green-400 text-black rounded-br-sm' : 'bg-zinc-800 text-white rounded-bl-sm'}">
-            <div>${m.message}</div>
-            <div class="text-[9px] opacity-60 mt-1">${new Date(m.created_at).toLocaleTimeString('es')}</div>
-          </div>
-        </div>`;
-      }).join('');
-      container.scrollTop = container.scrollHeight;
-    } catch (e){
-      container.innerHTML = `<p class="text-xs text-red-400 text-center py-6">Error: ${e.message}</p>`;
-    }
-  }
-
-  async function sendChatMessage(){
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if (!text || !currentChatToque) return;
-    const toOwner = currentChatToque.from_alias === profile.alias ? currentChatToque.to_owner : currentChatToque.from_alias;
-    try {
-      const { error } = await sb.from('dgt_chats').insert({
-        toque_id: currentChatToque.id,
-        from_alias: profile.alias,
-        from_email: btoa(user.email || ''),
-        to_owner: toOwner,
-        message: text,
-        created_at: new Date().toISOString()
-      });
-      if (error) throw error;
-      input.value = '';
-      loadChatMessages();
-    } catch (e){ showToast('Error al enviar: ' + e.message); }
-  }
-
-  function rbGoToSimilarSearch(){ goTo('global'); }
-  function rbGoToRegister(){ goTo('registrar'); }
-  function rbGoToFavorites(){ goTo('favoritos'); }
-
-  async function loadBovedaViva(){
-    const container = document.getElementById('boveda-list');
-    if (!container) return;
-  }
-
-  // =========================================================
-  // 14. EXPLORAR POR RAREZA + BUSCAR COMBINACIONES SEMEJANTES
-  // =========================================================
-  const RB_RARITY_DEFS = [
-    { key: '', label: 'Todas', chipClass: 'bg-zinc-800/60 text-zinc-300' },
-    { key: 'SOLID', label: 'SOLID', chipClass: 'bg-blue-500/15 text-blue-300 border border-blue-500/30' },
-    { key: 'RADAR', label: 'RADAR', chipClass: 'bg-blue-500/15 text-blue-300 border border-blue-500/30' },
-    { key: 'LADDER', label: 'LADDER', chipClass: 'bg-blue-500/15 text-blue-300 border border-blue-500/30' },
-    { key: 'REPEATER', label: 'REPEATER', chipClass: 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30' },
-    { key: 'BINARY', label: 'BINARY', chipClass: 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30' },
-    { key: 'SEMI-SOLID', label: 'SEMI-SOLID', chipClass: 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30' },
-    { key: 'COMUN', label: 'Común', chipClass: 'bg-zinc-800/60 text-zinc-400' }
-  ];
-  let rbPool = [];
-  let rbActiveRarity = '';
-
-  async function rbFetchPool(){
-    const { data } = await fetchFromFirstAvailable('points', 300);
-    rbPool = data || [];
-    return rbPool;
-  }
-
-  function rbSimilarityScore(q, d){
+function rbSimilarityScore(q, d){
     if (!d) return 0;
     if (d === q) return 100;
     if (d.includes(q) || q.includes(d)) return 80;
     let common = 0;
-    for (let i = 0; i < Math.min(q.length, d.length); i++) if (q[i] === d[i]) common++;
-    return Math.round((common / Math.max(q.length, d.length)) * 100);
-  }
+    for (let i=0;i<Math.min(q.length,d.length);i++) if (q[i]===d[i]) common++;
+    return Math.round((common/Math.max(q.length,d.length))*100);
+}
 
-  // =========================================================
-  // 15. SERIE LÍDER — rotación en vivo entre los Top contendientes de la Bóveda
-  // =========================================================
-  let rbLeaderCandidates = [];
-  let rbLeaderIndex = 0;
-  const RB_LEADER_ROTATE_MS = 15000;
-  const RB_LEADER_REFRESH_MS = 45000;
+// ---------------------------------------------------------------
+// 9. BÚSQUEDA + FILTRO POR RAREZA
+// ---------------------------------------------------------------
+let activeRarity = '';
+let searchQuery = '';
+let resultsShowCount = 5;
 
-  async function loadLeaderCandidates(){
-    try {
-      const { data } = await fetchFromFirstAvailable('points', 8);
-      rbLeaderCandidates = data || [];
-      if (rbLeaderIndex >= rbLeaderCandidates.length) rbLeaderIndex = 0;
-      renderLeader();
-    } catch (e){
-      document.getElementById('leader-serial').textContent = 'Error al cargar';
-    }
-  }
+function renderRarityFilters(){
+    const wrap = document.getElementById('rarityFilters');
+    wrap.innerHTML = RARITY_DEFS.filter(d=>d.key!=='').map(d =>
+        `<button class="filter-btn ${activeRarity===d.key?'active':''}" data-rarity="${d.key}">${d.label}</button>`
+    ).join('');
+}
+document.addEventListener('click', e => {
+    const chip = e.target.closest('.filter-btn');
+    if (chip){ activeRarity = chip.dataset.rarity; resultsShowCount = 5; renderRarityFilters(); renderResults(); }
+    const favBtn = e.target.closest('.action.favorite');
+    if (favBtn){ rbToggleFavorite(favBtn.dataset.serial); renderResults(); }
+    const toqueBtn = e.target.closest('.action.toque');
+    if (toqueBtn){ onToqueClick(toqueBtn.dataset.serial); }
+    const moreBtn = e.target.closest('#moreButton');
+    if (moreBtn){ resultsShowCount += 20; renderResults(); }
+});
 
-  function renderLeader(){
-    const data = rbLeaderCandidates[rbLeaderIndex];
-    if (!data){
-      document.getElementById('leader-serial').textContent = 'Sin datos aún';
-      document.getElementById('leader-updated').textContent = 'Sé el primero en registrar un billete';
-      return;
-    }
-    const rarityKey = rarityKeyFallback(data.rarity);
-    document.getElementById('leader-serial').textContent = data.serial || data.serial_display || data.digits || '—';
-    document.getElementById('leader-letters').textContent = data.letters_snapshot || '—';
-    document.getElementById('leader-digits').textContent = data.digits || '—';
-    document.getElementById('leader-year').textContent = data.yr || '—';
-    document.getElementById('leader-points').textContent = data.points || 0;
-    document.getElementById('leader-rarity').textContent = rarityLabelFallback(data.rarity);
-    document.getElementById('leader-rarity').className = `text-lg font-bold ${rarityColor(rarityKey)}`;
-    document.getElementById('leader-owner').textContent = (data.owner || data.alias) ? '@'+(data.owner || data.alias) : '—';
-    document.getElementById('leader-country').textContent = data.country || '—';
-    const rankLabel = rbLeaderCandidates.length > 1
-      ? `#${rbLeaderIndex + 1} de ${rbLeaderCandidates.length} en tendencia`
-      : 'Actualizado';
-    document.getElementById('leader-updated').textContent = rankLabel;
-    renderDigitHistogram(data.digits || '');
-    updateLeaderProbabilityBar();
-  }
-
-  function renderDigitHistogram(digitsStr){
-    const container = document.getElementById('leader-digit-histogram');
-    if (!container) return;
-    const clean = String(digitsStr).replace(/\D/g, '');
-    if (!clean){
-      container.innerHTML = '';
-      return;
-    }
-    const counts = Array(10).fill(0);
-    clean.split('').forEach(d => counts[parseInt(d, 10)]++);
-    const max = Math.max(...counts, 1);
-    container.innerHTML = counts.map((c, digit) => `
-      <div class="hist-bar-wrap">
-        ${c > 0 ? `<span class="hist-count">${c}</span>` : ''}
-        <div class="hist-bar" style="height:${c > 0 ? Math.max((c / max) * 100, 10) : 2}%;"></div>
-        <span class="hist-digit">${digit}</span>
-      </div>`).join('');
-  }
-
-  const RB_LEADER_BAR_COLORS = {
-    SOLID: '#00bfff', RADAR: '#00bfff', LADDER: '#00bfff',
-    REPEATER: '#00e5ff', BINARY: '#00e5ff', 'SEMI-SOLID': '#00e5ff',
-    COMUN: '#52525b'
-  };
-  function renderLeaderProbabilityBar(){
-    const bar = document.getElementById('leader-probability-bar');
-    if (!bar || rbPool.length === 0) return;
-    const counts = {};
-    rbPool.forEach(row => { const k = rarityKeyFallback(row.rarity); counts[k] = (counts[k]||0) + 1; });
-    const total = rbPool.length || 1;
-    bar.innerHTML = RB_RARITY_DEFS.filter(d => d.key !== '').map(def => {
-      const count = counts[def.key] || 0;
-      if (count === 0) return '';
-      const pct = Math.max(Math.round((count / total) * 100), 2);
-      return `<div title="${def.label}: ${count} (${pct}%)" style="width:${pct}%; background:${RB_LEADER_BAR_COLORS[def.key] || '#52525b'}"></div>`;
-    }).join('');
-  }
-  async function updateLeaderProbabilityBar(){
-    if (rbPool.length === 0) await rbFetchPool();
-    renderLeaderProbabilityBar();
-  }
-
-  function rotateLeader(){
-    if (rbLeaderCandidates.length <= 1) return;
-    rbLeaderIndex = (rbLeaderIndex + 1) % rbLeaderCandidates.length;
-    renderLeader();
-  }
-
-  async function loadLeader(){ await loadLeaderCandidates(); }
-
-  // =========================================================
-  // TARJETA GANCHO — aparece a los pocos segundos, una sola vez por dispositivo
-  // =========================================================
-  function dismissHookCard(){
-    document.getElementById('hook-backdrop').classList.remove('show');
-    localStorage.setItem('dgt_hook_seen_v1', '1');
-  }
-  function maybeShowHookCard(){
-    if (localStorage.getItem('dgt_hook_seen_v1')) return;
-    setTimeout(() => {
-      document.getElementById('hook-backdrop').classList.add('show');
-    }, 2500);
-  }
-
-  // =========================================================
-  // 16. PANTALLA GLOBAL (nativa) — Buscar / Por Rareza, capado a 5 resultados
-  // =========================================================
-  let nativeSearchRows = [];
-  let nativeRarityRows = [];
-  let nativeFavRows = [];
-  let nativeRarityActive = '';
-
-  function setGlobalTab(tab){
-    document.getElementById('globalTabBuscar').classList.toggle('active', tab === 'buscar');
-    document.getElementById('globalTabRareza').classList.toggle('active', tab === 'rareza');
-    document.getElementById('globalPanelBuscar').style.display = tab === 'buscar' ? 'flex' : 'none';
-    document.getElementById('globalPanelRareza').style.display = tab === 'rareza' ? 'flex' : 'none';
-    if (tab === 'rareza' && !document.getElementById('global-rarity-chips').innerHTML){
-      renderNativeRarityChips();
-    }
-  }
-
-  function nativeCompactRow(row, idx, arrayName, extraTag){
-    const rarityKey = rarityKeyFallback(row.rarity);
-    const rarityLabel = rarityLabelFallback(row.rarity);
-    const serial = row.serial || row.serial_display || row.digits || '';
-    const ownerAlias = row.owner || row.alias || '';
+function renderResults(){
+    const container = document.getElementById('resultsScroll');
     const favs = rbGetFavorites();
-    const isFav = favs.includes(serial);
-    const currencyMatch = (row.country || '').match(/[$€£¥]/);
-    const denomDisplay = row.denom ? ` · ${currencyMatch ? currencyMatch[0] : ''}${row.denom}` : '';
-    return `
-    <div class="result-row">
-      <div style="min-width:0;overflow:hidden;">
-        <div class="result-serial">${serial}</div>
-        <div class="result-meta">${row.country || ''} · ${rarityLabel}${denomDisplay}${extraTag || ''}</div>
-      </div>
-      <div class="result-right">
-        <div class="result-points">${row.points || 0} pts</div>
-        <div class="result-sim">${ownerAlias ? '@'+ownerAlias : ''}</div>
-      </div>
-      <div class="result-actions">
-        <button class="result-icon-btn ${isFav ? 'fav-active' : ''}" onclick="event.stopPropagation(); nativeToggleFavorite('${arrayName}', ${idx})">♥</button>
-        <button class="result-icon-btn" onclick="event.stopPropagation(); nativeToqueRow('${arrayName}', ${idx})">✋</button>
-      </div>
-    </div>`;
-  }
-  function nativeRowsFor(arrayName){
-    if (arrayName === 'nativeSearchRows') return nativeSearchRows;
-    if (arrayName === 'nativeRarityRows') return nativeRarityRows;
-    if (arrayName === 'nativeFavRows') return nativeFavRows;
-    if (arrayName === 'nativeSeeMoreRows') return nativeSeeMoreRows;
-    return [];
-  }
-  function nativeToggleFavorite(arrayName, idx){
-    const row = nativeRowsFor(arrayName)[idx];
-    if (!row) return;
-    const serial = row.serial || row.serial_display || row.digits;
-    let favs = rbGetFavorites();
-    if (favs.includes(serial)) favs = favs.filter(s => s !== serial);
-    else favs.push(serial);
-    localStorage.setItem('dgt_favorites_v1', JSON.stringify(favs));
-    if (arrayName === 'nativeSearchRows') performCompactSearch();
-    if (arrayName === 'nativeRarityRows' && nativeRarityActive) nativeFilterByRarity(nativeRarityActive);
-    if (arrayName === 'nativeFavRows') loadFavoritesScreen();
-    if (arrayName === 'nativeSeeMoreRows'){
-      loadFavoritesScreen();
-      document.getElementById('see-more-body').innerHTML = nativeSeeMoreRows.map((r, i) => nativeCompactRow(r, i, 'nativeSeeMoreRows')).join('');
+    let rows = MOCK_POOL;
+    if (searchQuery){
+        rows = rows.map(r => ({ r, score: rbSimilarityScore(searchQuery.toUpperCase(), r.digits) }))
+                   .filter(x => x.score >= 20).sort((a,b)=>b.score-a.score).map(x=>x.r);
+    } else if (activeRarity){
+        rows = rows.filter(r => r.rarity.key === activeRarity);
+    } else {
+        rows = [...rows].sort((a,b)=>b.points-a.points);
     }
-  }
-  function nativeToqueRow(arrayName, idx){
-    const row = nativeRowsFor(arrayName)[idx];
+    const shown = rows.slice(0, resultsShowCount);
+    if (shown.length === 0){
+        container.innerHTML = '<div class="empty-note">Sin resultados todavía.</div>';
+        return;
+    }
+    container.innerHTML = shown.map(r => `
+        <article class="result-card" data-rarity="${r.rarity.key}" data-star="${r.serial.includes('★')}">
+            <div class="result-content">
+                <div>
+                    <div class="serial">${r.serial}</div>
+                    <div class="result-meta"><span>${r.country}</span><span>·</span><span>${r.rarity.label}</span></div>
+                    <div class="owner">@${r.owner}</div>
+                </div>
+                <div class="points">${r.points} pts</div>
+                <div class="actions">
+                    <button class="action favorite ${favs.includes(r.serial)?'active':''}" data-serial="${r.serial}">${favs.includes(r.serial)?'❤️':'♡'}</button>
+                    <button class="action toque" data-serial="${r.serial}">👋</button>
+                </div>
+            </div>
+        </article>`).join('');
+    if (rows.length > shown.length){
+        container.innerHTML += `<button class="more-btn" id="moreButton">🔽 Ver más resultados (${rows.length-shown.length})</button>`;
+    }
+}
+
+function onToqueClick(serial){
+    const row = MOCK_POOL.find(r => r.serial === serial);
     if (!row) return;
-    const toOwner = row.owner || row.alias;
-    if (user && profile && toOwner === profile.alias){ showToast('No puedes tocar tu propio billete'); return; }
-    const payload = {
-      toOwner,
-      toEmail: decodeEmailIfNeeded(row.email),
-      serial: row.serial || row.serial_display || row.digits,
-      digits: row.digits,
-      country: profile?.country || ''
-    };
+    if (profile && row.owner === profile.alias){ showToast('No puedes tocar tu propio billete'); return; }
+    const payload = { toOwner: row.owner, toEmail: decodeEmailIfNeeded(row.email), serial: row.serial, digits: row.digits };
     if (!gate('toque', payload)) return;
     executeToque(payload);
-  }
-
-  let nativeSearchTimer = null;
-  function scheduleCompactSearch(){
-    clearTimeout(nativeSearchTimer);
-    nativeSearchTimer = setTimeout(performCompactSearch, 280);
-  }
-  let nativeSearchFullRows = [];
-  let nativeRarityFullRows = [];
-  let nativeSeeMoreRows = [];
-
-  async function performCompactSearch(){
-    const q = document.getElementById('global-search-input').value.trim().toUpperCase();
-    const container = document.getElementById('global-search-results');
-    if (q.length < 1){
-      container.innerHTML = '<div class="compact-empty">Escribe al menos 1 carácter para buscar</div>';
-      return;
+}
+async function executeToque(payload){
+    try {
+        const { error } = await sb.rpc('enviar_toque', {
+            p_to_owner: payload.toOwner,
+            p_to_email: payload.toEmail,
+            p_serial: payload.serial,
+            p_digits: payload.digits,
+            p_from_country: profile?.country || ''
+        });
+        if (error) throw error;
+        showToast(`Toque enviado a @${payload.toOwner}`);
+    } catch (e){
+        showToast('Error al enviar el toque: ' + (e.message || e));
     }
-    if (rbPool.length === 0) await rbFetchPool();
-    const scored = rbPool
-      .map(row => {
-        const target = (row.serial || row.serial_display || row.digits || '').replace(/\s/g, '').toUpperCase();
-        return { row, score: rbSimilarityScore(q, target) };
-      })
-      .filter(x => x.score >= 20)
-      .sort((a,b) => b.score - a.score)
-      .slice(0, 25);
-    nativeSearchFullRows = scored.map(x => x.row);
-    nativeSearchRows = nativeSearchFullRows.slice(0, 3);
-    if (scored.length === 0){
-      container.innerHTML = `<div class="compact-empty">Sin coincidencias para <b>${q}</b> todavía</div>`;
-      return;
-    }
-    let html = scored.slice(0, 3).map((x, idx) => nativeCompactRow(x.row, idx, 'nativeSearchRows', ` · ${x.score}% similar`)).join('');
-    if (nativeSearchFullRows.length > 3){
-      html += `<button style="flex-shrink:0;height:44px;border:1.5px dashed #3a3a3a;border-radius:14px;background:transparent;color:var(--yellow);font-weight:800;font-size:12px;width:100%;" onclick="openSeeMoreModal('search','Más coincidencias')">🔽 Ver más resultados (${nativeSearchFullRows.length - 3})</button>`;
-    }
-    container.innerHTML = html;
-  }
+}
 
-  function renderNativeRarityChips(){
-    const container = document.getElementById('global-rarity-chips');
-    container.innerHTML = RB_RARITY_DEFS.filter(d => d.key !== '').map(def => {
-      const active = nativeRarityActive === def.key;
-      return `<div class="rarity-chip ${active ? 'active' : ''}" onclick="nativeFilterByRarity('${def.key}')">${def.label}</div>`;
+document.getElementById('openSearch')?.addEventListener('click', () => { openModalId('searchModal'); setTimeout(()=>document.getElementById('searchInput').focus(),80); });
+document.getElementById('executeSearch')?.addEventListener('click', () => {
+    searchQuery = document.getElementById('searchInput').value.trim();
+    closeModalId('searchModal');
+    activeRarity = '';
+    resultsShowCount = 5;
+    renderRarityFilters();
+    renderResults();
+});
+document.getElementById('rareButton')?.addEventListener('click', () => {
+    searchQuery = '';
+    resultsShowCount = 5;
+    document.getElementById('searchInput').value = '';
+    renderResults();
+});
+
+// ---------------------------------------------------------------
+// 10. SERIE LÍDER — rotación entre top contendientes
+// ---------------------------------------------------------------
+let leaderIndex = 0;
+const LEADER_ROTATE_MS = 15000;
+function renderLeader(){
+    const top = [...MOCK_POOL].sort((a,b)=>b.points-a.points).slice(0,8);
+    if (leaderIndex >= top.length) leaderIndex = 0;
+    const data = top[leaderIndex];
+    if (!data) return;
+    document.getElementById('leaderBill').textContent = data.serial;
+    document.getElementById('leaderLetters').textContent = data.letters_snapshot || data.serial.split(' ')[0];
+    document.getElementById('leaderDigits').textContent = data.digits;
+    document.getElementById('leaderYear').textContent = data.yr;
+    document.getElementById('leaderPoints').textContent = data.points;
+    document.getElementById('leaderRarity').textContent = data.rarity.label;
+    document.getElementById('leaderRarity').setAttribute('data-rarity', data.rarity.key); // solo estilo: color por rareza
+    document.getElementById('leaderOwner').textContent = '@'+data.owner;
+    document.getElementById('leaderRankTag').textContent = top.length>1 ? `#${leaderIndex+1}/${top.length}` : '';
+}
+function rotateLeader(){
+    const top = Math.min(MOCK_POOL.length, 8);
+    if (top <= 1) return;
+    leaderIndex = (leaderIndex + 1) % top;
+    renderLeader();
+}
+
+// ---------------------------------------------------------------
+// 11. ESTADÍSTICAS DE INICIO
+// ---------------------------------------------------------------
+function renderStats(){
+    document.getElementById('statSeries').textContent = MOCK_POOL.length;
+    const totalValue = MOCK_POOL.reduce((s,r)=> s + (r.denom||0) * (10 + r.rarity.score), 0);
+    document.getElementById('statValue').textContent = totalValue >= 1000 ? Math.round(totalValue/1000)+'K' : Math.round(totalValue);
+    const countries = new Set(MOCK_POOL.map(r => r.country));
+    document.getElementById('statCountries').textContent = countries.size;
+
+    // Distribución de rareza real en la bóveda (sustituye la gráfica decorativa anterior)
+    const RARITY_COLOR_VAR = { SOLID:'--r-solid', RADAR:'--r-radar', LADDER:'--r-ladder',
+        REPEATER:'--r-repeater', BINARY:'--r-binary', 'SEMI-SOLID':'--r-semi', COMUN:'--r-comun' };
+    const order = ['SOLID','RADAR','LADDER','REPEATER','BINARY','SEMI-SOLID','COMUN'];
+    const counts = {};
+    MOCK_POOL.forEach(r => { const k = r.rarity.key; counts[k] = (counts[k]||0) + 1; });
+    const total = MOCK_POOL.length || 1;
+    const present = order.filter(k => counts[k]);
+
+    const bar = document.getElementById('statsChart');
+    bar.innerHTML = present.map(k => {
+        const pct = Math.max(Math.round((counts[k]/total)*100), 4);
+        const label = k === 'COMUN' ? 'Común' : k;
+        return `<div class="rarity-dist-seg" style="width:${pct}%;background:var(${RARITY_COLOR_VAR[k]})" title="${label}: ${counts[k]} (${pct}%)"></div>`;
     }).join('');
-  }
-  async function nativeFilterByRarity(key){
-    nativeRarityActive = key;
-    if (rbPool.length === 0) await rbFetchPool();
-    renderNativeRarityChips();
-    const container = document.getElementById('global-rarity-results');
-    nativeRarityFullRows = rbPool.filter(r => rarityKeyFallback(r.rarity) === key).slice(0, 25);
-    nativeRarityRows = nativeRarityFullRows.slice(0, 3);
-    if (nativeRarityFullRows.length === 0){
-      container.innerHTML = '<div class="compact-empty">Sin billetes con esta rareza todavía</div>';
-      return;
-    }
-    let html = nativeRarityRows.map((row, idx) => nativeCompactRow(row, idx, 'nativeRarityRows')).join('');
-    if (nativeRarityFullRows.length > 3){
-      html += `<button style="flex-shrink:0;height:44px;border:1.5px dashed #3a3a3a;border-radius:14px;background:transparent;color:var(--yellow);font-weight:800;font-size:12px;width:100%;" onclick="openSeeMoreModal('rareza','Más billetes ${key}')">🔽 Ver más resultados (${nativeRarityFullRows.length - 3})</button>`;
-    }
-    container.innerHTML = html;
-  }
 
-  function openSeeMoreModal(kind, title){
-    nativeSeeMoreRows = kind === 'search' ? nativeSearchFullRows : kind === 'rareza' ? nativeRarityFullRows : nativeFavFullRows;
-    document.getElementById('see-more-title').textContent = title;
-    document.getElementById('see-more-body').innerHTML = nativeSeeMoreRows.map((row, idx) => nativeCompactRow(row, idx, 'nativeSeeMoreRows')).join('');
-    openModal('see-more-modal');
-  }
+    const legend = document.getElementById('statsLegend');
+    legend.innerHTML = present.map(k => {
+        const pct = Math.round((counts[k]/total)*100);
+        const label = k === 'COMUN' ? 'Común' : k;
+        return `<div class="rarity-dist-item"><span class="dot" style="background:var(${RARITY_COLOR_VAR[k]});color:var(${RARITY_COLOR_VAR[k]})"></span>${label} · ${pct}%</div>`;
+    }).join('');
 
-  // =========================================================
-  // 17. PANTALLA FAVORITOS (nativa)
-  // =========================================================
-  let nativeFavFullRows = [];
+    document.getElementById('loginPrompt').style.display = session ? 'none' : 'block';
+}
 
-  async function loadFavoritesScreen(){
-    const container = document.getElementById('fav-list-native');
-    const favs = rbGetFavorites();
-    if (favs.length === 0){
-      container.innerHTML = '<div class="compact-empty">Aún no marcaste favoritos.<br>Toca el ♥ en cualquier resultado.</div>';
-      return;
+// ---------------------------------------------------------------
+// TOQUES RECIBIDOS — botón "👋" en Búsqueda + badge de aviso + modal (real)
+// ---------------------------------------------------------------
+let toquesReceivedCache = [];
+
+async function updateToquesBadges(){
+    if (!session || !profile?.alias){
+        ['toquesBadge','toquesBadgeGlobal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el){ el.textContent = '0'; el.classList.remove('show'); }
+        });
+        return;
     }
-    if (rbPool.length === 0) await rbFetchPool();
-    nativeFavFullRows = rbPool.filter(r => favs.includes(r.serial || r.serial_display || r.digits)).slice(0, 25);
-    nativeFavRows = nativeFavFullRows.slice(0, 3);
-    if (nativeFavFullRows.length === 0){
-      container.innerHTML = '<div class="compact-empty">Aún no marcaste favoritos.<br>Toca el ♥ en cualquier resultado.</div>';
-      return;
+    try {
+        const { data } = await sb.from('dgt_toques').select('id,status').eq('to_owner', profile.alias).eq('status', 'pending');
+        const pending = data?.length || 0;
+        ['toquesBadge','toquesBadgeGlobal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = pending;
+            el.classList.toggle('show', pending > 0);
+        });
+    } catch {}
+}
+async function openToquesModal(){
+    if (!session){ openModalId('authModal'); return; }
+    if (!profile?.alias){ onProfileNavClick(); return; }
+    openModalId('toquesModal');
+    await renderToquesList();
+}
+async function renderToquesList(){
+    const container = document.getElementById('toquesList');
+    container.innerHTML = '<p style="text-align:center;color:var(--gray-dim);font-size:12px;padding:20px 0;">Cargando...</p>';
+    try {
+        const { data, error } = await sb.from('dgt_toques').select('*').eq('to_owner', profile.alias).order('created_at', { ascending:false }).limit(30);
+        if (error) throw error;
+        toquesReceivedCache = data || [];
+    } catch (e){
+        container.innerHTML = `<p style="text-align:center;color:var(--danger);font-size:12px;padding:20px 0;">Error: ${e.message}</p>`;
+        return;
     }
-    let html = nativeFavRows.map((row, idx) => nativeCompactRow(row, idx, 'nativeFavRows')).join('');
-    if (nativeFavFullRows.length > 3){
-      html += `<button style="flex-shrink:0;height:44px;border:1.5px dashed #3a3a3a;border-radius:14px;background:transparent;color:var(--yellow);font-weight:800;font-size:12px;width:100%;" onclick="openSeeMoreModal('fav','Todos tus favoritos')">🔽 Ver más resultados (${nativeFavFullRows.length - 3})</button>`;
+    if (toquesReceivedCache.length === 0){
+        container.innerHTML = '<p style="text-align:center;color:var(--gray-dim);font-size:12px;padding:20px 0;">Sin toques recibidos aún.</p>';
+        return;
     }
-    container.innerHTML = html;
-  }
+    container.innerHTML = toquesReceivedCache.map((t, idx) => `
+        <div class="toque-row">
+            <p style="font-weight:800;font-size:13px;color:var(--white);">👋 @${t.from_alias} te tocó</p>
+            <p class="serial" style="font-family:var(--font-mono);color:var(--blue);margin-top:2px;">${t.serial || ''}</p>
+            <p style="font-size:10px;color:var(--gray-dim);margin-top:2px;">${t.from_country || ''}</p>
+            ${t.status === 'pending' ? `
+            <div style="display:flex;gap:8px;margin-top:8px;">
+                <button onclick="acceptToqueReceived(${idx})" style="flex:1;height:34px;border:0;border-radius:999px;background:var(--green);color:#04140a;font-weight:900;font-size:11px;cursor:pointer;">ACEPTAR</button>
+                <button onclick="rejectToqueReceived(${idx})" style="flex:1;height:34px;border:0;border-radius:999px;background:var(--field);color:var(--gray);font-weight:800;font-size:11px;cursor:pointer;">RECHAZAR</button>
+            </div>` : `<p style="font-size:10px;color:var(--gray-dim);margin-top:6px;">${t.status === 'accepted' ? 'Aceptado' : 'Rechazado'}</p>`}
+        </div>`).join('');
+}
+async function acceptToqueReceived(idx){
+    const t = toquesReceivedCache[idx];
+    if (!t) return;
+    try {
+        const { error } = await sb.from('dgt_toques').update({ status: 'accepted' }).eq('id', t.id);
+        if (error) throw error;
+        t.status = 'accepted';
+        showToast(`Aceptaste el toque de @${t.from_alias}`);
+        renderToquesList();
+        updateToquesBadges();
+    } catch (e){ showToast('Error: ' + e.message); }
+}
+async function rejectToqueReceived(idx){
+    const t = toquesReceivedCache[idx];
+    if (!t) return;
+    try {
+        const { error } = await sb.from('dgt_toques').update({ status: 'rejected' }).eq('id', t.id);
+        if (error) throw error;
+        t.status = 'rejected';
+        showToast(`Rechazaste el toque de @${t.from_alias}`);
+        renderToquesList();
+        updateToquesBadges();
+    } catch (e){ showToast('Error: ' + e.message); }
+}
 
-  // =========================================================
-  // 18. INIT
-  // =========================================================
-  (async function init(){
-    const { data: sessionData } = await sb.auth.getSession();
-    user = sessionData?.session?.user || null;
-    if (user) await loadUserContext();
-    await rbFetchPool();
-    await loadLeaderCandidates();
-    renderMembershipCard();
-    updateProfileScreen();
-    performCompactSearch();
-    nativeFilterByRarity('SOLID');
-    setInterval(rotateLeader, RB_LEADER_ROTATE_MS);
-    setInterval(loadLeaderCandidates, RB_LEADER_REFRESH_MS);
-    maybeShowHookCard();
-  })();
+function refreshPoolDependentUI(){
+    renderLeader();
+    renderStats();
+    renderResults();
+}
 
-  // ============ Navegación entre pantallas (SIN scroll, una a la vez) ============
-  const SCREENS = ['inicio','global','registrar','favoritos','perfil'];
-  function goTo(name){
-    SCREENS.forEach(s => {
-      document.getElementById('screen-'+s).classList.toggle('active', s === name);
-      document.getElementById('navBtn-'+s).classList.toggle('active', s === name);
+// ---------------------------------------------------------------
+// 12. NAVEGACIÓN
+// ---------------------------------------------------------------
+document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const v = btn.dataset.view;
+        document.getElementById('homeView').classList.toggle('active', v==='home');
+        document.getElementById('registerView').classList.toggle('active', v==='register');
+        document.getElementById('searchView').classList.toggle('active', v==='search');
     });
-    if (name === 'favoritos') loadFavoritesScreen();
-    if (name === 'perfil') renderMembershipCard();
-  }
+});
 
+// ---------------------------------------------------------------
+// 13. INIT
+// ---------------------------------------------------------------
+(async function init(){
+    fillLetters(); fillYears(); fillCountries(); fillDenominationsForCountry();
+    renderSerial();
+
+    const { data: sessionData } = await sb.auth.getSession();
+    session = sessionData?.session?.user || null;
+    if (session) await loadUserContext();
+
+    await fetchPool();
+    renderRarityFilters();
+    updateSessionUI();
+    refreshPoolDependentUI();
+    updateToquesBadges();
+    setInterval(rotateLeader, LEADER_ROTATE_MS);
+})();
 </script>
-
 </body>
 </html>
