@@ -154,7 +154,26 @@ header{height:9.5%;min-height:52px;display:flex;align-items:center;justify-conte
 .rb-panel.active{display:block;}
 #rb-panel-sd.active{display:block;}
 #rb-panel-serie.active{display:flex;}
-select.dgt-select, input.dgt-select{background:rgba(10,10,10,.7);border:1px solid #3a3a3a;color:var(--text);border-radius:.75rem;padding:.65rem .75rem;font-size:16px;font-weight:600;width:100%;appearance:none;}
+input.dgt-select{background:rgba(10,10,10,.7);border:1px solid #3a3a3a;color:var(--text);border-radius:.75rem;padding:.65rem .75rem;font-size:16px;font-weight:600;width:100%;}
+select.dgt-select{
+  background-color:rgba(10,10,10,.7);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300ff87' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  background-size:14px;
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:.75rem;
+  padding:.65rem 2.1rem .65rem .75rem;
+  font-size:14px;
+  font-weight:700;
+  width:100%;
+  appearance:none;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+}
+select.dgt-select:invalid, select.dgt-select option[value=""]{ color:var(--muted); }
+.field-label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
 select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--green);}
 .dgt-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;z-index:160;backdrop-filter:blur(4px);}
 .dgt-modal.active{display:flex;}
@@ -228,7 +247,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
       </div>
     </article>
     <div style="height:13%;flex-shrink:0;display:flex;gap:10px;margin-top:12px;margin-bottom:8px;align-items:flex-start;">
-      <button onclick="goTo('registrar')" style="flex:1;height:56px;border:none;border-radius:14px;background:linear-gradient(180deg,var(--yellow),#0099cc);color:#0a0a0a;font-weight:800;font-size:clamp(12px,3.2vw,14px);display:flex;align-items:center;justify-content:center;gap:7px;">
+      <button onclick="goTo('registrar'); openSerieModal();" style="flex:1;height:56px;border:none;border-radius:14px;background:linear-gradient(180deg,var(--yellow),#0099cc);color:#0a0a0a;font-weight:800;font-size:clamp(12px,3.2vw,14px);display:flex;align-items:center;justify-content:center;gap:7px;">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
         Ingresar Serie
       </button>
@@ -277,45 +296,57 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
       <div class="pro membership-badge-clone">👑 $5 VIDA</div>
     </header>
     <div class="section-title" style="margin-top:6px;"><span class="live-dot"></span><span>REGISTRAR MI BILLETE</span></div>
-    <div class="reg-tabs">
-      <div class="reg-tab" onclick="rbSwitchTab('sd')" id="rb-tab-btn-sd">🏷️ Datos SD</div>
-      <div class="reg-tab active" onclick="rbSwitchTab('serie')" id="rb-tab-btn-serie">🔢 Serie DGT</div>
-    </div>
 
-    <div class="reg-panel" style="flex:1;min-height:0;position:relative;">
-
-      <!-- Panel Datos SD: único con scroll interno propio (es un formulario) -->
-      <div id="rb-panel-sd" class="rb-panel" style="height:100%;overflow-y:auto;padding-top:2px;">
-        <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Letras del billete <span style="color:#888;">(solo la 1ª es obligatoria)</span></p>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
-          <select class="dgt-select" id="rb-letra1"><option value="">A-Z *</option></select>
-          <select class="dgt-select" id="rb-letra2"><option value="">—</option></select>
-          <select class="dgt-select" id="rb-letra3"><option value="">—</option></select>
-        </div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:6px;">País</label>
-        <select class="dgt-select" id="rb-pais" style="margin-bottom:12px;"><option value="">Selecciona país</option></select>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:6px;">Año de emisión</label>
-        <select class="dgt-select" id="rb-anio" style="margin-bottom:12px;"><option value="">Selecciona año</option></select>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:6px;">Denominación</label>
-        <select class="dgt-select" id="rb-denominacion" onchange="rbToggleDenomOtro()"><option value="">Selecciona denominación</option></select>
-        <input id="rb-denom-otro" type="text" placeholder="Especifica denominación (ej. 200)" class="dgt-select hidden" style="margin-top:8px;" />
+    <div style="flex:1;min-height:0;display:flex;flex-direction:column;margin-top:12px;overflow-y:auto;">
+      <div class="field-label">🏷️ LETRAS DEL BILLETE <span style="text-transform:none;font-weight:600;color:#666;">(solo la 1ª es obligatoria · ★ = billete estrella)</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;flex-shrink:0;">
+        <select class="dgt-select" id="rb-letra1"><option value="">A-Z *</option></select>
+        <select class="dgt-select" id="rb-letra2"><option value="">—</option></select>
+        <select class="dgt-select" id="rb-letra3"><option value="">—</option></select>
       </div>
 
-      <!-- Panel Serie DGT: teclado, sin scroll, ocupa toda la pantalla disponible -->
-      <div id="rb-panel-serie" class="rb-panel active" style="flex-direction:column;height:100%;">
-        <div class="digit-display empty" id="rb-digit-display">Ingresa hasta 10 dígitos</div>
-        <p style="text-align:right;font-size:10px;color:var(--muted);margin-top:4px;" id="rb-digit-count">0 / 10 dígitos (mín. 6)</p>
-        <div class="rarity-preview" id="rb-rarity-preview" style="margin-top:6px;">Ingresa dígitos para ver la rareza en vivo</div>
-        <div class="keypad">
-          <div class="key" onclick="rbPressNum(1)">1</div><div class="key" onclick="rbPressNum(2)">2</div><div class="key" onclick="rbPressNum(3)">3</div>
-          <div class="key" onclick="rbPressNum(4)">4</div><div class="key" onclick="rbPressNum(5)">5</div><div class="key" onclick="rbPressNum(6)">6</div>
-          <div class="key" onclick="rbPressNum(7)">7</div><div class="key" onclick="rbPressNum(8)">8</div><div class="key" onclick="rbPressNum(9)">9</div>
-          <div class="key wide" onclick="rbClearInput()">C</div><div class="key" onclick="rbPressNum(0)">0</div><div class="key wide" onclick="rbDeleteDigit()">⌫</div>
+      <button id="rb-open-serie-btn" onclick="openSerieModal()" style="flex-shrink:0;margin-top:14px;height:56px;border-radius:16px;border:1.5px solid rgba(0,255,135,.35);background:rgba(0,255,135,.08);color:var(--green);font-weight:900;font-size:clamp(15px,4.2vw,18px);display:flex;align-items:center;justify-content:center;gap:8px;">
+        🔢 Serie <span id="rb-serie-btn-count" style="color:var(--muted);font-weight:700;font-size:13px;">· 0/10</span>
+      </button>
+      <p id="rb-serie-preview-line" style="text-align:center;margin-top:5px;font-size:11px;color:#666;font-family:monospace;flex-shrink:0;min-height:14px;"></p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;flex-shrink:0;">
+        <div>
+          <div class="field-label">🗓️ AÑO</div>
+          <select class="dgt-select" id="rb-anio"><option value="">Año</option></select>
+        </div>
+        <div>
+          <div class="field-label">🌍 PAÍS</div>
+          <select class="dgt-select" id="rb-pais"><option value="">País</option></select>
         </div>
       </div>
+
+      <div class="field-label" style="margin-top:14px;">💵 DENOMINACIÓN</div>
+      <select class="dgt-select" id="rb-denominacion" onchange="rbToggleDenomOtro()" style="flex-shrink:0;"><option value="">Selecciona denominación</option></select>
+      <input id="rb-denom-otro" type="text" placeholder="Especifica denominación (ej. 200)" class="dgt-select hidden" style="margin-top:8px;flex-shrink:0;" />
     </div>
 
     <div class="reg-submit" id="rb-submit-btn" onclick="handleRegister()">🔐 Registrar a Bóveda</div>
+  </div>
+
+  <!-- ============ MODAL: SERIE DGT (teclado numérico + rareza en vivo) ============ -->
+  <div id="serie-modal" class="dgt-modal">
+    <div class="dgt-modal-card" style="max-height:92vh;display:flex;flex-direction:column;">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-black text-green-400">🔢 Ingresar Serie DGT</h3>
+        <button onclick="closeSerieModal()" style="flex-shrink:0;height:34px;padding:0 14px;border-radius:999px;border:1.5px solid #3a3a3a;background:#1f1f1f;color:var(--text);font-weight:800;font-size:12px;">← Datos</button>
+      </div>
+      <div class="digit-display empty" id="rb-digit-display">Ingresa hasta 10 dígitos</div>
+      <p style="text-align:right;font-size:10px;color:var(--muted);margin-top:4px;" id="rb-digit-count">0 / 10 dígitos (mín. 6)</p>
+      <div class="rarity-preview" id="rb-rarity-preview" style="margin-top:6px;">Ingresa dígitos para ver la rareza en vivo</div>
+      <div class="keypad" style="height:280px;flex:none;margin-top:12px;">
+        <div class="key" onclick="rbPressNum(1)">1</div><div class="key" onclick="rbPressNum(2)">2</div><div class="key" onclick="rbPressNum(3)">3</div>
+        <div class="key" onclick="rbPressNum(4)">4</div><div class="key" onclick="rbPressNum(5)">5</div><div class="key" onclick="rbPressNum(6)">6</div>
+        <div class="key" onclick="rbPressNum(7)">7</div><div class="key" onclick="rbPressNum(8)">8</div><div class="key" onclick="rbPressNum(9)">9</div>
+        <div class="key wide" onclick="rbClearInput()">C</div><div class="key" onclick="rbPressNum(0)">0</div><div class="key wide" onclick="rbDeleteDigit()">⌫</div>
+      </div>
+      <button onclick="closeSerieModal()" style="flex-shrink:0;margin-top:12px;height:48px;border-radius:16px;background:linear-gradient(180deg,var(--green),#00cc6a);color:#0a0a0a;font-weight:900;font-size:14px;">✓ Listo, volver a Datos</button>
+    </div>
   </div>
 
   <!-- ============ FAVORITOS ============ -->
@@ -463,7 +494,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
 <div id="toques-modal" class="dgt-modal">
   <div class="dgt-modal-card" style="max-height:88vh;">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-black text-red-400">👋 Toques Privados</h3>
+      <h3 class="text-lg font-black text-blue-400">👋 Toques Privados</h3>
       <button onclick="closeModal('toques-modal')" class="text-zinc-500 text-xl">✕</button>
     </div>
     <div class="flex gap-2 mb-4">
@@ -485,7 +516,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     <div class="flex items-center justify-between p-4 border-b border-zinc-800 shrink-0">
       <div>
         <p id="chat-with-label" class="font-black text-white text-sm">Chat</p>
-        <p id="chat-serial-label" class="font-mono text-xs text-red-400"></p>
+        <p id="chat-serial-label" class="font-mono text-xs text-blue-400"></p>
       </div>
       <button onclick="closeModal('chat-modal')" class="text-zinc-500 text-xl">✕</button>
     </div>
@@ -493,7 +524,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     </div>
     <div class="p-3 border-t border-zinc-800 flex gap-2 shrink-0">
       <input id="chat-input" type="text" placeholder="Mensaje privado..." class="dgt-select flex-1" onkeydown="if(event.key==='Enter') sendChatMessage()" />
-      <button onclick="sendChatMessage()" class="h-11 w-11 rounded-xl bg-red-500 text-white font-black shrink-0">↑</button>
+      <button onclick="sendChatMessage()" class="h-11 w-11 rounded-xl bg-blue-500 text-white font-black shrink-0">↑</button>
     </div>
   </div>
 </div>
@@ -908,9 +939,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
       const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect: 'if_required' });
       if (error) throw new Error(error.message);
       if (paymentIntent && paymentIntent.status === 'succeeded'){
-        // El pago con Stripe ya se cobró. Ahora hay que confirmarlo con el servidor
-        // y esperar a que la fila en `members` quede activa antes de celebrar —
-        // el webhook puede tardar unos segundos, así que no asumimos éxito a ciegas.
         payBtn.textContent = 'Confirmando con el servidor...';
         const confirmRes = await fetch(SUPABASE_EDGE_FUNCTION, {
           method: 'POST',
@@ -934,8 +962,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
           showToast('✅ Membresía activada');
           runPendingAction();
         } else {
-          // No confirmamos aún: dejamos el modal abierto con opción de reintentar
-          // en vez de decir "activado" sin estar seguros.
           payBtn.disabled = false;
           payBtn.textContent = '¿Ya se activó? Verificar de nuevo';
           payBtn.onclick = async () => {
@@ -963,8 +989,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     }
   }
 
-  // Consulta la tabla members hasta `attempts` veces (con espera entre cada una)
-  // para confirmar que el webhook/servidor realmente activó la membresía.
   async function rbPollMembership(attempts = 8, delayMs = 1500){
     for (let i = 0; i < attempts; i++){
       try {
@@ -988,6 +1012,10 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
         opt.value = l; opt.textContent = l;
         sel.appendChild(opt);
       }
+      // Billete estrella (star note): billete de reemplazo, más raro/valorado por coleccionistas
+      const starOpt = document.createElement('option');
+      starOpt.value = '★'; starOpt.textContent = '★ Estrella';
+      sel.appendChild(starOpt);
     });
   })();
 
@@ -1048,12 +1076,10 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
   // =========================================================
   // 9. TABS + TECLADO NUMÉRICO
   // =========================================================
-  function rbSwitchTab(tab){
-    document.getElementById('rb-tab-btn-sd').classList.toggle('active', tab === 'sd');
-    document.getElementById('rb-tab-btn-serie').classList.toggle('active', tab === 'serie');
-    document.getElementById('rb-panel-sd').classList.toggle('active', tab === 'sd');
-    document.getElementById('rb-panel-serie').classList.toggle('active', tab === 'serie');
-  }
+  // La pantalla Registrar ya no tiene pestañas: los dígitos se ingresan en un
+  // pop-up aparte (serie-modal) para no apretar todo en una sola vista.
+  function openSerieModal(){ openModal('serie-modal'); }
+  function closeSerieModal(){ closeModal('serie-modal'); }
 
   let rbUserDigits = [];
   const RB_MAX_DIGITS = 10;
@@ -1082,6 +1108,13 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
       preview.className = `mt-3 rounded-xl border px-4 py-3 text-center text-lg font-black tracking-wide ${colorClass}`;
       preview.textContent = `${r.label}${r.key !== 'COMUN' ? ' ✨' : ''}`;
     }
+
+    // Refleja el progreso en el botón "# Serie" y una vista previa chica en la
+    // pantalla principal, para que no se sienta "perdido" al cerrar el pop-up.
+    const countBtn = document.getElementById('rb-serie-btn-count');
+    const previewLine = document.getElementById('rb-serie-preview-line');
+    if (countBtn) countBtn.textContent = `· ${rbUserDigits.length}/10`;
+    if (previewLine) previewLine.textContent = rbUserDigits.length ? rbUserDigits.join('') : '';
   }
   function rbPressNum(n){ if (rbUserDigits.length >= RB_MAX_DIGITS) return; rbUserDigits.push(n); rbRenderDigits(); }
   function rbDeleteDigit(){ rbUserDigits.pop(); rbRenderDigits(); }
@@ -1126,30 +1159,24 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     const denominacionTxt = denomSel === 'Otro (especificar)' ? denomOtro : denomSel;
 
     if (!letra1 || !pais || !anio || !denominacionTxt){
-      rbSwitchTab('sd');
       showToast('Completa Letra 1, país, año y denominación (letras 2 y 3 son opcionales)');
       return;
     }
     if (rbUserDigits.length < RB_MIN_DIGITS){
-      rbSwitchTab('serie');
       showToast(`La Serie DGT necesita mínimo ${RB_MIN_DIGITS} dígitos`);
+      openSerieModal();
       return;
     }
 
-    // Gate: user -> perfil -> consentimiento -> membresía. Si falta algo, abre el modal
-    // correspondiente y guarda 'register' como pendingAction para reanudar aquí.
     if (!gate('register')) return;
 
     const digits = rbUserDigits.join('');
     const prefix = `${letra1}${letra2}`;
-    // Formato real de tu tabla: "DT 20192680 W" (prefijo + espacio + dígitos + sufijo si existe)
     const serial = `${prefix} ${digits}${letra3 ? ' ' + letra3 : ''}`;
     const rarity = calcRarity(digits);
     const denomNumeric = Math.round(parseDenomNumeric(denominacionTxt));
     const points = calcPoints(rarity, denomNumeric);
     const valueSnapshot = Math.round(denomNumeric * (10 + rarity.score) * 100) / 100;
-    // El símbolo de moneda (€, $, £, ¥) viaja pegado al país, igual que en tus datos reales
-    // (ej. "🇲🇽 México $"), porque la columna `denom` en Supabase es solo el número.
     const currencyMatch = denominacionTxt.match(/[$€£¥]/);
     const paisConMoneda = currencyMatch ? `${pais} ${currencyMatch[0]}` : pais;
 
@@ -1157,7 +1184,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     const email = user.email || '';
     const contactB64 = btoa(`${phone}|${email}`);
     const emailB64 = btoa(email);
-    // letters_snapshot real es solo el prefijo (1 o 2 letras según el país), sin el sufijo
     const lettersSnapshot = prefix;
 
     const submitBtn = document.getElementById('rb-submit-btn');
@@ -1165,9 +1191,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     submitBtn.textContent = 'Registrando...';
 
     try {
-      // Firma real de publicar_serial(): NO recibe owner/alias/nom — la función los
-      // saca sola de profiles.alias vía auth.uid(), y nom se autocompleta = denom.
-      // También aplica un rate-limit de 60s entre publicaciones del mismo alias.
       const { error } = await sb.rpc('publicar_serial', {
         p_serial: serial,
         p_digits: digits,
@@ -1190,7 +1213,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
       renderLeaderProbabilityBar();
       renderMembershipCard();
     } catch (e){
-      // La función lanza 'Perfil incompleto' o 'Espera un minuto antes de publicar otro número'
       showToast('Error al registrar: ' + e.message);
     } finally {
       submitBtn.disabled = false;
@@ -1209,7 +1231,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
   function rarityLabelFallback(r){
     if (!r) return '⭐ COMÚN';
     if (typeof r === 'object') return r.label || '⭐ COMÚN';
-    // rarity puede venir como texto plano ("SOLID") o como JSON serializado en texto
     if (typeof r === 'string' && r.trim().startsWith('{')){
       try { return JSON.parse(r).label || r; } catch { return r; }
     }
@@ -1224,8 +1245,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     return r.toUpperCase();
   }
 
-  // La app real combina AMBAS tablas (vault + boveda_jugadas) en un solo pozo,
-  // igual que hace loadVault() en producción — no es una u otra, son las dos juntas.
   const RB_SOURCE_TABLES = ['vault', 'boveda_jugadas'];
 
   async function fetchFromFirstAvailable(orderCol, limit){
@@ -1319,7 +1338,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
       showToast(`Toque enviado a @${payload.toOwner}`);
       loadToquesCounts();
     } catch (e){
-      // La función lanza 'Perfil incompleto' o 'Espera unos segundos antes de enviar otro toque'
       showToast('Error al enviar el toque: ' + e.message);
     }
   }
@@ -1380,7 +1398,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
                 <button onclick="acceptToqueClick(${idx})" class="flex-1 h-8 rounded-full bg-green-500 text-black font-black text-[10px]">ACEPTAR → CHAT</button>
                 <button onclick="rejectToqueClick(${idx})" class="flex-1 h-8 rounded-full bg-zinc-800 text-zinc-400 font-bold text-[10px]">RECHAZAR</button>
               </div>` : t.status === 'accepted' ? `
-              <button onclick="openChatFromReceived(${idx})" class="w-full h-8 mt-2 rounded-full bg-red-500/20 border border-red-500/30 text-red-300 font-bold text-[10px]">ABRIR CHAT</button>` : `
+              <button onclick="openChatFromReceived(${idx})" class="w-full h-8 mt-2 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 font-bold text-[10px]">ABRIR CHAT</button>` : `
               <p class="text-[10px] text-zinc-600 mt-1">Rechazado</p>`}
           </div>`).join('');
 
@@ -1394,7 +1412,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
             </div>
             <div class="text-right">
               <span class="text-[10px] font-bold ${t.status==='accepted' ? 'text-green-400' : t.status==='pending' ? 'text-blue-400' : 'text-zinc-600'}">${t.status}</span>
-              ${t.status === 'accepted' ? `<button onclick="openChatFromSent(${idx})" class="block mt-1 text-[10px] text-red-300 underline">Abrir chat</button>` : ''}
+              ${t.status === 'accepted' ? `<button onclick="openChatFromSent(${idx})" class="block mt-1 text-[10px] text-blue-300 underline">Abrir chat</button>` : ''}
             </div>
           </div>`).join('');
     } catch (e){
@@ -1490,72 +1508,12 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
   }
 
   function rbGoToSimilarSearch(){ goTo('global'); }
-  function rbGoToRegister(){ goTo('registrar'); rbSwitchTab('serie'); }
+  function rbGoToRegister(){ goTo('registrar'); }
   function rbGoToFavorites(){ goTo('favoritos'); }
 
   async function loadBovedaViva(){
     const container = document.getElementById('boveda-list');
-    const heading = document.getElementById('boveda-heading');
-    const headingAction = document.getElementById('boveda-heading-action');
-    try {
-      let data;
-      if (rbShowingFavorites){
-        heading.textContent = 'MIS FAVORITOS';
-        headingAction.textContent = '← Ver todo';
-        if (rbPool.length === 0) await rbFetchPool();
-        const favs = rbGetFavorites();
-        data = rbPool.filter(r => favs.includes(r.serial || r.serial_display || r.digits));
-      } else {
-        heading.textContent = 'BÓVEDA VIVA';
-        headingAction.textContent = '';
-        const res = await fetchFromFirstAvailable('created_at', 20);
-        data = res.data;
-      }
-      rbBovedaRows = data || [];
-      if (rbBovedaRows.length === 0){
-        container.innerHTML = rbShowingFavorites
-          ? '<p class="text-xs text-zinc-600 text-center py-6">Aún no marcaste favoritos. Toca el ♥ en cualquier billete.</p>'
-          : '<p class="text-xs text-zinc-600 text-center py-6">Aún no hay billetes registrados.</p>';
-        return;
-      }
-      const favs = rbGetFavorites();
-      container.innerHTML = rbBovedaRows.map((h, idx) => {
-        const rarityKey = rarityKeyFallback(h.rarity);
-        const rarityLabel = rarityLabelFallback(h.rarity);
-        const serial = h.serial || h.serial_display || h.digits || '';
-        const ownerAlias = h.owner || h.alias || '';
-        const isMine = profile && ownerAlias === profile.alias;
-        const isFav = favs.includes(serial);
-        const emailLine = h.email ? decodeEmailIfNeeded(h.email) : '';
-        const toqueBtnLabel = isMine
-          ? '👤 Es tuyo'
-          : (globalActive ? `✋ Enviar toque a @${ownerAlias}` : `🔒 $5 PARA TOCAR A @${ownerAlias}`);
-        return `
-        <div class="glass rounded-2xl p-4 border border-zinc-800">
-          <div class="flex items-center justify-between mb-1">
-            <div class="flex items-center gap-2">
-              <p class="font-mono font-bold text-white">${serial}</p>
-              <button onclick="rbCopySerial(${idx})" class="text-[10px] bg-zinc-800/60 px-2 py-1 rounded-md text-zinc-400">COPIAR</button>
-              <button onclick="rbShareSerial(${idx})" class="text-[10px] bg-zinc-800/60 px-2 py-1 rounded-md text-zinc-400">COMPARTIR</button>
-            </div>
-            <span class="text-sm font-black text-green-400">${h.points || 0} pts</span>
-          </div>
-          <p class="text-xs text-zinc-500 mb-1">
-            <span class="font-bold ${rarityColor(rarityKey)}">${rarityLabel}</span>
-            · ${h.country || ''} · ${ownerAlias ? '@'+ownerAlias : ''}
-          </p>
-          ${emailLine ? `<p class="text-[10px] text-zinc-600 mb-3">${emailLine}</p>` : '<div class="mb-3"></div>'}
-          <div class="flex items-center gap-3">
-            <button onclick="rbToggleFavorite(${idx})" class="text-xl ${isFav ? 'text-red-500' : 'text-zinc-600'}">♥</button>
-            <button onclick="rbToqueClick(${idx})" ${isMine ? 'disabled' : ''} class="flex-1 text-xs font-bold py-2.5 rounded-full ${isMine ? 'bg-zinc-800/40 text-zinc-600' : 'bg-zinc-800/60 text-zinc-300'}">
-              ${toqueBtnLabel}
-            </button>
-          </div>
-        </div>`;
-      }).join('');
-    } catch (e){
-      container.innerHTML = `<p class="text-xs text-red-400 text-center py-6">No se pudo cargar la Bóveda: ${e.message}</p>`;
-    }
+    if (!container) return;
   }
 
   // =========================================================
@@ -1572,8 +1530,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     { key: 'COMUN', label: 'Común', chipClass: 'bg-zinc-800/60 text-zinc-400' }
   ];
   let rbPool = [];
-  let rbRarityRows = [];
-  let rbSimilarRows = [];
   let rbActiveRarity = '';
 
   async function rbFetchPool(){
@@ -1582,84 +1538,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     return rbPool;
   }
 
-  function rbRarityCounts(){
-    const counts = {};
-    rbPool.forEach(row => { const k = rarityKeyFallback(row.rarity); counts[k] = (counts[k]||0) + 1; });
-    return counts;
-  }
-
-  function renderRarityChips(){
-    const counts = rbRarityCounts();
-    const container = document.getElementById('rarity-chips');
-    container.innerHTML = RB_RARITY_DEFS.map(def => {
-      const count = def.key === '' ? rbPool.length : (counts[def.key] || 0);
-      const active = rbActiveRarity === def.key;
-      return `<button onclick="rbFilterByRarity('${def.key}')" class="text-xs font-bold px-3 py-1.5 rounded-full ${def.chipClass} ${active ? 'ring-2 ring-green-400' : ''}">${def.label} <span class="opacity-70">(${count})</span></button>`;
-    }).join('');
-  }
-
-  function rbRowActionsHtml(idx, arrayName){
-    return `
-      <div class="flex gap-2 mt-2">
-        <button onclick="${arrayName}CopyClick(${idx})" class="text-[10px] bg-zinc-800/60 px-2 py-1 rounded-md text-zinc-400">COPIAR</button>
-        <button onclick="${arrayName}UseClick(${idx})" class="text-[10px] bg-zinc-800/60 px-2 py-1 rounded-md text-green-400">USAR DÍGITOS</button>
-      </div>`;
-  }
-
-  function rbRenderRow(row, idx, arrayName, extraLine){
-    const rarityKey = rarityKeyFallback(row.rarity);
-    const rarityLabel = rarityLabelFallback(row.rarity);
-    const serial = row.serial || row.serial_display || row.digits || '';
-    const ownerAlias = row.owner || row.alias || '';
-    return `
-    <div class="glass rounded-2xl p-3 border border-zinc-800">
-      <div class="flex items-center justify-between">
-        <p class="font-mono font-bold text-white text-sm">${serial}</p>
-        <span class="text-sm font-black text-green-400">${row.points || 0} pts</span>
-      </div>
-      <p class="text-xs text-zinc-500 mt-0.5">
-        <span class="font-bold ${rarityColor(rarityKey)}">${rarityLabel}</span>
-        · ${row.country || ''} · ${ownerAlias ? '@'+ownerAlias : ''}
-      </p>
-      ${extraLine || ''}
-      ${rbRowActionsHtml(idx, arrayName)}
-    </div>`;
-  }
-
-  function rbUseDigits(digitsStr){
-    const clean = String(digitsStr || '').replace(/\D/g,'').slice(0, RB_MAX_DIGITS);
-    if (!clean) return;
-    rbUserDigits = clean.split('').map(Number);
-    rbRenderDigits();
-    rbSwitchTab('serie');
-    document.getElementById('rb-panel-serie').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    showToast('Dígitos cargados: ' + clean);
-  }
-  function rbCopyText(text){
-    navigator.clipboard?.writeText(text).then(() => showToast('Copiado: ' + text), () => showToast('No se pudo copiar'));
-  }
-
-  async function rbFilterByRarity(key){
-    rbActiveRarity = key;
-    if (rbPool.length === 0) await rbFetchPool();
-    renderRarityChips();
-    const container = document.getElementById('rarity-results');
-    rbRarityRows = key ? rbPool.filter(r => rarityKeyFallback(r.rarity) === key) : rbPool.slice(0, 30);
-    if (rbRarityRows.length === 0){
-      container.innerHTML = '<p class="text-xs text-zinc-600 text-center py-6">Sin billetes con esta rareza todavía.</p>';
-      return;
-    }
-    container.innerHTML = rbRarityRows.slice(0, 30).map((row, idx) => rbRenderRow(row, idx, 'rbRarity')).join('');
-  }
-  function rbRarityCopyClick(idx){ const r = rbRarityRows[idx]; if (r) rbCopyText(r.serial || r.digits || ''); }
-  function rbRarityUseClick(idx){ const r = rbRarityRows[idx]; if (r) rbUseDigits(r.digits || r.serial); }
-
-  // --- Búsqueda de combinaciones semejantes (portado del algoritmo real de producción) ---
-  let rbSimilarTimer = null;
-  function rbScheduleSimilarSearch(){
-    clearTimeout(rbSimilarTimer);
-    rbSimilarTimer = setTimeout(rbPerformSimilarSearch, 280);
-  }
   function rbSimilarityScore(q, d){
     if (!d) return 0;
     if (d === q) return 100;
@@ -1668,55 +1546,14 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     for (let i = 0; i < Math.min(q.length, d.length); i++) if (q[i] === d[i]) common++;
     return Math.round((common / Math.max(q.length, d.length)) * 100);
   }
-  function rbHighlightMatch(serial, digits, q){
-    const safeSerial = String(serial || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    if (!q) return safeSerial;
-    const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    try {
-      if (safeSerial.includes(q)) return safeSerial.replace(new RegExp(esc, 'g'), m => `<span class="bg-green-400 text-black px-0.5 rounded">${m}</span>`);
-    } catch {}
-    return safeSerial;
-  }
-
-  async function rbPerformSimilarSearch(){
-    const input = document.getElementById('similar-input');
-    const q = input.value.trim();
-    const container = document.getElementById('similar-results');
-    if (q.length < 2){
-      container.innerHTML = '<p class="text-xs text-zinc-600 text-center py-6">Escribe al menos 2 dígitos para buscar.</p>';
-      return;
-    }
-    if (rbPool.length === 0) await rbFetchPool();
-    const scored = rbPool
-      .map(row => ({ row, score: rbSimilarityScore(q, (row.digits || '').replace(/\D/g,'')) }))
-      .filter(x => x.score >= 30)
-      .sort((a,b) => b.score - a.score)
-      .slice(0, 25);
-    rbSimilarRows = scored.map(x => x.row);
-    if (scored.length === 0){
-      container.innerHTML = `<p class="text-xs text-zinc-600 text-center py-6">Sin coincidencias para <b class="text-white">${q}</b> todavía.</p>`;
-      return;
-    }
-    container.innerHTML = scored.map((x, idx) => {
-      const extra = `<p class="text-[10px] text-green-400 mt-1">Similitud: ${x.score}%</p>`;
-      const row = x.row;
-      const html = rbRenderRow(row, idx, 'rbSimilar', extra);
-      // Reinserta el serial con resaltado de coincidencia
-      const serial = row.serial || row.serial_display || row.digits || '';
-      const highlighted = rbHighlightMatch(serial, row.digits, q);
-      return html.replace(`>${serial}<`, `>${highlighted}<`);
-    }).join('');
-  }
-  function rbSimilarCopyClick(idx){ const r = rbSimilarRows[idx]; if (r) rbCopyText(r.serial || r.digits || ''); }
-  function rbSimilarUseClick(idx){ const r = rbSimilarRows[idx]; if (r) rbUseDigits(r.digits || r.serial); }
 
   // =========================================================
   // 15. SERIE LÍDER — rotación en vivo entre los Top contendientes de la Bóveda
   // =========================================================
   let rbLeaderCandidates = [];
   let rbLeaderIndex = 0;
-  const RB_LEADER_ROTATE_MS = 15000;   // cambia de "líder en vitrina" cada 15s
-  const RB_LEADER_REFRESH_MS = 45000;  // vuelve a consultar la Bóveda cada 45s
+  const RB_LEADER_ROTATE_MS = 15000;
+  const RB_LEADER_REFRESH_MS = 45000;
 
   async function loadLeaderCandidates(){
     try {
@@ -1754,8 +1591,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     updateLeaderProbabilityBar();
   }
 
-  // Histograma de dígitos: cuántas veces aparece cada dígito (0-9) en el serial de ESTE billete.
-  // Es un dato propio del billete, distinto de la barra de rareza global de abajo.
   function renderDigitHistogram(digitsStr){
     const container = document.getElementById('leader-digit-histogram');
     if (!container) return;
@@ -1775,7 +1610,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
       </div>`).join('');
   }
 
-  // Barra de probabilidades: qué tan común/rara es cada categoría en toda la Bóveda
   const RB_LEADER_BAR_COLORS = {
     SOLID: '#00bfff', RADAR: '#00bfff', LADDER: '#00bfff',
     REPEATER: '#00e5ff', BINARY: '#00e5ff', 'SEMI-SOLID': '#00e5ff',
@@ -1805,7 +1639,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     renderLeader();
   }
 
-  // Compatibilidad: cualquier código que aún llame a loadLeader() refresca el pool completo
   async function loadLeader(){ await loadLeaderCandidates(); }
 
   // =========================================================
@@ -1822,9 +1655,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     }, 2500);
   }
 
-  // =========================================================
-  // 13. INIT
-  // =========================================================
   // =========================================================
   // 16. PANTALLA GLOBAL (nativa) — Buscar / Por Rareza, capado a 5 resultados
   // =========================================================
@@ -1850,8 +1680,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     const ownerAlias = row.owner || row.alias || '';
     const favs = rbGetFavorites();
     const isFav = favs.includes(serial);
-    // El símbolo de moneda viaja pegado al país (ej. "🇲🇽 México $"); lo reutilizamos
-    // junto con `denom` para mostrar algo como "$200" sin necesitar una columna aparte.
     const currencyMatch = (row.country || '').match(/[$€£¥]/);
     const denomDisplay = row.denom ? ` · ${currencyMatch ? currencyMatch[0] : ''}${row.denom}` : '';
     return `
@@ -1885,13 +1713,11 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     if (favs.includes(serial)) favs = favs.filter(s => s !== serial);
     else favs.push(serial);
     localStorage.setItem('dgt_favorites_v1', JSON.stringify(favs));
-    // Re-pinta la vista activa donde se tocó el corazón
     if (arrayName === 'nativeSearchRows') performCompactSearch();
     if (arrayName === 'nativeRarityRows' && nativeRarityActive) nativeFilterByRarity(nativeRarityActive);
     if (arrayName === 'nativeFavRows') loadFavoritesScreen();
     if (arrayName === 'nativeSeeMoreRows'){
       loadFavoritesScreen();
-      const title = document.getElementById('see-more-title').textContent;
       document.getElementById('see-more-body').innerHTML = nativeSeeMoreRows.map((r, i) => nativeCompactRow(r, i, 'nativeSeeMoreRows')).join('');
     }
   }
@@ -1911,7 +1737,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     executeToque(payload);
   }
 
-  // --- Sub-pestaña Buscar ---
   let nativeSearchTimer = null;
   function scheduleCompactSearch(){
     clearTimeout(nativeSearchTimer);
@@ -1950,7 +1775,6 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
     container.innerHTML = html;
   }
 
-  // --- Sub-pestaña Por Rareza ---
   function renderNativeRarityChips(){
     const container = document.getElementById('global-rarity-chips');
     container.innerHTML = RB_RARITY_DEFS.filter(d => d.key !== '').map(def => {
@@ -2010,7 +1834,7 @@ select.dgt-select:focus, input.dgt-select:focus{outline:none;border-color:var(--
   }
 
   // =========================================================
-  // 13. INIT
+  // 18. INIT
   // =========================================================
   (async function init(){
     const { data: sessionData } = await sb.auth.getSession();
