@@ -16,6 +16,11 @@
            Forzamos 16px en todos los inputs/selects/textareas para evitarlo,
            sin importar qué clase de Tailwind traiga cada uno. */
         input, select, textarea { font-size: 16px !important; }
+        /* Safari en iOS recoge/expande la barra de direcciones y cambia el alto
+           real de la pantalla; 100vh usa el alto "viejo" y la página queda
+           descuadrada. 100dvh (alto dinámico) se ajusta en vivo. Con fallback
+           a 100vh para navegadores que no lo soporten. */
+        body, .app-frame-height { height: 100vh; height: 100dvh; }
     </style>
 </head>
 <body class="bg-[#163b74] text-slate-800 antialiased h-screen w-full flex justify-center overflow-hidden">
