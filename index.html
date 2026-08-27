@@ -540,50 +540,19 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900">Tus toques</h2>
-                        <span class="text-xs text-slate-400">3 solicitudes pendientes</span>
+                        <span id="toquesSubtitle" class="text-xs text-slate-400">Cargando…</span>
                     </div>
                     <button class="modal-close w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center" onclick="closeModalId('toquesModal')">✕</button>
                 </div>
 
-                <div id="toquesList" class="flex flex-col gap-3">
-
-                    <!-- Toque pendiente -->
-                    <div class="bg-[#fcfbf9] rounded-2xl p-4 flex items-center gap-3">
-                        <div class="w-11 h-11 rounded-full bg-[#8b008b] text-white flex items-center justify-center font-bold text-sm shrink-0">CM</div>
-                        <div class="flex-1 min-w-0">
-                            <div class="font-black text-sm text-slate-900 tracking-wide truncate">AB 88888888 K</div>
-                            <div class="text-xs text-slate-400">@collector_mx quiere tocar tu serie · hace 2h</div>
-                        </div>
-                        <div class="flex gap-1.5 shrink-0">
-                            <button onclick="acceptToqueReceived(0)" class="min-h-[36px] px-3 rounded-full bg-[#228c53] text-white text-xs font-bold">Aceptar</button>
-                            <button onclick="rejectToqueReceived(0)" class="min-h-[36px] px-3 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">✕</button>
-                        </div>
-                    </div>
-
-                    <!-- Toque pendiente -->
-                    <div class="bg-[#fcfbf9] rounded-2xl p-4 flex items-center gap-3">
-                        <div class="w-11 h-11 rounded-full bg-[#8b008b] text-white flex items-center justify-center font-bold text-sm shrink-0">EU</div>
-                        <div class="flex-1 min-w-0">
-                            <div class="font-black text-sm text-slate-900 tracking-wide truncate">EF 40217693</div>
-                            <div class="text-xs text-slate-400">@euro_stacks quiere tocar tu serie · hace 5h</div>
-                        </div>
-                        <div class="flex gap-1.5 shrink-0">
-                            <button onclick="acceptToqueReceived(1)" class="min-h-[36px] px-3 rounded-full bg-[#228c53] text-white text-xs font-bold">Aceptar</button>
-                            <button onclick="rejectToqueReceived(1)" class="min-h-[36px] px-3 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">✕</button>
-                        </div>
-                    </div>
-
-                    <!-- Toque ya aceptado (estado resuelto) -->
-                    <div class="bg-[#fcfbf9] rounded-2xl p-4 flex items-center gap-3 opacity-60">
-                        <div class="w-11 h-11 rounded-full bg-slate-300 text-white flex items-center justify-center font-bold text-sm shrink-0">MF</div>
-                        <div class="flex-1 min-w-0">
-                            <div class="font-black text-sm text-slate-900 tracking-wide truncate">C★ 12345678 T</div>
-                            <div class="text-xs text-slate-400">@Marcus_FX · aceptado ayer</div>
-                        </div>
-                        <span class="text-[11px] font-bold text-[#228c53] shrink-0">✓ Aceptado</span>
-                    </div>
-
+                <!-- Tabs Recibidos / Enviados -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="toquesTabReceived" onclick="switchToquesTab('received')" class="min-h-[40px] rounded-full bg-[#228c53] text-white text-xs font-bold">Recibidos</button>
+                    <button id="toquesTabSent" onclick="switchToquesTab('sent')" class="min-h-[40px] rounded-full bg-slate-50 text-slate-500 text-xs font-semibold">Enviados</button>
                 </div>
+
+                <!-- Se puebla dinámicamente por renderToquesList() según la pestaña activa -->
+                <div id="toquesList" class="flex flex-col gap-3"></div>
             </div>
         </div>
 
@@ -1253,9 +1222,27 @@
         if (!session) { openModalId("authModal"); return; }
         if (!profile?.alias) { onProfileNavClick(); return; }
         openModalId("toquesModal");
+        activeToquesTab = 'received';
+        updateToquesTabsUI();
         loadToquesReceived();
     }
     let toquesReceivedCache = [];
+    let toquesSentCache = [];
+    let activeToquesTab = 'received'; // 'received' | 'sent'
+
+    function updateToquesTabsUI() {
+        const recBtn = document.getElementById("toquesTabReceived");
+        const sentBtn = document.getElementById("toquesTabSent");
+        const isReceived = activeToquesTab === 'received';
+        recBtn.className = `min-h-[40px] rounded-full text-xs font-bold ${isReceived ? 'bg-[#228c53] text-white' : 'bg-slate-50 text-slate-500 font-semibold'}`;
+        sentBtn.className = `min-h-[40px] rounded-full text-xs font-bold ${!isReceived ? 'bg-[#228c53] text-white' : 'bg-slate-50 text-slate-500 font-semibold'}`;
+    }
+    function switchToquesTab(tab) {
+        activeToquesTab = tab;
+        updateToquesTabsUI();
+        if (tab === 'received') loadToquesReceived();
+        else loadToquesSent();
+    }
     async function loadToquesReceived() {
         if (!profile?.alias) { toquesReceivedCache = []; renderToquesList(); return; }
         try {
@@ -1265,27 +1252,59 @@
         } catch { toquesReceivedCache = []; }
         renderToquesList();
     }
+    async function loadToquesSent() {
+        if (!profile?.alias) { toquesSentCache = []; renderToquesList(); return; }
+        try {
+            const { data, error } = await sb.from('dgt_toques').select('*').eq('from_alias', profile.alias).order('created_at', { ascending: false }).limit(30);
+            if (error) throw error;
+            toquesSentCache = data || [];
+        } catch { toquesSentCache = []; }
+        renderToquesList();
+    }
     function renderToquesList() {
         const container = document.getElementById("toquesList");
-        if (toquesReceivedCache.length === 0) {
-            container.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Sin toques recibidos aún.</p>`;
+        const subtitle = document.getElementById("toquesSubtitle");
+        const isReceived = activeToquesTab === 'received';
+        const list = isReceived ? toquesReceivedCache : toquesSentCache;
+        const pending = list.filter(t => t.status === 'pending').length;
+        subtitle.textContent = isReceived
+            ? `${pending} solicitud${pending === 1 ? '' : 'es'} pendiente${pending === 1 ? '' : 's'}`
+            : `${list.length} toque${list.length === 1 ? '' : 's'} enviado${list.length === 1 ? '' : 's'}`;
+
+        if (list.length === 0) {
+            container.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">${isReceived ? 'Sin toques recibidos aún.' : 'Aún no has enviado ningún toque.'}</p>`;
             return;
         }
-        container.innerHTML = toquesReceivedCache.map(t => `
-            <div class="bg-[#fcfbf9] rounded-2xl p-4 flex items-center gap-3">
-                <div class="w-11 h-11 rounded-full bg-[#8b008b] text-white flex items-center justify-center font-bold text-sm shrink-0">${(t.from_alias || '?').slice(0,2).toUpperCase()}</div>
-                <div class="flex-1 min-w-0">
-                    <div class="font-black text-sm text-slate-900 tracking-wide truncate">${t.serial || ''}</div>
-                    <div class="text-xs text-slate-400">@${t.from_alias} · ${t.status === 'pending' ? 'pendiente' : (t.status === 'accepted' ? 'aceptado' : 'rechazado')}</div>
-                </div>
-                ${t.status === 'pending' ? `
-                <div class="flex gap-1.5 shrink-0">
-                    <button onclick="acceptToqueReceived('${t.id}')" class="min-h-[36px] px-3 rounded-full bg-[#228c53] text-white text-xs font-bold">Aceptar</button>
-                    <button onclick="rejectToqueReceived('${t.id}')" class="min-h-[36px] px-3 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">✕</button>
-                </div>` : (t.status === 'accepted' ? `
-                <button onclick="openChatModal('${t.id}','${t.from_alias}','${t.serial || ''}')" class="min-h-[36px] px-3 rounded-full bg-[#8b008b] text-white text-xs font-bold shrink-0">💬 Chat</button>`
-                : `<span class="text-[11px] font-bold text-slate-400 shrink-0">✕ Rechazado</span>`)}
-            </div>`).join('');
+
+        if (isReceived) {
+            container.innerHTML = list.map(t => `
+                <div class="bg-[#fcfbf9] rounded-2xl p-4 flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full bg-[#8b008b] text-white flex items-center justify-center font-bold text-sm shrink-0">${(t.from_alias || '?').slice(0,2).toUpperCase()}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-black text-sm text-slate-900 tracking-wide truncate">${t.serial || ''}</div>
+                        <div class="text-xs text-slate-400 truncate">@${t.from_alias} · ${t.status === 'pending' ? 'pendiente' : (t.status === 'accepted' ? 'aceptado' : 'rechazado')}</div>
+                    </div>
+                    ${t.status === 'pending' ? `
+                    <div class="flex gap-1.5 shrink-0">
+                        <button onclick="acceptToqueReceived('${t.id}')" class="min-h-[36px] px-3 rounded-full bg-[#228c53] text-white text-xs font-bold">Aceptar</button>
+                        <button onclick="rejectToqueReceived('${t.id}')" class="min-h-[36px] px-3 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">✕</button>
+                    </div>` : (t.status === 'accepted' ? `
+                    <button onclick="openChatModal('${t.id}','${t.from_alias}','${t.serial || ''}')" class="min-h-[36px] px-3 rounded-full bg-[#8b008b] text-white text-xs font-bold shrink-0">💬 Chat</button>`
+                    : `<span class="text-[11px] font-bold text-slate-400 shrink-0">✕ Rechazado</span>`)}
+                </div>`).join('');
+        } else {
+            container.innerHTML = list.map(t => `
+                <div class="bg-[#fcfbf9] rounded-2xl p-4 flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full bg-slate-300 text-white flex items-center justify-center font-bold text-sm shrink-0">${(t.to_owner || '?').slice(0,2).toUpperCase()}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-black text-sm text-slate-900 tracking-wide truncate">${t.serial || ''}</div>
+                        <div class="text-xs text-slate-400 truncate">a @${t.to_owner} · ${t.status === 'pending' ? 'esperando respuesta' : (t.status === 'accepted' ? 'aceptado' : 'rechazado')}</div>
+                    </div>
+                    ${t.status === 'accepted' ? `
+                    <button onclick="openChatModal('${t.id}','${t.to_owner}','${t.serial || ''}')" class="min-h-[36px] px-3 rounded-full bg-[#8b008b] text-white text-xs font-bold shrink-0">💬 Chat</button>`
+                    : `<span class="text-[11px] font-bold ${t.status === 'pending' ? 'text-amber-500' : 'text-slate-400'} shrink-0">${t.status === 'pending' ? '⏳ Pendiente' : '✕ Rechazado'}</span>`}
+                </div>`).join('');
+        }
     }
     async function acceptToqueReceived(id) {
         try {
