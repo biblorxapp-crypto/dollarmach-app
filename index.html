@@ -72,9 +72,9 @@
                     </div>
                 </div>
 
-                <!-- Login prompt (se oculta si hay sesión) -->
+                <!-- Franja de acceso rápido — siempre visible en Inicio; el texto cambia según haya sesión o no -->
                 <button id="loginPrompt" onclick="onSessionPillClick()" class="w-full min-h-[48px] rounded-2xl bg-white/10 flex items-center justify-center gap-2 text-sm font-semibold text-white/90">
-                    Inicia sesión para registrar y tocar series →
+                    <span id="loginPromptLabel">Inicia sesión para registrar y tocar series →</span>
                 </button>
 
                 <!-- Tarjeta de Serie Líder -->
@@ -790,8 +790,12 @@
     // ---------- Sesión / Auth real ----------
     function updateSessionUI() {
         document.getElementById("sessionPillLabel").textContent = session ? (profile?.alias ? "@" + profile.alias : session.email) : "Ingresar";
-        const loginPrompt = document.getElementById("loginPrompt");
-        if (loginPrompt) loginPrompt.classList.toggle("hidden", !!session);
+        const loginPromptLabel = document.getElementById("loginPromptLabel");
+        if (loginPromptLabel) {
+            loginPromptLabel.textContent = session
+                ? `Bienvenido${profile?.alias ? ", @" + profile.alias : ""} — toca para ver tu perfil →`
+                : "Inicia sesión para registrar y tocar series →";
+        }
         document.querySelectorAll("#registerMemberBtn, #searchMemberBtn").forEach(btn => {
             btn.textContent = membershipActive ? "💎 Miembro" : "Hazte miembro";
         });
