@@ -395,8 +395,8 @@
                     <button onclick="handleAuthSubmit('signup')" class="w-full bg-slate-50 text-slate-700 font-bold rounded-2xl min-h-[56px] active:scale-95 transition-transform">Crear Cuenta</button>
                 </div>
                 <p class="text-center text-xs text-slate-400 leading-relaxed -mt-2">
-                    Al continuar aceptas los <a href="#" onclick="openLegalModal('terms')" class="underline text-[#8b008b] font-semibold">Términos</a>
-                    y la <a href="#" onclick="openLegalModal('privacy')" class="underline text-[#8b008b] font-semibold">Política de Privacidad</a>.
+                    Al continuar aceptas los <a href="#" onclick="event.preventDefault(); openLegalModal('terms')" class="underline text-[#8b008b] font-semibold">Términos</a>
+                    y la <a href="#" onclick="event.preventDefault(); openLegalModal('privacy')" class="underline text-[#8b008b] font-semibold">Política de Privacidad</a>.
                 </p>
                 <button class="modal-close text-slate-400 font-semibold mt-1 min-h-[44px]" onclick="closeModalId('authModal')">Cancelar</button>
                 <!-- Aquí va la integración Supabase Auth -->
@@ -443,11 +443,11 @@
                 </div>
                 <label class="flex items-start gap-3 min-h-[44px] bg-slate-50 rounded-2xl p-4">
                     <input id="consentTerms" type="checkbox" class="mt-0.5 h-5 w-5 rounded accent-[#228c53]">
-                    <span class="text-sm text-slate-700">Acepto los <a href="#" onclick="event.stopPropagation(); openLegalModal('terms')" class="underline text-[#8b008b] font-semibold">Términos y Condiciones</a></span>
+                    <span class="text-sm text-slate-700">Acepto los <a href="#" onclick="event.preventDefault(); event.stopPropagation(); openLegalModal('terms')" class="underline text-[#8b008b] font-semibold">Términos y Condiciones</a></span>
                 </label>
                 <label class="flex items-start gap-3 min-h-[44px] bg-slate-50 rounded-2xl p-4">
                     <input id="consentPrivacy" type="checkbox" class="mt-0.5 h-5 w-5 rounded accent-[#228c53]">
-                    <span class="text-sm text-slate-700">Acepto la <a href="#" onclick="event.stopPropagation(); openLegalModal('privacy')" class="underline text-[#8b008b] font-semibold">Política de Privacidad</a></span>
+                    <span class="text-sm text-slate-700">Acepto la <a href="#" onclick="event.preventDefault(); event.stopPropagation(); openLegalModal('privacy')" class="underline text-[#8b008b] font-semibold">Política de Privacidad</a></span>
                 </label>
                 <label class="flex items-start gap-3 min-h-[44px] bg-slate-50 rounded-2xl p-4">
                     <input id="consentAge" type="checkbox" class="mt-0.5 h-5 w-5 rounded accent-[#228c53]">
@@ -527,7 +527,7 @@
                     Confirmar pago de $5
                 </button>
                 <div class="text-center">
-                    <a href="#" onclick="openLegalModal('refunds')" class="text-xs text-slate-400 underline min-h-[44px] inline-flex items-center">Política de Reembolsos</a>
+                    <a href="#" onclick="event.preventDefault(); openLegalModal('refunds')" class="text-xs text-slate-400 underline min-h-[44px] inline-flex items-center">Política de Reembolsos</a>
                 </div>
                 <button class="modal-close text-slate-400 font-semibold min-h-[44px]" onclick="closeModalId('membershipModal')">Cerrar</button>
             </div>
