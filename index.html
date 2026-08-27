@@ -663,7 +663,7 @@
     let MOCK_POOL = [];
     let activeRarity = '';
     let searchQuery = '';
-    let resultsShowCount = 5;
+    let resultsShowCount = 4;
     let leaderIndex = 0;
     const LEADER_ROTATE_MS = 15000;
 
@@ -1260,7 +1260,7 @@
     }
     document.addEventListener("click", (e) => {
         const chip = e.target.closest("#rarityFilters .filter-btn");
-        if (chip) { activeRarity = chip.dataset.rarity; resultsShowCount = 5; renderRarityFilters(); renderResults(); }
+        if (chip) { activeRarity = chip.dataset.rarity; resultsShowCount = 4; renderRarityFilters(); renderResults(); }
     });
 
     // ---------- Resultados de búsqueda ----------
@@ -1317,12 +1317,12 @@
     document.getElementById("executeSearch").addEventListener("click", () => {
         searchQuery = document.getElementById("searchInput").value.trim();
         closeModalId("searchModal");
-        activeRarity = ''; resultsShowCount = 5;
+        activeRarity = ''; resultsShowCount = 4;
         renderRarityFilters(); renderResults();
     });
     document.getElementById("rareButton").addEventListener("click", () => {
         searchQuery = ''; document.getElementById("searchInput").value = '';
-        resultsShowCount = 5; renderResults();
+        resultsShowCount = 4; renderResults();
     });
 
     // ---------- Toques (reales, tabla dgt_toques) ----------
