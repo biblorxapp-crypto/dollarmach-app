@@ -31,6 +31,10 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                     <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#163b74]"></span>
                 </button>
+                <!-- Ícono de perfil — misma función que la píldora de sesión -->
+                <button id="headerProfileBtn" onclick="onSessionPillClick()" class="shrink-0 w-9 h-9 rounded-full bg-white/10 flex items-center justify-center min-h-[44px] min-w-[44px]">
+                    <svg id="headerProfileIcon" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path stroke-linecap="round" d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+                </button>
                 <!-- Píldora de sesión — tope de ancho + truncado para alias/emails largos -->
                 <button id="sessionPill" onclick="onSessionPillClick()" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors min-h-[44px] max-w-[140px] shrink min-w-0">
                     <span id="sessionPillLabel" class="block truncate">Ingresar</span>
@@ -791,6 +795,18 @@
         document.querySelectorAll("#homeMemberBtn, #registerMemberBtn, #searchMemberBtn").forEach(btn => {
             btn.textContent = membershipActive ? "💎 Miembro" : "Hazte miembro";
         });
+        // Ícono de perfil del header: monito genérico si no hay sesión, inicial del alias si ya la hay
+        const headerBtn = document.getElementById("headerProfileBtn");
+        if (session) {
+            const initial = (profile?.alias || profile?.nickname || session.email || "?").charAt(0).toUpperCase();
+            headerBtn.innerHTML = `<span class="text-white text-xs font-bold">${initial}</span>`;
+            headerBtn.classList.toggle("bg-[#8b008b]", true);
+            headerBtn.classList.toggle("bg-white/10", false);
+        } else {
+            headerBtn.innerHTML = `<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path stroke-linecap="round" d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>`;
+            headerBtn.classList.toggle("bg-[#8b008b]", false);
+            headerBtn.classList.toggle("bg-white/10", true);
+        }
     }
     function onSessionPillClick() {
         if (session) { openMyProfileModal(); } else { openModalId("authModal"); }
