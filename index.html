@@ -118,17 +118,11 @@
                     </div>
                 </div>
 
-                <!-- Membresía -->
-                <div class="bg-gradient-to-br from-[#8b008b] to-[#5c0060] rounded-3xl p-5 text-white shadow-xl flex flex-col gap-3">
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-lg">💎 Membresía Vitalicia</span>
-                        <span class="text-2xl font-black">$5</span>
-                    </div>
-                    <p class="text-sm text-purple-100">Acceso total al Vault, toques y estadísticas.</p>
-                    <button id="homeMemberBtn" onclick="onMembershipClick()" class="w-full bg-white text-[#8b008b] font-bold rounded-2xl min-h-[48px] mt-1 active:scale-95 transition-transform">
-                        Hazte miembro
-                    </button>
-                </div>
+                <!-- Botón simple que invita a probar el número de serie — lleva a Registrar; -->
+                <!-- si no eres miembro, el gate() de Registrar ya se encarga de mostrar el pago -->
+                <button id="tryRegisterBtn" onclick="showView('register')" class="w-full bg-white text-[#8b008b] font-bold text-base rounded-2xl min-h-[52px] shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+                    🎯 Prueba Tu # De Serie
+                </button>
             </div>
 
             <!-- ==========================================
@@ -792,7 +786,7 @@
         document.getElementById("sessionPillLabel").textContent = session ? (profile?.alias ? "@" + profile.alias : session.email) : "Ingresar";
         const loginPrompt = document.getElementById("loginPrompt");
         if (loginPrompt) loginPrompt.classList.toggle("hidden", !!session);
-        document.querySelectorAll("#homeMemberBtn, #registerMemberBtn, #searchMemberBtn").forEach(btn => {
+        document.querySelectorAll("#registerMemberBtn, #searchMemberBtn").forEach(btn => {
             btn.textContent = membershipActive ? "💎 Miembro" : "Hazte miembro";
         });
         // Ícono de perfil del header: monito genérico si no hay sesión, inicial del alias si ya la hay
