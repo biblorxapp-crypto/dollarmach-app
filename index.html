@@ -582,6 +582,57 @@
             </div>
         </div>
 
+        <!-- MODAL: Mi Perfil (datos, membresía, mis series y mis favoritos) -->
+        <div id="myProfileModal" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 max-h-[88vh] overflow-y-auto flex flex-col hidden">
+            <div class="p-6 flex flex-col gap-5">
+                <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-1"></div>
+
+                <!-- Encabezado de identidad -->
+                <div class="flex items-center gap-4">
+                    <div id="myProfileAvatar" class="w-14 h-14 rounded-2xl bg-[#228c53] text-white flex items-center justify-center font-black text-xl shrink-0">?</div>
+                    <div class="min-w-0 flex-1">
+                        <div id="myProfileNick" class="text-lg font-bold text-slate-900 truncate">Invitado</div>
+                        <div id="myProfileAlias" class="text-sm font-bold text-[#8b008b] truncate"></div>
+                        <span id="myProfileMemberBadge" class="inline-block mt-1 text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-500">Sin membresía</span>
+                    </div>
+                    <button class="modal-close w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center shrink-0" onclick="closeModalId('myProfileModal')">✕</button>
+                </div>
+
+                <!-- Estadísticas -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-slate-50 rounded-2xl py-3 text-center">
+                        <div id="myProfileStatMine" class="font-black text-lg text-slate-900">0</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mis series</div>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl py-3 text-center">
+                        <div id="myProfileStatPoints" class="font-black text-lg text-[#8b008b]">0</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mis puntos</div>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl py-3 text-center">
+                        <div id="myProfileStatFavs" class="font-black text-lg text-[#228c53]">0</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Favoritos</div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button onclick="closeModalId('myProfileModal'); onProfileNavClick();" class="flex-1 min-h-[44px] rounded-2xl bg-slate-50 text-slate-700 text-sm font-bold">✏️ Editar perfil</button>
+                    <button onclick="signOut(); closeModalId('myProfileModal');" class="flex-1 min-h-[44px] rounded-2xl bg-rose-50 text-rose-500 text-sm font-bold">Cerrar sesión</button>
+                </div>
+
+                <!-- Mis series registradas -->
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Mis series registradas</h3>
+                    <div id="myProfileSeriesList" class="flex flex-col gap-2"></div>
+                </div>
+
+                <!-- Mis favoritos -->
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Mis favoritos</h3>
+                    <div id="myProfileFavsList" class="flex flex-col gap-2"></div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- ============================================================
@@ -635,7 +686,7 @@
     document.querySelectorAll(".nav-btn").forEach(btn => btn.addEventListener("click", () => showView(btn.dataset.view)));
 
     // ---------- Modales ----------
-    const ALL_MODALS = ["searchModal", "authModal", "profileModal", "consentModal", "legalModal", "membershipModal", "toquesModal", "chatModal"];
+    const ALL_MODALS = ["searchModal", "authModal", "profileModal", "consentModal", "legalModal", "membershipModal", "toquesModal", "chatModal", "myProfileModal"];
     function openModalId(id) {
         document.getElementById("modalOverlay").classList.remove("hidden");
         document.body.style.overflow = "hidden";
@@ -742,7 +793,58 @@
         });
     }
     function onSessionPillClick() {
-        if (session) { signOut(); } else { openModalId("authModal"); }
+        if (session) { openMyProfileModal(); } else { openModalId("authModal"); }
+    }
+    function openMyProfileModal() {
+        if (!session) { openModalId("authModal"); return; }
+        openModalId("myProfileModal");
+        renderMyProfile();
+    }
+    function renderMyProfile() {
+        const avatar = document.getElementById("myProfileAvatar");
+        const nickEl = document.getElementById("myProfileNick");
+        const aliasEl = document.getElementById("myProfileAlias");
+        const badgeEl = document.getElementById("myProfileMemberBadge");
+        avatar.textContent = (profile?.alias || profile?.nickname || session.email || "?").charAt(0).toUpperCase();
+        nickEl.textContent = profile?.nickname || session.email;
+        aliasEl.textContent = profile?.alias ? "@" + profile.alias : "";
+        if (membershipActive) {
+            badgeEl.textContent = "💎 Miembro vitalicio";
+            badgeEl.className = "inline-block mt-1 text-[10px] font-bold px-2 py-1 rounded-full bg-[#8b008b]/10 text-[#8b008b]";
+        } else {
+            badgeEl.textContent = "Sin membresía";
+            badgeEl.className = "inline-block mt-1 text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-500";
+        }
+
+        const mine = (profile?.alias) ? MOCK_POOL.filter(r => r.owner === profile.alias) : [];
+        const myPoints = mine.reduce((s, r) => s + (r.points || 0), 0);
+        document.getElementById("myProfileStatMine").textContent = mine.length;
+        document.getElementById("myProfileStatPoints").textContent = myPoints;
+
+        const favSerials = rbGetFavorites();
+        const favs = MOCK_POOL.filter(r => favSerials.includes(r.serial));
+        document.getElementById("myProfileStatFavs").textContent = favs.length;
+
+        const mineList = document.getElementById("myProfileSeriesList");
+        mineList.innerHTML = mine.length
+            ? mine.map(r => miniCardHtml(r, false)).join('')
+            : `<p class="text-center text-slate-400 text-xs py-4">Aún no has registrado ninguna serie.</p>`;
+
+        const favsList = document.getElementById("myProfileFavsList");
+        favsList.innerHTML = favs.length
+            ? favs.map(r => miniCardHtml(r, true)).join('')
+            : `<p class="text-center text-slate-400 text-xs py-4">Marca ☆ en Búsqueda para guardar favoritos aquí.</p>`;
+    }
+    function miniCardHtml(r, isFavorite) {
+        return `
+            <div class="bg-[#fcfbf9] rounded-2xl p-3 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-[#f5e6d3] flex items-center justify-center text-[11px] font-black text-[#a67c52] shrink-0">${(r.rarity?.key || '?').charAt(0)}</div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-black text-xs text-slate-900 truncate tracking-wide">${r.serial || ''}</div>
+                    <div class="text-[11px] text-slate-400 truncate">${r.rarity?.label || ''} · ${r.points || 0} pts</div>
+                </div>
+                ${isFavorite ? `<button onclick="rbToggleFavorite('${r.serial}'); renderMyProfile();" class="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-sm">★</button>` : ''}
+            </div>`;
     }
     async function handleAuthSubmit(mode) {
         const email = document.getElementById("authEmail").value.trim();
