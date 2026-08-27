@@ -12,6 +12,10 @@
         body { font-family: 'Inter', sans-serif; }
         ::-webkit-scrollbar { display: none; }
         * { -ms-overflow-style: none; scrollbar-width: none; -webkit-tap-highlight-color: transparent; }
+        /* iOS hace auto-zoom al tocar un campo si su letra es menor a 16px.
+           Forzamos 16px en todos los inputs/selects/textareas para evitarlo,
+           sin importar qué clase de Tailwind traiga cada uno. */
+        input, select, textarea { font-size: 16px !important; }
     </style>
 </head>
 <body class="bg-[#163b74] text-slate-800 antialiased h-screen w-full flex justify-center overflow-hidden">
@@ -118,11 +122,13 @@
                     </div>
                 </div>
 
-                <!-- Botón simple que invita a probar el número de serie — lleva a Registrar; -->
+                <!-- Tarjeta compacta que invita a probar el número de serie — lleva a Registrar; -->
                 <!-- si no eres miembro, el gate() de Registrar ya se encarga de mostrar el pago -->
-                <button id="tryRegisterBtn" onclick="showView('register')" class="w-full bg-gradient-to-br from-[#8b008b] to-[#5c0060] text-white font-bold text-base rounded-2xl min-h-[52px] shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
-                    🎯 Prueba Tu # De Serie
-                </button>
+                <div class="bg-gradient-to-br from-[#8b008b] to-[#5c0060] rounded-3xl p-2.5 shadow-xl">
+                    <button id="tryRegisterBtn" onclick="showView('register')" class="w-full bg-white text-[#8b008b] font-bold text-base rounded-2xl min-h-[52px] active:scale-95 transition-transform flex items-center justify-center gap-2">
+                        🎯 Prueba Tu # De Serie
+                    </button>
+                </div>
             </div>
 
             <!-- ==========================================
@@ -1163,7 +1169,11 @@
             serialDigits = ""; renderSerial();
             await fetchPool(); refreshPoolDependentUI();
         } catch (e) {
-            messageEl.textContent = "Error al registrar: " + (e.message || e);
+            const rawMsg = e.message || String(e);
+            const isDuplicate = e.code === '23505' || /duplicate key|unique constraint/i.test(rawMsg);
+            messageEl.textContent = isDuplicate
+                ? "Esa serie ya está registrada para ese año y país."
+                : "Error al registrar: " + rawMsg;
             messageEl.className = "text-center text-sm font-medium -mt-2 h-6 text-rose-400";
         } finally {
             submitBtn.disabled = false;
