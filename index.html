@@ -135,57 +135,24 @@
 
       <!-- Sub-tabs -->
       <div class="flex gap-2 mb-4 p-1 bg-white/10 rounded-2xl">
-        <button onclick="setGlobalTab('buscar')" class="flex-1 h-11 rounded-xl bg-white text-[#0f2f66] font-bold text-sm">Buscar</button>
-        <button onclick="setGlobalTab('rareza')" class="flex-1 h-11 rounded-xl text-white/80 font-semibold text-sm">Por Rareza</button>
+        <button id="global-tab-buscar" onclick="setGlobalTab('buscar')" class="flex-1 h-11 rounded-xl bg-white text-[#0f2f66] font-bold text-sm">Buscar</button>
+        <button id="global-tab-rareza" onclick="setGlobalTab('rareza')" class="flex-1 h-11 rounded-xl text-white/80 font-semibold text-sm">Por Rareza</button>
       </div>
 
       <!-- Input de búsqueda -->
-      <div class="relative mb-4">
+      <div id="global-search-box" class="relative mb-4">
         <input id="global-search-input" oninput="scheduleCompactSearch()" type="text" placeholder="Buscar serial, país, @alias…"
           class="w-full h-12 rounded-2xl bg-white pl-11 pr-4 text-base placeholder:text-slate-400 shadow-soft outline-none" />
         <svg class="w-5 h-5 absolute left-4 top-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.3-4.3m1.3-5.2a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       </div>
 
       <!-- Chips de rareza (tab Por Rareza) -->
-      <div id="global-rarity-chips" class="flex gap-2 overflow-x-auto no-scroll mb-4 pb-1">
-        <button onclick="nativeFilterByRarity('solid')" class="h-9 px-4 rounded-full bg-[#0f2f66] text-white text-sm font-bold shrink-0">Solid</button>
-        <button onclick="nativeFilterByRarity('radar')" class="h-9 px-4 rounded-full bg-white text-slate-600 text-sm font-semibold shrink-0">Radar</button>
-        <button onclick="nativeFilterByRarity('ladder')" class="h-9 px-4 rounded-full bg-white text-slate-600 text-sm font-semibold shrink-0">Ladder</button>
-        <button onclick="nativeFilterByRarity('repeater')" class="h-9 px-4 rounded-full bg-white text-slate-600 text-sm font-semibold shrink-0">Repeater</button>
-      </div>
+      <div id="global-rarity-chips" class="hidden flex gap-2 overflow-x-auto no-scroll mb-4 pb-1"></div>
 
-      <!-- Resultados (nativeCompactRow) -->
-      <div id="global-search-results" class="flex flex-col gap-2">
-        <!-- Fila de resultado (plantilla repetida) -->
-        <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
-          <div class="flex-1 min-w-0">
-            <p class="result-serial font-extrabold text-[#0f2f66] text-lg truncate">C12344321</p>
-            <p class="result-meta text-xs text-slate-500 truncate">🇲🇽 MX · Radar · USD · 92% similitud</p>
-            <p class="result-sim text-xs text-fuchsia-600 font-semibold">@sarah_bills</p>
-          </div>
-          <span class="result-points text-emerald-500 font-extrabold text-sm">8,400</span>
-          <div class="flex flex-col gap-1.5">
-            <button onclick="nativeToggleFavorite(arr,idx)" class="result-icon-btn w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-lg">♥</button>
-            <button onclick="nativeToqueRow(arr,idx)" class="result-icon-btn w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-lg">✋</button>
-          </div>
-        </div>
-        <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
-          <div class="flex-1 min-w-0">
-            <p class="result-serial font-extrabold text-[#0f2f66] text-lg truncate">L01234567</p>
-            <p class="result-meta text-xs text-slate-500 truncate">🇪🇸 ES · Ladder · EUR · 78% similitud</p>
-            <p class="result-sim text-xs text-fuchsia-600 font-semibold">@euro_hunter</p>
-          </div>
-          <span class="result-points text-emerald-500 font-extrabold text-sm">6,150</span>
-          <div class="flex flex-col gap-1.5">
-            <button class="result-icon-btn w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-lg">♥</button>
-            <button class="result-icon-btn w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-lg">✋</button>
-          </div>
-        </div>
-        <!-- Resultados por rareza se inyectan en #global-rarity-results -->
-        <div id="global-rarity-results" class="contents"></div>
-      </div>
+      <!-- Resultados -->
+      <div id="global-search-results" class="flex flex-col gap-2"></div>
 
-      <button onclick="openSeeMoreModal('search','Resultados')" class="mt-4 w-full h-12 rounded-2xl bg-white/10 text-white font-semibold">Ver más</button>
+      <button id="global-see-more-btn" onclick="openSeeMoreModal()" class="hidden mt-4 w-full h-12 rounded-2xl bg-white/10 text-white font-semibold">Ver más</button>
     </div>
 
     <!-- ============================================================= -->
@@ -496,8 +463,7 @@
       <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
         <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
         <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">Todos los resultados</h2>
-        <!-- Lista completa inyectada aquí -->
-        <div class="flex flex-col gap-2 text-slate-400 text-sm">Contenido dinámico…</div>
+        <div id="see-more-list" class="flex flex-col gap-2 text-slate-400 text-sm">Contenido dinámico…</div>
       </div>
     </div>
 
@@ -545,12 +511,7 @@ function showToast(msg){
   showToast._t = setTimeout(() => t.classList.add('hidden'), 2200);
 }
 
-// Stubs de funciones referenciadas en el esqueleto que aún no tienen
-// lógica real conectada (búsqueda global, favoritos) — quedan marcadas
-// para cablear en una siguiente pasada.
-['setGlobalTab','scheduleCompactSearch','nativeFilterByRarity',
- 'nativeToggleFavorite','nativeToqueRow','openSeeMoreModal'
-].forEach(fn => { if (!window[fn]) window[fn] = () => showToast('Pendiente de conectar: ' + fn); });
+// (sin stubs pendientes por ahora — Búsqueda Global ya está cableada abajo)
 
 window.openLegalModal = function(tipo){
   document.getElementById('legal-modal-body').textContent =
@@ -1100,7 +1061,7 @@ function rotateLeader(){
   leaderIndex = (leaderIndex + 1) % top;
   renderLeader();
 }
-function refreshPoolDependentUI(){ renderLeader(); renderStats(); }
+function refreshPoolDependentUI(){ renderLeader(); renderStats(); renderGlobalResults(); renderFavoritosScreen(); }
 
 /* ---------------- Toques reales (tabla dgt_toques) ---------------- */
 let activeToquesTab = 'recibidos', toquesReceivedCache = [], toquesSentCache = [];
@@ -1242,6 +1203,145 @@ async function initReal(){
   setInterval(rotateLeader, LEADER_ROTATE_MS);
 }
 initReal();
+
+/* =====================================================================
+   BÚSQUEDA GLOBAL — tabs, chips de rareza real, resultados, favoritos
+===================================================================== */
+const RARITY_DEFS = [
+  { key: '', label: 'Todas' }, { key: 'SOLID', label: 'SOLID' }, { key: 'RADAR', label: 'RADAR' },
+  { key: 'LADDER', label: 'LADDER' }, { key: 'REPEATER', label: 'REPEATER' }, { key: 'BINARY', label: 'BINARY' },
+  { key: 'SEMI-SOLID', label: 'SEMI' }, { key: 'COMUN', label: 'Común' }
+];
+let globalTab = 'buscar';
+let globalRarityFilter = '';
+let globalQuery = '';
+let globalShowCount = 5;
+let globalSearchDebounce = null;
+
+/* Favoritos (localStorage, misma clave que producción) */
+function rbGetFavorites(){ try { return JSON.parse(localStorage.getItem('dgt_favorites_v1') || '[]'); } catch { return []; } }
+function rbToggleFavorite(serial){
+  let favs = rbGetFavorites();
+  favs = favs.includes(serial) ? favs.filter(s => s !== serial) : [...favs, serial];
+  localStorage.setItem('dgt_favorites_v1', JSON.stringify(favs));
+}
+
+window.setGlobalTab = function(tab){
+  globalTab = tab;
+  globalShowCount = 5;
+  document.getElementById('global-tab-buscar').className = 'flex-1 h-11 rounded-xl font-bold text-sm ' + (tab === 'buscar' ? 'bg-white text-[#0f2f66]' : 'text-white/80 font-semibold');
+  document.getElementById('global-tab-rareza').className = 'flex-1 h-11 rounded-xl font-bold text-sm ' + (tab === 'rareza' ? 'bg-white text-[#0f2f66]' : 'text-white/80 font-semibold');
+  document.getElementById('global-search-box').classList.toggle('hidden', tab === 'rareza');
+  document.getElementById('global-rarity-chips').classList.toggle('hidden', tab !== 'rareza');
+  if (tab === 'rareza'){ renderGlobalRarityChips(); if (!globalRarityFilter) globalRarityFilter = 'SOLID'; }
+  renderGlobalResults();
+};
+function renderGlobalRarityChips(){
+  const wrap = document.getElementById('global-rarity-chips');
+  wrap.innerHTML = RARITY_DEFS.filter(d => d.key).map(d => {
+    const active = globalRarityFilter === d.key;
+    return `<button onclick="nativeFilterByRarity('${d.key}')" class="h-9 px-4 rounded-full text-sm font-bold shrink-0 ${active ? 'bg-[#0f2f66] text-white' : 'bg-white text-slate-600 font-semibold'}">${d.label}</button>`;
+  }).join('');
+}
+window.nativeFilterByRarity = function(key){
+  globalRarityFilter = key;
+  globalShowCount = 5;
+  renderGlobalRarityChips();
+  renderGlobalResults();
+};
+window.scheduleCompactSearch = function(){
+  clearTimeout(globalSearchDebounce);
+  globalSearchDebounce = setTimeout(() => {
+    globalQuery = document.getElementById('global-search-input').value.trim();
+    globalShowCount = 5;
+    renderGlobalResults();
+  }, 300);
+};
+function rbSimilarityScore(q, d){
+  if (!d) return 0;
+  q = q.toUpperCase(); d = d.toUpperCase();
+  if (d === q) return 100;
+  if (d.includes(q) || q.includes(d)) return 80;
+  let common = 0;
+  for (let i = 0; i < Math.min(q.length, d.length); i++) if (q[i] === d[i]) common++;
+  return Math.round((common / Math.max(q.length, d.length)) * 100);
+}
+function getGlobalRows(){
+  let rows = MOCK_POOL;
+  if (globalTab === 'buscar' && globalQuery){
+    rows = rows.map(r => ({ r, score: Math.max(
+      rbSimilarityScore(globalQuery, r.digits || ''),
+      (r.owner || '').toLowerCase().includes(globalQuery.toLowerCase()) ? 70 : 0,
+      (r.country || '').toLowerCase().includes(globalQuery.toLowerCase()) ? 60 : 0
+    ) })).filter(x => x.score >= 20).sort((a,b) => b.score - a.score).map(x => ({ ...x.r, _score: x.score }));
+  } else if (globalTab === 'rareza' && globalRarityFilter){
+    rows = rows.filter(r => r.rarity.key === globalRarityFilter);
+  } else {
+    rows = [...rows].sort((a,b) => (b.points||0) - (a.points||0));
+  }
+  return rows;
+}
+function globalResultCardHtml(r){
+  const favs = rbGetFavorites();
+  const isFav = favs.includes(r.serial);
+  const simLabel = r._score ? ` · ${r._score}% similitud` : '';
+  return `
+    <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
+      <div class="flex-1 min-w-0">
+        <p class="font-extrabold text-[#0f2f66] text-lg truncate">${r.serial || ''}</p>
+        <p class="text-xs text-slate-500 truncate">${r.country || ''} · ${r.rarity.label}${simLabel}</p>
+        <p class="text-xs text-fuchsia-600 font-semibold">@${r.owner || 'anónimo'}</p>
+      </div>
+      <span class="text-emerald-500 font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
+      <div class="flex flex-col gap-1.5">
+        <button onclick="nativeToggleFavorite('${r.serial}')" class="w-10 h-10 rounded-xl ${isFav ? 'bg-rose-500 text-white' : 'bg-rose-50 text-rose-500'} flex items-center justify-center text-lg">♥</button>
+        <button onclick="nativeToqueRow('${r.serial}')" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-lg">✋</button>
+      </div>
+    </div>`;
+}
+function renderGlobalResults(){
+  const rows = getGlobalRows();
+  const container = document.getElementById('global-search-results');
+  const moreBtn = document.getElementById('global-see-more-btn');
+  if (rows.length === 0){
+    container.innerHTML = `<div class="text-center text-white/50 text-sm py-10">Sin resultados todavía.</div>`;
+    moreBtn.classList.add('hidden');
+    return;
+  }
+  const shown = rows.slice(0, globalShowCount);
+  container.innerHTML = shown.map(globalResultCardHtml).join('');
+  moreBtn.classList.toggle('hidden', rows.length <= shown.length);
+  moreBtn.textContent = `Ver más (${rows.length - shown.length})`;
+}
+window.nativeToggleFavorite = function(serial){
+  rbToggleFavorite(serial);
+  renderGlobalResults();
+  renderFavoritosScreen();
+};
+window.nativeToqueRow = function(serial){ onToqueClick(serial); };
+window.openSeeMoreModal = function(){
+  const rows = getGlobalRows();
+  document.getElementById('see-more-list').innerHTML = rows.map(globalResultCardHtml).join('') || `<p class="text-center text-slate-400 text-sm py-6">Sin resultados.</p>`;
+  openModal('see-more-modal');
+};
+function onToqueClick(serial){
+  const row = MOCK_POOL.find(r => r.serial === serial);
+  if (!row){ showToast('No se encontró esa serie'); return; }
+  if (profile && row.owner === profile.alias){ showToast('No puedes tocar tu propio billete'); return; }
+  const payload = { toOwner: row.owner, toEmail: decodeEmailIfNeeded(row.email), serial: row.serial, digits: row.digits };
+  if (!gate('toque', payload)) return;
+  executeToque(payload);
+}
+
+/* ---------------- Favoritos (pantalla) ---------------- */
+function renderFavoritosScreen(){
+  const cont = document.getElementById('fav-list-native');
+  if (!cont) return;
+  const favSerials = rbGetFavorites();
+  const favs = MOCK_POOL.filter(r => favSerials.includes(r.serial));
+  cont.innerHTML = favs.length ? favs.map(globalResultCardHtml).join('') : `<p class="text-center text-slate-400 text-sm py-10">Aún no tienes favoritos — toca ♥ en Búsqueda Global.</p>`;
+}
+renderGlobalResults();
 
 refreshValidacion();
 </script>
