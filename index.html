@@ -127,6 +127,12 @@
         <button onclick="goTo('registrar')" class="h-14 rounded-2xl bg-white shadow-soft flex items-center justify-center gap-2 font-extrabold text-[#0f2f66] text-lg">
           🎯 Ingresar Serie
         </button>
+
+        <!-- Coincidencia Global: detecta si tu ÚLTIMA serie registrada comparte dígitos con otra en la Bóveda -->
+        <button id="global-coincidence-banner" onclick="openCoincidenceModal()" class="hidden h-14 rounded-2xl bg-white/10 text-white flex items-center justify-center gap-2 font-bold text-sm px-4 text-center">
+          🌐 <span id="global-coincidence-text">Coincidencia Global</span>
+        </button>
+
         <button onclick="goTo('global')" class="h-14 rounded-2xl bg-white/10 text-white flex items-center justify-center gap-2 font-bold text-base">
           🌐 Búsqueda Global
         </button>
@@ -423,6 +429,17 @@
           <p class="text-slate-400 text-sm text-center py-10">Formulario de pago seguro (Stripe)</p>
         </div>
         <button id="stripe-sim-pay" onclick="handleStripePay()" class="w-full h-14 rounded-2xl bg-emerald-500 text-white font-extrabold text-lg">Confirmar pago de $5</button>
+      </div>
+    </div>
+
+    <!-- MODAL: Coincidencia Global -->
+    <div id="coincidence-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('coincidence-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-1">🌐 Coincidencia Global</h2>
+        <p id="coincidence-modal-subtitle" class="text-sm text-slate-500 mb-4"></p>
+        <div id="coincidence-modal-list" class="flex flex-col gap-2"></div>
       </div>
     </div>
 
@@ -1015,6 +1032,7 @@ window.handleRegister = async function(){
     });
     if (error) throw error;
     showToast(`¡Serie registrada! ${points} pts · ${rarity.label}`);
+    localStorage.setItem('dgt_last_registered_v1', JSON.stringify({ digits, serial, ts: Date.now() }));
     inputDigitos().value = ''; inputDigitos().dispatchEvent(new Event('input'));
     await fetchPool(); refreshPoolDependentUI();
   } catch (e) {
@@ -1093,7 +1111,38 @@ function rotateLeader(){
   leaderIndex = (leaderIndex + 1) % top;
   renderLeader();
 }
-function refreshPoolDependentUI(){ renderLeader(); renderStats(); renderGlobalResults(); renderFavoritosScreen(); }
+function refreshPoolDependentUI(){ renderLeader(); renderStats(); renderGlobalResults(); renderFavoritosScreen(); renderCoincidenceBanner(); }
+
+/* ---------------- Coincidencia Global (tu última serie vs. la Bóveda) ---------------- */
+function getLastRegistered(){
+  try { return JSON.parse(localStorage.getItem('dgt_last_registered_v1') || 'null'); } catch { return null; }
+}
+function getCoincidenceMatches(last){
+  if (!last) return [];
+  return MOCK_POOL.filter(r => r.digits === last.digits && r.serial !== last.serial);
+}
+function renderCoincidenceBanner(){
+  const banner = document.getElementById('global-coincidence-banner');
+  const label = document.getElementById('global-coincidence-text');
+  if (!banner) return;
+  const last = getLastRegistered();
+  if (!last){ banner.classList.add('hidden'); return; }
+  banner.classList.remove('hidden');
+  const matches = getCoincidenceMatches(last);
+  label.textContent = matches.length > 0
+    ? `Coincidencia Global — ${matches.length} serie${matches.length === 1 ? '' : 's'} con tus mismos números`
+    : `Coincidencia Global — sin coincidencias con tu última serie (${last.digits})`;
+}
+window.openCoincidenceModal = function(){
+  const last = getLastRegistered();
+  if (!last) return;
+  const matches = getCoincidenceMatches(last);
+  document.getElementById('coincidence-modal-subtitle').textContent = `Series con los mismos dígitos que tu última serie registrada: ${last.digits}`;
+  document.getElementById('coincidence-modal-list').innerHTML = matches.length
+    ? matches.map(globalResultCardHtml).join('')
+    : `<p class="text-center text-slate-400 text-sm py-6">Nadie más ha registrado esos números todavía — tu serie es única por ahora.</p>`;
+  openModal('coincidence-modal');
+};
 
 /* ---------------- Toques reales (tabla dgt_toques) ---------------- */
 let activeToquesTab = 'recibidos', toquesReceivedCache = [], toquesSentCache = [];
