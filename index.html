@@ -1327,11 +1327,12 @@ function globalResultCardHtml(r){
   const favs = rbGetFavorites();
   const isFav = favs.includes(r.serial);
   const simLabel = r._score ? ` · ${r._score}% similitud` : '';
+  const anio = r.yr || r.year || '';
   return `
     <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
       <div class="flex-1 min-w-0">
         <p class="font-extrabold text-[#0f2f66] text-lg truncate">${r.serial || ''}</p>
-        <p class="text-xs text-slate-500 truncate">${r.country || ''} · ${r.rarity.label}${simLabel}</p>
+        <p class="text-xs text-slate-500 truncate">${r.country || ''}${anio ? ' · ' + anio : ''} · ${r.rarity.label}${simLabel}</p>
         <p class="text-xs text-fuchsia-600 font-semibold">@${r.owner || 'anónimo'}</p>
       </div>
       <span class="text-emerald-500 font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
@@ -1387,11 +1388,12 @@ renderGlobalResults();
 
 /* ---------------- Perfil: mis series + resumen de toques ---------------- */
 function profileSeriesCardHtml(r){
+  const anio = r.yr || r.year || '';
   return `
     <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
       <div class="flex-1 min-w-0">
         <p class="font-extrabold text-[#0f2f66] text-lg truncate">${r.serial || ''}</p>
-        <p class="text-xs text-slate-500 truncate">${r.country || ''} · ${r.rarity.label}</p>
+        <p class="text-xs text-slate-500 truncate">${r.country || ''}${anio ? ' · ' + anio : ''} · ${r.rarity.label}</p>
       </div>
       <span class="text-emerald-500 font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
     </div>`;
