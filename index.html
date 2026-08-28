@@ -36,7 +36,7 @@
             <!-- Toques / notificaciones -->
             <button class="relative w-11 h-11 flex items-center justify-center text-white/90" onclick="openToquesModal()">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
-              <span id="toques-badge" class="absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 rounded-full ring-2 ring-[#0f2f66]"></span>
+              <span id="toques-badge" class="hidden absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 rounded-full ring-2 ring-[#0f2f66]"></span>
             </button>
             <!-- Avatar / perfil -->
             <button class="w-11 h-11 rounded-full bg-fuchsia-700 flex items-center justify-center text-white font-bold text-lg" onclick="goTo('perfil')" id="profile-avatar-letter">O</button>
@@ -284,6 +284,22 @@
           <div class="flex items-center gap-2"><span class="w-16 text-xs font-semibold text-slate-500">Ladder</span><div class="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full w-[25%] bg-emerald-400 rounded-full"></div></div></div>
         </div>
       </div>
+
+      <!-- Mis series registradas -->
+      <div class="mb-5">
+        <h3 class="text-white/70 text-xs font-bold uppercase tracking-widest mb-2 px-1">Mis series registradas</h3>
+        <div id="profile-my-series" class="flex flex-col gap-2"></div>
+      </div>
+
+      <!-- Mis toques (resumen + acceso al modal completo) -->
+      <button onclick="openToquesModal()" class="w-full bg-white rounded-3xl p-4 shadow-soft flex items-center gap-3 mb-5">
+        <div class="w-11 h-11 rounded-2xl bg-[#0f2f66]/10 flex items-center justify-center text-xl shrink-0">✋</div>
+        <div class="flex-1 text-left">
+          <p class="font-bold text-[#0f2f66] text-sm">Mis toques</p>
+          <p id="profile-toques-summary" class="text-xs text-slate-400">Sin toques todavía</p>
+        </div>
+        <span class="text-slate-300 text-lg">›</span>
+      </button>
 
       <!-- CTA membresía dinámico -->
       <button id="perfil-upsell-btn" onclick="openStripeDirect()" class="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 font-extrabold text-lg shadow-premium mb-3">
@@ -812,6 +828,8 @@ function updateSessionUI(){
   if (upsell) upsell.classList.toggle('hidden', membershipActive);
   const statsMine = document.getElementById('stats-mine');
   if (statsMine && profile?.alias) statsMine.textContent = MOCK_POOL.filter(r => r.owner === profile.alias).length;
+  renderProfileSeries();
+  loadProfileToquesSummary();
 }
 window.handleAuthSubmit = async function(mode){
   const email = document.getElementById('auth-email').value.trim();
@@ -1101,16 +1119,20 @@ function renderToquesReceived(){
       <div class="flex gap-2">
         <button onclick="acceptToqueClick('${t.id}')" class="flex-1 h-10 rounded-xl bg-emerald-500 text-white text-sm font-bold">Aceptar → Chat</button>
         <button onclick="rejectToqueClick('${t.id}')" class="h-10 px-4 rounded-xl bg-slate-200 text-slate-600 text-sm font-bold">Rechazar</button>
-      </div>` : `<span class="text-xs font-bold ${t.status==='accepted' ? 'text-emerald-500' : 'text-slate-400'}">${t.status==='accepted' ? '✓ Aceptado' : '✕ Rechazado'}</span>`}
+      </div>` : t.status === 'accepted' ? `
+      <button onclick="openChatModal('${t.id}','${t.from_alias}','${t.serial || ''}')" class="w-full h-10 rounded-xl bg-[#0f2f66] text-white text-sm font-bold">💬 Abrir chat</button>`
+      : `<span class="text-xs font-bold text-slate-400">✕ Rechazado</span>`}
     </div>`).join('');
 }
 function renderToquesSent(){
   const cont = document.getElementById('toques-panel-enviados');
   if (toquesSentCache.length === 0){ cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Aún no has enviado ningún toque.</p>`; return; }
   cont.innerHTML = toquesSentCache.map(t => `
-    <div class="bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between">
-      <div><p class="font-bold text-[#0f2f66]">@${t.to_owner}</p><p class="text-xs text-slate-500">Serie ${t.serial || ''}</p></div>
-      <span class="text-xs font-bold ${t.status==='pending' ? 'text-amber-500' : (t.status==='accepted' ? 'text-emerald-500' : 'text-slate-400')}">${t.status==='pending' ? 'Pendiente' : (t.status==='accepted' ? 'Aceptado' : 'Rechazado')}</span>
+    <div class="bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+      <div class="min-w-0"><p class="font-bold text-[#0f2f66] truncate">@${t.to_owner}</p><p class="text-xs text-slate-500 truncate">Serie ${t.serial || ''}</p></div>
+      ${t.status === 'accepted'
+        ? `<button onclick="openChatModal('${t.id}','${t.to_owner}','${t.serial || ''}')" class="shrink-0 h-9 px-3 rounded-xl bg-[#0f2f66] text-white text-xs font-bold">💬 Chat</button>`
+        : `<span class="shrink-0 text-xs font-bold ${t.status==='pending' ? 'text-amber-500' : 'text-slate-400'}">${t.status==='pending' ? 'Pendiente' : 'Rechazado'}</span>`}
     </div>`).join('');
 }
 window.acceptToqueClick = async function(id){
@@ -1119,12 +1141,13 @@ window.acceptToqueClick = async function(id){
     if (error) throw error;
     showToast('Toque aceptado — chat abierto');
     await loadToquesReceived();
+    loadProfileToquesSummary();
     const t = toquesReceivedCache.find(x => String(x.id) === String(id));
     if (t) openChatModal(t.id, t.from_alias, t.serial || '');
   } catch (e) { showToast('Error: ' + (e.message || e)); }
 };
 window.rejectToqueClick = async function(id){
-  try { const { error } = await sb.from('dgt_toques').update({ status: 'rejected' }).eq('id', id); if (error) throw error; showToast('Toque rechazado'); await loadToquesReceived(); }
+  try { const { error } = await sb.from('dgt_toques').update({ status: 'rejected' }).eq('id', id); if (error) throw error; showToast('Toque rechazado'); await loadToquesReceived(); loadProfileToquesSummary(); }
   catch (e) { showToast('Error: ' + (e.message || e)); }
 };
 async function executeToque(payload){
@@ -1342,6 +1365,45 @@ function renderFavoritosScreen(){
   cont.innerHTML = favs.length ? favs.map(globalResultCardHtml).join('') : `<p class="text-center text-slate-400 text-sm py-10">Aún no tienes favoritos — toca ♥ en Búsqueda Global.</p>`;
 }
 renderGlobalResults();
+
+/* ---------------- Perfil: mis series + resumen de toques ---------------- */
+function profileSeriesCardHtml(r){
+  return `
+    <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
+      <div class="flex-1 min-w-0">
+        <p class="font-extrabold text-[#0f2f66] text-lg truncate">${r.serial || ''}</p>
+        <p class="text-xs text-slate-500 truncate">${r.country || ''} · ${r.rarity.label}</p>
+      </div>
+      <span class="text-emerald-500 font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
+    </div>`;
+}
+function renderProfileSeries(){
+  const cont = document.getElementById('profile-my-series');
+  if (!cont) return;
+  if (!profile?.alias){ cont.innerHTML = `<p class="text-center text-white/40 text-sm py-6">Inicia sesión y completa tu perfil para ver tus series.</p>`; return; }
+  const mine = MOCK_POOL.filter(r => r.owner === profile.alias).sort((a,b) => (b.points||0) - (a.points||0));
+  cont.innerHTML = mine.length ? mine.map(profileSeriesCardHtml).join('') : `<p class="text-center text-white/40 text-sm py-6">Aún no has registrado ninguna serie.</p>`;
+}
+async function loadProfileToquesSummary(){
+  const summary = document.getElementById('profile-toques-summary');
+  const badge = document.getElementById('toques-badge');
+  if (!profile?.alias || !summary){ if (badge) badge.classList.add('hidden'); return; }
+  try {
+    const [{ data: received }, { data: sent }] = await Promise.all([
+      sb.from('dgt_toques').select('id,status').eq('to_owner', profile.alias),
+      sb.from('dgt_toques').select('id').eq('from_alias', profile.alias)
+    ]);
+    const pending = (received || []).filter(t => t.status === 'pending').length;
+    const totalReceived = (received || []).length;
+    const totalSent = (sent || []).length;
+    summary.textContent = pending > 0
+      ? `${pending} pendiente${pending === 1 ? '' : 's'} · ${totalReceived} recibidos · ${totalSent} enviados`
+      : `${totalReceived} recibidos · ${totalSent} enviados`;
+    if (badge) badge.classList.toggle('hidden', pending === 0);
+  } catch {
+    if (badge) badge.classList.add('hidden');
+  }
+}
 
 refreshValidacion();
 </script>
