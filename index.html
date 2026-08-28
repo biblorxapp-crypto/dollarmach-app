@@ -30,11 +30,15 @@
     <div id="screen-inicio" class="screen-view pb-28">
 
       <!-- HEADER -->
-      <header class="px-5 pt-12 pb-4">
+      <header class="px-5 pt-12 pb-5">
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 shadow-soft"></div>
-            <span class="text-white font-extrabold text-2xl tracking-tight">DOLLARDGT</span>
+            <div id="brand-logo" class="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 shadow-soft overflow-hidden shrink-0">
+              <!-- Cuando tengas el logo redondo final, reemplaza este div por:
+                   <img src="TU-LOGO.png" class="w-full h-full object-cover" alt="DOLLARDGT" />
+                   El círculo ya está recortado (overflow-hidden) y del tamaño correcto. -->
+            </div>
+            <span class="text-white font-extrabold text-3xl tracking-tight">DOLLARDGT</span>
           </div>
           <div class="flex items-center gap-3">
             <!-- Toques / notificaciones -->
@@ -43,9 +47,7 @@
               <span id="toques-badge" class="hidden absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 rounded-full ring-2 ring-[#0f2f66]"></span>
             </button>
             <!-- Avatar / perfil -->
-            <button class="w-11 h-11 rounded-full bg-fuchsia-700 flex items-center justify-center text-white font-bold text-lg" onclick="goTo('perfil')" id="profile-avatar-letter">O</button>
-            <!-- Alias -->
-            <button class="h-11 px-4 rounded-full bg-white/10 text-white/90 font-semibold text-sm" id="profile-alias-native">@Ohd12</button>
+            <button class="w-11 h-11 rounded-full bg-fuchsia-700 flex items-center justify-center text-white font-bold text-lg shrink-0" onclick="goTo('perfil')" id="profile-avatar-letter">?</button>
           </div>
         </div>
       </header>
@@ -829,7 +831,6 @@ window.onSessionActionClick = function(){
 };
 function updateSessionUI(){
   const alias = profile?.alias ? '@' + profile.alias : null;
-  document.getElementById('profile-alias-native').textContent = alias || 'Ingresar';
   document.getElementById('profile-avatar-letter').textContent = (profile?.alias || profile?.nickname || session?.email || '?').charAt(0).toUpperCase();
   const alias2 = document.getElementById('profile-alias-native-2'); if (alias2) alias2.textContent = alias || '@invitado';
   const sub = document.getElementById('profile-sub-native');
