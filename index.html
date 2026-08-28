@@ -285,21 +285,19 @@
         </div>
       </div>
 
-      <!-- Mis series registradas -->
-      <div class="mb-5">
-        <h3 class="text-white/70 text-xs font-bold uppercase tracking-widest mb-2 px-1">Mis series registradas</h3>
-        <div id="profile-my-series" class="flex flex-col gap-2"></div>
-      </div>
-
-      <!-- Mis toques (resumen + acceso al modal completo) -->
-      <button onclick="openToquesModal()" class="w-full bg-white rounded-3xl p-4 shadow-soft flex items-center gap-3 mb-5">
-        <div class="w-11 h-11 rounded-2xl bg-[#0f2f66]/10 flex items-center justify-center text-xl shrink-0">✋</div>
-        <div class="flex-1 text-left">
+      <!-- Mis registros / Mis toques — botones compactos, cada uno abre su modal -->
+      <div class="flex gap-3 mb-5">
+        <button onclick="openMySeriesModal()" class="flex-1 bg-white rounded-3xl p-4 shadow-soft flex flex-col items-start gap-2">
+          <div class="w-11 h-11 rounded-2xl bg-[#0f2f66]/10 flex items-center justify-center text-xl">🎯</div>
+          <p class="font-bold text-[#0f2f66] text-sm">Mis registros</p>
+          <p id="profile-series-summary" class="text-xs text-slate-400">Sin registros todavía</p>
+        </button>
+        <button onclick="openToquesModal()" class="flex-1 bg-white rounded-3xl p-4 shadow-soft flex flex-col items-start gap-2">
+          <div class="w-11 h-11 rounded-2xl bg-[#0f2f66]/10 flex items-center justify-center text-xl">✋</div>
           <p class="font-bold text-[#0f2f66] text-sm">Mis toques</p>
           <p id="profile-toques-summary" class="text-xs text-slate-400">Sin toques todavía</p>
-        </div>
-        <span class="text-slate-300 text-lg">›</span>
-      </button>
+        </button>
+      </div>
 
       <!-- CTA membresía dinámico -->
       <button id="perfil-upsell-btn" onclick="openStripeDirect()" class="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 font-extrabold text-lg shadow-premium mb-3">
@@ -419,6 +417,17 @@
           Formulario de pago seguro (Stripe)
         </div>
         <button id="stripe-sim-pay" onclick="handleStripePay()" class="w-full h-14 rounded-2xl bg-emerald-500 text-white font-extrabold text-lg">Confirmar pago de $5</button>
+      </div>
+    </div>
+
+    <!-- MODAL: Mis registros -->
+    <div id="series-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('series-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">Mis registros</h2>
+        <div id="series-modal-list" class="flex flex-col gap-2"></div>
+        <button id="series-modal-more-btn" onclick="showMoreMySeries()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold">Ver más</button>
       </div>
     </div>
 
@@ -1083,9 +1092,11 @@ function refreshPoolDependentUI(){ renderLeader(); renderStats(); renderGlobalRe
 
 /* ---------------- Toques reales (tabla dgt_toques) ---------------- */
 let activeToquesTab = 'recibidos', toquesReceivedCache = [], toquesSentCache = [];
+let toquesReceivedShowCount = 4, toquesSentShowCount = 4;
 window.openToquesModal = function(){
   if (!session){ openModal('auth-modal'); return; }
   if (!profile?.alias){ openModal('profile-modal'); return; }
+  toquesReceivedShowCount = 4; toquesSentShowCount = 4;
   openModal('toques-modal');
   window.rbSwitchToquesTab('recibidos');
 };
@@ -1111,7 +1122,8 @@ async function loadToquesSent(){
 function renderToquesReceived(){
   const cont = document.getElementById('toques-panel-recibidos');
   if (toquesReceivedCache.length === 0){ cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Sin toques recibidos aún.</p>`; return; }
-  cont.innerHTML = toquesReceivedCache.map(t => `
+  const shown = toquesReceivedCache.slice(0, toquesReceivedShowCount);
+  cont.innerHTML = shown.map(t => `
     <div class="bg-slate-50 rounded-2xl p-3.5">
       <p class="font-bold text-[#0f2f66]">@${t.from_alias}</p>
       <p class="text-xs text-slate-500 mb-3">Serie ${t.serial || ''}</p>
@@ -1123,17 +1135,24 @@ function renderToquesReceived(){
       <button onclick="openChatModal('${t.id}','${t.from_alias}','${t.serial || ''}')" class="w-full h-10 rounded-xl bg-[#0f2f66] text-white text-sm font-bold">💬 Abrir chat</button>`
       : `<span class="text-xs font-bold text-slate-400">✕ Rechazado</span>`}
     </div>`).join('');
+  if (toquesReceivedCache.length > shown.length){
+    cont.innerHTML += `<button onclick="toquesReceivedShowCount += 4; renderToquesReceived();" class="w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold text-sm">Ver más (${toquesReceivedCache.length - shown.length})</button>`;
+  }
 }
 function renderToquesSent(){
   const cont = document.getElementById('toques-panel-enviados');
   if (toquesSentCache.length === 0){ cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Aún no has enviado ningún toque.</p>`; return; }
-  cont.innerHTML = toquesSentCache.map(t => `
+  const shown = toquesSentCache.slice(0, toquesSentShowCount);
+  cont.innerHTML = shown.map(t => `
     <div class="bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between gap-3">
       <div class="min-w-0"><p class="font-bold text-[#0f2f66] truncate">@${t.to_owner}</p><p class="text-xs text-slate-500 truncate">Serie ${t.serial || ''}</p></div>
       ${t.status === 'accepted'
         ? `<button onclick="openChatModal('${t.id}','${t.to_owner}','${t.serial || ''}')" class="shrink-0 h-9 px-3 rounded-xl bg-[#0f2f66] text-white text-xs font-bold">💬 Chat</button>`
         : `<span class="shrink-0 text-xs font-bold ${t.status==='pending' ? 'text-amber-500' : 'text-slate-400'}">${t.status==='pending' ? 'Pendiente' : 'Rechazado'}</span>`}
     </div>`).join('');
+  if (toquesSentCache.length > shown.length){
+    cont.innerHTML += `<button onclick="toquesSentShowCount += 4; renderToquesSent();" class="w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold text-sm">Ver más (${toquesSentCache.length - shown.length})</button>`;
+  }
 }
 window.acceptToqueClick = async function(id){
   try {
@@ -1377,12 +1396,31 @@ function profileSeriesCardHtml(r){
       <span class="text-emerald-500 font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
     </div>`;
 }
+let profileSeriesShowCount = 4;
 function renderProfileSeries(){
-  const cont = document.getElementById('profile-my-series');
-  if (!cont) return;
-  if (!profile?.alias){ cont.innerHTML = `<p class="text-center text-white/40 text-sm py-6">Inicia sesión y completa tu perfil para ver tus series.</p>`; return; }
-  const mine = MOCK_POOL.filter(r => r.owner === profile.alias).sort((a,b) => (b.points||0) - (a.points||0));
-  cont.innerHTML = mine.length ? mine.map(profileSeriesCardHtml).join('') : `<p class="text-center text-white/40 text-sm py-6">Aún no has registrado ninguna serie.</p>`;
+  const summary = document.getElementById('profile-series-summary');
+  if (!summary) return;
+  if (!profile?.alias){ summary.textContent = 'Inicia sesión para ver tus registros'; return; }
+  const mine = MOCK_POOL.filter(r => r.owner === profile.alias);
+  summary.textContent = mine.length ? `${mine.length} registro${mine.length === 1 ? '' : 's'}` : 'Sin registros todavía';
+}
+window.openMySeriesModal = function(){
+  if (!session){ openModal('auth-modal'); return; }
+  if (!profile?.alias){ openModal('profile-modal'); return; }
+  profileSeriesShowCount = 4;
+  renderSeriesModal();
+  openModal('series-modal');
+};
+window.showMoreMySeries = function(){ profileSeriesShowCount += 4; renderSeriesModal(); };
+function renderSeriesModal(){
+  const mine = MOCK_POOL.filter(r => r.owner === profile?.alias).sort((a,b) => (b.points||0) - (a.points||0));
+  const cont = document.getElementById('series-modal-list');
+  const moreBtn = document.getElementById('series-modal-more-btn');
+  if (mine.length === 0){ cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Aún no has registrado ninguna serie.</p>`; moreBtn.classList.add('hidden'); return; }
+  const shown = mine.slice(0, profileSeriesShowCount);
+  cont.innerHTML = shown.map(profileSeriesCardHtml).join('');
+  moreBtn.classList.toggle('hidden', mine.length <= shown.length);
+  moreBtn.textContent = `Ver más (${mine.length - shown.length})`;
 }
 async function loadProfileToquesSummary(){
   const summary = document.getElementById('profile-toques-summary');
