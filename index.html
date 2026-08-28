@@ -1,13 +1,17 @@
 <!DOCTYPE html>
-<html lang="es" class="bg-slate-200">
+<html lang="es" style="background:#0f2f66;">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f2f66" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>$DOLLARDGT — Bóveda Global</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://js.stripe.com/v3/"></script>
   <style>
+    html, body { background: #0f2f66; }
     body { -webkit-tap-highlight-color: transparent; }
     ::-webkit-scrollbar { display: none; }
     .no-scroll { -ms-overflow-style: none; scrollbar-width: none; }
@@ -15,7 +19,7 @@
     .shadow-soft { box-shadow: 0 6px 18px -6px rgba(8,20,45,.20); }
   </style>
 </head>
-<body class="min-h-screen bg-slate-300 flex justify-center font-sans antialiased text-slate-800">
+<body class="min-h-screen flex justify-center font-sans antialiased text-slate-800" style="background:#0f2f66;">
 
   <!-- ===== MARCO TIPO IPHONE ===== -->
   <div class="relative w-full max-w-[430px] min-h-screen bg-[#0f2f66] overflow-hidden">
@@ -412,9 +416,9 @@
         <p class="text-sm text-slate-500 mb-4">Pago único de <span class="font-bold text-emerald-500">$5</span>, acceso de por vida.</p>
         <div id="stripe-loading" class="hidden text-center text-sm text-slate-400 py-2">Cargando pasarela segura…</div>
         <!-- Aquí monta Stripe Elements -->
-        <div id="realPaymentElement" class="min-h-[120px] rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 text-sm mb-4">
+        <div id="realPaymentElement" class="min-h-[120px] rounded-2xl bg-slate-100 mb-4 [&>div]:w-full">
           <!-- stripe.elements().mount('#realPaymentElement') -->
-          Formulario de pago seguro (Stripe)
+          <p class="text-slate-400 text-sm text-center py-10">Formulario de pago seguro (Stripe)</p>
         </div>
         <button id="stripe-sim-pay" onclick="handleStripePay()" class="w-full h-14 rounded-2xl bg-emerald-500 text-white font-extrabold text-lg">Confirmar pago de $5</button>
       </div>
