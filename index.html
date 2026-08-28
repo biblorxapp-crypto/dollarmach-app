@@ -1,1604 +1,1249 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="bg-slate-200">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>DOLLARDGT v3.1</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        ::-webkit-scrollbar { display: none; }
-        * { -ms-overflow-style: none; scrollbar-width: none; -webkit-tap-highlight-color: transparent; }
-        /* iOS hace auto-zoom al tocar un campo si su letra es menor a 16px.
-           Forzamos 16px en todos los inputs/selects/textareas para evitarlo,
-           sin importar qué clase de Tailwind traiga cada uno. */
-        input, select, textarea { font-size: 16px !important; }
-        /* Safari en iOS recoge/expande la barra de direcciones y cambia el alto
-           real de la pantalla; 100vh usa el alto "viejo" y la página queda
-           descuadrada. 100dvh (alto dinámico) se ajusta en vivo. Con fallback
-           a 100vh para navegadores que no lo soporten. */
-        body, .app-frame-height { height: 100vh; height: 100dvh; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>$DOLLARDGT — Bóveda Global</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    ::-webkit-scrollbar { display: none; }
+    .no-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    .shadow-premium { box-shadow: 0 10px 30px -8px rgba(8,20,45,.35); }
+    .shadow-soft { box-shadow: 0 6px 18px -6px rgba(8,20,45,.20); }
+  </style>
 </head>
-<body class="bg-[#163b74] text-slate-800 antialiased h-screen w-full flex justify-center overflow-hidden">
+<body class="min-h-screen bg-slate-300 flex justify-center font-sans antialiased text-slate-800">
 
-    <!-- APP CONTAINER (Mobile Frame Constraint) -->
-    <main class="w-full max-w-md h-full relative flex flex-col shadow-2xl bg-[#163b74]">
+  <!-- ===== MARCO TIPO IPHONE ===== -->
+  <div class="relative w-full max-w-[430px] min-h-screen bg-[#0f2f66] overflow-hidden">
 
-        <!-- TOP NAVIGATION BAR -->
-        <header class="flex justify-between items-center px-5 py-4 z-10 shrink-0">
-            <div class="flex items-center gap-2 min-w-0 shrink-0">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#8b008b] to-blue-500 shadow-md shrink-0"></div>
-                <h1 class="text-white font-bold text-lg tracking-tight">DOLLARDGT</h1>
-            </div>
-            <div class="flex items-center gap-3 min-w-0">
-                <!-- Botón global de toques -->
-                <button id="openToquesBtn" onclick="openToquesModal()" class="relative text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                    <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#163b74]"></span>
-                </button>
-                <!-- Ícono de perfil — misma función que la píldora de sesión -->
-                <button id="headerProfileBtn" onclick="onSessionPillClick()" class="shrink-0 w-9 h-9 rounded-full bg-white/10 flex items-center justify-center min-h-[44px] min-w-[44px]">
-                    <svg id="headerProfileIcon" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path stroke-linecap="round" d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
-                </button>
-                <!-- Píldora de sesión — tope de ancho + truncado para alias/emails largos -->
-                <button id="sessionPill" onclick="onSessionPillClick()" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors min-h-[44px] max-w-[140px] shrink min-w-0">
-                    <span id="sessionPillLabel" class="block truncate">Ingresar</span>
-                </button>
-            </div>
-        </header>
+    <!-- ============================================================= -->
+    <!-- SCREEN: INICIO (screen-view activo)                            -->
+    <!-- ============================================================= -->
+    <div id="screen-inicio" class="screen-view pb-28">
 
-        <!-- CONTENIDO PRINCIPAL SCROLLEABLE -->
-        <section id="appMain" class="flex-1 overflow-y-auto px-4 pb-28 flex flex-col gap-6">
-
-            <!-- ==========================================
-                 VISTA: INICIO (#homeView)
-                 ========================================== -->
-            <div id="homeView" class="flex flex-col gap-6 flex-shrink-0">
-
-                <!-- Tarjeta de Estadísticas de Bóveda — la barra la puebla renderStats() con la distribución real de rareza -->
-                <div class="stats-card flex gap-4 w-full">
-                    <div class="bg-[#cbd5e1] rounded-2xl w-1/3 aspect-square shadow-inner flex flex-col items-center justify-center gap-1 p-3">
-                        <span id="statSeries" class="text-2xl font-black text-[#163b74]">—</span>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Series</span>
-                        <span id="statCountries" class="text-lg font-black text-[#163b74] mt-2">—</span>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Países</span>
-                    </div>
-                    <div class="w-2/3 flex flex-col gap-2 justify-center">
-                        <div id="statsChart" class="w-full h-4 rounded-full overflow-hidden flex bg-white/10"></div>
-                        <div id="statsLegend" class="flex flex-wrap gap-x-3 gap-y-1"></div>
-                        <div class="flex items-center justify-between px-1 mt-1">
-                            <span id="statValue" class="text-sm font-black text-white">—</span>
-                            <span class="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Valor Total</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Franja de acceso rápido — siempre visible en Inicio; el texto cambia según haya sesión o no -->
-                <button id="loginPrompt" onclick="onSessionPillClick()" class="w-full min-h-[48px] rounded-2xl bg-white/10 flex items-center justify-center gap-2 text-sm font-semibold text-white/90">
-                    <span id="loginPromptLabel">Inicia sesión para registrar y tocar series →</span>
-                </button>
-
-                <!-- Tarjeta de Serie Líder -->
-                <div class="leader-card bg-[#fcfbf9] rounded-[2rem] p-4 shadow-xl flex flex-col gap-5">
-                    <!-- Banner Púrpura Superior -->
-                    <div class="bg-[#8b008b] h-12 w-3/4 rounded-full mx-auto shadow-inner flex items-center justify-center">
-                        <span id="leaderRankTag" class="text-white font-bold text-sm tracking-wide">#1 / 8 · SERIE LÍDER</span>
-                    </div>
-
-                    <!-- Datos del serial -->
-                    <div class="flex items-center justify-between px-2">
-                        <div class="flex items-baseline gap-2 min-w-0">
-                            <span id="leaderLetters" class="text-lg font-medium text-slate-600 shrink-0">A</span>
-                            <span id="leaderDigits" class="text-2xl font-bold tracking-widest text-slate-900 truncate">8888888</span>
-                        </div>
-                        <div id="leaderRarity" data-rarity="solid" class="bg-[#f5e6d3] text-[#a67c52] px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider shrink-0">
-                            Solid
-                        </div>
-                    </div>
-                    <!-- serial completo, oculto — lo usa onToqueClick() -->
-                    <span id="leaderBill" class="hidden">A8888888</span>
-
-                    <!-- Metadatos -->
-                    <div class="flex flex-col gap-1 px-2">
-                        <div class="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                            <span id="leaderCountry">🇺🇸 Estados Unidos</span>
-                            <span>·</span>
-                            <span id="leaderYear">2021</span>
-                        </div>
-                        <div class="flex items-center justify-between mt-2 gap-2">
-                            <span id="leaderOwner" class="font-semibold text-slate-800 truncate min-w-0">@Marcus_FX</span>
-                            <span id="leaderPoints" class="font-bold text-[#a67c52] shrink-0">1,842 pts</span>
-                        </div>
-                    </div>
-
-                    <!-- Botones de acción -->
-                    <div class="flex gap-3 px-2 pt-2">
-                        <button class="flex-1 bg-[#f5efe6] text-slate-700 font-semibold rounded-2xl min-h-[48px] flex items-center justify-center gap-2 active:scale-95 transition-transform">
-                            <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
-                            Favorito
-                        </button>
-                        <button class="action toque flex-1 bg-[#14261c] text-white font-semibold rounded-2xl min-h-[48px] flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform" onclick="onToqueClick(document.getElementById('leaderBill').textContent)">
-                            👋 Tocar
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tarjeta compacta que invita a probar el número de serie — lleva a Registrar; -->
-                <!-- si no eres miembro, el gate() de Registrar ya se encarga de mostrar el pago -->
-                <div class="">
-                    <button id="tryRegisterBtn" onclick="showView('register')" class="w-full bg-white text-[#8b008b] font-bold text-base rounded-2xl min-h-[52px] active:scale-95 transition-transform flex items-center justify-center gap-2">
-                        🎯 Registra  En Boveda Global
-                    </button>
-                </div>
-            </div>
-
-            <!-- ==========================================
-                 VISTA: REGISTRAR (#registerView)
-                 ========================================== -->
-            <div id="registerView" class="hidden flex-col flex-shrink-0 mt-1 gap-6">
-
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-white font-bold text-xl">Registrar serie</h2>
-                        <p class="text-blue-200 text-xs font-medium mt-0.5">Ingresa entre 6 y 10 dígitos para calcular su rareza</p>
-                    </div>
-                    <button id="registerMemberBtn" onclick="onMembershipClick()" class="bg-white/10 text-white text-xs font-bold px-3 py-2 rounded-full min-h-[36px] shrink-0">💎</button>
-                </div>
-
-                <!-- Componente de entrada — fondo único de papel, sin marco -->
-                <div class="bg-[#fcfbf9] rounded-[2rem] p-5 shadow-xl flex flex-col gap-4">
-
-                    <!-- Fila superior: letras + moneda (selectores en verde) -->
-                    <div class="flex justify-between gap-2.5">
-                        <div class="flex-1 flex flex-col gap-1.5">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">Prefijo</span>
-                            <!-- Se puebla dinámicamente por fillLetters(): A-Z + ★ -->
-                            <select id="letter1" class="w-full h-16 bg-[#228c53] rounded-2xl text-center text-3xl font-black text-white appearance-none outline-none p-0" style="text-align-last:center;">
-                                <option>A</option>
-                            </select>
-                        </div>
-                        <div class="flex-1 flex flex-col gap-1.5">
-                            <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider text-center">Opcional</span>
-                            <!-- Se puebla dinámicamente por fillLetters(): — + A-Z -->
-                            <select id="letter2" class="w-full h-16 bg-[#228c53] rounded-2xl text-center text-3xl font-black text-white appearance-none outline-none p-0" style="text-align-last:center;">
-                                <option value="">—</option>
-                            </select>
-                        </div>
-                        <div class="flex-1 flex flex-col gap-1.5">
-                            <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider text-center">Sufijo</span>
-                            <!-- Se puebla dinámicamente por fillLetters(): — + A-Z -->
-                            <select id="letter3" class="w-full h-16 bg-[#228c53] rounded-2xl text-center text-3xl font-black text-white appearance-none outline-none p-0" style="text-align-last:center;">
-                                <option value="">—</option>
-                            </select>
-                        </div>
-                        <div class="flex-[1.3] flex flex-col gap-1.5">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">Moneda</span>
-                            <div class="w-full h-16 bg-[#228c53] rounded-2xl flex items-center justify-center">
-                                <span id="currencyDisplay" class="text-xl font-black text-white">USD</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Display principal del serial -->
-                    <div class="bg-slate-100 rounded-2xl px-6 py-5 relative overflow-hidden flex flex-col gap-1">
-                        <div class="flex items-center justify-between">
-                            <span id="serialDisplay" class="text-4xl font-black tracking-widest text-slate-900 leading-none">0000000000</span>
-                            <span class="text-lg font-bold text-slate-400">Sdg</span>
-                        </div>
-                        <div class="flex items-center justify-between mt-2">
-                            <span id="counter" class="text-slate-400 text-xs font-bold">0 / 10 · mínimo 6</span>
-                            <span id="rarityPreview" data-rarity="" class="text-[11px] px-2.5 py-1 rounded-full font-extrabold uppercase tracking-wide bg-white text-[#228c53]">Sin patrón aún</span>
-                        </div>
-                    </div>
-
-                    <!-- Teclado numérico (dígitos en púrpura) -->
-                    <div class="number-grid flex flex-col gap-2">
-                        <div class="grid grid-cols-3 gap-2">
-                            <button class="num-btn min-h-[60px] bg-[#8b008b] text-white text-2xl font-bold rounded-xl active:opacity-80 active:scale-95 transition-all" data-number="1">1</button>
-                            <button class="num-btn min-h-[60px] bg-[#8b008b] text-white text-2xl font-bold rounded-xl active:opacity-80 active:scale-95 transition-all" data-number="2">2</button>
-                            <button class="num-btn min-h-[60px] bg-[#8b008b] text-white text-2xl font-bold rounded-xl active:opacity-80 active:scale-95 transition-all" data-number="3">3</button>
-                            <button class="num-btn min-h-[60px] bg-[#8b008b] text-white text-2xl font-bold rounded-xl active:opacity-80 active:scale-95 transition-all" data-number="4">4</button>
-                            <button class="num-btn min-h-[60px] bg-[#8b008b] text-white text-2xl font-bold rounded-xl active:opacity-80 active:scale-95 transition-all" data-number="5">5</button>
-                            <button class="num-btn min-h-[60px] bg-[#8b008b] text-white text-2xl font-bold rounded-xl active:opacity-80 active:scale-95 transition-all" data-number="6">6</button>
-                            <button class="num-btn min-h-[60px] bg-[#8b008b] text-white text-2xl font-bold rounded-xl active:opacity-80 active:scale-95 transition-all" data-number="7">7</button>
-                            <button class="num-btn min-h-[60px] bg-[#8b008b] text-white text-2xl font-bold rounded-xl active:opacity-80 active:scale-95 transition-all" data-number="8">8</button>
-                            <button class="num-btn min-h-[60px] bg-[#8b008b] text-white text-2xl font-bold rounded-xl active:opacity-80 active:scale-95 transition-all" data-number="9">9</button>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button id="clearButton" class="min-h-[56px] bg-slate-100 text-slate-400 text-xs font-bold rounded-xl active:bg-slate-200 transition-all">LIMPIAR</button>
-                            <button class="num-btn min-h-[56px] bg-[#8b008b] text-white text-2xl font-bold rounded-xl active:opacity-80 active:scale-95 transition-all" data-number="0">0</button>
-                            <button id="deleteButton" class="min-h-[56px] bg-slate-100 text-slate-500 text-xl font-bold rounded-xl active:bg-slate-200 transition-all">⌫</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Metadatos: año, país, denominación (mismo fondo de papel, selectores en verde) -->
-                <div class="bg-[#fcfbf9] rounded-3xl p-2 flex flex-col divide-y divide-slate-100">
-                    <div class="flex items-center gap-3 p-3">
-                        <div class="w-10 h-10 rounded-xl bg-[#228c53] flex items-center justify-center text-lg shrink-0">📅</div>
-                        <div class="flex-1">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Año de emisión</span>
-                            <!-- Se puebla dinámicamente por fillYears() -->
-                            <select id="yearSelect" class="w-full bg-transparent text-slate-900 font-bold text-sm outline-none -mt-0.5">
-                                <option>Selecciona un año</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3 p-3">
-                        <div class="w-10 h-10 rounded-xl bg-[#228c53] flex items-center justify-center text-lg shrink-0">🌎</div>
-                        <div class="flex-1">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">País y moneda</span>
-                            <select id="countrySelect" class="w-full bg-transparent text-slate-900 font-bold text-sm outline-none -mt-0.5">
-                                <option>🇺🇸 Estados Unidos · USD</option>
-                                <option>🇨🇦 Canadá · CAD</option>
-                                <option>🇲🇽 México · MXN</option>
-                                <option>🇬🇹 Guatemala · GTQ</option>
-                                <option>🇧🇿 Belice · BZD</option>
-                                <option>🇭🇳 Honduras · HNL</option>
-                                <option>🇸🇻 El Salvador · USD</option>
-                                <option>🇳🇮 Nicaragua · NIO</option>
-                                <option>🇨🇷 Costa Rica · CRC</option>
-                                <option>🇵🇦 Panamá · PAB</option>
-                                <option>🇨🇺 Cuba · CUP</option>
-                                <option>🇩🇴 Rep. Dominicana · DOP</option>
-                                <option>🇭🇹 Haití · HTG</option>
-                                <option>🇯🇲 Jamaica · JMD</option>
-                                <option>🇵🇷 Puerto Rico · USD</option>
-                                <option>🇹🇹 Trinidad y Tobago · TTD</option>
-                                <option>🇧🇸 Bahamas · BSD</option>
-                                <option>🇧🇧 Barbados · BBD</option>
-                                <option>🇨🇴 Colombia · COP</option>
-                                <option>🇻🇪 Venezuela · VES</option>
-                                <option>🇪🇨 Ecuador · USD</option>
-                                <option>🇵🇪 Perú · PEN</option>
-                                <option>🇧🇴 Bolivia · BOB</option>
-                                <option>🇨🇱 Chile · CLP</option>
-                                <option>🇦🇷 Argentina · ARS</option>
-                                <option>🇵🇾 Paraguay · PYG</option>
-                                <option>🇺🇾 Uruguay · UYU</option>
-                                <option>🇧🇷 Brasil · BRL</option>
-                                <option>🇬🇾 Guyana · GYD</option>
-                                <option>🇸🇷 Surinam · SRD</option>
-                                <option>🇪🇺 Zona Euro · EUR</option>
-                                <option>🇬🇧 Reino Unido · GBP</option>
-                                <option>🇨🇭 Suiza · CHF</option>
-                                <option>🇸🇪 Suecia · SEK</option>
-                                <option>🇳🇴 Noruega · NOK</option>
-                                <option>🇩🇰 Dinamarca · DKK</option>
-                                <option>🇵🇱 Polonia · PLN</option>
-                                <option>🇷🇺 Rusia · RUB</option>
-                                <option>🇹🇷 Turquía · TRY</option>
-                                <option>🇺🇦 Ucrania · UAH</option>
-                                <option>🇨🇳 China · CNY</option>
-                                <option>🇯🇵 Japón · JPY</option>
-                                <option>🇰🇷 Corea del Sur · KRW</option>
-                                <option>🇮🇳 India · INR</option>
-                                <option>🇮🇩 Indonesia · IDR</option>
-                                <option>🇹🇭 Tailandia · THB</option>
-                                <option>🇻🇳 Vietnam · VND</option>
-                                <option>🇵🇭 Filipinas · PHP</option>
-                                <option>🇲🇾 Malasia · MYR</option>
-                                <option>🇸🇬 Singapur · SGD</option>
-                                <option>🇦🇺 Australia · AUD</option>
-                                <option>🇳🇿 Nueva Zelanda · NZD</option>
-                                <option>🇿🇦 Sudáfrica · ZAR</option>
-                                <option>🇳🇬 Nigeria · NGN</option>
-                                <option>🇪🇬 Egipto · EGP</option>
-                                <option>🇲🇦 Marruecos · MAD</option>
-                                <option>🇰🇪 Kenia · KES</option>
-                                <option>🇸🇦 Arabia Saudita · SAR</option>
-                                <option>🇦🇪 Emiratos Árabes · AED</option>
-                                <option>🇮🇱 Israel · ILS</option>
-                                <option>🌎 Otro país</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3 p-3">
-                        <div class="w-10 h-10 rounded-xl bg-[#228c53] flex items-center justify-center text-lg shrink-0">💵</div>
-                        <div class="flex-1">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Denominación</span>
-                            <select id="denominationSelect" class="w-full bg-transparent text-slate-900 font-bold text-sm outline-none -mt-0.5">
-                                <option>1</option><option>2</option><option>5</option><option>10</option>
-                                <option>20</option><option>50</option><option>100</option><option>200</option>
-                                <option>500</option><option>1000</option><option>2000</option><option>5000</option>
-                                <option>10000</option><option>20000</option><option>50000</option><option>100000</option>
-                                <option>Otra</option>
-                            </select>
-                        </div>
-                    </div>
-                    <!-- Visible solo si denominación = "Otra" -->
-                    <input id="denomOtroInput" placeholder="Especifica la denominación" class="hidden mx-3 my-3 h-12 rounded-xl bg-slate-50 px-4 text-sm outline-none" />
-                </div>
-
-                <button id="registerButton" onclick="handleRegister()" class="w-full bg-white text-[#163b74] font-black text-base min-h-[58px] rounded-2xl shadow-lg active:scale-95 transition-transform">Registrar Billete</button>
-                <div id="message" class="text-center text-sm font-medium -mt-2 h-6 text-emerald-300"></div>
-            </div>
-
-            <!-- ==========================================
-                 VISTA: BÚSQUEDA (#searchView)
-                 ========================================== -->
-            <div id="searchView" class="hidden flex-col gap-4 flex-shrink-0 mt-2">
-
-                <div class="flex items-center justify-between mb-1">
-                    <h2 class="text-white font-bold text-xl">Explorar</h2>
-                    <button id="searchMemberBtn" onclick="onMembershipClick()" class="bg-white/10 text-white text-xs font-bold px-3 py-2 rounded-full min-h-[36px]">💎 Miembro</button>
-                </div>
-
-                <div class="flex gap-2">
-                    <button id="openSearch" onclick="openModalId('searchModal')" class="flex-1 min-h-[48px] rounded-2xl bg-white/10 text-white/60 flex items-center gap-2 px-4 text-sm">
-                        🔎 Buscar por serie, dueño o país…
-                    </button>
-                    <button id="rareButton" class="min-h-[48px] px-4 rounded-2xl bg-[#8b008b] text-white text-sm font-bold whitespace-nowrap">💎 Rareza</button>
-                </div>
-
-                <!-- Chips de filtro por rareza — se generan por JS vía renderRarityFilters() para cubrir las 7 categorías reales -->
-                <div class="flex gap-2 overflow-x-auto pb-1" id="rarityFilters"></div>
-
-                <!-- Resultados (mismo fondo de papel sin borde que el resto de tarjetas) -->
-                <!-- Se puebla dinámicamente por renderResults() desde MOCK_POOL (Supabase real) -->
-                <div id="resultsScroll" class="flex flex-col gap-3"></div>
-
-                <!-- El botón "Ver más" lo agrega renderResults() dentro de #resultsScroll cuando hay más de 5 resultados -->
-            </div>
-
-        </section>
-
-        <!-- BARRA DE NAVEGACIÓN INFERIOR (native app feel) -->
-        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-100 px-6 py-4 pb-6 flex justify-between items-center rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-30">
-            <button class="nav-btn flex flex-col items-center gap-1 text-[#8b008b] transition-colors w-16" data-view="home">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3l8 6v12h-5v-7H9v7H4V9l8-6z"></path></svg>
-                <span class="text-[10px] font-bold">Inicio</span>
+      <!-- HEADER -->
+      <header class="px-5 pt-12 pb-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 shadow-soft"></div>
+            <span class="text-white font-extrabold text-2xl tracking-tight">DOLLARDGT</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <!-- Toques / notificaciones -->
+            <button class="relative w-11 h-11 flex items-center justify-center text-white/90" onclick="openToquesModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+              <span id="toques-badge" class="absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 rounded-full ring-2 ring-[#0f2f66]"></span>
             </button>
-            <button class="nav-btn flex flex-col items-center gap-1 text-slate-400 transition-colors w-16" data-view="register">
-                <div class="w-12 h-12 absolute bottom-6 bg-gradient-to-r from-[#228c53] to-[#1d8a55] text-white rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 ring-4 ring-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                </div>
-                <span class="text-[10px] font-bold mt-6">Añadir</span>
-            </button>
-            <button class="nav-btn flex flex-col items-center gap-1 text-slate-400 transition-colors w-16" data-view="search">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                <span class="text-[10px] font-bold">Buscar</span>
-            </button>
-        </nav>
+            <!-- Avatar / perfil -->
+            <button class="w-11 h-11 rounded-full bg-fuchsia-700 flex items-center justify-center text-white font-bold text-lg" onclick="goTo('perfil')" id="profile-avatar-letter">O</button>
+            <!-- Alias -->
+            <button class="h-11 px-4 rounded-full bg-white/10 text-white/90 font-semibold text-sm" id="profile-alias-native">@Ohd12</button>
+          </div>
+        </div>
+      </header>
 
-        <!-- ==========================================
-             MODALES (BOTTOM SHEETS)
-             ========================================== -->
-        <div id="modalOverlay" onclick="closeAllModals()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity"></div>
-
-        <!-- MODAL: Buscar -->
-        <div id="searchModal" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 max-h-[85vh] overflow-y-auto flex flex-col hidden">
-            <div class="p-6 flex flex-col gap-4">
-                <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-1"></div>
-                <h2 class="text-xl font-bold text-slate-900">Buscar en la Bóveda</h2>
-                <input id="searchInput" placeholder="Serie, alias, país…" class="w-full bg-slate-50 rounded-2xl px-5 py-4 min-h-[44px] outline-none">
-                <button id="executeSearch" class="w-full bg-[#8b008b] text-white font-bold rounded-2xl min-h-[56px] active:scale-95 transition-transform">Buscar</button>
-                <button class="modal-close text-slate-400 font-semibold min-h-[44px]" onclick="closeModalId('searchModal')">Cancelar</button>
+      <!-- BENTO: STATS + DISTRIBUCIÓN -->
+      <section class="px-5">
+        <div class="flex gap-3">
+          <!-- Card conteos -->
+          <div class="bg-white/85 rounded-3xl px-5 py-4 text-center shadow-soft shrink-0">
+            <p class="text-3xl font-extrabold text-[#0f2f66]" id="stats-total">300</p>
+            <p class="text-[11px] font-bold tracking-widest text-slate-500">SERIES</p>
+            <p class="text-3xl font-extrabold text-[#0f2f66] mt-2">21</p>
+            <p class="text-[11px] font-bold tracking-widest text-slate-500">PAÍSES</p>
+          </div>
+          <!-- Barra de distribución de rarezas -->
+          <div class="flex-1 flex flex-col justify-center">
+            <!-- Aquí va renderLeaderProbabilityBar() -->
+            <div id="leader-probability-bar" class="h-3 w-full rounded-full overflow-hidden flex mb-3">
+              <span class="h-full w-[30%] bg-sky-200"></span>
+              <span class="h-full w-[15%] bg-sky-500"></span>
+              <span class="h-full w-[15%] bg-emerald-400"></span>
+              <span class="h-full w-[20%] bg-sky-400"></span>
+              <span class="h-full w-[20%] bg-slate-400"></span>
             </div>
+            <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs font-semibold text-white/90">
+              <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-sky-200"></i>SOLID 7%</span>
+              <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-sky-500"></i>RADAR 1%</span>
+              <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-emerald-400"></i>LADDER 5%</span>
+              <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-teal-300"></i>REPEATER 1%</span>
+            </div>
+            <div class="flex items-center justify-between mt-3">
+              <span class="text-white font-extrabold text-lg" id="stats-value">544K</span>
+              <span class="text-white/70 font-bold text-xs tracking-widest">VALOR TOTAL</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TARJETA: SERIE LÍDER (Top 5 en vivo, rota cada 15s) -->
+      <section class="px-5 mt-5">
+        <article id="leader-card" class="bg-white rounded-3xl p-5 shadow-premium">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[11px] font-bold tracking-widest text-fuchsia-600 flex items-center gap-1">🏆 SERIE LÍDER</span>
+            <span class="text-[11px] font-semibold text-slate-400" id="leader-updated">#1 de 8 en tendencia</span>
+          </div>
+          <div class="flex items-end justify-between gap-3">
+            <div>
+              <p class="text-3xl font-black tracking-tight text-[#0f2f66]" id="leader-serial">A08800880</p>
+              <p class="text-sm text-slate-500 mt-0.5"><span id="leader-letters">A</span> · <span id="leader-digits">08800880</span> · <span id="leader-year">2017</span></p>
+            </div>
+            <div class="text-right">
+              <p class="text-2xl font-extrabold text-emerald-500" id="leader-points">9,800</p>
+              <p class="text-[11px] font-bold tracking-widest text-slate-400">PUNTOS</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-3">
+            <span id="leader-rarity" class="px-3 h-7 inline-flex items-center rounded-full bg-[#0f2f66] text-white text-xs font-bold">RADAR</span>
+            <span id="leader-country" class="px-3 h-7 inline-flex items-center rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">🇬🇹 GT</span>
+            <span id="leader-owner" class="px-3 h-7 inline-flex items-center rounded-full bg-fuchsia-50 text-fuchsia-700 text-xs font-semibold ml-auto">@coleccionista</span>
+          </div>
+          <!-- Histograma de dígitos: renderDigitHistogram() -->
+          <div id="leader-digit-histogram" class="mt-4 flex items-end gap-1.5 h-14">
+            <div class="flex-1 bg-sky-100 rounded-t-md" style="height:40%"></div>
+            <div class="flex-1 bg-sky-200 rounded-t-md" style="height:90%"></div>
+            <div class="flex-1 bg-sky-300 rounded-t-md" style="height:60%"></div>
+            <div class="flex-1 bg-sky-400 rounded-t-md" style="height:100%"></div>
+            <div class="flex-1 bg-sky-300 rounded-t-md" style="height:50%"></div>
+            <div class="flex-1 bg-sky-200 rounded-t-md" style="height:75%"></div>
+            <div class="flex-1 bg-sky-100 rounded-t-md" style="height:30%"></div>
+            <div class="flex-1 bg-sky-200 rounded-t-md" style="height:65%"></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- ACCIONES RÁPIDAS -->
+      <section class="px-5 mt-4 flex flex-col gap-3">
+        <button onclick="goTo('registrar')" class="h-14 rounded-2xl bg-white shadow-soft flex items-center justify-center gap-2 font-extrabold text-[#0f2f66] text-lg">
+          🎯 Ingresar Serie
+        </button>
+        <button onclick="goTo('global')" class="h-14 rounded-2xl bg-white/10 text-white flex items-center justify-center gap-2 font-bold text-base">
+          🌐 Búsqueda Global
+        </button>
+      </section>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- SCREEN: GLOBAL (Buscar / Por Rareza) — oculto en la app        -->
+    <!-- ============================================================= -->
+    <div id="screen-global" class="screen-view px-5 pt-12 pb-28 hidden">
+      <h1 class="text-white text-2xl font-extrabold mb-4">Búsqueda Global</h1>
+
+      <!-- Sub-tabs -->
+      <div class="flex gap-2 mb-4 p-1 bg-white/10 rounded-2xl">
+        <button onclick="setGlobalTab('buscar')" class="flex-1 h-11 rounded-xl bg-white text-[#0f2f66] font-bold text-sm">Buscar</button>
+        <button onclick="setGlobalTab('rareza')" class="flex-1 h-11 rounded-xl text-white/80 font-semibold text-sm">Por Rareza</button>
+      </div>
+
+      <!-- Input de búsqueda -->
+      <div class="relative mb-4">
+        <input id="global-search-input" oninput="scheduleCompactSearch()" type="text" placeholder="Buscar serial, país, @alias…"
+          class="w-full h-12 rounded-2xl bg-white pl-11 pr-4 text-base placeholder:text-slate-400 shadow-soft outline-none" />
+        <svg class="w-5 h-5 absolute left-4 top-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.3-4.3m1.3-5.2a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+
+      <!-- Chips de rareza (tab Por Rareza) -->
+      <div id="global-rarity-chips" class="flex gap-2 overflow-x-auto no-scroll mb-4 pb-1">
+        <button onclick="nativeFilterByRarity('solid')" class="h-9 px-4 rounded-full bg-[#0f2f66] text-white text-sm font-bold shrink-0">Solid</button>
+        <button onclick="nativeFilterByRarity('radar')" class="h-9 px-4 rounded-full bg-white text-slate-600 text-sm font-semibold shrink-0">Radar</button>
+        <button onclick="nativeFilterByRarity('ladder')" class="h-9 px-4 rounded-full bg-white text-slate-600 text-sm font-semibold shrink-0">Ladder</button>
+        <button onclick="nativeFilterByRarity('repeater')" class="h-9 px-4 rounded-full bg-white text-slate-600 text-sm font-semibold shrink-0">Repeater</button>
+      </div>
+
+      <!-- Resultados (nativeCompactRow) -->
+      <div id="global-search-results" class="flex flex-col gap-2">
+        <!-- Fila de resultado (plantilla repetida) -->
+        <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
+          <div class="flex-1 min-w-0">
+            <p class="result-serial font-extrabold text-[#0f2f66] text-lg truncate">C12344321</p>
+            <p class="result-meta text-xs text-slate-500 truncate">🇲🇽 MX · Radar · USD · 92% similitud</p>
+            <p class="result-sim text-xs text-fuchsia-600 font-semibold">@sarah_bills</p>
+          </div>
+          <span class="result-points text-emerald-500 font-extrabold text-sm">8,400</span>
+          <div class="flex flex-col gap-1.5">
+            <button onclick="nativeToggleFavorite(arr,idx)" class="result-icon-btn w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-lg">♥</button>
+            <button onclick="nativeToqueRow(arr,idx)" class="result-icon-btn w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-lg">✋</button>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
+          <div class="flex-1 min-w-0">
+            <p class="result-serial font-extrabold text-[#0f2f66] text-lg truncate">L01234567</p>
+            <p class="result-meta text-xs text-slate-500 truncate">🇪🇸 ES · Ladder · EUR · 78% similitud</p>
+            <p class="result-sim text-xs text-fuchsia-600 font-semibold">@euro_hunter</p>
+          </div>
+          <span class="result-points text-emerald-500 font-extrabold text-sm">6,150</span>
+          <div class="flex flex-col gap-1.5">
+            <button class="result-icon-btn w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-lg">♥</button>
+            <button class="result-icon-btn w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-lg">✋</button>
+          </div>
+        </div>
+        <!-- Resultados por rareza se inyectan en #global-rarity-results -->
+        <div id="global-rarity-results" class="contents"></div>
+      </div>
+
+      <button onclick="openSeeMoreModal('search','Resultados')" class="mt-4 w-full h-12 rounded-2xl bg-white/10 text-white font-semibold">Ver más</button>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- SCREEN: REGISTRAR BILLETE — oculto                             -->
+    <!-- ============================================================= -->
+    <div id="screen-registrar" class="screen-view px-5 pt-12 pb-28 hidden">
+      <h1 class="text-white text-2xl font-extrabold mb-4">Registrar Billete</h1>
+
+      <div class="bg-slate-200 rounded-3xl p-4 pb-6 shadow-premium flex flex-col gap-3">
+
+        <!-- País + Moneda -->
+        <div class="flex gap-3">
+          <button onclick="openPicker('pais')" class="flex-[2.2] h-14 rounded-2xl bg-white shadow-soft flex items-center gap-2 px-4 font-bold text-slate-700 text-left" id="rb-pais">
+            <span id="rb-pais-flag">🌎</span> <span id="rb-pais-nombre">País</span>
+          </button>
+          <button onclick="openPicker('moneda')" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-extrabold text-slate-700" id="rb-moneda">USD</button>
         </div>
 
-        <!-- MODAL: Auth -->
-        <div id="authModal" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 max-h-[85vh] overflow-y-auto flex flex-col hidden">
-            <div class="p-6 flex flex-col gap-5">
-                <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-1"></div>
-                <div class="flex items-center justify-center gap-1.5">
-                    <span class="h-1.5 w-6 rounded-full bg-[#8b008b]"></span>
-                    <span class="h-1.5 w-6 rounded-full bg-slate-100"></span>
-                    <span class="h-1.5 w-6 rounded-full bg-slate-100"></span>
-                </div>
-                <div class="text-center">
-                    <h2 class="text-2xl font-bold text-slate-900">Bienvenido de nuevo</h2>
-                    <p class="text-slate-400 text-sm mt-1">Paso 1 de 3 · Acceso</p>
-                </div>
-                <div class="flex flex-col gap-3">
-                    <input type="email" id="authEmail" placeholder="Tu correo electrónico" class="w-full bg-slate-50 text-slate-800 rounded-2xl px-5 py-4 min-h-[44px] outline-none">
-                    <input type="password" id="authPassword" placeholder="Contraseña" class="w-full bg-slate-50 text-slate-800 rounded-2xl px-5 py-4 min-h-[44px] outline-none">
-                    <p id="authError" class="text-red-500 text-sm hidden"></p>
-                </div>
-                <div class="flex flex-col gap-3 mt-1">
-                    <button onclick="handleAuthSubmit('signin')" class="w-full bg-[#8b008b] text-white font-bold rounded-2xl min-h-[56px] shadow-lg active:scale-95 transition-transform">Iniciar Sesión</button>
-                    <button onclick="handleAuthSubmit('signup')" class="w-full bg-slate-50 text-slate-700 font-bold rounded-2xl min-h-[56px] active:scale-95 transition-transform">Crear Cuenta</button>
-                </div>
-                <p class="text-center text-xs text-slate-400 leading-relaxed -mt-2">
-                    Al continuar aceptas los <a href="#" onclick="event.preventDefault(); openLegalModal('terms')" class="underline text-[#8b008b] font-semibold">Términos</a>
-                    y la <a href="#" onclick="event.preventDefault(); openLegalModal('privacy')" class="underline text-[#8b008b] font-semibold">Política de Privacidad</a>.
-                </p>
-                <button class="modal-close text-slate-400 font-semibold mt-1 min-h-[44px]" onclick="closeModalId('authModal')">Cancelar</button>
-                <!-- Aquí va la integración Supabase Auth -->
-            </div>
+        <!-- Selectores de letras + rareza en vivo -->
+        <div class="flex gap-3">
+          <button onclick="openPicker('letra1')" id="rb-letra1" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-extrabold text-2xl text-slate-800">A-Z</button>
+          <button onclick="openPicker('letra2')" id="rb-letra2" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-extrabold text-2xl text-slate-400">A-Z</button>
+          <button onclick="openPicker('letra3')" id="rb-letra3" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-extrabold text-2xl text-slate-400">A-Z</button>
+          <button id="rb-rarity-preview" class="w-24 h-14 rounded-2xl bg-[#0f2f66] shadow-soft font-bold text-white text-sm">Común</button>
         </div>
 
-        <!-- MODAL: Perfil -->
-        <div id="profileModal" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 max-h-[85vh] overflow-y-auto flex flex-col hidden">
-            <div class="p-6 flex flex-col gap-4">
-                <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-1"></div>
-                <div class="flex items-center justify-center gap-1.5">
-                    <span class="h-1.5 w-6 rounded-full bg-[#228c53]"></span>
-                    <span class="h-1.5 w-6 rounded-full bg-[#228c53]"></span>
-                    <span class="h-1.5 w-6 rounded-full bg-slate-100"></span>
-                </div>
-                <div class="text-center">
-                    <h2 class="text-2xl font-bold text-slate-900">Completa tu perfil</h2>
-                    <p class="text-slate-400 text-sm mt-1">Paso 2 de 3 · Perfil</p>
-                </div>
-                <input id="profileNickname" placeholder="Apodo público" class="w-full bg-slate-50 rounded-2xl px-5 py-4 min-h-[44px] outline-none">
-                <input id="profileAlias" placeholder="@alias" class="w-full bg-slate-50 rounded-2xl px-5 py-4 min-h-[44px] outline-none">
-                <select id="profileCountry" class="w-full bg-[#228c53] text-white font-semibold rounded-2xl px-5 py-4 min-h-[44px] outline-none appearance-none">
-                    <option>🇺🇸 Estados Unidos</option><option>🇲🇽 México</option><option>🌎 Otro</option>
-                </select>
-                <input id="profilePhone" type="tel" placeholder="WhatsApp (opcional)" class="w-full bg-slate-50 rounded-2xl px-5 py-4 min-h-[44px] outline-none">
-                <p id="profileError" class="text-red-500 text-sm hidden"></p>
-                <button onclick="handleSaveProfile()" class="w-full bg-[#8b008b] text-white font-bold rounded-2xl min-h-[56px] active:scale-95 transition-transform mt-1">Guardar perfil</button>
-                <button class="modal-close text-slate-400 font-semibold min-h-[44px]" onclick="closeModalId('profileModal')">Cancelar</button>
-            </div>
+        <!-- Denominación + Año -->
+        <div class="flex gap-3">
+          <button onclick="openPicker('denom')" id="rb-denominacion" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-bold text-slate-700">DD. OO.</button>
+          <button onclick="openPicker('anio')" id="rb-anio" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-bold text-slate-700">Año</button>
         </div>
 
-        <!-- MODAL: Consentimiento -->
-        <div id="consentModal" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 max-h-[85vh] overflow-y-auto flex flex-col hidden">
-            <div class="p-6 flex flex-col gap-4">
-                <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-1"></div>
-                <div class="flex items-center justify-center gap-1.5">
-                    <span class="h-1.5 w-6 rounded-full bg-[#228c53]"></span>
-                    <span class="h-1.5 w-6 rounded-full bg-[#228c53]"></span>
-                    <span class="h-1.5 w-6 rounded-full bg-[#228c53]"></span>
-                </div>
-                <div class="text-center">
-                    <h2 class="text-2xl font-bold text-slate-900">Un último paso</h2>
-                    <p class="text-slate-400 text-sm mt-1">Paso 3 de 3 · Consentimiento</p>
-                </div>
-                <label class="flex items-start gap-3 min-h-[44px] bg-slate-50 rounded-2xl p-4">
-                    <input id="consentTerms" type="checkbox" class="mt-0.5 h-5 w-5 rounded accent-[#228c53]">
-                    <span class="text-sm text-slate-700">Acepto los <a href="#" onclick="event.preventDefault(); event.stopPropagation(); openLegalModal('terms')" class="underline text-[#8b008b] font-semibold">Términos y Condiciones</a></span>
-                </label>
-                <label class="flex items-start gap-3 min-h-[44px] bg-slate-50 rounded-2xl p-4">
-                    <input id="consentPrivacy" type="checkbox" class="mt-0.5 h-5 w-5 rounded accent-[#228c53]">
-                    <span class="text-sm text-slate-700">Acepto la <a href="#" onclick="event.preventDefault(); event.stopPropagation(); openLegalModal('privacy')" class="underline text-[#8b008b] font-semibold">Política de Privacidad</a></span>
-                </label>
-                <label class="flex items-start gap-3 min-h-[44px] bg-slate-50 rounded-2xl p-4">
-                    <input id="consentAge" type="checkbox" class="mt-0.5 h-5 w-5 rounded accent-[#228c53]">
-                    <span class="text-sm text-slate-700">Confirmo que soy mayor de edad</span>
-                </label>
-                <p id="consentError" class="text-red-500 text-sm hidden"></p>
-                <button onclick="handleAcceptConsent()" class="w-full bg-[#8b008b] text-white font-bold rounded-2xl min-h-[56px] active:scale-95 transition-transform mt-1">Aceptar y continuar</button>
-                <button class="modal-close text-slate-400 font-semibold min-h-[44px]" onclick="closeModalId('consentModal')">Cancelar</button>
-            </div>
+        <!-- Display serie numérica: input real, activa el teclado nativo -->
+        <div class="h-24 rounded-2xl bg-white shadow-soft flex flex-col items-center justify-center px-3" onclick="document.getElementById('rb-digit-input').focus()">
+          <input
+            id="rb-digit-input"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="10"
+            placeholder="0000000000"
+            autocomplete="off"
+            class="w-full bg-transparent text-center text-4xl font-black tracking-widest text-slate-800 outline-none placeholder:text-slate-300"
+          />
+          <p id="rb-digit-count" class="text-xs font-semibold mt-1 text-slate-400">Introduce entre 6 y 10 dígitos</p>
         </div>
 
-        <!-- MODAL: Legal -->
-        <div id="legalModal" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 max-h-[85vh] overflow-y-auto flex flex-col hidden">
-            <div class="p-6 flex flex-col gap-4">
-                <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-1"></div>
+        <p class="text-center text-sm text-slate-500 leading-snug px-2 pt-1">
+          ¿Tienes un billete único? Regístralo hoy en la Bóveda Global y conecta con coleccionistas de todo el mundo.
+        </p>
+      </div>
 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-lg shrink-0">📜</div>
-                        <div>
-                            <h2 id="legalModalTitleText" class="text-lg font-bold text-slate-900 leading-tight">Términos y Condiciones</h2>
-                            <span class="text-xs text-slate-400">Última actualización · 12 ago 2026</span>
-                        </div>
-                    </div>
-                    <button class="modal-close w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center shrink-0" onclick="closeModalId('legalModal')">✕</button>
-                </div>
+      <!-- CTA registrar -->
+      <button id="rb-submit-btn" onclick="handleRegister()" class="mt-5 w-full h-14 rounded-2xl bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-extrabold text-lg shadow-premium opacity-50 pointer-events-none transition-opacity">
+        🔐 Registrar a Bóveda
+      </button>
+    </div>
 
-                <!-- Selector de documento legal (verde = seleccionado) -->
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="openLegalModal('terms')" class="min-h-[40px] rounded-full bg-[#228c53] text-white text-xs font-bold">Términos</button>
-                    <button onclick="openLegalModal('privacy')" class="min-h-[40px] rounded-full bg-slate-50 text-slate-500 text-xs font-semibold">Privacidad</button>
-                    <button onclick="openLegalModal('cookies')" class="min-h-[40px] rounded-full bg-slate-50 text-slate-500 text-xs font-semibold">Cookies</button>
-                    <button onclick="openLegalModal('refunds')" class="min-h-[40px] rounded-full bg-slate-50 text-slate-500 text-xs font-semibold">Reembolsos</button>
-                </div>
-
-                <div id="legalModalBody" class="text-sm text-slate-500 leading-relaxed flex flex-col gap-3 pb-2">
-                    <!-- Aquí se inyecta el contenido legal correspondiente (terms/privacy/cookies/refunds) -->
-                    <p>Al usar $DOLLARDGT aceptas registrar únicamente series que posees físicamente y a no falsificar datos de billetes en la Bóveda.</p>
-                    <p>Los puntos y rangos son de carácter coleccionable y no representan valor monetario canjeable fuera de la plataforma.</p>
-                    <p>Nos reservamos el derecho de suspender cuentas que envíen toques abusivos o contenido fraudulento.</p>
-                </div>
-            </div>
+    <!-- ============================================================= -->
+    <!-- MODAL: Picker genérico (país / moneda / letras / denom / año) -->
+    <!-- ============================================================= -->
+    <div id="picker-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('picker-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[80vh] flex flex-col">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4 shrink-0"></div>
+        <div class="flex items-center justify-between mb-3 shrink-0">
+          <h2 id="picker-title" class="text-xl font-extrabold text-[#0f2f66]">Selecciona</h2>
+          <button onclick="closeModal('picker-modal')" class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 font-bold">✕</button>
         </div>
+        <input id="picker-search" oninput="renderPickerList()" placeholder="Buscar…" class="hidden h-11 rounded-xl bg-slate-100 px-4 text-base outline-none mb-3 shrink-0" />
+        <div id="picker-list" class="overflow-y-auto flex flex-col gap-1.5"></div>
+      </div>
+    </div>
 
-        <!-- MODAL: Membresía -->
-        <div id="membershipModal" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto flex flex-col hidden">
-            <div class="p-6 flex flex-col gap-6">
-                <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-1"></div>
-                <div class="text-center">
-                    <h2 class="text-2xl font-bold text-slate-900">Membresía Élite</h2>
-                    <p class="text-slate-400 text-sm mt-1">Desbloquea toques ilimitados y funciones pro.</p>
-                </div>
-
-                <div class="bg-gradient-to-br from-[#8b008b] to-[#5c0060] rounded-3xl p-6 text-white relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-                    <div class="relative z-10 flex flex-col gap-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-purple-200 font-medium uppercase tracking-wider text-xs">Pago único · vitalicio</span>
-                            <span class="text-3xl font-black">$5</span>
-                        </div>
-                        <ul class="text-sm space-y-2 mt-2">
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#7be3ac]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Acceso total al Vault</li>
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#7be3ac]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Toques sin límite</li>
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#7be3ac]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Registro y estadísticas completas</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div id="membershipLoading" class="hidden text-center text-sm text-slate-400 py-2">Confirmando tu pago…</div>
-
-                <div id="realPaymentElement" class="min-h-[100px] rounded-2xl p-4 flex items-center justify-center bg-slate-50">
-                    <!-- Aquí va el widget de Stripe Elements -->
-                    <span class="text-slate-400 text-sm font-medium">Elementos de pago seguros (Stripe)</span>
-                </div>
-
-                <button id="membershipPayBtn" onclick="handleStripePay()" class="w-full bg-[#8b008b] text-white font-bold rounded-2xl min-h-[56px] shadow-lg active:scale-95 transition-transform">
-                    Confirmar pago de $5
-                </button>
-                <div class="text-center">
-                    <a href="#" onclick="event.preventDefault(); openLegalModal('refunds')" class="text-xs text-slate-400 underline min-h-[44px] inline-flex items-center">Política de Reembolsos</a>
-                </div>
-                <button class="modal-close text-slate-400 font-semibold min-h-[44px]" onclick="closeModalId('membershipModal')">Cerrar</button>
-            </div>
+    <!-- ============================================================= -->
+    <!-- SCREEN: FAVORITOS — oculto                                     -->
+    <!-- ============================================================= -->
+    <div id="screen-favoritos" class="screen-view px-5 pt-12 pb-28 hidden">
+      <h1 class="text-white text-2xl font-extrabold mb-4">Favoritos ♥</h1>
+      <!-- loadFavoritesScreen() → localStorage dgt_favorites_v1 -->
+      <div id="fav-list-native" class="flex flex-col gap-2">
+        <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
+          <div class="flex-1 min-w-0">
+            <p class="font-extrabold text-[#0f2f66] text-lg">A77777777</p>
+            <p class="text-xs text-slate-500">🇺🇸 US · Solid · USD</p>
+            <p class="text-xs text-fuchsia-600 font-semibold">@lucky_seven</p>
+          </div>
+          <span class="text-emerald-500 font-extrabold text-sm">12,000</span>
+          <button class="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-lg">♥</button>
         </div>
-
-        <!-- MODAL: Toques -->
-        <div id="toquesModal" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 max-h-[85vh] overflow-y-auto flex flex-col hidden">
-            <div class="p-6 flex flex-col gap-4">
-                <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-1"></div>
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-900">Tus toques</h2>
-                        <span id="toquesSubtitle" class="text-xs text-slate-400">Cargando…</span>
-                    </div>
-                    <button class="modal-close w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center" onclick="closeModalId('toquesModal')">✕</button>
-                </div>
-
-                <!-- Tabs Recibidos / Enviados -->
-                <div class="grid grid-cols-2 gap-2">
-                    <button id="toquesTabReceived" onclick="switchToquesTab('received')" class="min-h-[40px] rounded-full bg-[#228c53] text-white text-xs font-bold">Recibidos</button>
-                    <button id="toquesTabSent" onclick="switchToquesTab('sent')" class="min-h-[40px] rounded-full bg-slate-50 text-slate-500 text-xs font-semibold">Enviados</button>
-                </div>
-
-                <!-- Se puebla dinámicamente por renderToquesList() según la pestaña activa -->
-                <div id="toquesList" class="flex flex-col gap-3"></div>
-            </div>
+        <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
+          <div class="flex-1 min-w-0">
+            <p class="font-extrabold text-[#0f2f66] text-lg">R80800808</p>
+            <p class="text-xs text-slate-500">🇨🇦 CA · Radar · CAD</p>
+            <p class="text-xs text-fuchsia-600 font-semibold">@maple_notes</p>
+          </div>
+          <span class="text-emerald-500 font-extrabold text-sm">7,300</span>
+          <button class="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-lg">♥</button>
         </div>
+      </div>
+    </div>
 
-        <!-- MODAL: Chat privado (se abre desde un toque aceptado) -->
-        <div id="chatModal" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 max-h-[85vh] overflow-y-auto flex flex-col hidden">
-            <div class="p-6 flex flex-col gap-4">
-                <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-1"></div>
-                <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-10 h-10 rounded-full bg-[#8b008b] text-white flex items-center justify-center font-bold text-sm shrink-0" id="chatAvatar">?</div>
-                        <div class="min-w-0">
-                            <h2 id="chatTitle" class="text-lg font-bold text-slate-900 leading-tight truncate">Chat</h2>
-                            <span id="chatSerialLabel" class="text-xs text-slate-400 truncate block"></span>
-                        </div>
-                    </div>
-                    <button class="modal-close w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center shrink-0" onclick="closeModalId('chatModal')">✕</button>
-                </div>
-
-                <!-- Ventana de mensajes -->
-                <div id="chatMessages" class="flex flex-col gap-2 max-h-[48vh] overflow-y-auto py-1"></div>
-
-                <!-- Entrada de mensaje -->
-                <div class="flex items-center gap-2">
-                    <input id="chatInput" type="text" maxlength="500" placeholder="Escribe un mensaje…" class="flex-1 bg-slate-50 rounded-2xl px-5 py-3 min-h-[44px] outline-none text-sm">
-                    <button onclick="handleSendChat()" class="shrink-0 h-11 px-5 rounded-2xl bg-[#8b008b] text-white text-sm font-bold">Enviar</button>
-                </div>
-            </div>
+    <!-- ============================================================= -->
+    <!-- SCREEN: PERFIL — oculto                                        -->
+    <!-- ============================================================= -->
+    <div id="screen-perfil" class="screen-view px-5 pt-12 pb-28 hidden">
+      <!-- Tarjeta de membresía: renderMembershipCard() -->
+      <div class="bg-gradient-to-br from-fuchsia-600 to-purple-700 rounded-3xl p-6 shadow-premium text-white mb-5">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-3xl font-black">O</div>
+          <div>
+            <p class="text-xl font-extrabold" id="profile-alias-native-2">@Ohd12</p>
+            <p class="text-sm text-white/80" id="profile-sub-native">🇬🇹 Guatemala · No miembro</p>
+          </div>
         </div>
+      </div>
 
-        <!-- MODAL: Mi Perfil (datos, membresía, mis series y mis favoritos) -->
-        <div id="myProfileModal" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 max-h-[88vh] overflow-y-auto flex flex-col hidden">
-            <div class="p-6 flex flex-col gap-5">
-                <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-1"></div>
-
-                <!-- Encabezado de identidad -->
-                <div class="flex items-center gap-4">
-                    <div id="myProfileAvatar" class="w-14 h-14 rounded-2xl bg-[#228c53] text-white flex items-center justify-center font-black text-xl shrink-0">?</div>
-                    <div class="min-w-0 flex-1">
-                        <div id="myProfileNick" class="text-lg font-bold text-slate-900 truncate">Invitado</div>
-                        <div id="myProfileAlias" class="text-sm font-bold text-[#8b008b] truncate"></div>
-                        <span id="myProfileMemberBadge" class="inline-block mt-1 text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-500">Sin membresía</span>
-                    </div>
-                    <button class="modal-close w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center shrink-0" onclick="closeModalId('myProfileModal')">✕</button>
-                </div>
-
-                <!-- Estadísticas -->
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="bg-slate-50 rounded-2xl py-3 text-center">
-                        <div id="myProfileStatMine" class="font-black text-lg text-slate-900">0</div>
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mis series</div>
-                    </div>
-                    <div class="bg-slate-50 rounded-2xl py-3 text-center">
-                        <div id="myProfileStatPoints" class="font-black text-lg text-[#8b008b]">0</div>
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mis puntos</div>
-                    </div>
-                    <div class="bg-slate-50 rounded-2xl py-3 text-center">
-                        <div id="myProfileStatFavs" class="font-black text-lg text-[#228c53]">0</div>
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Favoritos</div>
-                    </div>
-                </div>
-
-                <div class="flex gap-2">
-                    <button onclick="closeModalId('myProfileModal'); onProfileNavClick();" class="flex-1 min-h-[44px] rounded-2xl bg-slate-50 text-slate-700 text-sm font-bold">✏️ Editar perfil</button>
-                    <button onclick="signOut(); closeModalId('myProfileModal');" class="flex-1 min-h-[44px] rounded-2xl bg-rose-50 text-rose-500 text-sm font-bold">Cerrar sesión</button>
-                </div>
-
-                <!-- Mis series registradas -->
-                <div>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Mis series registradas</h3>
-                    <div id="myProfileSeriesList" class="flex flex-col gap-2"></div>
-                </div>
-
-                <!-- Mis favoritos -->
-                <div>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Mis favoritos</h3>
-                    <div id="myProfileFavsList" class="flex flex-col gap-2"></div>
-                </div>
-            </div>
+      <!-- Stats propias -->
+      <div class="bg-white rounded-3xl p-5 shadow-soft mb-5">
+        <div class="flex justify-around text-center mb-4">
+          <div><p class="text-3xl font-black text-[#0f2f66]" id="stats-mine">42</p><p class="text-xs font-bold tracking-widest text-slate-400">MÍOS</p></div>
+          <div class="w-px bg-slate-200"></div>
+          <div><p class="text-3xl font-black text-[#0f2f66]">300</p><p class="text-xs font-bold tracking-widest text-slate-400">TOTALES</p></div>
         </div>
+        <!-- stats-rarity-bars -->
+        <div id="stats-rarity-bars" class="flex flex-col gap-2">
+          <div class="flex items-center gap-2"><span class="w-16 text-xs font-semibold text-slate-500">Solid</span><div class="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full w-[70%] bg-[#0f2f66] rounded-full"></div></div></div>
+          <div class="flex items-center gap-2"><span class="w-16 text-xs font-semibold text-slate-500">Radar</span><div class="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full w-[40%] bg-sky-500 rounded-full"></div></div></div>
+          <div class="flex items-center gap-2"><span class="w-16 text-xs font-semibold text-slate-500">Ladder</span><div class="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full w-[25%] bg-emerald-400 rounded-full"></div></div></div>
+        </div>
+      </div>
 
-    </main>
+      <!-- CTA membresía dinámico -->
+      <button id="perfil-upsell-btn" onclick="openStripeDirect()" class="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 font-extrabold text-lg shadow-premium mb-3">
+        👑 Activar membresía $5
+      </button>
 
-    <!-- ============================================================
-         LÓGICA REAL — Supabase + Stripe (mismas credenciales de producción)
-         El diseño y los IDs son los del esqueleto app-frame; la lógica de
-         datos es la extraída de la versión funcional v7.9.
-         ============================================================ -->
-    <script>
-    // ---------- 0. Conexión real ----------
-    const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
-    const SUPABASE_EDGE_FUNCTION = 'https://hvdaitsnvwigqbizirbi.supabase.co/functions/v1/stripe-lifetime';
-    const STRIPE_PUBLISHABLE_KEY = 'pk_live_51U0o31IPKX7lMjR6jorRtUXLX4QbhnVkrZaSnBVFioWRhiTZKAu8p4OR0WyPWOLiTrH0toQGzrShEoVmwW82El7w00l2e179li';
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-    let stripe = null, elements = null;
+      <!-- Sesión -->
+      <button id="perfil-session-btn" onclick="onSessionActionClick()" class="w-full h-12 rounded-2xl bg-white/10 text-white font-semibold mb-5">Iniciar sesión</button>
 
-    // ---------- Estado global ----------
-    let session = null;
-    let profile = null;
-    let membershipActive = false;
-    let pendingAction = null;
-    let serialDigits = "";
-    const MIN_DIGITS = 6, MAX_DIGITS = 10;
-    let MOCK_POOL = [];
-    let activeRarity = '';
-    let searchQuery = '';
-    let resultsShowCount = 3;
-    let leaderIndex = 0;
-    const LEADER_ROTATE_MS = 15000;
+      <!-- Enlaces legales -->
+      <div class="flex justify-center gap-6 text-sm text-white/60">
+        <a href="#" onclick="openLegalModal('terms')" class="underline">Términos y Condiciones</a>
+        <a href="#" onclick="openLegalModal('privacy')" class="underline">Política de Privacidad</a>
+      </div>
+    </div>
 
-    sb.auth.onAuthStateChange((_e, sessionObj) => { session = sessionObj?.user || session; });
+    <!-- ============================================================= -->
+    <!-- BOTTOM NAV FIJA                                                -->
+    <!-- ============================================================= -->
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl shadow-[0_-8px_30px_-8px_rgba(8,20,45,.25)] px-8 pt-3 pb-7 z-40">
+      <div class="flex items-center justify-between">
+        <button id="navBtn-inicio" onclick="goTo('inicio')" class="flex flex-col items-center gap-0.5 w-14 text-fuchsia-600">
+          <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 01-1.06 1.06l-.72-.72V20a1 1 0 01-1 1h-3.5a1 1 0 01-1-1v-4h-3v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-7.13l-.72.72a.75.75 0 01-1.06-1.06l8.69-8.69z"/></svg>
+          <span class="text-[11px] font-bold">Inicio</span>
+        </button>
+        <button id="navBtn-favoritos" onclick="goTo('favoritos')" class="flex flex-col items-center gap-0.5 w-14 text-slate-400">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
+          <span class="text-[11px] font-semibold">Favoritos</span>
+        </button>
 
-    // ---------- Navegación entre vistas ----------
-    const VIEWS = ["home", "register", "search"];
-    function showView(view) {
-        VIEWS.forEach(v => {
-            const el = document.getElementById(v + "View");
-            if (!el) return;
-            el.classList.toggle("hidden", v !== view);
-            el.classList.toggle("flex", v === view);
-        });
-        document.querySelectorAll(".nav-btn").forEach(btn => {
-            if (btn.dataset.view === "register") return;
-            const active = btn.dataset.view === view;
-            btn.classList.toggle("text-[#8b008b]", active);
-            btn.classList.toggle("text-slate-400", !active);
-        });
-        document.getElementById("appMain").scrollTop = 0;
-        if (view === "search") renderResults();
-    }
-    document.querySelectorAll(".nav-btn").forEach(btn => btn.addEventListener("click", () => showView(btn.dataset.view)));
+        <!-- FAB Registrar -->
+        <button id="navBtn-registrar" onclick="goTo('registrar')" class="w-16 h-16 -mt-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-premium ring-4 ring-white">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        </button>
 
-    // ---------- Modales ----------
-    const ALL_MODALS = ["searchModal", "authModal", "profileModal", "consentModal", "legalModal", "membershipModal", "toquesModal", "chatModal", "myProfileModal"];
-    function openModalId(id) {
-        document.getElementById("modalOverlay").classList.remove("hidden");
-        document.body.style.overflow = "hidden";
-        const el = document.getElementById(id);
-        el.classList.remove("hidden");
-        requestAnimationFrame(() => el.classList.remove("translate-y-full"));
-    }
-    function closeModalId(id) {
-        const el = document.getElementById(id);
-        el.classList.add("translate-y-full");
-        setTimeout(() => el.classList.add("hidden"), 300);
-        const anyOpen = ALL_MODALS.some(m => m !== id && !document.getElementById(m).classList.contains("hidden"));
-        if (!anyOpen) { document.getElementById("modalOverlay").classList.add("hidden"); document.body.style.overflow = ""; }
-    }
-    function closeAllModals() { ALL_MODALS.forEach(id => { const el = document.getElementById(id); if (!el.classList.contains("hidden")) closeModalId(id); }); }
+        <button id="navBtn-global" onclick="goTo('global')" class="flex flex-col items-center gap-0.5 w-14 text-slate-400">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.3-4.3m1.3-5.2a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span class="text-[11px] font-semibold">Buscar</span>
+        </button>
+        <button id="navBtn-perfil" onclick="goTo('perfil')" class="flex flex-col items-center gap-0.5 w-14 text-slate-400">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 0115 0"/></svg>
+          <span class="text-[11px] font-semibold">Perfil</span>
+        </button>
+      </div>
+    </nav>
 
-    function showToast(msg) {
-        let toast = document.getElementById("dgtToast");
-        if (!toast) {
-            toast = document.createElement("div");
-            toast.id = "dgtToast";
-            toast.className = "fixed left-1/2 -translate-x-1/2 bottom-28 z-[60] bg-slate-900 text-white text-sm font-semibold px-5 py-3 rounded-full shadow-xl opacity-0 transition-opacity pointer-events-none max-w-[90%] text-center";
-            document.querySelector("main").appendChild(toast);
-        }
-        toast.textContent = msg;
-        toast.classList.remove("opacity-0");
-        clearTimeout(showToast._t);
-        showToast._t = setTimeout(() => toast.classList.add("opacity-0"), 2400);
-    }
+    <!-- ============================================================= -->
+    <!-- POP-UP GANCHO (retención, aparece 2.5s — dgt_hook_seen_v1)     -->
+    <!-- ============================================================= -->
+    <div id="hook-card" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-6">
+      <div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-premium">
+        <p class="text-4xl mb-2">💎</p>
+        <h3 class="text-xl font-extrabold text-[#0f2f66]">¿Tienes un billete raro?</h3>
+        <p class="text-sm text-slate-500 mt-2 mb-5">Regístralo gratis en la Bóveda Global y descubre su valor entre coleccionistas.</p>
+        <button onclick="dismissHookCard(); rbGoToRegister();" class="w-full h-12 rounded-2xl bg-fuchsia-600 text-white font-bold">Registrar ahora</button>
+        <button onclick="dismissHookCard()" class="mt-2 text-sm text-slate-400">Ahora no</button>
+      </div>
+    </div>
 
-    // ---------- Legal ----------
-    const LEGAL_CONTENT = {
-        terms: {
-            title: "Términos y Condiciones",
-            body: `<p><strong class="text-slate-700">Aceptación de uso.</strong> Al crear una cuenta en $DOLLARDGT aceptas cumplir con estos términos. Nos reservamos el derecho de suspender cuentas que hagan un uso indebido de la plataforma, registren series que no poseen físicamente o envíen toques abusivos.</p>
-                   <p><strong class="text-slate-700">Servicios y pagos.</strong> El acceso a la Bóveda, los chats y los "toques" puede estar sujeto a la membresía de pago único. El procesamiento de cobros se realiza de forma externa y segura a través de Stripe. No realizamos reembolsos a menos que la ley lo exija.</p>
-                   <p><strong class="text-slate-700">Responsabilidad.</strong> No nos hacemos responsables de las interacciones entre usuarios en el chat ni de pérdidas derivadas del uso de la app. Los puntos y rangos son de carácter coleccionable y no representan valor monetario canjeable. El servicio se ofrece "tal cual".</p>
-                   <p class="text-xs text-slate-400">Contacto: support@dollardgt.com</p>`
-        },
-        privacy: {
-            title: "Política de Privacidad",
-            body: `<p><strong class="text-slate-700">Responsable.</strong> $DOLLARDGT (support@dollardgt.com).</p>
-                   <p><strong class="text-slate-700">Datos que recopilamos.</strong> Datos de registro (país, alias, correo, WhatsApp), datos de uso de la app (series, toques, chats), y datos técnicos y de pago gestionados directamente por Stripe.</p>
-                   <p><strong class="text-slate-700">Finalidad y destinatarios.</strong> Usamos tus datos para gestionar tu cuenta, procesar pagos y mejorar la app. Almacenamos la información en Supabase (servidores en EE. UU.). Solo compartimos tu alias con otro usuario si aceptas un "toque".</p>
-                   <p><strong class="text-slate-700">Tus derechos.</strong> Tienes derecho a acceder, corregir o borrar tus datos en cualquier momento escribiendo a nuestro soporte. No admitimos menores de 18 años en la plataforma.</p>`
-        },
-        cookies: {
-            title: "Política de Cookies",
-            body: `<p><strong class="text-slate-700">¿Qué usamos?</strong> Esta aplicación utiliza únicamente cookies técnicas y esenciales, para mantener tu sesión iniciada de forma segura y recordar tus preferencias de navegación.</p>
-                   <p><strong class="text-slate-700">Control del usuario.</strong> Al utilizar la app, aceptas su uso. Si deseas bloquearlas o eliminarlas, puedes hacerlo directamente desde los ajustes de privacidad de tu dispositivo móvil o navegador web.</p>
-                   <p>Ten en cuenta que, si las desactivas, algunas funciones de la aplicación podrían dejar de operar correctamente.</p>`
-        },
-        refunds: {
-            title: "Política de Reembolsos",
-            body: `<p>La membresía vitalicia de $5 se procesa como un pago único a través de Stripe y otorga acceso digital inmediato a la Bóveda, los toques y las estadísticas completas.</p>
-                   <p>Por tratarse de un servicio digital de entrega inmediata, no realizamos reembolsos a menos que la ley aplicable en tu país lo exija.</p>
-                   <p>Si consideras que hubo un cobro indebido o duplicado, escríbenos desde tu correo registrado a support@dollardgt.com y lo revisaremos.</p>`
-        }
-    };
-    function openLegalModal(which) {
-        const data = LEGAL_CONTENT[which] || LEGAL_CONTENT.terms;
-        document.getElementById("legalModalTitleText").textContent = data.title;
-        document.getElementById("legalModalBody").innerHTML = data.body;
-        document.querySelectorAll("#legalModal .grid.grid-cols-2 button").forEach(btn => {
-            const isActive = btn.getAttribute("onclick").includes(`'${which}'`);
-            btn.classList.toggle("bg-[#228c53]", isActive);
-            btn.classList.toggle("text-white", isActive);
-            btn.classList.toggle("bg-slate-50", !isActive);
-            btn.classList.toggle("text-slate-500", !isActive);
-        });
-        openModalId("legalModal");
-    }
+    <!-- ============================================================= -->
+    <!-- BOTTOM SHEETS / MODALES (.dgt-modal → .active)                 -->
+    <!-- ============================================================= -->
 
-    // ---------- Consentimiento (localStorage, igual clave que producción) ----------
-    function hasConsent() {
-        try {
-            const c = JSON.parse(localStorage.getItem('dgt_consent_v1') || 'null');
-            return !!(c && c.terms && c.privacy && c.age);
-        } catch { return false; }
-    }
-    function handleAcceptConsent() {
-        const terms = document.getElementById("consentTerms").checked;
-        const privacy = document.getElementById("consentPrivacy").checked;
-        const age = document.getElementById("consentAge").checked;
-        const errorEl = document.getElementById("consentError");
-        if (!terms || !privacy || !age) {
-            errorEl.textContent = "Debes aceptar los tres puntos para continuar";
-            errorEl.classList.remove("hidden");
-            return;
-        }
-        errorEl.classList.add("hidden");
-        localStorage.setItem('dgt_consent_v1', JSON.stringify({ terms, privacy, age, ts: Date.now() }));
-        closeModalId("consentModal");
-        runPendingAction();
-    }
+    <!-- MODAL: Auth -->
+    <div id="auth-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('auth-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">Acceder</h2>
+        <input type="email" autocomplete="email" placeholder="Correo electrónico" id="auth-email" class="w-full h-12 rounded-2xl bg-slate-100 px-4 text-base mb-3 outline-none" />
+        <input type="password" id="auth-password" placeholder="Contraseña" class="w-full h-12 rounded-2xl bg-slate-100 px-4 text-base mb-4 outline-none" />
+        <p id="auth-error" class="hidden text-rose-500 text-sm -mt-3 mb-3"></p>
+        <button onclick="handleAuthSubmit('signin')" class="w-full h-12 rounded-2xl bg-[#0f2f66] text-white font-bold mb-2">Iniciar sesión</button>
+        <button onclick="handleAuthSubmit('signup')" class="w-full h-12 rounded-2xl bg-slate-100 text-[#0f2f66] font-bold">Crear cuenta</button>
+      </div>
+    </div>
 
-    // ---------- Sesión / Auth real ----------
-    function updateSessionUI() {
-        document.getElementById("sessionPillLabel").textContent = session ? (profile?.alias ? "@" + profile.alias : session.email) : "Ingresar";
-        const loginPromptLabel = document.getElementById("loginPromptLabel");
-        if (loginPromptLabel) {
-            loginPromptLabel.textContent = session
-                ? `Bienvenido${profile?.alias ? ", @" + profile.alias : ""} — toca para ver tu perfil →`
-                : "Inicia sesión para registrar y tocar series →";
-        }
-        document.querySelectorAll("#registerMemberBtn, #searchMemberBtn").forEach(btn => {
-            btn.textContent = membershipActive ? "💎 Miembro" : "Hazte miembro";
-        });
-        // Ícono de perfil del header: monito genérico si no hay sesión, inicial del alias si ya la hay
-        const headerBtn = document.getElementById("headerProfileBtn");
-        if (session) {
-            const initial = (profile?.alias || profile?.nickname || session.email || "?").charAt(0).toUpperCase();
-            headerBtn.innerHTML = `<span class="text-white text-xs font-bold">${initial}</span>`;
-            headerBtn.classList.toggle("bg-[#8b008b]", true);
-            headerBtn.classList.toggle("bg-white/10", false);
-        } else {
-            headerBtn.innerHTML = `<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path stroke-linecap="round" d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>`;
-            headerBtn.classList.toggle("bg-[#8b008b]", false);
-            headerBtn.classList.toggle("bg-white/10", true);
-        }
-    }
-    function onSessionPillClick() {
-        if (session) { openMyProfileModal(); } else { openModalId("authModal"); }
-    }
-    function openMyProfileModal() {
-        if (!session) { openModalId("authModal"); return; }
-        openModalId("myProfileModal");
-        renderMyProfile();
-    }
-    function renderMyProfile() {
-        const avatar = document.getElementById("myProfileAvatar");
-        const nickEl = document.getElementById("myProfileNick");
-        const aliasEl = document.getElementById("myProfileAlias");
-        const badgeEl = document.getElementById("myProfileMemberBadge");
-        avatar.textContent = (profile?.alias || profile?.nickname || session.email || "?").charAt(0).toUpperCase();
-        nickEl.textContent = profile?.nickname || session.email;
-        aliasEl.textContent = profile?.alias ? "@" + profile.alias : "";
-        if (membershipActive) {
-            badgeEl.textContent = "💎 Miembro vitalicio";
-            badgeEl.className = "inline-block mt-1 text-[10px] font-bold px-2 py-1 rounded-full bg-[#8b008b]/10 text-[#8b008b]";
-        } else {
-            badgeEl.textContent = "Sin membresía";
-            badgeEl.className = "inline-block mt-1 text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-500";
-        }
+    <!-- MODAL: Perfil (completar nickname/alias) -->
+    <div id="profile-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('profile-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">Tu perfil</h2>
+        <input placeholder="Nickname" id="profile-nickname" class="w-full h-12 rounded-2xl bg-slate-100 px-4 text-base mb-3 outline-none" />
+        <input placeholder="@alias" id="profile-alias-input" class="w-full h-12 rounded-2xl bg-slate-100 px-4 text-base mb-3 outline-none" />
+        <input placeholder="País" id="profile-country" class="w-full h-12 rounded-2xl bg-slate-100 px-4 text-base mb-4 outline-none" />
+        <p id="profile-error" class="hidden text-rose-500 text-sm -mt-3 mb-3"></p>
+        <button onclick="handleSaveProfile()" class="w-full h-12 rounded-2xl bg-[#0f2f66] text-white font-bold">Guardar perfil</button>
+      </div>
+    </div>
 
-        const mine = (profile?.alias) ? MOCK_POOL.filter(r => r.owner === profile.alias) : [];
-        const myPoints = mine.reduce((s, r) => s + (r.points || 0), 0);
-        document.getElementById("myProfileStatMine").textContent = mine.length;
-        document.getElementById("myProfileStatPoints").textContent = myPoints;
+    <!-- MODAL: Consentimiento (gate de checkboxes) -->
+    <div id="consent-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('consent-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">Antes de continuar</h2>
+        <label class="flex items-start gap-3 mb-3 text-sm text-slate-600"><input id="consent-terms" type="checkbox" class="mt-1 w-5 h-5"> Acepto los <a href="#" onclick="openLegalModal('terms')" class="text-fuchsia-600 underline">Términos y Condiciones</a></label>
+        <label class="flex items-start gap-3 mb-3 text-sm text-slate-600"><input id="consent-privacy" type="checkbox" class="mt-1 w-5 h-5"> Acepto la <a href="#" onclick="openLegalModal('privacy')" class="text-fuchsia-600 underline">Política de Privacidad</a></label>
+        <label class="flex items-start gap-3 mb-5 text-sm text-slate-600"><input id="consent-age" type="checkbox" class="mt-1 w-5 h-5"> Confirmo que soy mayor de edad</label>
+        <p id="consent-error" class="hidden text-rose-500 text-sm -mt-3 mb-3"></p>
+        <button onclick="handleAcceptConsent()" class="w-full h-12 rounded-2xl bg-[#0f2f66] text-white font-bold">Aceptar y continuar</button>
+      </div>
+    </div>
 
-        const favSerials = rbGetFavorites();
-        const favs = MOCK_POOL.filter(r => favSerials.includes(r.serial));
-        document.getElementById("myProfileStatFavs").textContent = favs.length;
+    <!-- MODAL: Stripe ($5 vitalicio) -->
+    <div id="stripe-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('stripe-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66]">Membresía vitalicia</h2>
+        <p class="text-sm text-slate-500 mb-4">Pago único de <span class="font-bold text-emerald-500">$5</span>, acceso de por vida.</p>
+        <div id="stripe-loading" class="hidden text-center text-sm text-slate-400 py-2">Cargando pasarela segura…</div>
+        <!-- Aquí monta Stripe Elements -->
+        <div id="realPaymentElement" class="min-h-[120px] rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 text-sm mb-4">
+          <!-- stripe.elements().mount('#realPaymentElement') -->
+          Formulario de pago seguro (Stripe)
+        </div>
+        <button id="stripe-sim-pay" onclick="handleStripePay()" class="w-full h-14 rounded-2xl bg-emerald-500 text-white font-extrabold text-lg">Confirmar pago de $5</button>
+      </div>
+    </div>
 
-        const mineList = document.getElementById("myProfileSeriesList");
-        mineList.innerHTML = mine.length
-            ? mine.map(r => miniCardHtml(r, false)).join('')
-            : `<p class="text-center text-slate-400 text-xs py-4">Aún no has registrado ninguna serie.</p>`;
+    <!-- MODAL: Toques Privados -->
+    <div id="toques-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('toques-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">Toques privados ✋</h2>
+        <div class="flex gap-2 mb-4 p-1 bg-slate-100 rounded-2xl">
+          <button onclick="rbSwitchToquesTab('recibidos')" class="flex-1 h-10 rounded-xl bg-white text-[#0f2f66] font-bold text-sm shadow-soft">Recibidos</button>
+          <button onclick="rbSwitchToquesTab('enviados')" class="flex-1 h-10 rounded-xl text-slate-500 font-semibold text-sm">Enviados</button>
+        </div>
+        <!-- Recibidos -->
+        <div id="toques-panel-recibidos" class="flex flex-col gap-2">
+          <div class="bg-slate-50 rounded-2xl p-3.5">
+            <p class="font-bold text-[#0f2f66]">@sarah_bills</p>
+            <p class="text-xs text-slate-500 mb-3">Serie C12344321 · 🇲🇽 MX</p>
+            <div class="flex gap-2">
+              <button onclick="acceptToqueClick(0)" class="flex-1 h-10 rounded-xl bg-emerald-500 text-white text-sm font-bold">Aceptar → Chat</button>
+              <button onclick="rejectToqueClick(0)" class="h-10 px-4 rounded-xl bg-slate-200 text-slate-600 text-sm font-bold">Rechazar</button>
+            </div>
+          </div>
+        </div>
+        <!-- Enviados -->
+        <div id="toques-panel-enviados" class="hidden flex-col gap-2">
+          <div class="bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between">
+            <div><p class="font-bold text-[#0f2f66]">@euro_hunter</p><p class="text-xs text-slate-500">Serie L01234567</p></div>
+            <span class="text-xs font-bold text-amber-500">Pendiente</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        const favsList = document.getElementById("myProfileFavsList");
-        favsList.innerHTML = favs.length
-            ? favs.map(r => miniCardHtml(r, true)).join('')
-            : `<p class="text-center text-slate-400 text-xs py-4">Marca ☆ en Búsqueda para guardar favoritos aquí.</p>`;
-    }
-    function miniCardHtml(r, isFavorite) {
-        return `
-            <div class="bg-[#fcfbf9] rounded-2xl p-3 flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-[#f5e6d3] flex items-center justify-center text-[11px] font-black text-[#a67c52] shrink-0">${(r.rarity?.key || '?').charAt(0)}</div>
-                <div class="flex-1 min-w-0">
-                    <div class="font-black text-xs text-slate-900 truncate tracking-wide">${r.serial || ''}</div>
-                    <div class="text-[11px] text-slate-400 truncate">${r.rarity?.label || ''} · ${r.points || 0} pts</div>
-                </div>
-                ${isFavorite ? `<button onclick="rbToggleFavorite('${r.serial}'); renderMyProfile();" class="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-sm">★</button>` : ''}
-            </div>`;
-    }
-    async function handleAuthSubmit(mode) {
-        const email = document.getElementById("authEmail").value.trim();
-        const password = document.getElementById("authPassword").value;
-        const errorEl = document.getElementById("authError");
-        if (!email || !password) { errorEl.textContent = "Completa correo y contraseña"; errorEl.classList.remove("hidden"); return; }
-        errorEl.classList.add("hidden");
-        try {
-            const { data, error } = mode === 'signin'
-                ? await sb.auth.signInWithPassword({ email, password })
-                : await sb.auth.signUp({ email, password });
-            if (error) throw error;
-            session = data.user || data.session?.user || null;
-            closeModalId("authModal");
-            showToast(mode === 'signin' ? "Sesión iniciada" : "Cuenta creada");
-            await loadUserContext();
-            runPendingAction();
-        } catch (e) {
-            errorEl.textContent = e.message || "Error de autenticación";
-            errorEl.classList.remove("hidden");
-        }
-    }
-    async function signOut() {
-        await sb.auth.signOut();
-        session = null; profile = null; membershipActive = false;
-        updateSessionUI();
-        updateToquesBadges();
-        showToast("Sesión cerrada");
-    }
-    async function loadUserContext() {
-        if (!session) return;
-        const { data: sessionData } = await sb.auth.getSession();
-        session = sessionData?.session?.user || session;
-        const { data: prof } = await sb.from('profiles').select('*').eq('id', session.id).maybeSingle();
-        profile = prof || null;
-        const { data: mem } = await sb.from('members').select('active').eq('user_id', session.id).maybeSingle();
-        membershipActive = !!mem?.active;
-        updateSessionUI();
-        updateToquesBadges();
-    }
+    <!-- MODAL: Chat Privado -->
+    <div id="chat-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('chat-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl flex flex-col max-h-[90vh]">
+        <div class="p-5 border-b border-slate-100">
+          <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
+          <p class="font-extrabold text-[#0f2f66]" id="chat-with-label">@sarah_bills</p>
+          <p class="text-xs text-slate-500" id="chat-serial-label">Serie C12344321</p>
+        </div>
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-5 flex flex-col gap-2 min-h-[240px]">
+          <div class="self-start max-w-[75%] bg-slate-100 rounded-2xl rounded-bl-md px-4 py-2 text-sm">Hola, me interesa tu billete.</div>
+          <div class="self-end max-w-[75%] bg-[#0f2f66] text-white rounded-2xl rounded-br-md px-4 py-2 text-sm">¡Claro! ¿Qué ofreces?</div>
+        </div>
+        <div class="p-4 border-t border-slate-100 flex items-center gap-2">
+          <input id="chat-input" placeholder="Mensaje…" class="flex-1 h-12 rounded-2xl bg-slate-100 px-4 text-base outline-none" />
+          <button onclick="sendChatMessage()" class="w-12 h-12 rounded-full bg-fuchsia-600 text-white flex items-center justify-center text-xl">↑</button>
+        </div>
+      </div>
+    </div>
 
-    // ---------- Perfil ----------
-    function onProfileNavClick() {
-        document.getElementById("profileNickname").value = profile?.nickname || "";
-        document.getElementById("profileAlias").value = profile?.alias || "";
-        const phoneInput = document.getElementById("profilePhone");
-        if (phoneInput) phoneInput.value = profile?.phone || "";
-        openModalId("profileModal");
-    }
-    async function handleSaveProfile() {
-        const nickname = document.getElementById("profileNickname").value.trim();
-        const alias = document.getElementById("profileAlias").value.trim();
-        const countrySel = document.getElementById("profileCountry").value;
-        const phone = document.getElementById("profilePhone")?.value.trim() || "";
-        const errorEl = document.getElementById("profileError");
-        if (!nickname || !alias) { errorEl.textContent = "Nombre y alias son obligatorios"; errorEl.classList.remove("hidden"); return; }
-        errorEl.classList.add("hidden");
-        try {
-            const { error } = await sb.from('profiles').upsert({
-                id: session.id, email: session.email, nickname, alias, country: countrySel, phone, updated_at: new Date().toISOString()
-            });
-            if (error) throw error;
-            profile = { ...(profile || {}), id: session.id, email: session.email, nickname, alias, country: countrySel, phone };
-            closeModalId("profileModal");
-            showToast("Perfil guardado");
-            updateSessionUI();
-            runPendingAction();
-        } catch (e) {
-            errorEl.textContent = e.message || "No se pudo guardar el perfil";
-            errorEl.classList.remove("hidden");
-        }
-    }
+    <!-- MODAL: Ver más -->
+    <div id="see-more-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('see-more-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">Todos los resultados</h2>
+        <!-- Lista completa inyectada aquí -->
+        <div class="flex flex-col gap-2 text-slate-400 text-sm">Contenido dinámico…</div>
+      </div>
+    </div>
 
-    // ---------- Membresía / Stripe real (2 pasos + polling) ----------
-    function onMembershipClick() {
-        pendingAction = { type: 'membership' };
-        if (membershipActive) { showToast("Ya eres miembro vitalicio 💎"); return; }
-        if (!gate('membership')) return;
-        openMembershipModal();
+    <!-- MODAL: Legal -->
+    <div id="legal-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('legal-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">Legal</h2>
+        <div id="legal-modal-body" class="text-sm leading-relaxed text-slate-600 space-y-3">
+          <!-- LEGAL_CONTENT inyectado aquí -->
+          <p>Contenido de términos / privacidad…</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="hidden fixed bottom-28 left-1/2 -translate-x-1/2 z-[60] bg-[#0f2f66] text-white text-sm font-semibold px-5 py-3 rounded-full shadow-premium">Mensaje</div>
+
+  </div>
+
+<script>
+/* =====================================================================
+   NAVEGACIÓN ENTRE PANTALLAS Y MODALES (infraestructura mínima del
+   esqueleto — goTo()/closeModal() no venían implementados en el HTML
+   de V0, solo referenciados en los onclick)
+===================================================================== */
+const SCREENS = ['inicio','global','registrar','favoritos','perfil'];
+function goTo(screen){
+  SCREENS.forEach(s => document.getElementById('screen-' + s)?.classList.toggle('hidden', s !== screen));
+  ['inicio','favoritos','registrar','global','perfil'].forEach(s => {
+    const btn = document.getElementById('navBtn-' + s);
+    if (btn) btn.classList.toggle('text-fuchsia-600', s === screen);
+    if (btn && s !== screen) btn.classList.toggle('text-slate-400', s !== 'registrar');
+  });
+  window.scrollTo(0,0);
+}
+function openModal(id){ document.getElementById(id)?.classList.remove('hidden'); }
+function closeModal(id){ document.getElementById(id)?.classList.add('hidden'); }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.add('hidden'), 2200);
+}
+
+// Stubs de funciones referenciadas en el esqueleto que aún no tienen
+// lógica real conectada (búsqueda global, favoritos) — quedan marcadas
+// para cablear en una siguiente pasada.
+['setGlobalTab','scheduleCompactSearch','nativeFilterByRarity',
+ 'nativeToggleFavorite','nativeToqueRow','openSeeMoreModal'
+].forEach(fn => { if (!window[fn]) window[fn] = () => showToast('Pendiente de conectar: ' + fn); });
+
+window.openLegalModal = function(tipo){
+  document.getElementById('legal-modal-body').textContent =
+    tipo === 'terms' ? 'Términos y Condiciones — contenido pendiente de cargar.' : 'Política de Privacidad — contenido pendiente de cargar.';
+  openModal('legal-modal');
+};
+window.rbGoToRegister = function(){ goTo('registrar'); };
+
+/* =====================================================================
+   PANEL DE REGISTRO — datos base
+===================================================================== */
+const PAISES = [
+  {n:'Afganistán',f:'🇦🇫',c:'AFN'},{n:'Albania',f:'🇦🇱',c:'ALL'},{n:'Alemania',f:'🇩🇪',c:'EUR'},
+  {n:'Andorra',f:'🇦🇩',c:'EUR'},{n:'Angola',f:'🇦🇴',c:'AOA'},{n:'Arabia Saudita',f:'🇸🇦',c:'SAR'},
+  {n:'Argelia',f:'🇩🇿',c:'DZD'},{n:'Argentina',f:'🇦🇷',c:'ARS'},{n:'Armenia',f:'🇦🇲',c:'AMD'},
+  {n:'Australia',f:'🇦🇺',c:'AUD'},{n:'Austria',f:'🇦🇹',c:'EUR'},{n:'Azerbaiyán',f:'🇦🇿',c:'AZN'},
+  {n:'Bahamas',f:'🇧🇸',c:'BSD'},{n:'Bahréin',f:'🇧🇭',c:'BHD'},{n:'Bangladés',f:'🇧🇩',c:'BDT'},
+  {n:'Barbados',f:'🇧🇧',c:'BBD'},{n:'Bélgica',f:'🇧🇪',c:'EUR'},{n:'Belice',f:'🇧🇿',c:'BZD'},
+  {n:'Benín',f:'🇧🇯',c:'XOF'},{n:'Bielorrusia',f:'🇧🇾',c:'BYN'},{n:'Bolivia',f:'🇧🇴',c:'BOB'},
+  {n:'Bosnia y Herzegovina',f:'🇧🇦',c:'BAM'},{n:'Botsuana',f:'🇧🇼',c:'BWP'},{n:'Brasil',f:'🇧🇷',c:'BRL'},
+  {n:'Brunéi',f:'🇧🇳',c:'BND'},{n:'Bulgaria',f:'🇧🇬',c:'BGN'},{n:'Burkina Faso',f:'🇧🇫',c:'XOF'},
+  {n:'Burundi',f:'🇧🇮',c:'BIF'},{n:'Bután',f:'🇧🇹',c:'BTN'},{n:'Cabo Verde',f:'🇨🇻',c:'CVE'},
+  {n:'Camboya',f:'🇰🇭',c:'KHR'},{n:'Camerún',f:'🇨🇲',c:'XAF'},{n:'Canadá',f:'🇨🇦',c:'CAD'},
+  {n:'Catar',f:'🇶🇦',c:'QAR'},{n:'Chad',f:'🇹🇩',c:'XAF'},{n:'Chile',f:'🇨🇱',c:'CLP'},
+  {n:'China',f:'🇨🇳',c:'CNY'},{n:'Chipre',f:'🇨🇾',c:'EUR'},{n:'Colombia',f:'🇨🇴',c:'COP'},
+  {n:'Comoras',f:'🇰🇲',c:'KMF'},{n:'Corea del Norte',f:'🇰🇵',c:'KPW'},{n:'Corea del Sur',f:'🇰🇷',c:'KRW'},
+  {n:'Costa de Marfil',f:'🇨🇮',c:'XOF'},{n:'Costa Rica',f:'🇨🇷',c:'CRC'},{n:'Croacia',f:'🇭🇷',c:'EUR'},
+  {n:'Cuba',f:'🇨🇺',c:'CUP'},{n:'Dinamarca',f:'🇩🇰',c:'DKK'},{n:'Dominica',f:'🇩🇲',c:'XCD'},
+  {n:'Ecuador',f:'🇪🇨',c:'USD'},{n:'Egipto',f:'🇪🇬',c:'EGP'},{n:'El Salvador',f:'🇸🇻',c:'USD'},
+  {n:'Emiratos Árabes Unidos',f:'🇦🇪',c:'AED'},{n:'Eritrea',f:'🇪🇷',c:'ERN'},{n:'Eslovaquia',f:'🇸🇰',c:'EUR'},
+  {n:'Eslovenia',f:'🇸🇮',c:'EUR'},{n:'España',f:'🇪🇸',c:'EUR'},{n:'Estados Unidos',f:'🇺🇸',c:'USD'},
+  {n:'Estonia',f:'🇪🇪',c:'EUR'},{n:'Esuatini',f:'🇸🇿',c:'SZL'},{n:'Etiopía',f:'🇪🇹',c:'ETB'},
+  {n:'Filipinas',f:'🇵🇭',c:'PHP'},{n:'Finlandia',f:'🇫🇮',c:'EUR'},{n:'Fiyi',f:'🇫🇯',c:'FJD'},
+  {n:'Francia',f:'🇫🇷',c:'EUR'},{n:'Gabón',f:'🇬🇦',c:'XAF'},{n:'Gambia',f:'🇬🇲',c:'GMD'},
+  {n:'Georgia',f:'🇬🇪',c:'GEL'},{n:'Ghana',f:'🇬🇭',c:'GHS'},{n:'Granada',f:'🇬🇩',c:'XCD'},
+  {n:'Grecia',f:'🇬🇷',c:'EUR'},{n:'Guatemala',f:'🇬🇹',c:'GTQ'},{n:'Guinea',f:'🇬🇳',c:'GNF'},
+  {n:'Guinea Ecuatorial',f:'🇬🇶',c:'XAF'},{n:'Guinea-Bisáu',f:'🇬🇼',c:'XOF'},{n:'Guyana',f:'🇬🇾',c:'GYD'},
+  {n:'Haití',f:'🇭🇹',c:'HTG'},{n:'Honduras',f:'🇭🇳',c:'HNL'},{n:'Hungría',f:'🇭🇺',c:'HUF'},
+  {n:'India',f:'🇮🇳',c:'INR'},{n:'Indonesia',f:'🇮🇩',c:'IDR'},{n:'Irak',f:'🇮🇶',c:'IQD'},
+  {n:'Irán',f:'🇮🇷',c:'IRR'},{n:'Irlanda',f:'🇮🇪',c:'EUR'},{n:'Islandia',f:'🇮🇸',c:'ISK'},
+  {n:'Islas Marshall',f:'🇲🇭',c:'USD'},{n:'Islas Salomón',f:'🇸🇧',c:'SBD'},{n:'Israel',f:'🇮🇱',c:'ILS'},
+  {n:'Italia',f:'🇮🇹',c:'EUR'},{n:'Jamaica',f:'🇯🇲',c:'JMD'},{n:'Japón',f:'🇯🇵',c:'JPY'},
+  {n:'Jordania',f:'🇯🇴',c:'JOD'},{n:'Kazajistán',f:'🇰🇿',c:'KZT'},{n:'Kenia',f:'🇰🇪',c:'KES'},
+  {n:'Kirguistán',f:'🇰🇬',c:'KGS'},{n:'Kiribati',f:'🇰🇮',c:'AUD'},{n:'Kuwait',f:'🇰🇼',c:'KWD'},
+  {n:'Laos',f:'🇱🇦',c:'LAK'},{n:'Lesoto',f:'🇱🇸',c:'LSL'},{n:'Letonia',f:'🇱🇻',c:'EUR'},
+  {n:'Líbano',f:'🇱🇧',c:'LBP'},{n:'Liberia',f:'🇱🇷',c:'LRD'},{n:'Libia',f:'🇱🇾',c:'LYD'},
+  {n:'Liechtenstein',f:'🇱🇮',c:'CHF'},{n:'Lituania',f:'🇱🇹',c:'EUR'},{n:'Luxemburgo',f:'🇱🇺',c:'EUR'},
+  {n:'Madagascar',f:'🇲🇬',c:'MGA'},{n:'Malasia',f:'🇲🇾',c:'MYR'},{n:'Malaui',f:'🇲🇼',c:'MWK'},
+  {n:'Maldivas',f:'🇲🇻',c:'MVR'},{n:'Malí',f:'🇲🇱',c:'XOF'},{n:'Malta',f:'🇲🇹',c:'EUR'},
+  {n:'Marruecos',f:'🇲🇦',c:'MAD'},{n:'Mauricio',f:'🇲🇺',c:'MUR'},{n:'Mauritania',f:'🇲🇷',c:'MRU'},
+  {n:'México',f:'🇲🇽',c:'MXN'},{n:'Micronesia',f:'🇫🇲',c:'USD'},{n:'Moldavia',f:'🇲🇩',c:'MDL'},
+  {n:'Mónaco',f:'🇲🇨',c:'EUR'},{n:'Mongolia',f:'🇲🇳',c:'MNT'},{n:'Montenegro',f:'🇲🇪',c:'EUR'},
+  {n:'Mozambique',f:'🇲🇿',c:'MZN'},{n:'Myanmar',f:'🇲🇲',c:'MMK'},{n:'Namibia',f:'🇳🇦',c:'NAD'},
+  {n:'Nauru',f:'🇳🇷',c:'AUD'},{n:'Nepal',f:'🇳🇵',c:'NPR'},{n:'Nicaragua',f:'🇳🇮',c:'NIO'},
+  {n:'Níger',f:'🇳🇪',c:'XOF'},{n:'Nigeria',f:'🇳🇬',c:'NGN'},{n:'Noruega',f:'🇳🇴',c:'NOK'},
+  {n:'Nueva Zelanda',f:'🇳🇿',c:'NZD'},{n:'Omán',f:'🇴🇲',c:'OMR'},{n:'Países Bajos',f:'🇳🇱',c:'EUR'},
+  {n:'Pakistán',f:'🇵🇰',c:'PKR'},{n:'Palaos',f:'🇵🇼',c:'USD'},{n:'Panamá',f:'🇵🇦',c:'PAB'},
+  {n:'Papúa Nueva Guinea',f:'🇵🇬',c:'PGK'},{n:'Paraguay',f:'🇵🇾',c:'PYG'},{n:'Perú',f:'🇵🇪',c:'PEN'},
+  {n:'Polonia',f:'🇵🇱',c:'PLN'},{n:'Portugal',f:'🇵🇹',c:'EUR'},{n:'Reino Unido',f:'🇬🇧',c:'GBP'},
+  {n:'República Centroafricana',f:'🇨🇫',c:'XAF'},{n:'República Checa',f:'🇨🇿',c:'CZK'},
+  {n:'República del Congo',f:'🇨🇬',c:'XAF'},{n:'República Democrática del Congo',f:'🇨🇩',c:'CDF'},
+  {n:'República Dominicana',f:'🇩🇴',c:'DOP'},{n:'Ruanda',f:'🇷🇼',c:'RWF'},{n:'Rumania',f:'🇷🇴',c:'RON'},
+  {n:'Rusia',f:'🇷🇺',c:'RUB'},{n:'Samoa',f:'🇼🇸',c:'WST'},{n:'San Cristóbal y Nieves',f:'🇰🇳',c:'XCD'},
+  {n:'San Marino',f:'🇸🇲',c:'EUR'},{n:'San Vicente y las Granadinas',f:'🇻🇨',c:'XCD'},
+  {n:'Santa Lucía',f:'🇱🇨',c:'XCD'},{n:'Santo Tomé y Príncipe',f:'🇸🇹',c:'STN'},{n:'Senegal',f:'🇸🇳',c:'XOF'},
+  {n:'Serbia',f:'🇷🇸',c:'RSD'},{n:'Seychelles',f:'🇸🇨',c:'SCR'},{n:'Sierra Leona',f:'🇸🇱',c:'SLE'},
+  {n:'Singapur',f:'🇸🇬',c:'SGD'},{n:'Siria',f:'🇸🇾',c:'SYP'},{n:'Somalia',f:'🇸🇴',c:'SOS'},
+  {n:'Sri Lanka',f:'🇱🇰',c:'LKR'},{n:'Sudáfrica',f:'🇿🇦',c:'ZAR'},{n:'Sudán',f:'🇸🇩',c:'SDG'},
+  {n:'Sudán del Sur',f:'🇸🇸',c:'SSP'},{n:'Suecia',f:'🇸🇪',c:'SEK'},{n:'Suiza',f:'🇨🇭',c:'CHF'},
+  {n:'Surinam',f:'🇸🇷',c:'SRD'},{n:'Tailandia',f:'🇹🇭',c:'THB'},{n:'Tanzania',f:'🇹🇿',c:'TZS'},
+  {n:'Tayikistán',f:'🇹🇯',c:'TJS'},{n:'Timor Oriental',f:'🇹🇱',c:'USD'},{n:'Togo',f:'🇹🇬',c:'XOF'},
+  {n:'Tonga',f:'🇹🇴',c:'TOP'},{n:'Trinidad y Tobago',f:'🇹🇹',c:'TTD'},{n:'Túnez',f:'🇹🇳',c:'TND'},
+  {n:'Turkmenistán',f:'🇹🇲',c:'TMT'},{n:'Turquía',f:'🇹🇷',c:'TRY'},{n:'Tuvalu',f:'🇹🇻',c:'AUD'},
+  {n:'Ucrania',f:'🇺🇦',c:'UAH'},{n:'Uganda',f:'🇺🇬',c:'UGX'},{n:'Uruguay',f:'🇺🇾',c:'UYU'},
+  {n:'Uzbekistán',f:'🇺🇿',c:'UZS'},{n:'Vanuatu',f:'🇻🇺',c:'VUV'},{n:'Vaticano',f:'🇻🇦',c:'EUR'},
+  {n:'Venezuela',f:'🇻🇪',c:'VES'},{n:'Vietnam',f:'🇻🇳',c:'VND'},{n:'Yemen',f:'🇾🇪',c:'YER'},
+  {n:'Yibuti',f:'🇩🇯',c:'DJF'},{n:'Zambia',f:'🇿🇲',c:'ZMW'},{n:'Zimbabue',f:'🇿🇼',c:'ZWL'}
+];
+const OTROS_PAIS = {n:'Otros',f:'🌎',c:'USD'};
+const MONEDAS = [...new Set(PAISES.map(p => p.c).concat(['USD']))].sort();
+const DENOMINACIONES = [1,2,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000];
+const ANIOS = (() => { const arr=[]; const hoy=new Date().getFullYear(); for(let y=hoy;y>=1950;y--) arr.push(y); return arr; })();
+
+const rbState = { pais:null, moneda:'USD', letra1:'', letra2:'', letra3:'', denom:'', anio:'' };
+
+/* ---------------- Picker genérico ---------------- */
+let pickerTipo = null;
+function openPicker(tipo){
+  pickerTipo = tipo;
+  const titulos = {pais:'Selecciona un país', moneda:'Selecciona una moneda', letra1:'Letra 1 (obligatoria)',
+    letra2:'Letra 2 (opcional)', letra3:'Letra 3 (opcional)', denom:'Denominación', anio:'Año de emisión'};
+  document.getElementById('picker-title').textContent = titulos[tipo] || 'Selecciona';
+  document.getElementById('picker-search').classList.toggle('hidden', tipo !== 'pais');
+  document.getElementById('picker-search').value = '';
+  renderPickerList();
+  openModal('picker-modal');
+}
+function renderPickerList(){
+  const cont = document.getElementById('picker-list');
+  cont.innerHTML = '';
+  cont.className = 'overflow-y-auto flex flex-col gap-1.5';
+
+  if (pickerTipo === 'pais'){
+    const term = document.getElementById('picker-search').value.trim().toLowerCase();
+    PAISES.filter(p => p.n.toLowerCase().includes(term)).forEach(p => cont.appendChild(rowPais(p,false)));
+    cont.appendChild(rowPais(OTROS_PAIS,true));
+  } else if (pickerTipo === 'moneda'){
+    MONEDAS.forEach(m => cont.appendChild(rowSimple(m, () => setMoneda(m))));
+  } else if (pickerTipo === 'denom'){
+    cont.className += ' grid grid-cols-3 gap-2';
+    DENOMINACIONES.forEach(d => cont.appendChild(rowChip(d.toLocaleString('es'), () => setDenom(d))));
+  } else if (pickerTipo === 'anio'){
+    cont.className += ' grid grid-cols-4 gap-2';
+    ANIOS.forEach(y => cont.appendChild(rowChip(y, () => setAnio(y))));
+  } else if (pickerTipo?.startsWith('letra')){
+    cont.className += ' grid grid-cols-5 gap-2';
+    if (pickerTipo !== 'letra1'){
+      cont.appendChild(rowChip('—', () => setLetra(pickerTipo, '')));
     }
-    async function openMembershipModal() {
-        if (!session) { openModalId("authModal"); return; }
-        const loading = document.getElementById("membershipLoading");
-        const mount = document.getElementById("realPaymentElement");
-        const payBtn = document.getElementById("membershipPayBtn");
+    for (let i=65;i<=90;i++){
+      const L = String.fromCharCode(i);
+      cont.appendChild(rowChip(L, () => setLetra(pickerTipo, L)));
+    }
+  }
+}
+function rowPais(p, esOtros){
+  const b = document.createElement('button');
+  b.className = 'w-full text-left px-3 py-3 rounded-xl flex items-center gap-3 ' + (esOtros ? 'bg-[#0f2f66] text-white font-bold' : 'bg-slate-50 hover:bg-slate-100');
+  b.innerHTML = `<span class="text-lg">${p.f}</span><span class="flex-1 font-semibold">${p.n}</span><span class="text-xs opacity-70 font-bold">${p.c}</span>`;
+  b.onclick = () => { setPais(p); closeModal('picker-modal'); };
+  return b;
+}
+function rowSimple(label, onClick){
+  const b = document.createElement('button');
+  b.className = 'w-full text-left px-3 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 font-semibold';
+  b.textContent = label;
+  b.onclick = () => { onClick(); closeModal('picker-modal'); };
+  return b;
+}
+function rowChip(label, onClick){
+  const b = document.createElement('button');
+  b.className = 'h-11 rounded-xl bg-slate-50 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center';
+  b.textContent = label;
+  b.onclick = () => { onClick(); closeModal('picker-modal'); };
+  return b;
+}
+
+/* ---------------- Setters de estado + refresco de UI ---------------- */
+function setPais(p){
+  rbState.pais = p;
+  document.getElementById('rb-pais-flag').textContent = p.f;
+  document.getElementById('rb-pais-nombre').textContent = p.n;
+  setMoneda(p.c);
+}
+function setMoneda(m){
+  rbState.moneda = m;
+  document.getElementById('rb-moneda').textContent = m;
+  refreshValidacion();
+}
+function setDenom(d){
+  rbState.denom = d;
+  document.getElementById('rb-denominacion').textContent = d.toLocaleString('es');
+  refreshValidacion();
+}
+function setAnio(y){
+  rbState.anio = y;
+  document.getElementById('rb-anio').textContent = y;
+  refreshValidacion();
+}
+function setLetra(campo, valor){
+  rbState[campo] = valor;
+  const btn = document.getElementById('rb-' + campo);
+  btn.textContent = valor || 'A-Z';
+  btn.classList.toggle('text-slate-400', !valor && campo !== 'letra1');
+  btn.classList.toggle('text-slate-800', !!valor || campo === 'letra1');
+  actualizarRarezaPreview();
+  refreshValidacion();
+}
+
+/* ---------------- Dígitos: input real con teclado nativo ---------------- */
+const inputDigitos = () => document.getElementById('rb-digit-input');
+document.addEventListener('input', e => {
+  if (e.target.id === 'rb-digit-input'){
+    const limpio = e.target.value.replace(/\D/g,'');
+    if (limpio !== e.target.value) e.target.value = limpio;
+    const count = document.getElementById('rb-digit-count');
+    const len = limpio.length;
+    if (len === 0){ count.textContent = 'Introduce entre 6 y 10 dígitos'; count.className = 'text-xs font-semibold mt-1 text-slate-400'; }
+    else if (len < 6){ count.textContent = `Faltan ${6-len} dígito(s) — mínimo 6`; count.className = 'text-xs font-semibold mt-1 text-rose-500'; }
+    else { count.textContent = `${len} dígitos ✓`; count.className = 'text-xs font-semibold mt-1 text-emerald-500'; }
+    actualizarRarezaPreview();
+    refreshValidacion();
+  }
+});
+
+/* ---------------- Motor de rareza y puntos — IDÉNTICO al de producción ---------------- */
+function calcRarity(digits) {
+  const c = String(digits).replace(/\D/g, '');
+  if (/^(\d)\1+$/.test(c)) return { key: 'SOLID', label: 'SOLID', score: 100 };
+  if (c === c.split('').reverse().join('')) return { key: 'RADAR', label: 'RADAR', score: 82 };
+  if (/0123|1234|2345|4567|6789|9876/.test(c)) return { key: 'LADDER', label: 'LADDER', score: 88 };
+  if (/^(\d{2})\1+$/.test(c)) return { key: 'REPEATER', label: 'REPEATER', score: 78 };
+  if (/^[01]+$/.test(c)) return { key: 'BINARY', label: 'BINARY', score: 75 };
+  if (/(\d)\1{2,}/.test(c)) return { key: 'SEMI-SOLID', label: 'SEMI-SOLID', score: 62 };
+  return { key: 'COMUN', label: 'Común', score: 10 };
+}
+function calcPoints(rarity, denomNumeric) {
+  let b = 100 + rarity.score * 18 + (denomNumeric || 0) * 2 + Math.floor(Math.random() * 200);
+  if (rarity.label !== 'Común') b *= 3;
+  return Math.floor(b);
+}
+const RARITY_COLOR_CLASS = {
+  SOLID: 'bg-fuchsia-600', RADAR: 'bg-sky-600', LADDER: 'bg-emerald-600', REPEATER: 'bg-teal-600',
+  BINARY: 'bg-amber-600', 'SEMI-SOLID': 'bg-indigo-600', COMUN: 'bg-[#0f2f66]'
+};
+function actualizarRarezaPreview(){
+  const digitos = inputDigitos().value;
+  const btn = document.getElementById('rb-rarity-preview');
+  if (digitos.length < 6){ btn.textContent = 'Sin patrón'; btn.className = 'w-24 h-14 rounded-2xl shadow-soft font-bold text-white text-sm bg-[#0f2f66]'; return; }
+  const r = calcRarity(digitos);
+  btn.textContent = r.label;
+  btn.className = 'w-24 h-14 rounded-2xl shadow-soft font-bold text-white text-sm ' + (RARITY_COLOR_CLASS[r.key] || 'bg-[#0f2f66]');
+}
+
+/* ---------------- Validación general ---------------- */
+function refreshValidacion(){
+  const len = inputDigitos().value.length;
+  const ok = len >= 6 && len <= 10 && !!rbState.letra1 && !!rbState.denom && !!rbState.pais;
+  const btn = document.getElementById('rb-submit-btn');
+  btn.classList.toggle('opacity-50', !ok);
+  btn.classList.toggle('pointer-events-none', !ok);
+}
+
+/* =====================================================================
+   CONEXIÓN REAL — Supabase + Stripe (mismas credenciales de producción)
+===================================================================== */
+const SUPABASE_URL = 'https://hvdaitsnvwigqbizirbi.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZGFpdHNudndpZ3FiaXppcmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4Mzg5OTUsImV4cCI6MjEwMDQxNDk5NX0.w4F0NBVTJMhP7LmJaEy_rAvrD2Cvs2-2Y2uoRVfBvsU';
+const SUPABASE_EDGE_FUNCTION = 'https://hvdaitsnvwigqbizirbi.supabase.co/functions/v1/stripe-lifetime';
+const STRIPE_PUBLISHABLE_KEY = 'pk_live_51U0o31IPKX7lMjR6jorRtUXLX4QbhnVkrZaSnBVFioWRhiTZKAu8p4OR0WyPWOLiTrH0toQGzrShEoVmwW82El7w00l2e179li';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+let stripeClient = null, stripeElements = null;
+
+let session = null, profile = null, membershipActive = false, pendingAction = null;
+let MOCK_POOL = [];
+let leaderIndex = 0;
+const LEADER_ROTATE_MS = 15000;
+
+/* ---------------- Consentimiento (misma clave localStorage que producción) ---------------- */
+function hasConsent(){
+  try { const c = JSON.parse(localStorage.getItem('dgt_consent_v1') || 'null'); return !!(c && c.terms && c.privacy && c.age); }
+  catch { return false; }
+}
+window.handleAcceptConsent = async function(){
+  const terms = document.getElementById('consent-terms').checked;
+  const privacy = document.getElementById('consent-privacy').checked;
+  const age = document.getElementById('consent-age').checked;
+  const err = document.getElementById('consent-error');
+  if (!terms || !privacy || !age){ err.textContent = 'Debes aceptar los tres puntos para continuar'; err.classList.remove('hidden'); return; }
+  err.classList.add('hidden');
+  localStorage.setItem('dgt_consent_v1', JSON.stringify({ terms, privacy, age, ts: Date.now() }));
+  closeModal('consent-modal');
+  runPendingAction();
+};
+
+/* ---------------- Gate de acceso escalonado (mismo orden que producción) ---------------- */
+function gate(actionType, payload){
+  pendingAction = { type: actionType, payload: payload || null };
+  if (!session){ openModal('auth-modal'); return false; }
+  if (!profile || !profile.nickname || !profile.alias){ openModal('profile-modal'); return false; }
+  if (!hasConsent()){ openModal('consent-modal'); return false; }
+  if ((actionType === 'register' || actionType === 'toque') && !membershipActive){ openMembershipModal(); return false; }
+  return true;
+}
+function runPendingAction(){
+  if (!pendingAction) return;
+  const action = pendingAction; pendingAction = null;
+  if (action.type === 'register') handleRegister();
+  if (action.type === 'membership') openMembershipModal();
+  if (action.type === 'toque') executeToque(action.payload);
+}
+
+/* ---------------- Sesión / Auth real ---------------- */
+window.onSessionActionClick = function(){
+  if (session) { goTo('perfil'); } else { openModal('auth-modal'); }
+};
+function updateSessionUI(){
+  const alias = profile?.alias ? '@' + profile.alias : null;
+  document.getElementById('profile-alias-native').textContent = alias || 'Ingresar';
+  document.getElementById('profile-avatar-letter').textContent = (profile?.alias || profile?.nickname || session?.email || '?').charAt(0).toUpperCase();
+  const alias2 = document.getElementById('profile-alias-native-2'); if (alias2) alias2.textContent = alias || '@invitado';
+  const sub = document.getElementById('profile-sub-native');
+  if (sub) sub.textContent = (profile?.country || '') + (membershipActive ? ' · Miembro vitalicio 💎' : ' · No miembro');
+  const sessionBtn = document.getElementById('perfil-session-btn');
+  if (sessionBtn) sessionBtn.textContent = session ? 'Cerrar sesión' : 'Iniciar sesión';
+  if (sessionBtn) sessionBtn.onclick = session ? signOut : () => openModal('auth-modal');
+  const upsell = document.getElementById('perfil-upsell-btn');
+  if (upsell) upsell.classList.toggle('hidden', membershipActive);
+  const statsMine = document.getElementById('stats-mine');
+  if (statsMine && profile?.alias) statsMine.textContent = MOCK_POOL.filter(r => r.owner === profile.alias).length;
+}
+window.handleAuthSubmit = async function(mode){
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const err = document.getElementById('auth-error');
+  if (!email || !password){ err.textContent = 'Completa correo y contraseña'; err.classList.remove('hidden'); return; }
+  err.classList.add('hidden');
+  try {
+    const { data, error } = mode === 'signin'
+      ? await sb.auth.signInWithPassword({ email, password })
+      : await sb.auth.signUp({ email, password });
+    if (error) throw error;
+    session = data.user || data.session?.user || null;
+    closeModal('auth-modal');
+    showToast(mode === 'signin' ? 'Sesión iniciada' : 'Cuenta creada');
+    await loadUserContext();
+    runPendingAction();
+  } catch (e) {
+    console.error('Error de autenticación Supabase:', e);
+    err.textContent = e.message || 'Error de autenticación';
+    err.classList.remove('hidden');
+  }
+};
+window.signOut = async function(){
+  await sb.auth.signOut();
+  session = null; profile = null; membershipActive = false;
+  updateSessionUI();
+  showToast('Sesión cerrada');
+};
+async function loadUserContext(){
+  if (!session) return;
+  const { data: sessionData } = await sb.auth.getSession();
+  session = sessionData?.session?.user || session;
+  const { data: prof } = await sb.from('profiles').select('*').eq('id', session.id).maybeSingle();
+  profile = prof || null;
+  const { data: mem } = await sb.from('members').select('active').eq('user_id', session.id).maybeSingle();
+  membershipActive = !!mem?.active;
+  updateSessionUI();
+}
+
+/* ---------------- Perfil real ---------------- */
+window.handleSaveProfile = async function(){
+  const nickname = document.getElementById('profile-nickname').value.trim();
+  const alias = document.getElementById('profile-alias-input').value.trim().replace(/^@+/, '').replace(/\s+/g, '');
+  const country = document.getElementById('profile-country').value.trim();
+  const err = document.getElementById('profile-error');
+  if (!nickname || !alias){ err.textContent = 'Nombre y alias son obligatorios'; err.classList.remove('hidden'); return; }
+  err.classList.add('hidden');
+  try {
+    const { error } = await sb.from('profiles').upsert({
+      id: session.id, email: session.email, nickname, alias, country, updated_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    profile = { ...(profile || {}), id: session.id, email: session.email, nickname, alias, country };
+    closeModal('profile-modal');
+    showToast('Perfil guardado');
+    updateSessionUI();
+    runPendingAction();
+  } catch (e) {
+    err.textContent = e.message || 'No se pudo guardar el perfil';
+    err.classList.remove('hidden');
+  }
+};
+
+/* ---------------- Membresía / Stripe real (2 pasos + polling) ---------------- */
+window.openStripeDirect = function(){
+  pendingAction = { type: 'membership' };
+  if (membershipActive){ showToast('Ya eres miembro vitalicio 💎'); return; }
+  if (!gate('membership')) return;
+  openMembershipModal();
+};
+async function openMembershipModal(){
+  if (!session){ openModal('auth-modal'); return; }
+  const loading = document.getElementById('stripe-loading');
+  const mount = document.getElementById('realPaymentElement');
+  const payBtn = document.getElementById('stripe-sim-pay');
+  payBtn.disabled = false;
+  payBtn.textContent = 'Confirmar pago de $5';
+  payBtn.onclick = handleStripePay;
+  loading.classList.remove('hidden');
+  mount.innerHTML = '';
+  openModal('stripe-modal');
+  try {
+    const res = await fetch(SUPABASE_EDGE_FUNCTION, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON },
+      body: JSON.stringify({ action: 'create', user_id: session.id })
+    });
+    const data = await res.json();
+    if (!data.client_secret) throw new Error(data.error || 'No se pudo iniciar el pago');
+    stripeClient = Stripe(STRIPE_PUBLISHABLE_KEY);
+    stripeElements = stripeClient.elements({ clientSecret: data.client_secret, appearance: { theme: 'stripe', variables: { colorPrimary: '#8b008b', borderRadius: '14px' } } });
+    stripeElements.create('payment').mount('#realPaymentElement');
+    loading.classList.add('hidden');
+  } catch (e) {
+    loading.textContent = 'Error al cargar el pago: ' + e.message;
+  }
+}
+window.handleStripePay = async function(){
+  if (!stripeClient || !stripeElements) return;
+  const payBtn = document.getElementById('stripe-sim-pay');
+  payBtn.disabled = true;
+  try {
+    const { error, paymentIntent } = await stripeClient.confirmPayment({ elements: stripeElements, redirect: 'if_required' });
+    if (error) throw new Error(error.message);
+    if (paymentIntent && paymentIntent.status === 'succeeded'){
+      payBtn.textContent = 'Confirmando con el servidor…';
+      await fetch(SUPABASE_EDGE_FUNCTION, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON },
+        body: JSON.stringify({ action: 'confirm', payment_intent_id: paymentIntent.id, user_id: session.id })
+      });
+      payBtn.textContent = 'Verificando activación…';
+      const activated = await rbPollMembership();
+      if (activated){
+        membershipActive = true; updateSessionUI(); closeModal('stripe-modal');
+        showToast('💎 Membresía activada'); await fetchPool(); refreshPoolDependentUI(); runPendingAction();
+      } else {
         payBtn.disabled = false;
-        payBtn.textContent = "Confirmar pago de $5";
-        payBtn.onclick = handleStripePay;
-        loading.classList.remove("hidden");
-        loading.textContent = "Cargando pasarela segura…";
-        mount.innerHTML = "";
-        openModalId("membershipModal");
-        try {
-            const res = await fetch(SUPABASE_EDGE_FUNCTION, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON },
-                body: JSON.stringify({ action: 'create', user_id: session.id })
-            });
-            const data = await res.json();
-            if (!data.client_secret) throw new Error(data.error || "No se pudo iniciar el pago");
-            stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-            elements = stripe.elements({ clientSecret: data.client_secret, appearance: { theme: 'stripe', variables: { colorPrimary: '#8b008b', borderRadius: '14px' } } });
-            elements.create('payment').mount('#realPaymentElement');
-            loading.classList.add("hidden");
-        } catch (e) {
-            loading.textContent = "Error al cargar el pago: " + e.message;
-        }
+        payBtn.textContent = '¿Ya se activó? Verificar de nuevo';
+        payBtn.onclick = async () => {
+          payBtn.disabled = true; payBtn.textContent = 'Verificando…';
+          const ok = await rbPollMembership(3);
+          if (ok){ membershipActive = true; updateSessionUI(); closeModal('stripe-modal'); showToast('💎 Membresía activada'); await fetchPool(); refreshPoolDependentUI(); runPendingAction(); }
+          else { showToast('Tu pago se cobró. Si no se activa en un minuto, escribe a support@dollardgt.com'); payBtn.disabled = false; }
+        };
+        showToast('Pago cobrado. Confirmando activación, un momento…');
+      }
     }
-    async function handleStripePay() {
-        if (!stripe || !elements) return;
-        const payBtn = document.getElementById("membershipPayBtn");
-        payBtn.disabled = true;
-        try {
-            const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect: 'if_required' });
-            if (error) throw new Error(error.message);
-            if (paymentIntent && paymentIntent.status === 'succeeded') {
-                payBtn.textContent = "Confirmando con el servidor…";
-                await fetch(SUPABASE_EDGE_FUNCTION, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON },
-                    body: JSON.stringify({ action: 'confirm', payment_intent_id: paymentIntent.id, user_id: session.id })
-                });
-                payBtn.textContent = "Verificando activación…";
-                const activated = await rbPollMembership();
-                if (activated) {
-                    membershipActive = true;
-                    updateSessionUI();
-                    closeModalId("membershipModal");
-                    showToast("💎 Membresía activada");
-                    renderStats();
-                    runPendingAction();
-                } else {
-                    payBtn.disabled = false;
-                    payBtn.textContent = "¿Ya se activó? Verificar de nuevo";
-                    payBtn.onclick = async () => {
-                        payBtn.disabled = true; payBtn.textContent = "Verificando…";
-                        const ok = await rbPollMembership(3);
-                        if (ok) {
-                            membershipActive = true; updateSessionUI(); closeModalId("membershipModal");
-                            showToast("💎 Membresía activada"); renderStats(); runPendingAction();
-                        } else {
-                            showToast("Tu pago se cobró. Si no se activa en un minuto, escribe a support@dollardgt.com");
-                            payBtn.disabled = false;
-                        }
-                    };
-                    showToast("Pago cobrado. Confirmando activación, un momento…");
-                }
-            }
-        } catch (e) {
-            showToast("Error en el pago: " + e.message);
-            payBtn.disabled = false;
-            payBtn.textContent = "Confirmar pago de $5";
-        }
-    }
-    async function rbPollMembership(attempts = 8, delayMs = 1500) {
-        for (let i = 0; i < attempts; i++) {
-            try {
-                const { data } = await sb.from('members').select('active').eq('user_id', session.id).maybeSingle();
-                if (data?.active) return true;
-            } catch {}
-            await new Promise(r => setTimeout(r, delayMs));
-        }
-        return false;
-    }
+  } catch (e) {
+    showToast('Error en el pago: ' + e.message);
+    payBtn.disabled = false;
+    payBtn.textContent = 'Confirmar pago de $5';
+  }
+};
+async function rbPollMembership(attempts = 8, delayMs = 1500){
+  for (let i = 0; i < attempts; i++){
+    try { const { data } = await sb.from('members').select('active').eq('user_id', session.id).maybeSingle(); if (data?.active) return true; } catch {}
+    await new Promise(r => setTimeout(r, delayMs));
+  }
+  return false;
+}
 
-    // ---------- Gate (control de acceso escalonado, mismo orden que producción) ----------
-    function gate(actionType, payload) {
-        pendingAction = { type: actionType, payload: payload || null };
-        if (!session) { openModalId("authModal"); return false; }
-        if (!profile || !profile.nickname || !profile.alias) { onProfileNavClick(); return false; }
-        if (!hasConsent()) { openModalId("consentModal"); return false; }
-        if ((actionType === 'register' || actionType === 'toque') && !membershipActive) { openMembershipModal(); return false; }
-        return true;
-    }
-    function runPendingAction() {
-        if (!pendingAction) return;
-        const action = pendingAction; pendingAction = null;
-        if (action.type === 'register') handleRegister();
-        if (action.type === 'membership') openMembershipModal();
-        if (action.type === 'toque') executeToque(action.payload);
-    }
+/* ---------------- Registro real (RPC publicar_serial) ---------------- */
+window.handleRegister = async function(){
+  const digits = inputDigitos().value;
+  if (digits.length < 6 || digits.length > 10 || !rbState.letra1 || !rbState.denom || !rbState.pais) return;
+  if (!gate('register')) return;
 
-    // ---------- Motor de rareza y puntos (idéntico a producción) ----------
-    function calcRarity(digits) {
-        const c = String(digits).replace(/\D/g, '');
-        if (/^(\d)\1+$/.test(c)) return { key: 'SOLID', label: 'SOLID', score: 100 };
-        if (c === c.split('').reverse().join('')) return { key: 'RADAR', label: 'RADAR', score: 82 };
-        if (/0123|1234|2345|4567|6789|9876/.test(c)) return { key: 'LADDER', label: 'LADDER', score: 88 };
-        if (/^(\d{2})\1+$/.test(c)) return { key: 'REPEATER', label: 'REPEATER', score: 78 };
-        if (/^[01]+$/.test(c)) return { key: 'BINARY', label: 'BINARY', score: 75 };
-        if (/(\d)\1{2,}/.test(c)) return { key: 'SEMI-SOLID', label: 'SEMI-SOLID', score: 62 };
-        return { key: 'COMUN', label: 'Común', score: 10 };
-    }
-    function calcPoints(rarity, denomNumeric) {
-        let b = 100 + rarity.score * 18 + (denomNumeric || 0) * 2 + Math.floor(Math.random() * 200);
-        if (rarity.label !== 'Común') b *= 3;
-        return Math.floor(b);
-    }
-    const RARITY_DEFS = [
-        { key: '', label: 'Todas' }, { key: 'SOLID', label: 'SOLID' }, { key: 'RADAR', label: 'RADAR' },
-        { key: 'LADDER', label: 'LADDER' }, { key: 'REPEATER', label: 'REPEATER' }, { key: 'BINARY', label: 'BINARY' },
-        { key: 'SEMI-SOLID', label: 'SEMI' }, { key: 'COMUN', label: 'Común' }
-    ];
+  const rarity = calcRarity(digits);
+  const points = calcPoints(rarity, rbState.denom);
+  const lettersSnapshot = `${rbState.letra1}${rbState.letra2 || ''}`;
+  const serial = `${lettersSnapshot} ${digits}${rbState.letra3 ? ' ' + rbState.letra3 : ''}`.trim();
+  const countryLabel = `${rbState.pais.f} ${rbState.pais.n} · ${rbState.moneda}`;
+  const valueSnapshot = Math.round(rbState.denom * (10 + rarity.score) * 100) / 100;
+  const phone = profile?.phone || '';
+  const email = session.email || '';
+  const contactB64 = btoa(`${phone}|${email}`);
+  const emailB64 = btoa(email);
 
-    // ---------- Letras, años, países, denominaciones ----------
-    function fillLetters() {
-        const letters = [];
-        for (let c = 65; c <= 90; c++) letters.push(String.fromCharCode(c));
-        const l1 = document.getElementById("letter1");
-        l1.innerHTML = ""; letters.forEach(l => l1.appendChild(new Option(l, l))); l1.appendChild(new Option("★", "★"));
-        [document.getElementById("letter2"), document.getElementById("letter3")].forEach(sel => {
-            sel.innerHTML = ""; sel.appendChild(new Option("—", "")); letters.forEach(l => sel.appendChild(new Option(l, l)));
-        });
-    }
-    function fillYears() {
-        const select = document.getElementById("yearSelect");
-        const currentYear = new Date().getFullYear();
-        for (let y = currentYear; y >= 1900; y--) { const opt = document.createElement("option"); opt.textContent = y; select.appendChild(opt); }
-    }
-    function updateCurrencyFromCountry() {
-        const countrySelect = document.getElementById("countrySelect");
-        const currencyDisplay = document.getElementById("currencyDisplay");
-        const selected = countrySelect.options[countrySelect.selectedIndex].textContent;
-        const parts = selected.split("·");
-        currencyDisplay.textContent = parts.length > 1 ? parts[1].trim() : "—";
-    }
-    document.getElementById("countrySelect").addEventListener("change", updateCurrencyFromCountry);
-    document.getElementById("denominationSelect").addEventListener("change", (e) => {
-        document.getElementById("denomOtroInput").classList.toggle("hidden", e.target.value !== "Otra");
+  const btn = document.getElementById('rb-submit-btn');
+  btn.classList.add('opacity-60'); btn.classList.add('pointer-events-none');
+
+  try {
+    const { error } = await sb.rpc('publicar_serial', {
+      p_serial: serial, p_digits: digits, p_points: points, p_rarity: rarity,
+      p_denom: rbState.denom, p_yr: parseInt(rbState.anio, 10) || null, p_country: countryLabel,
+      p_contact: contactB64, p_email: emailB64, p_letters_snapshot: lettersSnapshot, p_value_snapshot: valueSnapshot
     });
+    if (error) throw error;
+    showToast(`¡Serie registrada! ${points} pts · ${rarity.label}`);
+    inputDigitos().value = ''; inputDigitos().dispatchEvent(new Event('input'));
+    await fetchPool(); refreshPoolDependentUI();
+  } catch (e) {
+    const isDuplicate = e.code === '23505' || /duplicate key|unique constraint/i.test(e.message || '');
+    showToast(isDuplicate ? 'Esa serie ya está registrada para ese año y país.' : 'Error al registrar: ' + (e.message || e));
+  } finally {
+    refreshValidacion();
+  }
+};
 
-    // ---------- Registro: teclado, display, rareza en vivo ----------
-    function renderSerial() {
-        const display = document.getElementById("serialDisplay");
-        const counter = document.getElementById("counter");
-        let html = "";
-        for (let i = 0; i < MAX_DIGITS; i++) {
-            html += i < serialDigits.length
-                ? `<span class="text-slate-900">${serialDigits[i]}</span>`
-                : `<span class="text-slate-300">0</span>`;
-        }
-        display.innerHTML = html;
-        counter.textContent = `${serialDigits.length} / ${MAX_DIGITS} · mínimo ${MIN_DIGITS}`;
-        renderRarityPreview();
-    }
-    function renderRarityPreview() {
-        const el = document.getElementById("rarityPreview");
-        if (serialDigits.length < MIN_DIGITS) { el.textContent = "Sin patrón aún"; el.dataset.rarity = ""; return; }
-        const r = calcRarity(serialDigits);
-        el.textContent = r.label; el.dataset.rarity = r.key.toLowerCase();
-    }
-    document.querySelectorAll(".num-btn").forEach(btn => {
-        btn.addEventListener("click", () => { if (serialDigits.length < MAX_DIGITS) { serialDigits += btn.dataset.number; renderSerial(); } });
-    });
-    document.getElementById("deleteButton").addEventListener("click", () => { serialDigits = serialDigits.slice(0, -1); renderSerial(); });
-    document.getElementById("clearButton").addEventListener("click", () => { serialDigits = ""; renderSerial(); });
+/* ---------------- Pool real (vault + boveda_jugadas) ---------------- */
+const RARITY_SCORE_BY_KEY = { SOLID: 100, RADAR: 82, LADDER: 88, REPEATER: 78, BINARY: 75, 'SEMI-SOLID': 62, COMUN: 10 };
+function rarityKeyFallback(r){
+  if (!r) return 'COMUN';
+  if (typeof r === 'object') return r.key || 'COMUN';
+  if (typeof r === 'string' && r.trim().startsWith('{')) { try { return JSON.parse(r).key || 'COMUN'; } catch { return r.toUpperCase(); } }
+  return String(r).toUpperCase();
+}
+function rarityLabelFallback(r){
+  if (!r) return 'Común';
+  if (typeof r === 'object') return r.label || 'Común';
+  if (typeof r === 'string' && r.trim().startsWith('{')) { try { return JSON.parse(r).label || r; } catch { return r; } }
+  return r;
+}
+function normalizeRarity(r){ const key = rarityKeyFallback(r); return { key, label: rarityLabelFallback(r), score: RARITY_SCORE_BY_KEY[key] ?? 10 }; }
+function decodeEmailIfNeeded(v){
+  if (!v) return '';
+  if (v.includes('@')) return v;
+  try { const d = atob(v); if (d.includes('@')) return d; } catch {}
+  return v;
+}
+const RB_SOURCE_TABLES = ['vault', 'boveda_jugadas'];
+async function fetchFromFirstAvailable(orderCol, limit){
+  const results = await Promise.all(RB_SOURCE_TABLES.map(async table => {
+    try { const { data, error } = await sb.from(table).select('*').order(orderCol, { ascending: false }).limit(limit); return (!error && data) ? data : []; }
+    catch { return []; }
+  }));
+  const merged = results.flat();
+  merged.sort((a, b) => (b[orderCol] || 0) > (a[orderCol] || 0) ? 1 : -1);
+  return merged.slice(0, limit);
+}
+async function fetchPool(){
+  const rows = await fetchFromFirstAvailable('points', 300);
+  MOCK_POOL = rows.map(row => ({ ...row, serial: row.serial || row.serial_display || row.digits, owner: row.owner || row.alias, rarity: normalizeRarity(row.rarity) }));
+  return MOCK_POOL;
+}
 
-    function buildSerialString(l1, l2, l3, digits) {
-        const prefix = `${l1}${l2 || ''}`;
-        return `${prefix} ${digits}${l3 ? ' ' + l3 : ''}`.trim();
-    }
+/* ---------------- Estadísticas + serie líder reales (pantalla Inicio) ---------------- */
+function renderStats(){
+  document.getElementById('stats-total').textContent = MOCK_POOL.length;
+  const countries = new Set(MOCK_POOL.map(r => r.country).filter(Boolean));
+  const totalValue = MOCK_POOL.reduce((s, r) => s + (r.denom || 0) * (10 + (r.rarity?.score || 0)), 0);
+  const valueLabel = document.getElementById('stats-value');
+  if (valueLabel) valueLabel.textContent = totalValue >= 1000 ? Math.round(totalValue/1000) + 'K' : Math.round(totalValue);
+  const statsMine = document.getElementById('stats-mine');
+  if (statsMine && profile?.alias) statsMine.textContent = MOCK_POOL.filter(r => r.owner === profile.alias).length;
+}
+function renderLeader(){
+  const top = [...MOCK_POOL].sort((a,b) => (b.points||0) - (a.points||0)).slice(0,8);
+  if (top.length === 0) return;
+  if (leaderIndex >= top.length) leaderIndex = 0;
+  const d = top[leaderIndex];
+  document.getElementById('leader-serial').textContent = d.serial || '';
+  document.getElementById('leader-letters').textContent = d.letters_snapshot || (d.serial||'').split(' ')[0] || '';
+  document.getElementById('leader-digits').textContent = d.digits || '';
+  document.getElementById('leader-year').textContent = d.yr || d.year || '—';
+  document.getElementById('leader-points').textContent = (d.points||0).toLocaleString('es');
+  document.getElementById('leader-owner').textContent = '@' + (d.owner || 'anónimo');
+  document.getElementById('leader-country').textContent = d.country || '';
+  document.getElementById('leader-rarity').textContent = d.rarity.label;
+  document.getElementById('leader-updated').textContent = `#${leaderIndex+1} de ${top.length} en tendencia`;
+}
+function rotateLeader(){
+  const top = Math.min(MOCK_POOL.length, 8);
+  if (top <= 1) return;
+  leaderIndex = (leaderIndex + 1) % top;
+  renderLeader();
+}
+function refreshPoolDependentUI(){ renderLeader(); renderStats(); }
 
-    async function handleRegister() {
-        const letter1 = document.getElementById("letter1").value;
-        const letter2 = document.getElementById("letter2").value;
-        const letter3 = document.getElementById("letter3").value;
-        const year = document.getElementById("yearSelect").value;
-        const countrySelect = document.getElementById("countrySelect");
-        const countryText = countrySelect.options[countrySelect.selectedIndex].textContent;
-        const denomSel = document.getElementById("denominationSelect").value;
-        const denomOtro = document.getElementById("denomOtroInput").value.trim();
-        const messageEl = document.getElementById("message");
+/* ---------------- Toques reales (tabla dgt_toques) ---------------- */
+let activeToquesTab = 'recibidos', toquesReceivedCache = [], toquesSentCache = [];
+window.openToquesModal = function(){
+  if (!session){ openModal('auth-modal'); return; }
+  if (!profile?.alias){ openModal('profile-modal'); return; }
+  openModal('toques-modal');
+  window.rbSwitchToquesTab('recibidos');
+};
+window.rbSwitchToquesTab = async function(tab){
+  activeToquesTab = tab;
+  document.getElementById('toques-panel-recibidos').classList.toggle('hidden', tab !== 'recibidos');
+  document.getElementById('toques-panel-enviados').classList.toggle('hidden', tab !== 'enviados');
+  document.getElementById('toques-panel-enviados').classList.toggle('flex', tab === 'enviados');
+  if (tab === 'recibidos') await loadToquesReceived(); else await loadToquesSent();
+};
+async function loadToquesReceived(){
+  if (!profile?.alias){ toquesReceivedCache = []; renderToquesReceived(); return; }
+  try { const { data, error } = await sb.from('dgt_toques').select('*').eq('to_owner', profile.alias).order('created_at', { ascending: false }).limit(30); if (error) throw error; toquesReceivedCache = data || []; }
+  catch { toquesReceivedCache = []; }
+  renderToquesReceived();
+}
+async function loadToquesSent(){
+  if (!profile?.alias){ toquesSentCache = []; renderToquesSent(); return; }
+  try { const { data, error } = await sb.from('dgt_toques').select('*').eq('from_alias', profile.alias).order('created_at', { ascending: false }).limit(30); if (error) throw error; toquesSentCache = data || []; }
+  catch { toquesSentCache = []; }
+  renderToquesSent();
+}
+function renderToquesReceived(){
+  const cont = document.getElementById('toques-panel-recibidos');
+  if (toquesReceivedCache.length === 0){ cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Sin toques recibidos aún.</p>`; return; }
+  cont.innerHTML = toquesReceivedCache.map(t => `
+    <div class="bg-slate-50 rounded-2xl p-3.5">
+      <p class="font-bold text-[#0f2f66]">@${t.from_alias}</p>
+      <p class="text-xs text-slate-500 mb-3">Serie ${t.serial || ''}</p>
+      ${t.status === 'pending' ? `
+      <div class="flex gap-2">
+        <button onclick="acceptToqueClick('${t.id}')" class="flex-1 h-10 rounded-xl bg-emerald-500 text-white text-sm font-bold">Aceptar → Chat</button>
+        <button onclick="rejectToqueClick('${t.id}')" class="h-10 px-4 rounded-xl bg-slate-200 text-slate-600 text-sm font-bold">Rechazar</button>
+      </div>` : `<span class="text-xs font-bold ${t.status==='accepted' ? 'text-emerald-500' : 'text-slate-400'}">${t.status==='accepted' ? '✓ Aceptado' : '✕ Rechazado'}</span>`}
+    </div>`).join('');
+}
+function renderToquesSent(){
+  const cont = document.getElementById('toques-panel-enviados');
+  if (toquesSentCache.length === 0){ cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Aún no has enviado ningún toque.</p>`; return; }
+  cont.innerHTML = toquesSentCache.map(t => `
+    <div class="bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between">
+      <div><p class="font-bold text-[#0f2f66]">@${t.to_owner}</p><p class="text-xs text-slate-500">Serie ${t.serial || ''}</p></div>
+      <span class="text-xs font-bold ${t.status==='pending' ? 'text-amber-500' : (t.status==='accepted' ? 'text-emerald-500' : 'text-slate-400')}">${t.status==='pending' ? 'Pendiente' : (t.status==='accepted' ? 'Aceptado' : 'Rechazado')}</span>
+    </div>`).join('');
+}
+window.acceptToqueClick = async function(id){
+  try {
+    const { error } = await sb.from('dgt_toques').update({ status: 'accepted' }).eq('id', id);
+    if (error) throw error;
+    showToast('Toque aceptado — chat abierto');
+    await loadToquesReceived();
+    const t = toquesReceivedCache.find(x => String(x.id) === String(id));
+    if (t) openChatModal(t.id, t.from_alias, t.serial || '');
+  } catch (e) { showToast('Error: ' + (e.message || e)); }
+};
+window.rejectToqueClick = async function(id){
+  try { const { error } = await sb.from('dgt_toques').update({ status: 'rejected' }).eq('id', id); if (error) throw error; showToast('Toque rechazado'); await loadToquesReceived(); }
+  catch (e) { showToast('Error: ' + (e.message || e)); }
+};
+async function executeToque(payload){
+  try {
+    const { error } = await sb.rpc('enviar_toque', { p_to_owner: payload.toOwner, p_to_email: payload.toEmail, p_serial: payload.serial, p_digits: payload.digits, p_from_country: profile?.country || '' });
+    if (error) throw error;
+    showToast(`👋 Toque enviado a @${payload.toOwner}`);
+  } catch (e) { showToast('Error al enviar el toque: ' + (e.message || e)); }
+}
 
-        if (serialDigits.length < MIN_DIGITS) { messageEl.textContent = `Ingresa al menos ${MIN_DIGITS} dígitos`; messageEl.className = "text-center text-sm font-medium -mt-2 h-6 text-rose-400"; return; }
-        if (!letter1) { messageEl.textContent = "La primera letra es obligatoria"; messageEl.className = "text-center text-sm font-medium -mt-2 h-6 text-rose-400"; return; }
-        if (!year || year === "Selecciona un año") { messageEl.textContent = "Selecciona el año"; messageEl.className = "text-center text-sm font-medium -mt-2 h-6 text-rose-400"; return; }
-        if (!denomSel || (denomSel === "Otra" && !denomOtro)) { messageEl.textContent = "Indica la denominación"; messageEl.className = "text-center text-sm font-medium -mt-2 h-6 text-rose-400"; return; }
+/* ---------------- Chat privado real (tabla dgt_chats) ---------------- */
+let activeChatToqueId = null, activeChatWith = null, chatMessagesCache = [];
+function dgtEscapeHtml(str){ return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+window.openChatModal = async function(toqueId, alias, serial){
+  activeChatToqueId = toqueId; activeChatWith = alias;
+  document.getElementById('chat-with-label').textContent = '@' + alias;
+  document.getElementById('chat-serial-label').textContent = 'Serie ' + (serial || '');
+  document.getElementById('chat-messages').innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Cargando…</p>`;
+  openModal('chat-modal');
+  closeModal('toques-modal');
+  await loadChatMessages();
+};
+async function loadChatMessages(){
+  if (!activeChatToqueId) return;
+  try { const { data, error } = await sb.from('dgt_chats').select('*').eq('toque_id', activeChatToqueId).order('created_at', { ascending: true }).limit(200); if (error) throw error; chatMessagesCache = data || []; }
+  catch { chatMessagesCache = []; }
+  renderChatMessages();
+}
+function renderChatMessages(){
+  const box = document.getElementById('chat-messages');
+  if (chatMessagesCache.length === 0){ box.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Chat privado iniciado.<br>Solo ustedes dos ven estos mensajes.</p>`; return; }
+  box.innerHTML = chatMessagesCache.map(m => {
+    const mine = m.from_alias === profile?.alias;
+    return `<div class="${mine ? 'self-end bg-[#0f2f66] text-white rounded-br-md' : 'self-start bg-slate-100 rounded-bl-md'} max-w-[75%] rounded-2xl px-4 py-2 text-sm">${dgtEscapeHtml(m.message)}</div>`;
+  }).join('');
+  box.scrollTop = box.scrollHeight;
+}
+window.sendChatMessage = async function(){
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text || !activeChatToqueId || !profile?.alias) return;
+  try {
+    const { error } = await sb.from('dgt_chats').insert({ toque_id: activeChatToqueId, from_alias: profile.alias, from_email: btoa(profile.email || session?.email || ''), to_owner: activeChatWith, message: text, created_at: new Date().toISOString() });
+    if (error) throw error;
+    input.value = ''; await loadChatMessages();
+  } catch (e) { showToast('Error al enviar: ' + (e.message || e)); }
+};
 
-        if (!gate('register')) return;
+/* ---------------- Legal real ---------------- */
+const LEGAL_CONTENT = {
+  terms: `<p><strong class="text-slate-700">Aceptación de uso.</strong> Al crear una cuenta en $DOLLARDGT aceptas cumplir con estos términos. Nos reservamos el derecho de suspender cuentas que hagan un uso indebido de la plataforma, registren series que no poseen físicamente o envíen toques abusivos.</p>
+          <p><strong class="text-slate-700">Servicios y pagos.</strong> El acceso a la Bóveda, los chats y los "toques" puede estar sujeto a la membresía de pago único. El procesamiento de cobros se realiza de forma externa y segura a través de Stripe. No realizamos reembolsos a menos que la ley lo exija.</p>
+          <p class="text-xs text-slate-400">Contacto: support@dollardgt.com</p>`,
+  privacy: `<p><strong class="text-slate-700">Responsable.</strong> $DOLLARDGT (support@dollardgt.com).</p>
+            <p><strong class="text-slate-700">Datos que recopilamos.</strong> Datos de registro (país, alias, correo), datos de uso (series, toques, chats), y datos de pago gestionados directamente por Stripe.</p>
+            <p><strong class="text-slate-700">Tus derechos.</strong> Puedes acceder, corregir o borrar tus datos escribiendo a soporte. No admitimos menores de 18 años en la plataforma.</p>`
+};
+window.openLegalModal = function(tipo){
+  document.getElementById('legal-modal-body').innerHTML = LEGAL_CONTENT[tipo] || LEGAL_CONTENT.terms;
+  openModal('legal-modal');
+};
 
-        const [flagCountry, currency] = countryText.split("·").map(s => s.trim());
-        const denomNumeric = denomSel === "Otra" ? (parseFloat(denomOtro.replace(/[^0-9.]/g, '')) || 0) : parseFloat(denomSel);
-        const rarity = calcRarity(serialDigits);
-        const points = calcPoints(rarity, denomNumeric);
-        const serial = buildSerialString(letter1, letter2, letter3, serialDigits);
-        const valueSnapshot = Math.round(denomNumeric * (10 + rarity.score) * 100) / 100;
-        const lettersSnapshot = `${letter1}${letter2 || ''}`;
-        const phone = profile?.phone || '';
-        const email = session.email || '';
-        const contactB64 = btoa(`${phone}|${email}`);
-        const emailB64 = btoa(email);
+window.dismissHookCard = function(){ document.getElementById('hook-card')?.classList.add('hidden'); };
 
-        const submitBtn = document.getElementById("registerButton");
-        submitBtn.disabled = true;
-        submitBtn.classList.add("opacity-60");
+/* ---------------- Inicialización real ---------------- */
+async function initReal(){
+  if (location.protocol === 'file:'){
+    showToast('⚠️ Abre este archivo desde un servidor (no con doble clic) para que Supabase funcione');
+  }
+  const { data: sessionData } = await sb.auth.getSession();
+  session = sessionData?.session?.user || null;
+  if (session) await loadUserContext();
+  await fetchPool();
+  updateSessionUI();
+  refreshPoolDependentUI();
+  setInterval(rotateLeader, LEADER_ROTATE_MS);
+}
+initReal();
 
-        try {
-            const { error } = await sb.rpc('publicar_serial', {
-                p_serial: serial, p_digits: serialDigits, p_points: points, p_rarity: rarity,
-                p_denom: denomNumeric, p_yr: parseInt(year, 10), p_country: `${flagCountry} ${currency || ''}`.trim(),
-                p_contact: contactB64, p_email: emailB64, p_letters_snapshot: lettersSnapshot, p_value_snapshot: valueSnapshot
-            });
-            if (error) throw error;
-            messageEl.innerHTML = `¡Serie registrada! ${points} pts · ${rarity.label}`;
-            messageEl.className = "text-center text-sm font-medium -mt-2 h-6 text-emerald-500";
-            serialDigits = ""; renderSerial();
-            await fetchPool(); refreshPoolDependentUI();
-        } catch (e) {
-            const rawMsg = e.message || String(e);
-            const isDuplicate = e.code === '23505' || /duplicate key|unique constraint/i.test(rawMsg);
-            messageEl.textContent = isDuplicate
-                ? "Esa serie ya está registrada para ese año y país."
-                : "Error al registrar: " + rawMsg;
-            messageEl.className = "text-center text-sm font-medium -mt-2 h-6 text-rose-400";
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.classList.remove("opacity-60");
-        }
-    }
-
-    // ---------- Pool real (vault + boveda_jugadas) ----------
-    const RARITY_SCORE_BY_KEY = { SOLID: 100, RADAR: 82, LADDER: 88, REPEATER: 78, BINARY: 75, 'SEMI-SOLID': 62, COMUN: 10 };
-    function rarityKeyFallback(r) {
-        if (!r) return 'COMUN';
-        if (typeof r === 'object') return r.key || 'COMUN';
-        if (typeof r === 'string' && r.trim().startsWith('{')) { try { return JSON.parse(r).key || 'COMUN'; } catch { return r.toUpperCase(); } }
-        return String(r).toUpperCase();
-    }
-    function rarityLabelFallback(r) {
-        if (!r) return 'Común';
-        if (typeof r === 'object') return r.label || 'Común';
-        if (typeof r === 'string' && r.trim().startsWith('{')) { try { return JSON.parse(r).label || r; } catch { return r; } }
-        return r;
-    }
-    function normalizeRarity(r) {
-        const key = rarityKeyFallback(r);
-        return { key, label: rarityLabelFallback(r), score: RARITY_SCORE_BY_KEY[key] ?? 10 };
-    }
-    function decodeEmailIfNeeded(v) {
-        if (!v) return '';
-        if (v.includes('@')) return v;
-        try { const d = atob(v); if (d.includes('@')) return d; } catch {}
-        return v;
-    }
-    const RB_SOURCE_TABLES = ['vault', 'boveda_jugadas'];
-    async function fetchFromFirstAvailable(orderCol, limit) {
-        const results = await Promise.all(RB_SOURCE_TABLES.map(async table => {
-            try {
-                const { data, error } = await sb.from(table).select('*').order(orderCol, { ascending: false }).limit(limit);
-                return (!error && data) ? data : [];
-            } catch { return []; }
-        }));
-        const merged = results.flat();
-        merged.sort((a, b) => (b[orderCol] || 0) > (a[orderCol] || 0) ? 1 : -1);
-        return merged.slice(0, limit);
-    }
-    async function fetchPool() {
-        const rows = await fetchFromFirstAvailable('points', 300);
-        MOCK_POOL = rows.map(row => ({
-            ...row,
-            serial: row.serial || row.serial_display || row.digits,
-            owner: row.owner || row.alias,
-            rarity: normalizeRarity(row.rarity)
-        }));
-        return MOCK_POOL;
-    }
-
-    // ---------- Favoritos (localStorage) ----------
-    function rbGetFavorites() { try { return JSON.parse(localStorage.getItem('dgt_favorites_v1') || '[]'); } catch { return []; } }
-    function rbToggleFavorite(serial) {
-        let favs = rbGetFavorites();
-        favs = favs.includes(serial) ? favs.filter(s => s !== serial) : [...favs, serial];
-        localStorage.setItem('dgt_favorites_v1', JSON.stringify(favs));
-    }
-
-    // ---------- Búsqueda por similitud ----------
-    function rbSimilarityScore(q, d) {
-        if (!d) return 0;
-        if (d === q) return 100;
-        if (d.includes(q) || q.includes(d)) return 80;
-        let common = 0;
-        for (let i = 0; i < Math.min(q.length, d.length); i++) if (q[i] === d[i]) common++;
-        return Math.round((common / Math.max(q.length, d.length)) * 100);
-    }
-
-    // ---------- Chips de rareza ----------
-    function renderRarityFilters() {
-        const wrap = document.getElementById("rarityFilters");
-        wrap.innerHTML = RARITY_DEFS.map(d => {
-            const active = activeRarity === d.key;
-            return `<button class="filter-btn shrink-0 min-h-[36px] px-4 rounded-full text-xs font-bold ${active ? 'bg-[#228c53] text-white' : 'bg-white/10 text-white/70 font-semibold'}" data-rarity="${d.key}">${d.label}</button>`;
-        }).join('');
-    }
-    document.addEventListener("click", (e) => {
-        const chip = e.target.closest("#rarityFilters .filter-btn");
-        if (chip) { activeRarity = chip.dataset.rarity; resultsShowCount = 3; renderRarityFilters(); renderResults(); }
-    });
-
-    // ---------- Resultados de búsqueda ----------
-    function renderResults() {
-        const container = document.getElementById("resultsScroll");
-        if (!container) return;
-        const favs = rbGetFavorites();
-        let rows = MOCK_POOL;
-        if (searchQuery) {
-            rows = rows.map(r => ({ r, score: rbSimilarityScore(searchQuery.toUpperCase(), r.digits || '') }))
-                       .filter(x => x.score >= 20).sort((a, b) => b.score - a.score).map(x => x.r);
-        } else if (activeRarity) {
-            rows = rows.filter(r => r.rarity.key === activeRarity);
-        } else {
-            rows = [...rows].sort((a, b) => (b.points || 0) - (a.points || 0));
-        }
-        const shown = rows.slice(0, resultsShowCount);
-        if (shown.length === 0) {
-            container.innerHTML = `<div class="text-center text-white/40 text-sm py-10">Sin resultados todavía.</div>`;
-            return;
-        }
-        container.innerHTML = shown.map(r => `
-            <div class="result-card bg-[#fcfbf9] rounded-2xl p-4 shadow-lg flex items-center gap-4" data-rarity="${(r.rarity.key||'').toLowerCase()}">
-                <div class="w-11 h-11 rounded-xl bg-[#f5e6d3] flex items-center justify-center text-xs font-black text-[#a67c52] shrink-0">${(r.rarity.key||'?').charAt(0)}</div>
-                <div class="flex-1 min-w-0">
-                    <div class="serial font-black text-sm text-slate-900 truncate tracking-wide">${r.serial || ''}</div>
-                    <div class="result-meta text-xs text-slate-500">${r.country || ''} · ${r.rarity.label}</div>
-                    <div class="owner text-xs text-slate-500 font-medium">@${r.owner || 'anónimo'}</div>
-                </div>
-                <div class="flex flex-col items-end gap-2 shrink-0">
-                    <span class="points font-black text-[#a67c52] text-sm">${r.points || 0} pts</span>
-                    <div class="flex gap-1">
-                        <button class="action favorite w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center" data-serial="${r.serial}">${favs.includes(r.serial) ? '★' : '☆'}</button>
-                        <button class="action toque w-9 h-9 rounded-full bg-[#8b008b] text-white flex items-center justify-center" data-serial="${r.serial}">👋</button>
-                    </div>
-                </div>
-            </div>`).join('');
-        if (rows.length > shown.length) {
-            container.innerHTML += `<button id="moreButton" class="w-full min-h-[48px] rounded-2xl bg-white/10 text-white/70 text-sm font-semibold">Ver más resultados (${rows.length - shown.length}) 🔽</button>`;
-        }
-    }
-    document.addEventListener("click", (e) => {
-        const favBtn = e.target.closest("#resultsScroll .action.favorite");
-        if (favBtn) { rbToggleFavorite(favBtn.dataset.serial); renderResults(); }
-        const toqueBtn = e.target.closest(".action.toque");
-        if (toqueBtn) { onToqueClick(toqueBtn.dataset.serial); }
-        const moreBtn = e.target.closest("#moreButton");
-        if (moreBtn) { resultsShowCount += 20; renderResults(); }
-    });
-
-    document.getElementById("openSearch").addEventListener("click", () => {
-        setTimeout(() => document.getElementById("searchInput").focus(), 350);
-    });
-    document.getElementById("executeSearch").addEventListener("click", () => {
-        searchQuery = document.getElementById("searchInput").value.trim();
-        closeModalId("searchModal");
-        activeRarity = ''; resultsShowCount = 3;
-        renderRarityFilters(); renderResults();
-    });
-    document.getElementById("rareButton").addEventListener("click", () => {
-        searchQuery = ''; document.getElementById("searchInput").value = '';
-        resultsShowCount = 3; renderResults();
-    });
-
-    // ---------- Toques (reales, tabla dgt_toques) ----------
-    function onToqueClick(serial) {
-        const row = MOCK_POOL.find(r => r.serial === serial);
-        if (!row) { showToast("No se encontró esa serie"); return; }
-        if (profile && row.owner === profile.alias) { showToast("No puedes tocar tu propio billete"); return; }
-        const payload = { toOwner: row.owner, toEmail: decodeEmailIfNeeded(row.email), serial: row.serial, digits: row.digits };
-        if (!gate('toque', payload)) return;
-        executeToque(payload);
-    }
-    async function executeToque(payload) {
-        try {
-            const { error } = await sb.rpc('enviar_toque', {
-                p_to_owner: payload.toOwner, p_to_email: payload.toEmail, p_serial: payload.serial,
-                p_digits: payload.digits, p_from_country: profile?.country || ''
-            });
-            if (error) throw error;
-            showToast(`👋 Toque enviado a @${payload.toOwner}`);
-        } catch (e) { showToast("Error al enviar el toque: " + (e.message || e)); }
-    }
-    function openToquesModal() {
-        if (!session) { openModalId("authModal"); return; }
-        if (!profile?.alias) { onProfileNavClick(); return; }
-        openModalId("toquesModal");
-        activeToquesTab = 'received';
-        updateToquesTabsUI();
-        loadToquesReceived();
-    }
-    let toquesReceivedCache = [];
-    let toquesSentCache = [];
-    let activeToquesTab = 'received'; // 'received' | 'sent'
-
-    function updateToquesTabsUI() {
-        const recBtn = document.getElementById("toquesTabReceived");
-        const sentBtn = document.getElementById("toquesTabSent");
-        const isReceived = activeToquesTab === 'received';
-        recBtn.className = `min-h-[40px] rounded-full text-xs font-bold ${isReceived ? 'bg-[#228c53] text-white' : 'bg-slate-50 text-slate-500 font-semibold'}`;
-        sentBtn.className = `min-h-[40px] rounded-full text-xs font-bold ${!isReceived ? 'bg-[#228c53] text-white' : 'bg-slate-50 text-slate-500 font-semibold'}`;
-    }
-    function switchToquesTab(tab) {
-        activeToquesTab = tab;
-        updateToquesTabsUI();
-        if (tab === 'received') loadToquesReceived();
-        else loadToquesSent();
-    }
-    async function loadToquesReceived() {
-        if (!profile?.alias) { toquesReceivedCache = []; renderToquesList(); return; }
-        try {
-            const { data, error } = await sb.from('dgt_toques').select('*').eq('to_owner', profile.alias).order('created_at', { ascending: false }).limit(30);
-            if (error) throw error;
-            toquesReceivedCache = data || [];
-        } catch { toquesReceivedCache = []; }
-        renderToquesList();
-    }
-    async function loadToquesSent() {
-        if (!profile?.alias) { toquesSentCache = []; renderToquesList(); return; }
-        try {
-            const { data, error } = await sb.from('dgt_toques').select('*').eq('from_alias', profile.alias).order('created_at', { ascending: false }).limit(30);
-            if (error) throw error;
-            toquesSentCache = data || [];
-        } catch { toquesSentCache = []; }
-        renderToquesList();
-    }
-    function renderToquesList() {
-        const container = document.getElementById("toquesList");
-        const subtitle = document.getElementById("toquesSubtitle");
-        const isReceived = activeToquesTab === 'received';
-        const list = isReceived ? toquesReceivedCache : toquesSentCache;
-        const pending = list.filter(t => t.status === 'pending').length;
-        subtitle.textContent = isReceived
-            ? `${pending} solicitud${pending === 1 ? '' : 'es'} pendiente${pending === 1 ? '' : 's'}`
-            : `${list.length} toque${list.length === 1 ? '' : 's'} enviado${list.length === 1 ? '' : 's'}`;
-
-        if (list.length === 0) {
-            container.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">${isReceived ? 'Sin toques recibidos aún.' : 'Aún no has enviado ningún toque.'}</p>`;
-            return;
-        }
-
-        if (isReceived) {
-            container.innerHTML = list.map(t => `
-                <div class="bg-[#fcfbf9] rounded-2xl p-4 flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-full bg-[#8b008b] text-white flex items-center justify-center font-bold text-sm shrink-0">${(t.from_alias || '?').slice(0,2).toUpperCase()}</div>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-black text-sm text-slate-900 tracking-wide truncate">${t.serial || ''}</div>
-                        <div class="text-xs text-slate-400 truncate">@${t.from_alias} · ${t.status === 'pending' ? 'pendiente' : (t.status === 'accepted' ? 'aceptado' : 'rechazado')}</div>
-                    </div>
-                    ${t.status === 'pending' ? `
-                    <div class="flex gap-1.5 shrink-0">
-                        <button onclick="acceptToqueReceived('${t.id}')" class="min-h-[36px] px-3 rounded-full bg-[#228c53] text-white text-xs font-bold">Aceptar</button>
-                        <button onclick="rejectToqueReceived('${t.id}')" class="min-h-[36px] px-3 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">✕</button>
-                    </div>` : (t.status === 'accepted' ? `
-                    <button onclick="openChatModal('${t.id}','${t.from_alias}','${t.serial || ''}')" class="min-h-[36px] px-3 rounded-full bg-[#8b008b] text-white text-xs font-bold shrink-0">💬 Chat</button>`
-                    : `<span class="text-[11px] font-bold text-slate-400 shrink-0">✕ Rechazado</span>`)}
-                </div>`).join('');
-        } else {
-            container.innerHTML = list.map(t => `
-                <div class="bg-[#fcfbf9] rounded-2xl p-4 flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-full bg-slate-300 text-white flex items-center justify-center font-bold text-sm shrink-0">${(t.to_owner || '?').slice(0,2).toUpperCase()}</div>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-black text-sm text-slate-900 tracking-wide truncate">${t.serial || ''}</div>
-                        <div class="text-xs text-slate-400 truncate">a @${t.to_owner} · ${t.status === 'pending' ? 'esperando respuesta' : (t.status === 'accepted' ? 'aceptado' : 'rechazado')}</div>
-                    </div>
-                    ${t.status === 'accepted' ? `
-                    <button onclick="openChatModal('${t.id}','${t.to_owner}','${t.serial || ''}')" class="min-h-[36px] px-3 rounded-full bg-[#8b008b] text-white text-xs font-bold shrink-0">💬 Chat</button>`
-                    : `<span class="text-[11px] font-bold ${t.status === 'pending' ? 'text-amber-500' : 'text-slate-400'} shrink-0">${t.status === 'pending' ? '⏳ Pendiente' : '✕ Rechazado'}</span>`}
-                </div>`).join('');
-        }
-    }
-    async function acceptToqueReceived(id) {
-        try {
-            const { error } = await sb.from('dgt_toques').update({ status: 'accepted' }).eq('id', id);
-            if (error) throw error;
-            showToast("Toque aceptado — chat abierto");
-            await loadToquesReceived(); updateToquesBadges();
-            const t = toquesReceivedCache.find(x => String(x.id) === String(id));
-            if (t) openChatModal(t.id, t.from_alias, t.serial || '');
-        } catch (e) { showToast("Error: " + (e.message || e)); }
-    }
-    async function rejectToqueReceived(id) {
-        try {
-            const { error } = await sb.from('dgt_toques').update({ status: 'rejected' }).eq('id', id);
-            if (error) throw error;
-            showToast("Toque rechazado");
-            await loadToquesReceived(); updateToquesBadges();
-        } catch (e) { showToast("Error: " + (e.message || e)); }
-    }
-    async function updateToquesBadges() {
-        if (!session || !profile?.alias) return;
-        try {
-            const { data } = await sb.from('dgt_toques').select('id').eq('to_owner', profile.alias).eq('status', 'pending');
-            const pending = data?.length || 0;
-            if (pending > 0) showToast(`Tienes ${pending} toque(s) pendiente(s)`);
-        } catch {}
-    }
-
-    // ---------- Chat privado (tabla real dgt_chats, ligado a un toque aceptado) ----------
-    let activeChatToqueId = null;
-    let activeChatWith = null;
-    let chatMessagesCache = [];
-
-    function dgtEscapeHtml(str) {
-        return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
-    }
-
-    async function openChatModal(toqueId, alias, serial) {
-        activeChatToqueId = toqueId;
-        activeChatWith = alias;
-        document.getElementById("chatTitle").textContent = "@" + alias;
-        document.getElementById("chatSerialLabel").textContent = serial || "";
-        document.getElementById("chatAvatar").textContent = (alias || "?").slice(0, 2).toUpperCase();
-        document.getElementById("chatMessages").innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Cargando…</p>`;
-        openModalId("chatModal");
-        await loadChatMessages();
-        setTimeout(() => document.getElementById("chatInput").focus(), 350);
-    }
-    async function loadChatMessages() {
-        if (!activeChatToqueId) return;
-        try {
-            const { data, error } = await sb.from('dgt_chats').select('*').eq('toque_id', activeChatToqueId).order('created_at', { ascending: true }).limit(200);
-            if (error) throw error;
-            chatMessagesCache = data || [];
-        } catch { chatMessagesCache = []; }
-        renderChatMessages();
-    }
-    function renderChatMessages() {
-        const box = document.getElementById("chatMessages");
-        if (!box) return;
-        if (chatMessagesCache.length === 0) {
-            box.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Chat privado iniciado.<br>Solo ustedes dos ven estos mensajes.</p>`;
-            return;
-        }
-        box.innerHTML = chatMessagesCache.map(m => {
-            const mine = m.from_alias === profile?.alias;
-            const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            return `<div class="max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-snug ${mine ? 'self-end bg-[#8b008b] text-white rounded-br-md' : 'self-start bg-slate-100 text-slate-800 rounded-bl-md'}" style="display:flex;flex-direction:column;">
-                        ${dgtEscapeHtml(m.message)}
-                        <span class="text-[9px] mt-1 ${mine ? 'text-white/70' : 'text-slate-400'} self-end">${time}</span>
-                     </div>`;
-        }).join('');
-        box.classList.add("flex", "flex-col");
-        box.scrollTop = box.scrollHeight;
-    }
-    async function handleSendChat() {
-        const input = document.getElementById("chatInput");
-        const text = input.value.trim();
-        if (!text || !activeChatToqueId || !profile?.alias) return;
-        try {
-            const { error } = await sb.from('dgt_chats').insert({
-                toque_id: activeChatToqueId, from_alias: profile.alias,
-                from_email: btoa(profile.email || session?.email || ''), to_owner: activeChatWith,
-                message: text, created_at: new Date().toISOString()
-            });
-            if (error) throw error;
-            input.value = "";
-            await loadChatMessages();
-        } catch (e) { showToast("Error al enviar: " + (e.message || e)); }
-    }
-    document.getElementById("chatInput")?.addEventListener("keydown", e => {
-        if (e.key === "Enter") { e.preventDefault(); handleSendChat(); }
-    });
-
-    // ---------- Serie líder + estadísticas (leen del pool real) ----------
-    function renderLeader() {
-        const top = [...MOCK_POOL].sort((a, b) => (b.points||0) - (a.points||0)).slice(0, 8);
-        if (top.length === 0) return;
-        if (leaderIndex >= top.length) leaderIndex = 0;
-        const data = top[leaderIndex];
-        document.getElementById("leaderBill").textContent = data.serial || '';
-        document.getElementById("leaderLetters").textContent = data.letters_snapshot || (data.serial || '').split(' ')[0] || '';
-        document.getElementById("leaderDigits").textContent = data.digits || '';
-        document.getElementById("leaderYear").textContent = data.yr || data.year || '—';
-        document.getElementById("leaderPoints").textContent = `${data.points || 0} pts`;
-        document.getElementById("leaderOwner").textContent = '@' + (data.owner || 'anónimo');
-        document.getElementById("leaderCountry").textContent = data.country || '';
-        const rarityEl = document.getElementById("leaderRarity");
-        rarityEl.textContent = data.rarity.label;
-        rarityEl.dataset.rarity = (data.rarity.key || '').toLowerCase();
-        document.getElementById("leaderRankTag").textContent = `#${leaderIndex + 1} / ${top.length} · SERIE LÍDER`;
-    }
-    function rotateLeader() {
-        const top = Math.min(MOCK_POOL.length, 8);
-        if (top <= 1) return;
-        leaderIndex = (leaderIndex + 1) % top;
-        renderLeader();
-    }
-    const RARITY_COLOR = { SOLID: '#a6faff', RADAR: '#00c8ff', LADDER: '#00ff88', REPEATER: '#22e0c8', BINARY: '#12a5e8', 'SEMI-SOLID': '#6f9fc9', COMUN: '#94a3b8' };
-    function renderStats() {
-        document.getElementById("statSeries").textContent = MOCK_POOL.length;
-        const totalValue = MOCK_POOL.reduce((s, r) => s + (r.denom || 0) * (10 + (r.rarity?.score || 0)), 0);
-        document.getElementById("statValue").textContent = totalValue >= 1000 ? Math.round(totalValue / 1000) + 'K' : Math.round(totalValue);
-        const countries = new Set(MOCK_POOL.map(r => r.country).filter(Boolean));
-        document.getElementById("statCountries").textContent = countries.size;
-
-        const order = ['SOLID', 'RADAR', 'LADDER', 'REPEATER', 'BINARY', 'SEMI-SOLID', 'COMUN'];
-        const counts = {};
-        MOCK_POOL.forEach(r => { const k = r.rarity.key; counts[k] = (counts[k] || 0) + 1; });
-        const total = MOCK_POOL.length || 1;
-        const present = order.filter(k => counts[k]);
-        const bar = document.getElementById("statsChart");
-        bar.innerHTML = present.map(k => {
-            const pct = Math.max(Math.round((counts[k] / total) * 100), 4);
-            return `<div style="width:${pct}%;background:${RARITY_COLOR[k]}" title="${k}: ${counts[k]}"></div>`;
-        }).join('');
-        const legend = document.getElementById("statsLegend");
-        legend.innerHTML = present.slice(0, 4).map(k => {
-            const pct = Math.round((counts[k] / total) * 100);
-            return `<span class="text-[10px] font-bold text-white/70 flex items-center gap-1"><span class="h-2 w-2 rounded-full inline-block" style="background:${RARITY_COLOR[k]}"></span>${k === 'COMUN' ? 'Común' : k} ${pct}%</span>`;
-        }).join('');
-    }
-    function refreshPoolDependentUI() { renderLeader(); renderStats(); renderResults(); }
-
-    // ---------- Inicialización ----------
-    async function init() {
-        showView("home");
-        fillLetters(); fillYears(); updateCurrencyFromCountry();
-        renderSerial();
-
-        const { data: sessionData } = await sb.auth.getSession();
-        session = sessionData?.session?.user || null;
-        if (session) await loadUserContext();
-
-        await fetchPool();
-        renderRarityFilters();
-        updateSessionUI();
-        refreshPoolDependentUI();
-        updateToquesBadges();
-        setInterval(rotateLeader, LEADER_ROTATE_MS);
-    }
-    init();
-    </script>
-
+refreshValidacion();
+</script>
 </body>
 </html>
