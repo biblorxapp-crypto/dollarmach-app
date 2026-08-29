@@ -91,7 +91,7 @@
 
       <!-- TARJETA: SERIE LÍDER (Top 5 en vivo, rota cada 15s) -->
       <section class="px-5 mt-5">
-        <article id="leader-card" class="bg-white rounded-3xl p-5 shadow-premium">
+        <article id="leader-card" class="bg-white rounded-3xl p-5 shadow-premium transition-opacity duration-300">
           <div class="flex items-center justify-between mb-3">
             <span class="text-[11px] font-bold tracking-widest text-fuchsia-600 flex items-center gap-1">🏆 SERIE LÍDER</span>
             <span class="text-[11px] font-semibold text-slate-400" id="leader-updated">#1 de 8 en tendencia</span>
@@ -111,24 +111,15 @@
             <span id="leader-country" class="px-3 h-7 inline-flex items-center rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">🇬🇹 GT</span>
             <span id="leader-owner" class="px-3 h-7 inline-flex items-center rounded-full bg-fuchsia-50 text-fuchsia-700 text-xs font-semibold ml-auto">@coleccionista</span>
           </div>
-          <!-- Histograma de dígitos: renderDigitHistogram() -->
-          <div id="leader-digit-histogram" class="mt-4 flex items-end gap-1.5 h-14">
-            <div class="flex-1 bg-sky-100 rounded-t-md" style="height:40%"></div>
-            <div class="flex-1 bg-sky-200 rounded-t-md" style="height:90%"></div>
-            <div class="flex-1 bg-sky-300 rounded-t-md" style="height:60%"></div>
-            <div class="flex-1 bg-sky-400 rounded-t-md" style="height:100%"></div>
-            <div class="flex-1 bg-sky-300 rounded-t-md" style="height:50%"></div>
-            <div class="flex-1 bg-sky-200 rounded-t-md" style="height:75%"></div>
-            <div class="flex-1 bg-sky-100 rounded-t-md" style="height:30%"></div>
-            <div class="flex-1 bg-sky-200 rounded-t-md" style="height:65%"></div>
-          </div>
+          <!-- Histograma de dígitos: real, calculado de la serie que se muestra -->
+          <div id="leader-digit-histogram" class="mt-4 flex items-end gap-1.5 h-14"></div>
         </article>
       </section>
 
       <!-- ACCIONES RÁPIDAS -->
       <section class="px-5 mt-4 flex flex-col gap-3">
         <button onclick="goTo('registrar')" class="h-14 rounded-2xl bg-white shadow-soft flex items-center justify-center gap-2 font-extrabold text-[#0f2f66] text-lg">
-          🎯 Registra # De Serie
+          🎯 Ingresar Serie
         </button>
 
         <!-- Coincidencia Global: detecta si tu ÚLTIMA serie registrada comparte dígitos con otra en la Bóveda -->
@@ -1118,28 +1109,79 @@ function renderStats(){
   const statsMine = document.getElementById('stats-mine');
   if (statsMine && profile?.alias) statsMine.textContent = MOCK_POOL.filter(r => r.owner === profile.alias).length;
 }
+let trendingPool = [];
+let rotateCount = 0;
+
+/* Muestreo aleatorio ponderado por puntos (sin reemplazo) — series con más
+   puntos tienen más probabilidad de salir, pero no es siempre fijo el mismo top 8. */
+function buildTrendingPool(){
+  if (MOCK_POOL.length === 0){ trendingPool = []; return; }
+  const pool = [...MOCK_POOL];
+  const picked = [];
+  const size = Math.min(8, pool.length);
+  for (let i = 0; i < size; i++){
+    const totalWeight = pool.reduce((s, r) => s + (r.points || 0) + 1, 0);
+    let roll = Math.random() * totalWeight;
+    let idx = 0;
+    for (; idx < pool.length; idx++){
+      roll -= (pool[idx].points || 0) + 1;
+      if (roll <= 0) break;
+    }
+    idx = Math.min(idx, pool.length - 1);
+    picked.push(pool[idx]);
+    pool.splice(idx, 1);
+  }
+  trendingPool = picked;
+}
+function renderDigitHistogram(digits){
+  const cont = document.getElementById('leader-digit-histogram');
+  if (!cont) return;
+  const counts = new Array(10).fill(0);
+  String(digits || '').split('').forEach(ch => { const n = parseInt(ch, 10); if (!isNaN(n)) counts[n]++; });
+  const max = Math.max(1, ...counts);
+  const targets = counts.map(c => Math.max(6, Math.round((c / max) * 100)));
+  const shades = ['bg-sky-100','bg-sky-200','bg-sky-300','bg-sky-400'];
+  cont.innerHTML = targets.map(() => `<div class="flex-1 rounded-t-md bg-sky-200 transition-all duration-700 ease-out" style="height:6%"></div>`).join('');
+  requestAnimationFrame(() => {
+    const bars = cont.children;
+    targets.forEach((pct, i) => {
+      if (!bars[i]) return;
+      bars[i].style.height = pct + '%';
+      bars[i].className = `flex-1 rounded-t-md transition-all duration-700 ease-out ${shades[Math.min(3, Math.floor(pct/26))]}`;
+    });
+  });
+}
 function renderLeader(){
-  const top = [...MOCK_POOL].sort((a,b) => (b.points||0) - (a.points||0)).slice(0,8);
-  if (top.length === 0) return;
-  if (leaderIndex >= top.length) leaderIndex = 0;
-  const d = top[leaderIndex];
-  document.getElementById('leader-serial').textContent = d.serial || '';
-  document.getElementById('leader-letters').textContent = d.letters_snapshot || (d.serial||'').split(' ')[0] || '';
-  document.getElementById('leader-digits').textContent = d.digits || '';
-  document.getElementById('leader-year').textContent = d.yr || d.year || '—';
-  document.getElementById('leader-points').textContent = (d.points||0).toLocaleString('es');
-  document.getElementById('leader-owner').textContent = '@' + (d.owner || 'anónimo');
-  document.getElementById('leader-country').textContent = d.country || '';
-  document.getElementById('leader-rarity').textContent = d.rarity.label;
-  document.getElementById('leader-updated').textContent = `#${leaderIndex+1} de ${top.length} en tendencia`;
+  if (trendingPool.length === 0) return;
+  if (leaderIndex >= trendingPool.length) leaderIndex = 0;
+  const d = trendingPool[leaderIndex];
+  const card = document.getElementById('leader-card');
+  card.classList.add('opacity-0');
+  setTimeout(() => {
+    document.getElementById('leader-serial').textContent = d.serial || '';
+    document.getElementById('leader-letters').textContent = d.letters_snapshot || (d.serial||'').split(' ')[0] || '';
+    document.getElementById('leader-digits').textContent = d.digits || '';
+    document.getElementById('leader-year').textContent = d.yr || d.year || '—';
+    document.getElementById('leader-points').textContent = (d.points||0).toLocaleString('es');
+    document.getElementById('leader-owner').textContent = '@' + (d.owner || 'anónimo');
+    document.getElementById('leader-country').textContent = d.country || '';
+    document.getElementById('leader-rarity').textContent = d.rarity.label;
+    document.getElementById('leader-updated').textContent = `#${leaderIndex+1} de ${trendingPool.length} en tendencia`;
+    renderDigitHistogram(d.digits);
+    card.classList.remove('opacity-0');
+  }, 220);
 }
 function rotateLeader(){
-  const top = Math.min(MOCK_POOL.length, 8);
-  if (top <= 1) return;
-  leaderIndex = (leaderIndex + 1) % top;
+  if (MOCK_POOL.length <= 1) return;
+  rotateCount++;
+  leaderIndex++;
+  if (leaderIndex >= trendingPool.length || rotateCount % 8 === 0){
+    buildTrendingPool();
+    leaderIndex = 0;
+  }
   renderLeader();
 }
-function refreshPoolDependentUI(){ renderLeader(); renderStats(); renderGlobalResults(); renderFavoritosScreen(); renderCoincidenceBanner(); }
+function refreshPoolDependentUI(){ buildTrendingPool(); renderLeader(); renderStats(); renderGlobalResults(); renderFavoritosScreen(); renderCoincidenceBanner(); }
 
 /* ---------------- Coincidencia Global (tu última serie vs. la Bóveda) ---------------- */
 function getLastRegistered(){
