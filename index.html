@@ -1116,6 +1116,7 @@ async function fetchPool(){
 
 /* ---------------- Demanda (toques activos por serie) + series que sigo ---------------- */
 let DEMAND_COUNTS = {};
+let TRANSFER_COUNTS = {};
 let MY_WATCHED = new Set();
 async function fetchDemandAndWatchers(){
   try {
@@ -1125,6 +1126,12 @@ async function fetchDemandAndWatchers(){
     DEMAND_COUNTS = counts;
   } catch { DEMAND_COUNTS = {}; }
   try {
+    const { data: transfers } = await sb.from('dgt_transfers').select('serial');
+    const tcounts = {};
+    (transfers || []).forEach(t => { if (t.serial) tcounts[t.serial] = (tcounts[t.serial] || 0) + 1; });
+    TRANSFER_COUNTS = tcounts;
+  } catch { TRANSFER_COUNTS = {}; }
+  try {
     if (session){
       const { data: watched } = await sb.from('dgt_watchers').select('serial');
       MY_WATCHED = new Set((watched || []).map(w => w.serial));
@@ -1132,6 +1139,11 @@ async function fetchDemandAndWatchers(){
       MY_WATCHED = new Set();
     }
   } catch { MY_WATCHED = new Set(); }
+}
+function transferBadgeHtml(serial){
+  const n = TRANSFER_COUNTS[serial] || 0;
+  if (n === 0) return `<span class="text-[10px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full whitespace-nowrap">🆕 Serie original</span>`;
+  return `<span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">🔁 ${n} transferencia${n===1?'':'s'}</span>`;
 }
 function demandBadgeHtml(serial){
   const n = DEMAND_COUNTS[serial] || 0;
@@ -1572,7 +1584,7 @@ function globalResultCardHtml(r){
         <p class="font-extrabold text-[#0f2f66] text-lg truncate">${r.serial || ''}</p>
         <p class="text-xs text-slate-500 truncate">${r.country || ''}${anio ? ' · ' + anio : ''} · ${r.rarity.label}${simLabel}</p>
         <p class="text-xs text-fuchsia-600 font-semibold mb-1">@${r.owner || 'anónimo'}</p>
-        <div class="flex flex-wrap gap-1">${dispTag}${demandBadgeHtml(r.serial)}</div>
+        <div class="flex flex-wrap gap-1">${dispTag}${demandBadgeHtml(r.serial)}${transferBadgeHtml(r.serial)}</div>
       </div>
       <span class="text-emerald-500 font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
       <div class="flex flex-col gap-1.5">
@@ -1655,7 +1667,7 @@ function profileSeriesCardHtml(r){
         </div>
         <span class="text-emerald-500 font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
       </div>
-      ${demandBadgeHtml(r.serial) ? `<div>${demandBadgeHtml(r.serial)}</div>` : ''}
+      ${demandBadgeHtml(r.serial) || transferBadgeHtml(r.serial) ? `<div class="flex flex-wrap gap-1">${demandBadgeHtml(r.serial)}${transferBadgeHtml(r.serial)}</div>` : ''}
       <div class="flex gap-1.5">
         ${opciones.map(o => `<button onclick="cambiarDisponibilidad('${r.serial}','${o.key}')" class="flex-1 h-8 rounded-lg text-[11px] font-bold ${disp === o.key ? 'bg-[#0f2f66] text-white' : 'bg-slate-100 text-slate-500'}">${o.label}</button>`).join('')}
       </div>
