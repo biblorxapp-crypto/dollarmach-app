@@ -33,7 +33,9 @@
       <header class="px-5 pt-12 pb-5">
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3">
-            <div id="brand-logo" class="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 shadow-soft overflow-hidden shrink-0">
+            <div
+ kdiv id="brand-logo"
+class="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 shadow-soft overflow-hidden shrink-0">
               <!-- Cuando tengas el logo redondo final, reemplaza este div por:
                    <img src="TU-LOGO.png" class="w-full h-full object-cover" alt="DOLLARDGT" />
                    El círculo ya está recortado (overflow-hidden) y del tamaño correcto. -->
@@ -46,8 +48,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
               <span id="toques-badge" class="hidden absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 rounded-full ring-2 ring-[#0f2f66]"></span>
             </button>
-            <!-- Avatar / perfil -->
-            <button class="w-11 h-11 rounded-full bg-fuchsia-700 flex items-center justify-center text-white font-bold text-lg shrink-0" onclick="goTo('perfil')" id="profile-avatar-letter">?</button>
+
+   <!-- Avatar / perfil -->
+            <button class="w-11 h-11 rounded-full bg-green-700 flex items-center justify-center text-white font-bold text-lg shrink-0" onclick="goTo('perfil')" id="profile-avatar-letter">?</button>
           </div>
         </div>
       </header>
@@ -89,48 +92,82 @@
         </div>
       </section>
 
-      <!-- TARJETA: SERIE LÍDER (Top 5 en vivo, rota cada 15s) -->
+       <!-- TARJETA: SERIE LÍDER (Top 5 en vivo, rota cada 15s) -->
       <section class="px-5 mt-5">
-        <article id="leader-card" class="bg-white rounded-3xl p-5 shadow-premium transition-opacity duration-300">
+        <article id="leader-card" class="bg-[#F8F9FC] rounded-3xl p-5 shadow-premium border border-[#D5A83A]/40 transition-opacity duration-300">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-[11px] font-bold tracking-widest text-fuchsia-600 flex items-center gap-1">🏆 SERIE LÍDER</span>
+            <span class="text-[11px] font-bold tracking-widest text-[#B8860B] flex items-center gap-1">🏆 SERIE LÍDER</span>
             <span class="text-[11px] font-semibold text-slate-400" id="leader-updated">#1 de 8 en tendencia</span>
           </div>
           <div class="flex items-end justify-between gap-3">
             <div>
-              <p class="text-3xl font-black tracking-tight text-[#0f2f66]" id="leader-serial">A08800880</p>
+              <p class="text-3xl font-black tracking-tight text-[#12305F]" id="leader-serial">A08800880</p>
               <p class="text-sm text-slate-500 mt-0.5"><span id="leader-letters">A</span> · <span id="leader-digits">08800880</span> · <span id="leader-year">2017</span></p>
             </div>
             <div class="text-right">
-              <p class="text-2xl font-extrabold text-emerald-500" id="leader-points">9,800</p>
+              <p class="text-2xl font-extrabold text-[#18B889]" id="leader-points">9,800</p>
               <p class="text-[11px] font-bold tracking-widest text-slate-400">PUNTOS</p>
             </div>
           </div>
           <div class="flex items-center gap-2 mt-3">
-            <span id="leader-rarity" class="px-3 h-7 inline-flex items-center rounded-full bg-[#0f2f66] text-white text-xs font-bold">RADAR</span>
-            <span id="leader-country" class="px-3 h-7 inline-flex items-center rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">🇬🇹 GT</span>
-            <span id="leader-owner" class="px-3 h-7 inline-flex items-center rounded-full bg-fuchsia-50 text-fuchsia-700 text-xs font-semibold ml-auto">@coleccionista</span>
+            <span id="leader-rarity" class="px-3 h-7 inline-flex items-center rounded-full bg-[#193E7A] text-white text-xs font-bold">RADAR</span>
+            <span id="leader-country" class="px-3 h-7 inline-flex items-center rounded-full bg-[#18B889]/12 text-[#0D8F6B] text-xs font-semibold">🇬🇹 GT</span>
+            <span id="leader-owner" class="px-3 h-7 inline-flex items-center rounded-full bg-[#D5A83A]/15 text-[#8a6a1f] text-xs font-semibold ml-auto">@coleccionista</span>
           </div>
           <!-- Histograma de dígitos: real, calculado de la serie que se muestra -->
           <div id="leader-digit-histogram" class="mt-4 flex items-end gap-1.5 h-14"></div>
         </article>
       </section>
 
-      <!-- ACCIONES RÁPIDAS -->
-      <section class="px-5 mt-4 flex flex-col gap-3">
-        <button onclick="goTo('registrar')" class="h-14 rounded-2xl bg-white shadow-soft flex items-center justify-center gap-2 font-extrabold text-[#0f2f66] text-lg">
-          🎯 Registra Serie
-        </button>
+    <!-- ACCIONES RÁPIDAS -->
+<section class="px-5 mt-4 flex flex-col gap-3">
 
-        <!-- Coincidencia Global: detecta si tu ÚLTIMA serie registrada comparte dígitos con otra en la Bóveda -->
-        <button id="global-coincidence-banner" onclick="openCoincidenceModal()" class="hidden h-14 rounded-2xl bg-white/10 text-white flex items-center justify-center gap-2 font-bold text-sm px-4 text-center">
-          🌐 <span id="global-coincidence-text">Coincidencia Global</span>
-        </button>
+  <!-- ACCIÓN PRINCIPAL -->
+  <button
+    onclick="goTo('registrar')"
+    class="h-14 rounded-2xl bg-gradient-to-r from-[#087F5B] to-[#10A36F]
+           shadow-[0_8px_20px_rgba(8,127,91,0.20)]
+           flex items-center justify-center gap-2
+           font-extrabold text-white text-lg
+           active:scale-[0.98] transition-all">
 
-        <button onclick="goTo('global')" class="h-14 rounded-2xl bg-white/10 text-white flex items-center justify-center gap-2 font-bold text-base">
-          🌐 Búsqueda Global
-        </button>
-      </section>
+    <span class="text-xl">🎯</span>
+    <span>Registra Serie</span>
+
+  </button>
+
+
+  <!-- COINCIDENCIA GLOBAL -->
+  <button
+    id="global-coincidence-banner"
+    onclick="openCoincidenceModal()"
+    class="hidden h-14 rounded-2xl bg-white/10 text-white
+           flex items-center justify-center gap-2
+           font-bold text-sm px-4 text-center
+           active:scale-[0.98] transition-all">
+
+    <span>🌐</span>
+    <span id="global-coincidence-text">
+      Coincidencia Global
+    </span>
+
+  </button>
+
+
+  <!-- BÚSQUEDA GLOBAL -->
+  <button
+    onclick="goTo('global')"
+    class="h-14 rounded-2xl bg-white/10 text-white
+           flex items-center justify-center gap-2
+           font-bold text-base
+           active:scale-[0.98] transition-all">
+
+    <span>🌐</span>
+    <span>Búsqueda Global</span>
+
+  </button>
+
+</section>
 
       <p class="text-center text-white/25 text-[11px] font-semibold mt-6">© 2026 DollarDgt.com</p>
     </div>
@@ -214,7 +251,7 @@
       </div>
 
       <!-- CTA registrar -->
-      <button id="rb-submit-btn" onclick="handleRegister()" class="mt-5 w-full h-14 rounded-2xl bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-extrabold text-lg shadow-premium opacity-50 pointer-events-none transition-opacity">
+      <button id="rb-submit-btn" onclick="handleRegister()" class="mt-5 w-full h-14 rounded-2xl bg-gradient-to-r from-gren-600 to-purple-600 text-white font-extrabold text-lg shadow-premium opacity-50 pointer-events-none transition-opacity">
         🔐 Registrar a Bóveda
       </button>
     </div>
@@ -268,11 +305,11 @@
     <!-- ============================================================= -->
     <div id="screen-perfil" class="screen-view px-5 pt-12 pb-28 hidden">
       <!-- Tarjeta de membresía: renderMembershipCard() -->
-      <div class="bg-gradient-to-br from-fuchsia-600 to-purple-700 rounded-3xl p-6 shadow-premium text-white mb-5">
+      <div class="bg-gradient-to-br from-green-700 to-green-700 rounded-3xl p-6 shadow-premium text-white mb-5">
         <div class="flex items-center gap-4">
           <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-3xl font-black">O</div>
           <div>
-            <p class="text-xl font-extrabold" id="profile-alias-native-2">@Ohd12</p>
+            <p class="text-xl font-extrabold" id="profile-alias-native-2">@Ahd</p>
             <p class="text-sm text-white/80" id="profile-sub-native">🇬🇹 Guatemala · No miembro</p>
           </div>
         </div>
@@ -360,7 +397,7 @@
         <p class="text-4xl mb-2">🔐</p>
         <h3 class="text-xl font-extrabold text-[#0f2f66] leading-snug">Registra tu Serie hoy.</h3>
         <p class="text-sm text-slate-500 mt-2 mb-5">Bóveda Global — Membresía de por vida · <span class="font-bold text-emerald-500">$5</span>.</p>
-        <button onclick="dismissHookCard(); rbGoToRegister();" class="w-full h-12 rounded-2xl bg-fuchsia-600 text-white font-bold">Registrar ahora</button>
+        <button onclick="dismissHookCard(); rbGoToRegister();" class="w-full h-12 rounded-2xl bg-green-600 text-white font-bold">Registrar ahora</button>
         <button onclick="dismissHookCard()" class="mt-2 text-sm text-slate-400">Ahora no</button>
       </div>
     </div>
@@ -511,7 +548,7 @@
         </div>
         <div class="p-4 border-t border-slate-100 flex items-center gap-2">
           <input id="chat-input" placeholder="Mensaje…" class="flex-1 h-12 rounded-2xl bg-slate-100 px-4 text-base outline-none" />
-          <button onclick="sendChatMessage()" class="w-12 h-12 rounded-full bg-fuchsia-600 text-white flex items-center justify-center text-xl">↑</button>
+          <button onclick="sendChatMessage()" class="w-12 h-12 rounded-full bg-green-600 text-white flex items-center justify-center text-xl">↑</button>
         </div>
       </div>
     </div>
