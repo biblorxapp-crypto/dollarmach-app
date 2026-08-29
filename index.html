@@ -376,6 +376,20 @@
     <!-- BOTTOM SHEETS / MODALES (.dgt-modal → .active)                 -->
     <!-- ============================================================= -->
 
+    <!-- MODAL: Confirma tu correo -->
+    <div id="confirm-email-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/60" onclick="closeModal('confirm-email-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 text-center">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <p class="text-5xl mb-3">📩</p>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-2">¡Ya casi!</h2>
+        <p class="text-sm text-slate-600 mb-1">Te enviamos un correo de confirmación a:</p>
+        <p id="confirm-email-address" class="font-bold text-[#0f2f66] mb-4 break-all">correo@ejemplo.com</p>
+        <p class="text-sm text-slate-500 mb-5">Ábrelo y toca el enlace para activar tu cuenta. Si no lo ves, revisa la carpeta de <span class="font-semibold">spam o promociones</span>.</p>
+        <button onclick="closeModal('confirm-email-modal')" class="w-full h-12 rounded-2xl bg-[#0f2f66] text-white font-bold">Entendido</button>
+      </div>
+    </div>
+
     <!-- MODAL: Auth -->
     <div id="auth-modal" class="dgt-modal fixed inset-0 z-50 hidden">
       <div class="absolute inset-0 bg-black/50" onclick="closeModal('auth-modal')"></div>
@@ -876,6 +890,17 @@ window.handleAuthSubmit = async function(mode){
       ? await sb.auth.signInWithPassword({ email, password })
       : await sb.auth.signUp({ email, password });
     if (error) throw error;
+
+    if (mode === 'signup' && !data.session){
+      // Supabase creó el usuario pero exige confirmar el correo antes de dar sesión.
+      closeModal('auth-modal');
+      document.getElementById('confirm-email-address').textContent = email;
+      openModal('confirm-email-modal');
+      document.getElementById('auth-email').value = '';
+      document.getElementById('auth-password').value = '';
+      return;
+    }
+
     session = data.user || data.session?.user || null;
     closeModal('auth-modal');
     showToast(mode === 'signin' ? 'Sesión iniciada' : 'Cuenta creada');
