@@ -52,6 +52,9 @@
         </div>
       </header>
 
+      <!-- Contador de visitas — solo uso interno, discreto -->
+      <p id="visit-counter" class="hidden text-white/30 text-[11px] font-semibold text-right px-5 mb-1">0</p>
+
       <!-- BENTO: STATS + DISTRIBUCIÓN -->
       <section class="px-5">
         <div class="flex gap-3">
@@ -1297,8 +1300,27 @@ async function initReal(){
   updateSessionUI();
   refreshPoolDependentUI();
   setInterval(rotateLeader, LEADER_ROTATE_MS);
+  trackVisit();
 }
 initReal();
+
+/* ---------------- Contador de visitas (uso interno) ---------------- */
+async function trackVisit(){
+  const el = document.getElementById('visit-counter');
+  if (!el) return;
+  try {
+    if (!sessionStorage.getItem('dgt_visit_counted_v1')){
+      sessionStorage.setItem('dgt_visit_counted_v1', '1');
+      await sb.from('site_visits').insert({});
+    }
+    const { count, error } = await sb.from('site_visits').select('*', { count: 'exact', head: true });
+    if (error) throw error;
+    el.textContent = `${(count || 0).toLocaleString('es')}`;
+    el.classList.remove('hidden');
+  } catch {
+    // Tabla site_visits aún no existe en Supabase — se oculta en silencio hasta que se cree.
+  }
+}
 
 /* =====================================================================
    BÚSQUEDA GLOBAL — tabs, chips de rareza real, resultados, favoritos
