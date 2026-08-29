@@ -360,13 +360,13 @@
     </nav>
 
     <!-- ============================================================= -->
-    <!-- POP-UP GANCHO (retención, aparece 2.5s — dgt_hook_seen_v1)     -->
+    <!-- POP-UP GANCHO (retención, aparece a los pocos segundos)        -->
     <!-- ============================================================= -->
-    <div id="hook-card" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-6">
-      <div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-premium">
-        <p class="text-4xl mb-2">💎</p>
-        <h3 class="text-xl font-extrabold text-[#0f2f66]">¿Tienes un billete raro?</h3>
-        <p class="text-sm text-slate-500 mt-2 mb-5">Regístralo gratis en la Bóveda Global y descubre su valor entre coleccionistas.</p>
+    <div id="hook-card" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-6 opacity-0 transition-opacity duration-500">
+      <div id="hook-card-box" class="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-premium scale-95 transition-transform duration-500">
+        <p class="text-4xl mb-2">🔐</p>
+        <h3 class="text-xl font-extrabold text-[#0f2f66] leading-snug">Registra tu Serie hoy.</h3>
+        <p class="text-sm text-slate-500 mt-2 mb-5">Bóveda Global — Membresía de por vida · <span class="font-bold text-emerald-500">$5</span>.</p>
         <button onclick="dismissHookCard(); rbGoToRegister();" class="w-full h-12 rounded-2xl bg-fuchsia-600 text-white font-bold">Registrar ahora</button>
         <button onclick="dismissHookCard()" class="mt-2 text-sm text-slate-400">Ahora no</button>
       </div>
@@ -1286,7 +1286,27 @@ window.openLegalModal = function(tipo){
   openModal('legal-modal');
 };
 
-window.dismissHookCard = function(){ document.getElementById('hook-card')?.classList.add('hidden'); };
+window.dismissHookCard = function(){
+  const card = document.getElementById('hook-card');
+  const box = document.getElementById('hook-card-box');
+  if (!card) return;
+  card.classList.add('opacity-0');
+  box.classList.add('scale-95');
+  setTimeout(() => card.classList.add('hidden'), 300);
+};
+function showHookCardOnce(){
+  if (sessionStorage.getItem('dgt_hook_seen_v1')) return;
+  setTimeout(() => {
+    sessionStorage.setItem('dgt_hook_seen_v1', '1');
+    const card = document.getElementById('hook-card');
+    if (!card) return;
+    card.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      card.classList.remove('opacity-0');
+      document.getElementById('hook-card-box').classList.remove('scale-95');
+    });
+  }, 3000);
+}
 
 /* ---------------- Inicialización real ---------------- */
 async function initReal(){
@@ -1301,6 +1321,7 @@ async function initReal(){
   refreshPoolDependentUI();
   setInterval(rotateLeader, LEADER_ROTATE_MS);
   trackVisit();
+  showHookCardOnce();
 }
 initReal();
 
