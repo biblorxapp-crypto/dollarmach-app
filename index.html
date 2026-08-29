@@ -849,6 +849,7 @@ function runPendingAction(){
   if (action.type === 'register') handleRegister();
   if (action.type === 'membership') openMembershipModal();
   if (action.type === 'toque') executeToque(action.payload);
+  if (action.type === 'watch') toggleWatchSerie(action.payload.serial);
 }
 
 /* ---------------- Sesión / Auth real ---------------- */
@@ -919,6 +920,18 @@ async function loadUserContext(){
   const { data: mem } = await sb.from('members').select('active').eq('user_id', session.id).maybeSingle();
   membershipActive = !!mem?.active;
   updateSessionUI();
+  loadNotifications();
+}
+async function loadNotifications(){
+  if (!session) return;
+  try {
+    const { data, error } = await sb.from('dgt_notifications').select('*').eq('read', false).order('created_at', { ascending: true }).limit(10);
+    if (error) throw error;
+    if (!data || data.length === 0) return;
+    data.forEach((n, i) => setTimeout(() => showToast(n.message), i * 3200));
+    const ids = data.map(n => n.id);
+    await sb.from('dgt_notifications').update({ read: true }).in('id', ids);
+  } catch { /* tabla aún no existe o sin permisos — se ignora en silencio */ }
 }
 
 /* ---------------- Perfil real ---------------- */
@@ -1096,8 +1109,38 @@ async function fetchFromFirstAvailable(orderCol, limit){
 }
 async function fetchPool(){
   const rows = await fetchFromFirstAvailable('points', 300);
-  MOCK_POOL = rows.map(row => ({ ...row, serial: row.serial || row.serial_display || row.digits, owner: row.owner || row.alias, rarity: normalizeRarity(row.rarity) }));
+  MOCK_POOL = rows.map(row => ({ ...row, serial: row.serial || row.serial_display || row.digits, owner: row.owner || row.alias, rarity: normalizeRarity(row.rarity), disponibilidad: row.disponibilidad || 'mantener' }));
+  await fetchDemandAndWatchers();
   return MOCK_POOL;
+}
+
+/* ---------------- Demanda (toques activos por serie) + series que sigo ---------------- */
+let DEMAND_COUNTS = {};
+let MY_WATCHED = new Set();
+async function fetchDemandAndWatchers(){
+  try {
+    const { data: toques } = await sb.from('dgt_toques').select('serial,status').in('status', ['pending','accepted']);
+    const counts = {};
+    (toques || []).forEach(t => { if (t.serial) counts[t.serial] = (counts[t.serial] || 0) + 1; });
+    DEMAND_COUNTS = counts;
+  } catch { DEMAND_COUNTS = {}; }
+  try {
+    if (session){
+      const { data: watched } = await sb.from('dgt_watchers').select('serial');
+      MY_WATCHED = new Set((watched || []).map(w => w.serial));
+    } else {
+      MY_WATCHED = new Set();
+    }
+  } catch { MY_WATCHED = new Set(); }
+}
+function demandBadgeHtml(serial){
+  const n = DEMAND_COUNTS[serial] || 0;
+  if (n === 0) return '';
+  let icon = '👤', label = 'Bajo';
+  if (n >= 10){ icon = '🔥🔥'; label = 'Muy alto'; }
+  else if (n >= 4){ icon = '🔥'; label = 'Alto'; }
+  else if (n >= 2){ icon = '👤👤'; label = 'Medio'; }
+  return `<span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full whitespace-nowrap">${icon} ${n} interesado${n===1?'':'s'} · ${label}</span>`;
 }
 
 /* ---------------- Estadísticas + serie líder reales (pantalla Inicio) ---------------- */
@@ -1515,17 +1558,27 @@ function globalResultCardHtml(r){
   const isFav = favs.includes(r.serial);
   const simLabel = r._score ? ` · ${r._score}% similitud` : '';
   const anio = r.yr || r.year || '';
+  const esMio = profile?.alias && r.owner === profile.alias;
+  const siguiendo = MY_WATCHED.has(r.serial);
+  const disp = r.disponibilidad || 'mantener';
+  const dispTag = disp === 'transferible'
+    ? `<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">🔴 Transferible</span>`
+    : disp === 'propuestas'
+    ? `<span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">🟡 Recibe propuestas</span>`
+    : '';
   return `
     <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
       <div class="flex-1 min-w-0">
         <p class="font-extrabold text-[#0f2f66] text-lg truncate">${r.serial || ''}</p>
         <p class="text-xs text-slate-500 truncate">${r.country || ''}${anio ? ' · ' + anio : ''} · ${r.rarity.label}${simLabel}</p>
-        <p class="text-xs text-fuchsia-600 font-semibold">@${r.owner || 'anónimo'}</p>
+        <p class="text-xs text-fuchsia-600 font-semibold mb-1">@${r.owner || 'anónimo'}</p>
+        <div class="flex flex-wrap gap-1">${dispTag}${demandBadgeHtml(r.serial)}</div>
       </div>
       <span class="text-emerald-500 font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
       <div class="flex flex-col gap-1.5">
         <button onclick="nativeToggleFavorite('${r.serial}')" class="w-10 h-10 rounded-xl ${isFav ? 'bg-rose-500 text-white' : 'bg-rose-50 text-rose-500'} flex items-center justify-center text-lg">♥</button>
-        <button onclick="nativeToqueRow('${r.serial}')" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-lg">✋</button>
+        ${esMio ? '' : `<button onclick="nativeToqueRow('${r.serial}')" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-lg">✋</button>`}
+        ${esMio ? '' : `<button onclick="toggleWatchSerie('${r.serial}')" class="w-10 h-10 rounded-xl ${siguiendo ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-600'} flex items-center justify-center text-lg" title="Avísame si se libera">🔔</button>`}
       </div>
     </div>`;
 }
@@ -1562,6 +1615,17 @@ function onToqueClick(serial){
   if (!gate('toque', payload)) return;
   executeToque(payload);
 }
+window.toggleWatchSerie = async function(serial){
+  if (!gate('watch', { serial })) return;
+  const yaSigue = MY_WATCHED.has(serial);
+  try {
+    const { error } = await sb.rpc('toggle_watch_serie', { p_serial: serial, p_watch: !yaSigue });
+    if (error) throw error;
+    if (yaSigue) MY_WATCHED.delete(serial); else MY_WATCHED.add(serial);
+    showToast(yaSigue ? 'Ya no sigues esta serie' : '🔔 Te avisaremos si esta serie se libera');
+    renderGlobalResults();
+  } catch (e) { showToast('Error: ' + (e.message || e)); }
+};
 
 /* ---------------- Favoritos (pantalla) ---------------- */
 function renderFavoritosScreen(){
@@ -1576,15 +1640,37 @@ renderGlobalResults();
 /* ---------------- Perfil: mis series + resumen de toques ---------------- */
 function profileSeriesCardHtml(r){
   const anio = r.yr || r.year || '';
+  const disp = r.disponibilidad || 'mantener';
+  const opciones = [
+    { key: 'mantener', label: '🟢 Mantener' },
+    { key: 'propuestas', label: '🟡 Propuestas' },
+    { key: 'transferible', label: '🔴 Transferible' }
+  ];
   return `
-    <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
-      <div class="flex-1 min-w-0">
-        <p class="font-extrabold text-[#0f2f66] text-lg truncate">${r.serial || ''}</p>
-        <p class="text-xs text-slate-500 truncate">${r.country || ''}${anio ? ' · ' + anio : ''} · ${r.rarity.label}</p>
+    <div class="bg-white rounded-2xl p-3.5 shadow-soft flex flex-col gap-2">
+      <div class="flex items-center gap-3">
+        <div class="flex-1 min-w-0">
+          <p class="font-extrabold text-[#0f2f66] text-lg truncate">${r.serial || ''}</p>
+          <p class="text-xs text-slate-500 truncate">${r.country || ''}${anio ? ' · ' + anio : ''} · ${r.rarity.label}</p>
+        </div>
+        <span class="text-emerald-500 font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
       </div>
-      <span class="text-emerald-500 font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
+      ${demandBadgeHtml(r.serial) ? `<div>${demandBadgeHtml(r.serial)}</div>` : ''}
+      <div class="flex gap-1.5">
+        ${opciones.map(o => `<button onclick="cambiarDisponibilidad('${r.serial}','${o.key}')" class="flex-1 h-8 rounded-lg text-[11px] font-bold ${disp === o.key ? 'bg-[#0f2f66] text-white' : 'bg-slate-100 text-slate-500'}">${o.label}</button>`).join('')}
+      </div>
     </div>`;
 }
+window.cambiarDisponibilidad = async function(serial, estado){
+  try {
+    const { error } = await sb.rpc('actualizar_disponibilidad', { p_serial: serial, p_estado: estado });
+    if (error) throw error;
+    showToast(estado === 'mantener' ? 'Serie marcada como no disponible' : estado === 'propuestas' ? '🟡 Ahora recibes propuestas por esta serie' : '🔴 Serie marcada como transferible');
+    await fetchPool();
+    refreshPoolDependentUI();
+    renderSeriesModal();
+  } catch (e) { showToast('Error: ' + (e.message || e)); }
+};
 let profileSeriesShowCount = 4;
 function renderProfileSeries(){
   const summary = document.getElementById('profile-series-summary');
