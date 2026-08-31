@@ -303,7 +303,6 @@
   </button>
 
 
-  
   <!-- BÚSQUEDA GLOBAL -->
   <button
     onclick="goTo('global')"
@@ -424,7 +423,7 @@
         <div class="flex-1 relative overflow-hidden mx-5 rounded-3xl mb-3 bg-black">
           <video id="scan-video" class="w-full h-full object-cover" playsinline muted autoplay></video>
           <canvas id="scan-canvas" class="hidden"></canvas>
-          <div class="absolute inset-6 border-2 border-[#FF6A00] rounded-2xl pointer-events-none dgt-scan-guide"></div>
+          <div id="scan-guide" class="absolute inset-6 border-2 border-[#FF6A00] rounded-2xl pointer-events-none dgt-scan-guide"></div>
         </div>
         <p id="scan-status" class="text-center text-white/70 text-sm px-6 pb-8">Apunta la cámara al número de serie del billete…</p>
       </div>
@@ -1123,7 +1122,9 @@ window.openScanModal = async function(){
   scanAttempts = 0;
   document.getElementById('scan-status').textContent = 'Apunta la cámara al número de serie del billete…';
   try {
-    scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    scanStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+    });
     const video = document.getElementById('scan-video');
     video.srcObject = scanStream;
     await video.play();
@@ -1144,17 +1145,62 @@ function startScanLoop(){
 function stopScanLoop(){
   if (scanLoopId){ clearInterval(scanLoopId); scanLoopId = null; }
 }
+// Mapea el recuadro guía (posición en pantalla) a coordenadas nativas del
+// video, compensando el recorte que hace object-fit:cover.
+function getGuideCropRectOnVideo(video, guideEl){
+  const videoRect = video.getBoundingClientRect();
+  const guideRect = guideEl.getBoundingClientRect();
+  const scale = Math.max(videoRect.width / video.videoWidth, videoRect.height / video.videoHeight);
+  const offsetX = (video.videoWidth * scale - videoRect.width) / 2;
+  const offsetY = (video.videoHeight * scale - videoRect.height) / 2;
+  const dvLeft = (guideRect.left - videoRect.left) + offsetX;
+  const dvTop = (guideRect.top - videoRect.top) + offsetY;
+  let sx = dvLeft / scale;
+  let sy = dvTop / scale;
+  let sw = guideRect.width / scale;
+  let sh = guideRect.height / scale;
+  sx = Math.max(0, Math.min(sx, video.videoWidth - 1));
+  sy = Math.max(0, Math.min(sy, video.videoHeight - 1));
+  sw = Math.max(1, Math.min(sw, video.videoWidth - sx));
+  sh = Math.max(1, Math.min(sh, video.videoHeight - sy));
+  return { sx, sy, sw, sh };
+}
+// Escala de grises + umbral adaptativo (binarización) — Tesseract lee mucho
+// mejor texto blanco/negro duro que una foto a color con ruido de fondo.
+function preprocessCanvasForOCR(canvas){
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imgData.data;
+  const gray = new Uint8ClampedArray(data.length / 4);
+  let sum = 0;
+  for (let i = 0, p = 0; i < data.length; i += 4, p++){
+    const g = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    gray[p] = g;
+    sum += g;
+  }
+  const avg = sum / gray.length;
+  const threshold = avg * 0.85; // umbral bajo el promedio: favorece tinta oscura sobre fondo claro
+  for (let i = 0, p = 0; i < data.length; i += 4, p++){
+    const v = gray[p] > threshold ? 255 : 0;
+    data[i] = data[i + 1] = data[i + 2] = v;
+  }
+  ctx.putImageData(imgData, 0, 0);
+}
 async function captureAndReadFrame(){
   if (scanBusy) return;
   const video = document.getElementById('scan-video');
-  if (!video || video.readyState < 2) return;
+  const guideEl = document.getElementById('scan-guide');
+  if (!video || video.readyState < 2 || !guideEl) return;
   scanBusy = true;
   scanAttempts++;
   try {
+    const { sx, sy, sw, sh } = getGuideCropRectOnVideo(video, guideEl);
+    const UPSCALE = 2; // el recorte es pequeño — se agranda para dar más píxeles por dígito
     const canvas = document.getElementById('scan-canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.width = Math.round(sw * UPSCALE);
+    canvas.height = Math.round(sh * UPSCALE);
+    canvas.getContext('2d').drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+    preprocessCanvasForOCR(canvas);
 
     const result = await Tesseract.recognize(canvas, 'eng', {
       tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
