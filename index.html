@@ -249,24 +249,8 @@
   </button>
 
 
-  <!-- COINCIDENCIA GLOBAL -->
-  <button
-    id="global-coincidence-banner"
-    onclick="openCoincidenceModal()"
-    class="hidden h-14 rounded-2xl bg-white/10 text-white
-           flex items-center justify-center gap-2
-           font-bold text-sm px-4 text-center
-           active:scale-[0.98] transition-all">
-
-    <span>🌐</span>
-    <span id="global-coincidence-text">
-      Coincidencia Global
-    </span>
-
-  </button>
-
-
-  <!-- BÚSQUEDA GLOBAL -->
+  
+   <!-- BÚSQUEDA GLOBAL -->
   <button
     onclick="goTo('global')"
     class="h-14 rounded-2xl bg-white/10 text-white
@@ -909,7 +893,7 @@ document.addEventListener('input', e => {
     const len = limpio.length;
     if (len === 0){ count.textContent = 'Introduce entre 6 y 10 dígitos'; count.className = 'text-xs font-semibold mt-1 text-slate-400'; }
     else if (len < 6){ count.textContent = `Faltan ${6-len} dígito(s) — mínimo 6`; count.className = 'text-xs font-semibold mt-1 text-rose-500'; }
-    else { count.textContent = `${len} dígitos ✓`; count.className = 'text-xs font-semibold mt-1 text-[#E05A00]'; }
+    else { count.textContent = `${len} dígitos ✓`; count.className = 'text-xs font-semibold mt-1 text-emerald-500'; }
     actualizarRarezaPreview();
     refreshValidacion();
   }
