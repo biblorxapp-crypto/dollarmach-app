@@ -56,7 +56,7 @@
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <div id="brand-logo"
-              class="w-16 h-16 rounded-full bg-[#0A2453] shadow-soft overflow-hidden shrink-0 flex items-center justify-center">
+              class="w-20 h-20 rounded-full bg-[#0A2453] shadow-soft overflow-hidden shrink-0 flex items-center justify-center">
               <span class="font-extrabold text-2xl tracking-tight text-white">d<span class="text-[#FF6A00]">G</span>t</span>
             </div>
             <span class="text-white font-extrabold text-2xl tracking-tight">DOLLAR<span class="text-[#FF6A00]">DGT</span></span>
@@ -249,8 +249,24 @@
   </button>
 
 
-  
-   <!-- BÚSQUEDA GLOBAL -->
+  <!-- COINCIDENCIA GLOBAL -->
+  <button
+    id="global-coincidence-banner"
+    onclick="openCoincidenceModal()"
+    class="hidden h-14 rounded-2xl bg-white/10 text-white
+           flex items-center justify-center gap-2
+           font-bold text-sm px-4 text-center
+           active:scale-[0.98] transition-all">
+
+    <span>🌐</span>
+    <span id="global-coincidence-text">
+      Coincidencia Global
+    </span>
+
+  </button>
+
+
+  <!-- BÚSQUEDA GLOBAL -->
   <button
     onclick="goTo('global')"
     class="h-14 rounded-2xl bg-white/10 text-white
@@ -341,13 +357,17 @@
           <p id="rb-digit-count" class="text-xs font-semibold mt-1 text-slate-400">Introduce entre 6 y 10 dígitos</p>
         </div>
 
-        <p class="text-center text-sm text-slate-500 leading-snug px-2 pt-1">
-          ¿Tienes un billete único? Regístralo hoy en la Bóveda Global y conecta con coleccionistas de todo el mundo.
-        </p>
+        <!-- Coincidencias en vivo desde la Bóveda, alimentadas mientras se escriben los dígitos -->
+        <div id="rb-live-match" class="pt-1">
+          <p id="rb-live-match-empty" class="text-center text-sm text-slate-500 leading-snug px-2">
+            Escribe el número de serie y te mostraremos aquí las coincidencias más parecidas ya registradas en la Bóveda.
+          </p>
+          <div id="rb-live-match-results" class="hidden flex flex-col gap-2"></div>
+        </div>
       </div>
 
       <!-- CTA registrar -->
-      <button id="rb-submit-btn" onclick="handleRegister()" class="mt-5 w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6A00] to-[#E05A00] text-white font-extrabold text-lg shadow-premium opacity-50 pointer-events-none transition-opacity">
+      <button id="rb-submit-btn" onclick="handleRegister()" class="mt-8 w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6A00] to-[#E05A00] text-white font-extrabold text-lg shadow-premium opacity-50 pointer-events-none transition-opacity">
         🔐 Registrar a Bóveda
       </button>
     </div>
@@ -896,8 +916,50 @@ document.addEventListener('input', e => {
     else { count.textContent = `${len} dígitos ✓`; count.className = 'text-xs font-semibold mt-1 text-emerald-500'; }
     actualizarRarezaPreview();
     refreshValidacion();
+    renderLiveMatch();
   }
 });
+
+/* ---------------- Coincidencias en vivo (Registrar) — reutiliza rbSimilarityScore de Búsqueda Global ---------------- */
+function renderLiveMatch(){
+  const digits = inputDigitos().value;
+  const emptyMsg = document.getElementById('rb-live-match-empty');
+  const results = document.getElementById('rb-live-match-results');
+  if (!emptyMsg || !results) return;
+
+  if (digits.length < 3){
+    emptyMsg.textContent = 'Escribe el número de serie y te mostraremos aquí las coincidencias más parecidas ya registradas en la Bóveda.';
+    emptyMsg.classList.remove('hidden');
+    results.classList.add('hidden');
+    results.innerHTML = '';
+    return;
+  }
+
+  const scored = MOCK_POOL
+    .map(r => ({ r, score: rbSimilarityScore(digits, r.digits || '') }))
+    .filter(x => x.score >= 40)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
+  if (scored.length === 0){
+    emptyMsg.textContent = 'Sin coincidencias parecidas todavía en la Bóveda — tu serie podría ser única.';
+    emptyMsg.classList.remove('hidden');
+    results.classList.add('hidden');
+    results.innerHTML = '';
+    return;
+  }
+
+  emptyMsg.classList.add('hidden');
+  results.classList.remove('hidden');
+  results.innerHTML = scored.map(({ r, score }) => `
+    <div class="bg-white rounded-2xl px-4 py-3 flex items-center gap-3 shadow-soft">
+      <div class="flex-1 min-w-0">
+        <p class="font-extrabold text-[#0f2f66] text-sm truncate">${r.serial || ''}</p>
+        <p class="text-xs text-slate-500 truncate">${r.country || ''} · ${r.rarity.label} · @${r.owner || 'anónimo'}</p>
+      </div>
+      <span class="text-[10px] font-bold text-[#E05A00] bg-[#FFF1E6] px-2 py-1 rounded-full whitespace-nowrap shrink-0">${score}% similar</span>
+    </div>`).join('');
+}
 
 /* ---------------- Motor de rareza y puntos — IDÉNTICO al de producción ---------------- */
 function calcRarity(digits) {
@@ -1390,7 +1452,7 @@ function rotateLeader(){
   }
   renderLeader();
 }
-function refreshPoolDependentUI(){ buildTrendingPool(); renderLeader(); renderStats(); renderGlobalResults(); renderFavoritosScreen(); renderCoincidenceBanner(); }
+function refreshPoolDependentUI(){ buildTrendingPool(); renderLeader(); renderStats(); renderGlobalResults(); renderFavoritosScreen(); renderCoincidenceBanner(); renderLiveMatch(); }
 
 /* ---------------- Coincidencia Global (tu última serie vs. la Bóveda) ---------------- */
 function getLastRegistered(){
