@@ -137,9 +137,9 @@
           <!-- Card conteos -->
           <div class="bg-white/85 rounded-3xl px-5 py-4 text-center shadow-soft shrink-0">
             <p class="text-3xl font-extrabold text-[#0f2f66]" id="stats-total">300</p>
-            <p class="text-[11px] font-bold tracking-widest text-slate-500">SERIES</p>
+            <p class="text-[11px] font-bold tracking-widest text-slate-500" data-i18n="home.series">SERIES</p>
             <p class="text-3xl font-extrabold text-[#0f2f66] mt-2">21</p>
-            <p class="text-[11px] font-bold tracking-widest text-slate-500">PAÍSES</p>
+            <p class="text-[11px] font-bold tracking-widest text-slate-500" data-i18n="home.paises">PAÍSES</p>
           </div>
           <!-- Barra de distribución de rarezas -->
           <div class="flex-1 bg-white/85 rounded-3xl px-4 py-4 shadow-soft flex flex-col justify-center">
@@ -159,7 +159,7 @@
             </div>
             <div class="flex items-center justify-between mt-3">
               <span class="text-[#0f2f66] font-extrabold text-lg" id="stats-value">544K</span>
-              <span class="text-slate-400 font-bold text-xs tracking-widest">VALOR TOTAL</span>
+              <span class="text-slate-400 font-bold text-xs tracking-widest" data-i18n="home.valorTotal">VALOR TOTAL</span>
             </div>
           </div>
         </div>
@@ -185,7 +185,7 @@
       <span
         class="text-[11px] font-extrabold tracking-widest
                text-[#E05A00] flex items-center gap-1.5">
-        <span class="dgt-live-dot"></span> SERIE LÍDER
+        <span class="dgt-live-dot"></span> <span data-i18n="home.serieLider">SERIE LÍDER</span>
       </span>
 
       <span
@@ -233,7 +233,8 @@
 
         <p
           class="text-[10px] font-extrabold tracking-[0.18em]
-                 text-slate-400 mt-1">
+                 text-slate-400 mt-1"
+          data-i18n="home.puntos">
           PUNTOS
         </p>
 
@@ -298,7 +299,7 @@
            active:scale-[0.98] transition-all">
 
     <span class="text-xl">🎯</span>
-    <span>Registra Serie</span>
+    <span data-i18n="home.registraSerie">Registra Serie</span>
 
   </button>
 
@@ -312,7 +313,7 @@
            active:scale-[0.98] transition-all">
 
     <span>🌐</span>
-    <span>Búsqueda Global</span>
+    <span data-i18n="home.busquedaGlobal">Búsqueda Global</span>
 
   </button>
 
@@ -325,17 +326,17 @@
     <!-- SCREEN: GLOBAL (Buscar / Por Rareza) — oculto en la app        -->
     <!-- ============================================================= -->
     <div id="screen-global" class="screen-view px-5 pt-12 pb-28 hidden">
-      <h1 class="text-white text-2xl font-extrabold mb-4">Búsqueda Global</h1>
+      <h1 class="text-white text-2xl font-extrabold mb-4" data-i18n="global.title">Búsqueda Global</h1>
 
       <!-- Sub-tabs -->
       <div class="flex gap-2 mb-4 p-1 bg-white/10 rounded-2xl">
-        <button id="global-tab-buscar" onclick="setGlobalTab('buscar')" class="flex-1 h-11 rounded-xl bg-white text-[#0f2f66] font-bold text-sm">Buscar</button>
-        <button id="global-tab-rareza" onclick="setGlobalTab('rareza')" class="flex-1 h-11 rounded-xl text-white/80 font-semibold text-sm">Por Rareza</button>
+        <button id="global-tab-buscar" onclick="setGlobalTab('buscar')" class="flex-1 h-11 rounded-xl bg-white text-[#0f2f66] font-bold text-sm" data-i18n="global.tabBuscar">Buscar</button>
+        <button id="global-tab-rareza" onclick="setGlobalTab('rareza')" class="flex-1 h-11 rounded-xl text-white/80 font-semibold text-sm" data-i18n="global.tabRareza">Por Rareza</button>
       </div>
 
       <!-- Input de búsqueda -->
       <div id="global-search-box" class="relative mb-4">
-        <input id="global-search-input" oninput="scheduleCompactSearch()" type="text" placeholder="Buscar serial, país, @alias…"
+        <input id="global-search-input" oninput="scheduleCompactSearch()" type="text" placeholder="Buscar serial, país, @alias…" data-i18n-placeholder="global.searchPlaceholder"
           class="w-full h-12 rounded-2xl bg-white pl-11 pr-4 text-base placeholder:text-slate-400 shadow-soft outline-none" />
         <svg class="w-5 h-5 absolute left-4 top-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.3-4.3m1.3-5.2a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       </div>
@@ -346,21 +347,21 @@
       <!-- Resultados -->
       <div id="global-search-results" class="flex flex-col gap-2"></div>
 
-      <button id="global-see-more-btn" onclick="openSeeMoreModal()" class="hidden mt-4 w-full h-12 rounded-2xl bg-white/10 text-white font-semibold">Ver más</button>
+      <button id="global-see-more-btn" onclick="openSeeMoreModal()" class="hidden mt-4 w-full h-12 rounded-2xl bg-white/10 text-white font-semibold" data-i18n="global.verMas">Ver más</button>
     </div>
 
     <!-- ============================================================= -->
     <!-- SCREEN: REGISTRAR BILLETE — oculto                             -->
     <!-- ============================================================= -->
     <div id="screen-registrar" class="screen-view px-5 pt-12 pb-28 hidden">
-      <h1 class="text-white text-2xl font-extrabold mb-4">Registrar Billete</h1>
+      <h1 class="text-white text-2xl font-extrabold mb-4" data-i18n="registrar.title">Registrar Billete</h1>
 
       <div class="bg-slate-200 rounded-3xl p-4 pb-6 shadow-premium flex flex-col gap-3">
 
         <!-- País + Moneda -->
         <div class="flex gap-3">
           <button onclick="openPicker('pais')" class="flex-[2.2] h-14 rounded-2xl bg-white shadow-soft flex items-center gap-2 px-4 font-bold text-slate-700 text-left" id="rb-pais">
-            <span id="rb-pais-flag">🌎</span> <span id="rb-pais-nombre">País</span>
+            <span id="rb-pais-flag">🌎</span> <span id="rb-pais-nombre" data-i18n="registrar.pais">País</span>
           </button>
           <button onclick="openPicker('moneda')" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-extrabold text-slate-700" id="rb-moneda">USD</button>
         </div>
@@ -370,13 +371,13 @@
           <button onclick="openPicker('letra1')" id="rb-letra1" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-extrabold text-2xl text-slate-800">A-Z</button>
           <button onclick="openPicker('letra2')" id="rb-letra2" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-extrabold text-2xl text-slate-400">A-Z</button>
           <button onclick="openPicker('letra3')" id="rb-letra3" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-extrabold text-2xl text-slate-400">A-Z</button>
-          <button id="rb-rarity-preview" class="w-24 h-14 rounded-2xl bg-[#0f2f66] shadow-soft font-bold text-white text-sm">Común</button>
+          <button id="rb-rarity-preview" class="w-24 h-14 rounded-2xl bg-[#0f2f66] shadow-soft font-bold text-white text-sm" data-i18n="registrar.rarityCommon">Común</button>
         </div>
 
         <!-- Denominación + Año -->
         <div class="flex gap-3">
           <button onclick="openPicker('denom')" id="rb-denominacion" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-bold text-slate-700">DD. OO.</button>
-          <button onclick="openPicker('anio')" id="rb-anio" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-bold text-slate-700">Año</button>
+          <button onclick="openPicker('anio')" id="rb-anio" class="flex-1 h-14 rounded-2xl bg-white shadow-soft font-bold text-slate-700" data-i18n="registrar.anio">Año</button>
         </div>
 
         <!-- Display serie numérica: input real, activa el teclado nativo -->
@@ -392,12 +393,12 @@
             autocomplete="off"
             class="w-full bg-transparent text-center text-4xl font-black tracking-widest text-slate-800 outline-none placeholder:text-slate-300"
           />
-          <p id="rb-digit-count" class="text-xs font-semibold mt-1 text-slate-400">Introduce entre 6 y 10 dígitos</p>
+          <p id="rb-digit-count" class="text-xs font-semibold mt-1 text-slate-400" data-i18n="registrar.digitsHintEmpty">Introduce entre 6 y 10 dígitos</p>
         </div>
 
         <!-- Coincidencias en vivo desde la Bóveda, alimentadas mientras se escriben los dígitos -->
         <div id="rb-live-match" class="pt-1">
-          <p id="rb-live-match-empty" class="text-center text-sm text-slate-500 leading-snug px-2">
+          <p id="rb-live-match-empty" class="text-center text-sm text-slate-500 leading-snug px-2" data-i18n="registrar.liveMatchEmpty">
             Escribe el número de serie y te mostraremos aquí las coincidencias más parecidas ya registradas en la Bóveda.
           </p>
           <div id="rb-live-match-results" class="hidden flex flex-col gap-2"></div>
@@ -405,7 +406,7 @@
       </div>
 
       <!-- CTA registrar -->
-      <button id="rb-submit-btn" onclick="handleRegister()" class="mt-8 w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6A00] to-[#E05A00] text-white font-extrabold text-lg shadow-premium opacity-50 pointer-events-none transition-opacity">
+      <button id="rb-submit-btn" onclick="handleRegister()" class="mt-8 w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6A00] to-[#E05A00] text-white font-extrabold text-lg shadow-premium opacity-50 pointer-events-none transition-opacity" data-i18n="registrar.submit">
         🔐 Registrar a Bóveda
       </button>
     </div>
@@ -417,7 +418,7 @@
       <div class="absolute inset-0 bg-black"></div>
       <div class="absolute inset-0 flex flex-col">
         <div class="flex items-center justify-between p-5">
-          <p class="text-white font-extrabold text-lg">Escanear serie</p>
+          <p class="text-white font-extrabold text-lg" data-i18n="scan.title">Escanear serie</p>
           <button onclick="closeScanModal()" class="w-9 h-9 rounded-full bg-white/20 text-white font-bold">✕</button>
         </div>
         <div class="flex-1 relative overflow-hidden mx-5 rounded-3xl mb-3 bg-black">
@@ -425,7 +426,7 @@
           <canvas id="scan-canvas" class="hidden"></canvas>
           <div id="scan-guide" class="absolute inset-6 border-2 border-[#FF6A00] rounded-2xl pointer-events-none dgt-scan-guide"></div>
         </div>
-        <p id="scan-status" class="text-center text-white/70 text-sm px-6 pb-8">Apunta la cámara al número de serie del billete…</p>
+        <p id="scan-status" class="text-center text-white/70 text-sm px-6 pb-8" data-i18n="scan.hint">Apunta la cámara al número de serie del billete…</p>
       </div>
     </div>
 
@@ -449,7 +450,7 @@
     <!-- SCREEN: FAVORITOS — oculto                                     -->
     <!-- ============================================================= -->
     <div id="screen-favoritos" class="screen-view px-5 pt-12 pb-28 hidden">
-      <h1 class="text-white text-2xl font-extrabold mb-4">Favoritos</h1>
+      <h1 class="text-white text-2xl font-extrabold mb-4" data-i18n="favoritos.title">Favoritos</h1>
       <!-- loadFavoritesScreen() → localStorage dgt_favorites_v1 -->
       <div id="fav-list-native" class="flex flex-col gap-2">
         <div class="bg-white rounded-2xl p-3.5 shadow-soft flex items-center gap-3">
@@ -492,7 +493,7 @@
       <div class="bg-white rounded-3xl p-5 shadow-soft mb-5">
         <div class="flex items-center justify-between mb-3">
           <div>
-            <p class="text-[10px] font-extrabold tracking-widest text-slate-400">RANGO DE COLECCIONISTA</p>
+            <p class="text-[10px] font-extrabold tracking-widest text-slate-400" data-i18n="perfil.rangoLabel">RANGO DE COLECCIONISTA</p>
             <p id="rango-nombre" class="text-xl font-black text-[#0f2f66]">Novato</p>
           </div>
           <span id="rango-emoji" class="text-3xl">🌱</span>
@@ -523,28 +524,31 @@
       <div class="flex gap-3 mb-5">
         <button onclick="openMySeriesModal()" class="flex-1 bg-white rounded-3xl p-4 shadow-soft flex flex-col items-start gap-2">
           <div class="w-11 h-11 rounded-2xl bg-[#0f2f66]/10 flex items-center justify-center text-xl">🎯</div>
-          <p class="font-bold text-[#0f2f66] text-sm">Mis registros</p>
-          <p id="profile-series-summary" class="text-xs text-slate-400">Sin registros todavía</p>
+          <p class="font-bold text-[#0f2f66] text-sm" data-i18n="perfil.misRegistros">Mis registros</p>
+          <p id="profile-series-summary" class="text-xs text-slate-400" data-i18n="perfil.sinRegistros">Sin registros todavía</p>
         </button>
         <button onclick="openToquesModal()" class="flex-1 bg-white rounded-3xl p-4 shadow-soft flex flex-col items-start gap-2">
           <div class="w-11 h-11 rounded-2xl bg-[#0f2f66]/10 flex items-center justify-center text-xl">✋</div>
-          <p class="font-bold text-[#0f2f66] text-sm">Mis toques</p>
-          <p id="profile-toques-summary" class="text-xs text-slate-400">Sin toques todavía</p>
+          <p class="font-bold text-[#0f2f66] text-sm" data-i18n="perfil.misToques">Mis toques</p>
+          <p id="profile-toques-summary" class="text-xs text-slate-400" data-i18n="perfil.sinToques">Sin toques todavía</p>
         </button>
       </div>
 
       <!-- CTA membresía dinámico -->
       <button id="perfil-upsell-btn" onclick="openStripeDirect()" class="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF6A00] to-[#E05A00] text-white font-extrabold text-lg shadow-premium mb-3">
-        👑 Membresía de por vida: $5
+        <span data-i18n="perfil.membership">👑 Membresía de por vida: $5</span>
       </button>
 
       <!-- Sesión -->
-      <button id="perfil-session-btn" onclick="onSessionActionClick()" class="w-full h-12 rounded-2xl bg-white/10 text-white font-semibold mb-5">Iniciar sesión</button>
+      <button id="perfil-session-btn" onclick="onSessionActionClick()" class="w-full h-12 rounded-2xl bg-white/10 text-white font-semibold mb-5" data-i18n="perfil.iniciarSesion">Iniciar sesión</button>
+
+      <!-- Selector de idioma -->
+      <button id="lang-toggle-btn" onclick="toggleLanguage()" class="w-full h-11 rounded-2xl bg-white/10 text-white font-semibold mb-5 text-sm">🇬🇹 ES</button>
 
       <!-- Enlaces legales -->
       <div class="flex justify-center gap-6 text-sm text-white/60">
-        <a href="#" onclick="openLegalModal('terms')" class="underline">Términos y Condiciones</a>
-        <a href="#" onclick="openLegalModal('privacy')" class="underline">Política de Privacidad</a>
+        <a href="#" onclick="openLegalModal('terms')" class="underline" data-i18n="perfil.terminos">Términos y Condiciones</a>
+        <a href="#" onclick="openLegalModal('privacy')" class="underline" data-i18n="perfil.privacidad">Política de Privacidad</a>
       </div>
     </div>
 
@@ -555,11 +559,11 @@
       <div class="flex items-center justify-between">
         <button id="navBtn-inicio" onclick="goTo('inicio')" class="flex flex-col items-center gap-0.5 w-14 text-[#FF6A00]">
           <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 01-1.06 1.06l-.72-.72V20a1 1 0 01-1 1h-3.5a1 1 0 01-1-1v-4h-3v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-7.13l-.72.72a.75.75 0 01-1.06-1.06l8.69-8.69z"/></svg>
-          <span class="text-[11px] font-bold">Inicio</span>
+          <span class="text-[11px] font-bold" data-i18n="nav.inicio">Inicio</span>
         </button>
         <button id="navBtn-favoritos" onclick="goTo('favoritos')" class="flex flex-col items-center gap-0.5 w-14 text-slate-400">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
-          <span class="text-[11px] font-semibold">Favoritos</span>
+          <span class="text-[11px] font-semibold" data-i18n="nav.favoritos">Favoritos</span>
         </button>
 
         <!-- FAB Registrar -->
@@ -569,11 +573,11 @@
 
         <button id="navBtn-global" onclick="goTo('global')" class="flex flex-col items-center gap-0.5 w-14 text-slate-400">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.3-4.3m1.3-5.2a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <span class="text-[11px] font-semibold">Buscar</span>
+          <span class="text-[11px] font-semibold" data-i18n="nav.buscar">Buscar</span>
         </button>
         <button id="navBtn-perfil" onclick="goTo('perfil')" class="flex flex-col items-center gap-0.5 w-14 text-slate-400">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 0115 0"/></svg>
-          <span class="text-[11px] font-semibold">Perfil</span>
+          <span class="text-[11px] font-semibold" data-i18n="nav.perfil">Perfil</span>
         </button>
       </div>
     </nav>
@@ -619,12 +623,12 @@
       <div class="absolute inset-0 bg-black/50" onclick="closeModal('auth-modal')"></div>
       <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
         <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
-        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">Acceder</h2>
-        <input type="email" autocomplete="email" placeholder="Correo electrónico" id="auth-email" class="w-full h-12 rounded-2xl bg-slate-100 px-4 text-base mb-3 outline-none" />
-        <input type="password" id="auth-password" placeholder="Contraseña" class="w-full h-12 rounded-2xl bg-slate-100 px-4 text-base mb-4 outline-none" />
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4" data-i18n="auth.title">Acceder</h2>
+        <input type="email" autocomplete="email" placeholder="Correo electrónico" id="auth-email" class="w-full h-12 rounded-2xl bg-slate-100 px-4 text-base mb-3 outline-none" data-i18n-placeholder="auth.email" />
+        <input type="password" id="auth-password" placeholder="Contraseña" class="w-full h-12 rounded-2xl bg-slate-100 px-4 text-base mb-4 outline-none" data-i18n-placeholder="auth.password" />
         <p id="auth-error" class="hidden text-rose-500 text-sm -mt-3 mb-3"></p>
-        <button onclick="handleAuthSubmit('signin')" class="w-full h-12 rounded-2xl bg-[#0f2f66] text-white font-bold mb-2">Iniciar sesión</button>
-        <button onclick="handleAuthSubmit('signup')" class="w-full h-12 rounded-2xl bg-slate-100 text-[#0f2f66] font-bold">Crear cuenta</button>
+        <button onclick="handleAuthSubmit('signin')" class="w-full h-12 rounded-2xl bg-[#0f2f66] text-white font-bold mb-2" data-i18n="auth.signin">Iniciar sesión</button>
+        <button onclick="handleAuthSubmit('signup')" class="w-full h-12 rounded-2xl bg-slate-100 text-[#0f2f66] font-bold" data-i18n="auth.signup">Crear cuenta</button>
       </div>
     </div>
 
@@ -827,6 +831,110 @@ function showToast(msg){
   showToast._t = setTimeout(() => t.classList.add('hidden'), 2200);
 }
 
+/* =====================================================================
+   IDIOMA — español (por defecto) + inglés.
+   Diccionario simple + t(clave) + setLanguage(). Los textos estáticos se
+   marcan con data-i18n en el HTML; los generados dinámicamente (tarjetas,
+   toasts, rango/insignias) llaman a t() directamente en su función de
+   render. Nota de alcance: por ahora cubre navegación, Inicio, Registrar,
+   Búsqueda Global, Favoritos, Perfil (rango/insignias), escáner y los
+   mensajes principales de registro/offline. El contenido legal (Términos/
+   Privacidad) y algunos toasts secundarios siguen solo en español.
+===================================================================== */
+const TRANSLATIONS = {
+  es: {
+    'nav.inicio': 'Inicio', 'nav.favoritos': 'Favoritos', 'nav.buscar': 'Buscar', 'nav.perfil': 'Perfil',
+    'home.series': 'SERIES', 'home.paises': 'PAÍSES', 'home.valorTotal': 'VALOR TOTAL',
+    'home.serieLider': 'SERIE LÍDER', 'home.puntos': 'PUNTOS',
+    'home.registraSerie': 'Registra Serie', 'home.busquedaGlobal': 'Búsqueda Global',
+    'registrar.title': 'Registrar Billete', 'registrar.pais': 'País', 'registrar.anio': 'Año',
+    'registrar.digitsPlaceholder': '0000000000', 'registrar.digitsHintEmpty': 'Introduce entre 6 y 10 dígitos',
+    'registrar.liveMatchEmpty': 'Escribe el número de serie y te mostraremos aquí las coincidencias más parecidas ya registradas en la Bóveda.',
+    'registrar.liveMatchNone': 'Sin coincidencias parecidas todavía en la Bóveda — tu serie podría ser única.',
+    'registrar.submit': '🔐 Registrar a Bóveda', 'registrar.rarityNone': 'Sin patrón', 'registrar.rarityCommon': 'Común',
+    'global.title': 'Búsqueda Global', 'global.tabBuscar': 'Buscar', 'global.tabRareza': 'Por Rareza',
+    'global.searchPlaceholder': 'Buscar serial, país, @alias…', 'global.verMas': 'Ver más',
+    'global.sinResultados': 'Sin resultados todavía.',
+    'favoritos.title': 'Favoritos', 'favoritos.empty': 'Aún no tienes favoritos — toca la estrella en Búsqueda Global.',
+    'perfil.misRegistros': 'Mis registros', 'perfil.misToques': 'Mis toques',
+    'perfil.sinRegistros': 'Sin registros todavía', 'perfil.sinToques': 'Sin toques todavía',
+    'perfil.membership': '👑 Membresía de por vida: $5', 'perfil.iniciarSesion': 'Iniciar sesión', 'perfil.cerrarSesion': 'Cerrar sesión',
+    'perfil.terminos': 'Términos y Condiciones', 'perfil.privacidad': 'Política de Privacidad',
+    'perfil.rangoLabel': 'RANGO DE COLECCIONISTA', 'perfil.rangoInicio': 'Registra tu primera serie para empezar',
+    'perfil.rangoMax': '¡Rango máximo alcanzado! 👑',
+    'scan.title': 'Escanear serie', 'scan.hint': 'Apunta la cámara al número de serie del billete…',
+    'auth.title': 'Acceder', 'auth.email': 'Correo electrónico', 'auth.password': 'Contraseña',
+    'auth.signin': 'Iniciar sesión', 'auth.signup': 'Crear cuenta',
+    'rango.novato': 'Novato', 'rango.cazador': 'Cazador', 'rango.experto': 'Experto', 'rango.leyenda': 'Leyenda de la Bóveda',
+    'badge.primer_billete.label': 'Primer Billete', 'badge.primer_billete.desc': 'Registraste tu primera serie en la Bóveda.',
+    'badge.coleccionista.label': 'Coleccionista', 'badge.coleccionista.desc': 'Registraste 5 series en la Bóveda.',
+    'badge.gran_coleccionista.label': 'Gran Coleccionista', 'badge.gran_coleccionista.desc': 'Registraste 15 series en la Bóveda.',
+    'badge.cazador_rarezas.label': 'Cazador de Rarezas', 'badge.cazador_rarezas.desc': 'Registraste series de 3 rarezas distintas.',
+    'badge.ojo_aguila.label': 'Ojo de Águila', 'badge.ojo_aguila.desc': 'Registraste una serie SOLID o RADAR.',
+    'badge.globetrotter.label': 'Globetrotter', 'badge.globetrotter.desc': 'Registraste series de 3 países distintos.',
+    'badge.club_10k.label': 'Club 10K', 'badge.club_10k.desc': 'Superaste los 10,000 puntos acumulados.',
+    'toast.registerSuccess': '¡Serie registrada!', 'toast.registerDuplicate': 'Esa serie ya está registrada para ese año y país.',
+    'toast.offlineQueued': '📡 Sin conexión — serie guardada, se sincronizará sola', 'toast.onlineSyncing': '📶 Conexión recuperada — sincronizando…',
+    'offline.default': '📡 Modo sin conexión — tus registros se guardan y suben solos'
+  },
+  en: {
+    'nav.inicio': 'Home', 'nav.favoritos': 'Favorites', 'nav.buscar': 'Search', 'nav.perfil': 'Profile',
+    'home.series': 'SERIES', 'home.paises': 'COUNTRIES', 'home.valorTotal': 'TOTAL VALUE',
+    'home.serieLider': 'TOP SERIES', 'home.puntos': 'POINTS',
+    'home.registraSerie': 'Register Bill', 'home.busquedaGlobal': 'Global Search',
+    'registrar.title': 'Register Bill', 'registrar.pais': 'Country', 'registrar.anio': 'Year',
+    'registrar.digitsPlaceholder': '0000000000', 'registrar.digitsHintEmpty': 'Enter between 6 and 10 digits',
+    'registrar.liveMatchEmpty': 'Type the serial number and we\u2019ll show the closest matches already registered in the Vault.',
+    'registrar.liveMatchNone': 'No close matches yet in the Vault — your bill might be one of a kind.',
+    'registrar.submit': '🔐 Register to Vault', 'registrar.rarityNone': 'No pattern', 'registrar.rarityCommon': 'Common',
+    'global.title': 'Global Search', 'global.tabBuscar': 'Search', 'global.tabRareza': 'By Rarity',
+    'global.searchPlaceholder': 'Search serial, country, @alias…', 'global.verMas': 'See more',
+    'global.sinResultados': 'No results yet.',
+    'favoritos.title': 'Favorites', 'favoritos.empty': 'No favorites yet — tap the star in Global Search.',
+    'perfil.misRegistros': 'My registrations', 'perfil.misToques': 'My touches',
+    'perfil.sinRegistros': 'No registrations yet', 'perfil.sinToques': 'No touches yet',
+    'perfil.membership': '👑 Lifetime membership: $5', 'perfil.iniciarSesion': 'Sign in', 'perfil.cerrarSesion': 'Sign out',
+    'perfil.terminos': 'Terms and Conditions', 'perfil.privacidad': 'Privacy Policy',
+    'perfil.rangoLabel': 'COLLECTOR RANK', 'perfil.rangoInicio': 'Register your first bill to get started',
+    'perfil.rangoMax': 'Max rank reached! 👑',
+    'scan.title': 'Scan serial', 'scan.hint': 'Point the camera at the bill\u2019s serial number…',
+    'auth.title': 'Sign in', 'auth.email': 'Email', 'auth.password': 'Password',
+    'auth.signin': 'Sign in', 'auth.signup': 'Create account',
+    'rango.novato': 'Rookie', 'rango.cazador': 'Hunter', 'rango.experto': 'Expert', 'rango.leyenda': 'Vault Legend',
+    'badge.primer_billete.label': 'First Bill', 'badge.primer_billete.desc': 'You registered your first bill in the Vault.',
+    'badge.coleccionista.label': 'Collector', 'badge.coleccionista.desc': 'You registered 5 bills in the Vault.',
+    'badge.gran_coleccionista.label': 'Grand Collector', 'badge.gran_coleccionista.desc': 'You registered 15 bills in the Vault.',
+    'badge.cazador_rarezas.label': 'Rarity Hunter', 'badge.cazador_rarezas.desc': 'You registered 3 different rarity types.',
+    'badge.ojo_aguila.label': 'Eagle Eye', 'badge.ojo_aguila.desc': 'You registered a SOLID or RADAR bill.',
+    'badge.globetrotter.label': 'Globetrotter', 'badge.globetrotter.desc': 'You registered bills from 3 different countries.',
+    'badge.club_10k.label': '10K Club', 'badge.club_10k.desc': 'You passed 10,000 accumulated points.',
+    'toast.registerSuccess': 'Bill registered!', 'toast.registerDuplicate': 'That bill is already registered for that year and country.',
+    'toast.offlineQueued': '📡 Offline — bill saved, it will sync on its own', 'toast.onlineSyncing': '📶 Back online — syncing…',
+    'offline.default': '📡 Offline mode — your registrations save and sync on their own'
+  }
+};
+let currentLang = localStorage.getItem('dgt_lang_v1') || 'es';
+function t(key){ return TRANSLATIONS[currentLang]?.[key] ?? TRANSLATIONS.es[key] ?? key; }
+function applyStaticTranslations(){
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  const langBtn = document.getElementById('lang-toggle-btn');
+  if (langBtn) langBtn.textContent = currentLang === 'es' ? '🇬🇹 ES' : '🇺🇸 EN';
+}
+window.setLanguage = function(lang){
+  currentLang = lang;
+  localStorage.setItem('dgt_lang_v1', lang);
+  applyStaticTranslations();
+  actualizarRarezaPreview();
+  renderLiveMatch();
+  renderGlobalResults();
+  renderFavoritosScreen();
+  renderRangoCard();
+  updateOfflineBanner();
+};
+window.toggleLanguage = function(){ setLanguage(currentLang === 'es' ? 'en' : 'es'); };
+
 // (sin stubs pendientes por ahora — Búsqueda Global ya está cableada abajo)
 
 window.openLegalModal = function(tipo){
@@ -1015,9 +1123,9 @@ document.addEventListener('input', e => {
     if (limpio !== e.target.value) e.target.value = limpio;
     const count = document.getElementById('rb-digit-count');
     const len = limpio.length;
-    if (len === 0){ count.textContent = 'Introduce entre 6 y 10 dígitos'; count.className = 'text-xs font-semibold mt-1 text-slate-400'; }
-    else if (len < 6){ count.textContent = `Faltan ${6-len} dígito(s) — mínimo 6`; count.className = 'text-xs font-semibold mt-1 text-rose-500'; }
-    else { count.textContent = `${len} dígitos ✓`; count.className = 'text-xs font-semibold mt-1 text-emerald-500'; }
+    if (len === 0){ count.textContent = t('registrar.digitsHintEmpty'); count.className = 'text-xs font-semibold mt-1 text-slate-400'; }
+    else if (len < 6){ count.textContent = currentLang === 'en' ? `${6-len} digit(s) left — minimum 6` : `Faltan ${6-len} dígito(s) — mínimo 6`; count.className = 'text-xs font-semibold mt-1 text-rose-500'; }
+    else { count.textContent = currentLang === 'en' ? `${len} digits ✓` : `${len} dígitos ✓`; count.className = 'text-xs font-semibold mt-1 text-emerald-500'; }
     actualizarRarezaPreview();
     refreshValidacion();
     renderLiveMatch();
@@ -1032,7 +1140,7 @@ function renderLiveMatch(){
   if (!emptyMsg || !results) return;
 
   if (digits.length < 3){
-    emptyMsg.textContent = 'Escribe el número de serie y te mostraremos aquí las coincidencias más parecidas ya registradas en la Bóveda.';
+    emptyMsg.textContent = t('registrar.liveMatchEmpty');
     emptyMsg.classList.remove('hidden');
     results.classList.add('hidden');
     results.innerHTML = '';
@@ -1046,7 +1154,7 @@ function renderLiveMatch(){
     .slice(0, 3);
 
   if (scored.length === 0){
-    emptyMsg.textContent = 'Sin coincidencias parecidas todavía en la Bóveda — tu serie podría ser única.';
+    emptyMsg.textContent = t('registrar.liveMatchNone');
     emptyMsg.classList.remove('hidden');
     results.classList.add('hidden');
     results.innerHTML = '';
@@ -1074,7 +1182,7 @@ function calcRarity(digits) {
   if (/^(\d{2})\1+$/.test(c)) return { key: 'REPEATER', label: 'REPEATER', score: 78 };
   if (/^[01]+$/.test(c)) return { key: 'BINARY', label: 'BINARY', score: 75 };
   if (/(\d)\1{2,}/.test(c)) return { key: 'SEMI-SOLID', label: 'SEMI-SOLID', score: 62 };
-  return { key: 'COMUN', label: 'Común', score: 10 };
+  return { key: 'COMUN', label: t('registrar.rarityCommon'), score: 10 };
 }
 function calcPoints(rarity, denomNumeric) {
   let b = 100 + rarity.score * 18 + (denomNumeric || 0) * 2 + Math.floor(Math.random() * 200);
@@ -1088,7 +1196,7 @@ const RARITY_COLOR_CLASS = {
 function actualizarRarezaPreview(){
   const digitos = inputDigitos().value;
   const btn = document.getElementById('rb-rarity-preview');
-  if (digitos.length < 6){ btn.textContent = 'Sin patrón'; btn.className = 'w-24 h-14 rounded-2xl shadow-soft font-bold text-white text-sm bg-[#0f2f66]'; return; }
+  if (digitos.length < 6){ btn.textContent = t('registrar.rarityNone'); btn.className = 'w-24 h-14 rounded-2xl shadow-soft font-bold text-white text-sm bg-[#0f2f66]'; return; }
   const r = calcRarity(digitos);
   btn.textContent = r.label;
   btn.className = 'w-24 h-14 rounded-2xl shadow-soft font-bold text-white text-sm ' + (RARITY_COLOR_CLASS[r.key] || 'bg-[#0f2f66]');
@@ -1315,7 +1423,7 @@ function updateSessionUI(){
   const sub = document.getElementById('profile-sub-native');
   if (sub) sub.textContent = (profile?.country || '') + (membershipActive ? ' · Miembro vitalicio 💎' : ' · No miembro');
   const sessionBtn = document.getElementById('perfil-session-btn');
-  if (sessionBtn) sessionBtn.textContent = session ? 'Cerrar sesión' : 'Iniciar sesión';
+  if (sessionBtn) sessionBtn.textContent = session ? t('perfil.cerrarSesion') : t('perfil.iniciarSesion');
   if (sessionBtn) sessionBtn.onclick = session ? signOut : () => openModal('auth-modal');
   const upsell = document.getElementById('perfil-upsell-btn');
   if (upsell) upsell.classList.toggle('hidden', membershipActive);
@@ -1519,7 +1627,7 @@ window.handleRegister = async function(){
   // Sin conexión: se encola en IndexedDB y se sube sola al volver la señal (Fase 4)
   if (!navigator.onLine){
     await queuePendingRegister({ rpcPayload });
-    showToast(`📡 Sin conexión — serie guardada, se sincronizará sola (${rarity.label})`);
+    showToast(`${t('toast.offlineQueued')} (${rarity.label})`);
     localStorage.setItem('dgt_last_registered_v1', JSON.stringify({ digits, serial, ts: Date.now() }));
     inputDigitos().value = ''; inputDigitos().dispatchEvent(new Event('input'));
     await updateOfflineBanner();
@@ -1531,7 +1639,7 @@ window.handleRegister = async function(){
   try {
     const { error } = await sb.rpc('publicar_serial', rpcPayload);
     if (error) throw error;
-    showToast(`¡Serie registrada! ${points} pts · ${rarity.label}`);
+    showToast(`${t('toast.registerSuccess')} ${points} pts · ${rarity.label}`);
     localStorage.setItem('dgt_last_registered_v1', JSON.stringify({ digits, serial, ts: Date.now() }));
     inputDigitos().value = ''; inputDigitos().dispatchEvent(new Event('input'));
     await fetchPool(); refreshPoolDependentUI();
@@ -1539,7 +1647,7 @@ window.handleRegister = async function(){
     checkForNewBadges();
   } catch (e) {
     const isDuplicate = e.code === '23505' || /duplicate key|unique constraint/i.test(e.message || '');
-    showToast(isDuplicate ? 'Esa serie ya está registrada para ese año y país.' : 'Error al registrar: ' + (e.message || e));
+    showToast(isDuplicate ? t('toast.registerDuplicate') : (currentLang === 'en' ? 'Registration error: ' : 'Error al registrar: ') + (e.message || e));
   } finally {
     refreshValidacion();
   }
@@ -1912,19 +2020,19 @@ function renderRangoCard(){
   const misRegistros = profile?.alias ? MOCK_POOL.filter(r => r.owner === profile.alias) : [];
   const { rangoActual, siguienteRango, progresoPct, faltan, badges } = calcularRangoYInsignias(misRegistros);
 
-  nombreEl.textContent = rangoActual.label;
+  nombreEl.textContent = t('rango.' + rangoActual.key);
   document.getElementById('rango-emoji').textContent = rangoActual.emoji;
   document.getElementById('rango-progress-bar').style.width = progresoPct + '%';
   document.getElementById('rango-meta-text').textContent = misRegistros.length === 0
-    ? 'Registra tu primera serie para empezar'
+    ? t('perfil.rangoInicio')
     : siguienteRango
-      ? `Te faltan ${faltan} pts de rango para llegar a ${siguienteRango.label}`
-      : '¡Rango máximo alcanzado! 👑';
+      ? `${currentLang === 'en' ? 'You need' : 'Te faltan'} ${faltan} ${currentLang === 'en' ? 'rank pts to reach' : 'pts de rango para llegar a'} ${t('rango.' + siguienteRango.key)}`
+      : t('perfil.rangoMax');
 
   document.getElementById('badges-row').innerHTML = badges.map(b => `
-    <div class="shrink-0 w-16 flex flex-col items-center gap-1" title="${b.label}">
+    <div class="shrink-0 w-16 flex flex-col items-center gap-1" title="${t('badge.' + b.key + '.label')}">
       <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${b.unlocked ? 'bg-[#FFF1E6]' : 'bg-slate-100 grayscale opacity-40'}">${b.icon}</div>
-      <p class="text-[9px] font-bold text-center leading-tight ${b.unlocked ? 'text-slate-600' : 'text-slate-300'}">${b.label}</p>
+      <p class="text-[9px] font-bold text-center leading-tight ${b.unlocked ? 'text-slate-600' : 'text-slate-300'}">${t('badge.' + b.key + '.label')}</p>
     </div>`).join('');
 }
 
@@ -1946,8 +2054,8 @@ function checkForNewBadges(){
 }
 function showBadgeUnlockedModal(badge){
   document.getElementById('badge-modal-icon').textContent = badge.icon;
-  document.getElementById('badge-modal-title').textContent = badge.label;
-  document.getElementById('badge-modal-desc').textContent = badge.desc;
+  document.getElementById('badge-modal-title').textContent = t('badge.' + badge.key + '.label');
+  document.getElementById('badge-modal-desc').textContent = t('badge.' + badge.key + '.desc');
   const icon = document.getElementById('badge-modal-icon');
   icon.classList.remove('dgt-badge-spin');
   void icon.offsetWidth;
@@ -2138,14 +2246,17 @@ async function updateOfflineBanner(){
   const banner = document.getElementById('offline-banner');
   if (!banner) return;
   const pending = await getPendingQueue();
+  const en = currentLang === 'en';
   if (!navigator.onLine){
     banner.classList.remove('hidden');
     document.getElementById('offline-banner-text').textContent = pending.length > 0
-      ? `📡 Sin conexión — ${pending.length} registro${pending.length===1?'':'s'} pendiente${pending.length===1?'':'s'} de sincronizar`
-      : '📡 Modo sin conexión — tus registros se guardan y suben solos';
+      ? (en ? `📡 Offline — ${pending.length} pending registration${pending.length===1?'':'s'} to sync` : `📡 Sin conexión — ${pending.length} registro${pending.length===1?'':'s'} pendiente${pending.length===1?'':'s'} de sincronizar`)
+      : t('offline.default');
   } else if (pending.length > 0){
     banner.classList.remove('hidden');
-    document.getElementById('offline-banner-text').textContent = `⬆️ Sincronizando ${pending.length} registro${pending.length===1?'':'s'} pendiente${pending.length===1?'':'s'}…`;
+    document.getElementById('offline-banner-text').textContent = en
+      ? `⬆️ Syncing ${pending.length} pending registration${pending.length===1?'':'s'}…`
+      : `⬆️ Sincronizando ${pending.length} registro${pending.length===1?'':'s'} pendiente${pending.length===1?'':'s'}…`;
   } else {
     banner.classList.add('hidden');
   }
@@ -2170,7 +2281,7 @@ async function flushPendingQueue(){
   refreshPoolDependentUI();
   updateOfflineBanner();
 }
-window.addEventListener('online', () => { showToast('📶 Conexión recuperada — sincronizando…'); flushPendingQueue(); });
+window.addEventListener('online', () => { showToast(t('toast.onlineSyncing')); flushPendingQueue(); });
 window.addEventListener('offline', () => { updateOfflineBanner(); });
 
 /* ---------------- Toques reales (tabla dgt_toques) ---------------- */
@@ -2358,6 +2469,7 @@ function showHookCardOnce(){
 
 /* ---------------- Inicialización real ---------------- */
 async function initReal(){
+  applyStaticTranslations();
   if (location.protocol === 'file:'){
     showToast('⚠️ Abre este archivo desde un servidor (no con doble clic) para que Supabase funcione');
   }
@@ -2511,14 +2623,14 @@ function renderGlobalResults(){
   const container = document.getElementById('global-search-results');
   const moreBtn = document.getElementById('global-see-more-btn');
   if (rows.length === 0){
-    container.innerHTML = `<div class="text-center text-white/50 text-sm py-10">Sin resultados todavía.</div>`;
+    container.innerHTML = `<div class="text-center text-white/50 text-sm py-10">${t('global.sinResultados')}</div>`;
     moreBtn.classList.add('hidden');
     return;
   }
   const shown = rows.slice(0, globalShowCount);
   container.innerHTML = shown.map(globalResultCardHtml).join('');
   moreBtn.classList.toggle('hidden', rows.length <= shown.length);
-  moreBtn.textContent = `Ver más (${rows.length - shown.length})`;
+  moreBtn.textContent = `${t('global.verMas')} (${rows.length - shown.length})`;
 }
 window.nativeToggleFavorite = function(serial){
   rbToggleFavorite(serial);
@@ -2557,7 +2669,7 @@ function renderFavoritosScreen(){
   if (!cont) return;
   const favSerials = rbGetFavorites();
   const favs = MOCK_POOL.filter(r => favSerials.includes(r.serial));
-  cont.innerHTML = favs.length ? favs.map(globalResultCardHtml).join('') : `<p class="text-center text-slate-400 text-sm py-10">Aún no tienes favoritos — toca la estrella en Búsqueda Global.</p>`;
+  cont.innerHTML = favs.length ? favs.map(globalResultCardHtml).join('') : `<p class="text-center text-slate-400 text-sm py-10">${t('favoritos.empty')}</p>`;
 }
 renderGlobalResults();
 
@@ -2620,7 +2732,7 @@ function renderSeriesModal(){
   const shown = mine.slice(0, profileSeriesShowCount);
   cont.innerHTML = shown.map(profileSeriesCardHtml).join('');
   moreBtn.classList.toggle('hidden', mine.length <= shown.length);
-  moreBtn.textContent = `Ver más (${mine.length - shown.length})`;
+  moreBtn.textContent = `${t('global.verMas')} (${mine.length - shown.length})`;
 }
 async function loadProfileToquesSummary(){
   const summary = document.getElementById('profile-toques-summary');
