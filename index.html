@@ -2,7 +2,7 @@
 <html lang="es" style="background:#0f2f66;">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0f2f66" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -14,7 +14,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
-    html, body { background: #0f2f66; }
+    html, body { background: #0f2f66; margin: 0; padding: 0; height: 100%; overscroll-behavior-y: none; }
     body { -webkit-tap-highlight-color: transparent; }
     ::-webkit-scrollbar { display: none; }
     .no-scroll { -ms-overflow-style: none; scrollbar-width: none; }
@@ -106,7 +106,7 @@
     <div id="screen-inicio" class="screen-view pb-28">
 
       <!-- HEADER -->
-      <header class="px-5 pt-12 pb-5">
+      <header class="px-5 pt-12 pb-5" style="padding-top: max(3rem, calc(env(safe-area-inset-top) + 1rem));">
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <div id="brand-logo"
@@ -842,6 +842,17 @@ function goTo(screen){
 }
 function openModal(id){ document.getElementById(id)?.classList.remove('hidden'); }
 function closeModal(id){ document.getElementById(id)?.classList.add('hidden'); }
+
+// La página a veces arranca con un pequeño desplazamiento vertical (rebote
+// elástico de iOS, restauración de bfcache, o el colapso de la barra de
+// direcciones tras cargar) — esto la fuerza de vuelta al tope real.
+function dgtForceScrollTop(){ window.scrollTo(0, 0); }
+window.addEventListener('load', dgtForceScrollTop);
+window.addEventListener('pageshow', dgtForceScrollTop);
+document.addEventListener('DOMContentLoaded', dgtForceScrollTop);
+setTimeout(dgtForceScrollTop, 50);
+setTimeout(dgtForceScrollTop, 300);
+
 function showToast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
