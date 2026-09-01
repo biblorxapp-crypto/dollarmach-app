@@ -523,6 +523,28 @@
         </div>
       </div>
 
+      <!-- Tarjeta: Mi Historial de Liderazgo — resumen + acceso al detalle.
+           Los 3 números vienen de mi_resumen_liderazgo() en Supabase, NO se
+           calculan del frontend: son la liquidación real, auditable. -->
+      <div class="bg-white rounded-3xl p-5 shadow-soft mb-5">
+        <p class="text-[10px] font-extrabold tracking-widest text-slate-400 mb-3">👑 MI HISTORIAL DE LIDERAZGO</p>
+        <div class="grid grid-cols-3 gap-2 text-center mb-4">
+          <div>
+            <p id="leadership-total-count" class="text-2xl font-black text-[#0f2f66]">0</p>
+            <p class="text-[9px] font-bold tracking-widest text-slate-400 leading-tight">LIDERAZGOS</p>
+          </div>
+          <div>
+            <p id="leadership-total-points" class="text-2xl font-black text-[#E05A00]">0</p>
+            <p class="text-[9px] font-bold tracking-widest text-slate-400 leading-tight">PUNTOS GANADOS</p>
+          </div>
+          <div>
+            <p id="leadership-best-harvest" class="text-2xl font-black text-[#0f2f66]">0</p>
+            <p class="text-[9px] font-bold tracking-widest text-slate-400 leading-tight">MEJOR RONDA</p>
+          </div>
+        </div>
+        <button onclick="openLeadershipHistoryModal()" class="w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold text-sm">Ver historial de rondas</button>
+      </div>
+
       <!-- Mis registros / Mis toques — botones compactos, cada uno abre su modal -->
       <div class="flex gap-3 mb-5">
         <button onclick="openMySeriesModal()" class="flex-1 bg-white rounded-3xl p-4 shadow-soft flex flex-col items-start gap-2">
@@ -706,6 +728,19 @@
         <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">Mis registros</h2>
         <div id="series-modal-list" class="flex flex-col gap-2"></div>
         <button id="series-modal-more-btn" onclick="showMoreMySeries()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold">Ver más</button>
+      </div>
+    </div>
+
+    <!-- MODAL: Historial de Liderazgo — cada fila es una ronda ya liquidada
+         (status SETTLED) leída de dgt_round_settlements vía Supabase, no
+         inventada en el cliente. -->
+    <div id="leadership-history-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('leadership-history-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">👑 Historial de Liderazgo</h2>
+        <div id="leadership-history-list" class="flex flex-col gap-2"></div>
+        <button id="leadership-history-more-btn" onclick="showMoreLeadershipHistory()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold">Ver más</button>
       </div>
     </div>
 
@@ -1460,6 +1495,7 @@ function updateSessionUI(){
   renderProfileSeries();
   loadProfileToquesSummary();
   renderRangoCard();
+  loadLeadershipSummary();
 }
 window.handleAuthSubmit = async function(mode){
   const email = document.getElementById('auth-email').value.trim();
@@ -1960,6 +1996,7 @@ async function settleRoundIfDue(){
     if (result && !result.already_settled && result.harvest > 0 && profile?.alias && result.leader_alias === profile.alias){
       showToast(`👑 ¡Ganaste la ronda! +${Number(result.harvest).toLocaleString('es')} puntos acreditados`);
       await fetchPool();
+      await loadLeadershipSummary();
     }
   } catch (e) {
     console.warn('No se pudo liquidar la ronda (requiere la función liquidar_ronda + tabla dgt_round_settlements en Supabase):', e);
@@ -2207,6 +2244,88 @@ function showBadgeUnlockedModal(badge){
   void icon.offsetWidth;
   icon.classList.add('dgt-badge-spin');
   openModal('badge-modal');
+}
+
+/* =====================================================================
+   HISTORIAL DE LIDERAZGO POR USUARIO
+   La tarjeta del Líder en Inicio solo muestra el progreso en vivo de la
+   ronda actual (roundHarvest, aproximado). El registro DEFINITIVO vive
+   en el backend: cada ronda liquidada por liquidar_ronda() queda como
+   fila en dgt_round_settlements (status SETTLED), y este bloque solo
+   lee esos números vía RPC — nunca los calcula ni los inventa aquí.
+===================================================================== */
+let leadershipSummary = { total: 0, totalPoints: 0, best: 0 };
+let leadershipHistoryCache = [];
+let leadershipHistoryShowCount = 10;
+
+async function loadLeadershipSummary(){
+  if (!profile?.alias){ leadershipSummary = { total: 0, totalPoints: 0, best: 0 }; renderLeadershipSummary(); return; }
+  try {
+    const { data, error } = await sb.rpc('mi_resumen_liderazgo', { p_alias: profile.alias });
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    leadershipSummary = {
+      total: Number(row?.total_liderazgos || 0),
+      totalPoints: Number(row?.total_puntos_ganados || 0),
+      best: Number(row?.mejor_cosecha || 0)
+    };
+  } catch (e) {
+    // Requiere mi_resumen_liderazgo() en Supabase — si aún no existe, se queda en 0 sin romper la pantalla
+    leadershipSummary = { total: 0, totalPoints: 0, best: 0 };
+  }
+  renderLeadershipSummary();
+}
+function renderLeadershipSummary(){
+  const a = document.getElementById('leadership-total-count');
+  const b = document.getElementById('leadership-total-points');
+  const c = document.getElementById('leadership-best-harvest');
+  if (a) a.textContent = leadershipSummary.total.toLocaleString('es');
+  if (b) b.textContent = leadershipSummary.totalPoints.toLocaleString('es');
+  if (c) c.textContent = leadershipSummary.best.toLocaleString('es');
+}
+window.openLeadershipHistoryModal = async function(){
+  if (!session){ openModal('auth-modal'); return; }
+  if (!profile?.alias){ openModal('profile-modal'); return; }
+  leadershipHistoryShowCount = 10;
+  const cont = document.getElementById('leadership-history-list');
+  cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Cargando…</p>`;
+  document.getElementById('leadership-history-more-btn').classList.add('hidden');
+  openModal('leadership-history-modal');
+  try {
+    const { data, error } = await sb.rpc('mi_historial_liderazgo', { p_alias: profile.alias, p_limit: 200, p_offset: 0 });
+    if (error) throw error;
+    leadershipHistoryCache = data || [];
+  } catch (e) {
+    leadershipHistoryCache = [];
+  }
+  renderLeadershipHistory();
+};
+window.showMoreLeadershipHistory = function(){ leadershipHistoryShowCount += 10; renderLeadershipHistory(); };
+function renderLeadershipHistory(){
+  const cont = document.getElementById('leadership-history-list');
+  const moreBtn = document.getElementById('leadership-history-more-btn');
+  if (!cont) return;
+  if (leadershipHistoryCache.length === 0){
+    cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Todavía no has liderado ninguna ronda.</p>`;
+    moreBtn.classList.add('hidden');
+    return;
+  }
+  const shown = leadershipHistoryCache.slice(0, leadershipHistoryShowCount);
+  cont.innerHTML = shown.map(r => {
+    const dt = r.round_start
+      ? new Date(r.round_start).toLocaleString('es', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+      : '';
+    return `
+    <div class="bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+      <div class="min-w-0">
+        <p class="font-extrabold text-[#0f2f66] text-sm truncate">${r.leader_serial || ''}</p>
+        <p class="text-xs text-slate-500">${dt} · ${(r.leader_power || 0).toLocaleString('es')} pts de poder</p>
+      </div>
+      <span class="text-[#E05A00] font-extrabold text-sm shrink-0">+${(r.harvest_points || 0).toLocaleString('es')}</span>
+    </div>`;
+  }).join('');
+  moreBtn.classList.toggle('hidden', leadershipHistoryCache.length <= shown.length);
+  moreBtn.textContent = `Ver más (${leadershipHistoryCache.length - shown.length})`;
 }
 
 /* =====================================================================
