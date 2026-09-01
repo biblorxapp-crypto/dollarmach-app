@@ -1808,6 +1808,7 @@ function renderStats(){
   document.getElementById('stats-total').textContent = MOCK_POOL.length;
   const countries = new Set(MOCK_POOL.map(r => r.country).filter(Boolean));
   const totalValue = MOCK_POOL.reduce((s, r) => s + (r.denom || 0) * (10 + (r.rarity?.score || 0)), 0);
+  lastVaultValue = totalValue;
   const valueLabel = document.getElementById('stats-value');
   if (valueLabel) valueLabel.textContent = totalValue >= 1000 ? Math.round(totalValue/1000) + 'K' : Math.round(totalValue);
   const statsMine = document.getElementById('stats-mine');
@@ -1907,6 +1908,13 @@ function animateLeaderPoints(el, to){
 ===================================================================== */
 const ROUND_DURATION_MS = 60000;
 const HARVEST_RATE = 0.05; // 5% de peaje sobre cada registro ajeno durante la ronda activa
+// Vista previa en cliente del Fondo de Permanencia. La tasa REAL vive en
+// dgt_leadership_config (editable sin redeploy) — esta constante es solo
+// para animar la cifra en vivo y debe reflejar ese mismo número a ojo;
+// si la cambias en Supabase, actualízala aquí también para que la vista
+// previa no se desalinee del pago real que calcula liquidar_permanencia_ronda().
+const PERMANENCE_FUND_RATE = 0.0005; // 0.05% — arranque "para que se note"; bajar más adelante
+let lastVaultValue = 0;
 let roundLeaderSerial = null;
 let roundLeaderOwner = null;
 let roundHarvest = 0;
@@ -1989,17 +1997,38 @@ async function settleRoundIfDue(){
   // desde boveda_jugadas, con dgt_round_settlements como candado anti-doble-pago
   // por si dos clientes detectan el cierre de ronda casi al mismo tiempo).
   // roundHarvest en el cliente es solo una vista previa en vivo durante la ronda.
+  let ganeAlgo = false;
   try {
     const { data, error } = await sb.rpc('liquidar_ronda', { p_round_start: new Date(currentStart).toISOString() });
     if (error) throw error;
     const result = Array.isArray(data) ? data[0] : data;
     if (result && !result.already_settled && result.harvest > 0 && profile?.alias && result.leader_alias === profile.alias){
       showToast(`👑 ¡Ganaste la ronda! +${Number(result.harvest).toLocaleString('es')} puntos acreditados`);
-      await fetchPool();
-      await loadLeadershipSummary();
+      ganeAlgo = true;
     }
   } catch (e) {
     console.warn('No se pudo liquidar la ronda (requiere la función liquidar_ronda + tabla dgt_round_settlements en Supabase):', e);
+  }
+
+  // Fondo de Permanencia: se reparte proporcional al tiempo que cada quien
+  // lideró dentro de esta ventana de 60s, aunque no haya entrado ningún
+  // registro nuevo — así el liderazgo siempre paga algo.
+  try {
+    const { data, error } = await sb.rpc('liquidar_permanencia_ronda', { p_round_start: new Date(currentStart).toISOString() });
+    if (error) throw error;
+    const rows = Array.isArray(data) ? data : (data ? [data] : []);
+    const mine = rows.find(r => profile?.alias && r.owner_alias === profile.alias && r.points_awarded > 0);
+    if (mine){
+      showToast(`⏳ Recompensa por permanencia: +${Number(mine.points_awarded).toLocaleString('es')} puntos`);
+      ganeAlgo = true;
+    }
+  } catch (e) {
+    console.warn('No se pudo liquidar la permanencia (requiere liquidar_permanencia_ronda + dgt_leadership_log en Supabase):', e);
+  }
+
+  if (ganeAlgo){
+    await fetchPool();
+    await loadLeadershipSummary();
   }
   roundHarvest = 0;
   renderHarvest();
@@ -2014,6 +2043,14 @@ function startRoundLoop(){
     const msLeft = getRoundMsLeft();
     const el = document.getElementById('leader-countdown');
     if (el) el.textContent = `⏱️ ${formatCountdown(msLeft)}`;
+    // Recompensa por permanencia: aunque no entre ningún registro nuevo,
+    // el líder sigue acumulando su parte del Fondo de la ronda segundo a
+    // segundo. Vista previa aproximada — el pago real y su reparto por
+    // tiempo exacto los calcula liquidar_permanencia_ronda() en el cierre.
+    if (roundLeaderSerial && lastVaultValue > 0){
+      roundHarvest += (lastVaultValue * PERMANENCE_FUND_RATE) / 60;
+      renderHarvest();
+    }
     if (msLeft <= 1000) settleRoundIfDue();
   }, 1000);
 }
@@ -2315,13 +2352,20 @@ function renderLeadershipHistory(){
     const dt = r.round_start
       ? new Date(r.round_start).toLocaleString('es', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
       : '';
+    const total = (r.harvest_points || 0) + (r.permanence_points || 0);
+    const desglose = (r.harvest_points > 0 && r.permanence_points > 0)
+      ? `${(r.harvest_points || 0).toLocaleString('es')} ronda + ${(r.permanence_points || 0).toLocaleString('es')} permanencia`
+      : r.permanence_points > 0
+        ? `${(r.permanence_points || 0).toLocaleString('es')} por permanencia`
+        : `${(r.harvest_points || 0).toLocaleString('es')} por registros`;
     return `
     <div class="bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between gap-3">
       <div class="min-w-0">
         <p class="font-extrabold text-[#0f2f66] text-sm truncate">${r.leader_serial || ''}</p>
         <p class="text-xs text-slate-500">${dt} · ${(r.leader_power || 0).toLocaleString('es')} pts de poder</p>
+        <p class="text-[10px] text-slate-400">${desglose}</p>
       </div>
-      <span class="text-[#E05A00] font-extrabold text-sm shrink-0">+${(r.harvest_points || 0).toLocaleString('es')}</span>
+      <span class="text-[#E05A00] font-extrabold text-sm shrink-0">+${total.toLocaleString('es')}</span>
     </div>`;
   }).join('');
   moreBtn.classList.toggle('hidden', leadershipHistoryCache.length <= shown.length);
