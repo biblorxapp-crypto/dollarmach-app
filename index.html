@@ -2,7 +2,7 @@
 <html lang="es" style="background:#0f2f66;">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0f2f66" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -14,7 +14,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
-    html, body { background: #0f2f66; }
+    html, body { background: #0f2f66; margin: 0; padding: 0; overscroll-behavior-y: none; }
     body { -webkit-tap-highlight-color: transparent; }
     ::-webkit-scrollbar { display: none; }
     .no-scroll { -ms-overflow-style: none; scrollbar-width: none; }
@@ -106,14 +106,14 @@
     <div id="screen-inicio" class="screen-view pb-28">
 
       <!-- HEADER -->
-      <header class="px-5 pt-12 pb-5">
+      <header class="px-5 pt-12 pb-5" style="padding-top: max(3rem, calc(env(safe-area-inset-top) + 1rem));">
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <div id="brand-logo"
               class="w-16 h-16 rounded-full bg-[#0A2453] shadow-soft overflow-hidden shrink-0 flex items-center justify-center">
               <span class="font-extrabold text-2xl tracking-tight text-white">d<span class="text-[#FF6A00]">G</span>t</span>
             </div>
-            <span class="text-white font-extrabold text-3xl tracking-tight">DOLLAR<span class="text-[#FF6A00]">DGT</span></span>
+            <span class="text-white font-extrabold text-2xl tracking-tight">DOLLAR<span class="text-[#FF6A00]">DGT</span></span>
           </div>
           <div class="flex items-center gap-3">
             <!-- Toques / notificaciones -->
@@ -141,24 +141,15 @@
             <p class="text-3xl font-extrabold text-[#0f2f66] mt-2">21</p>
             <p class="text-[11px] font-bold tracking-widest text-slate-500" data-i18n="home.paises">PAÍSES</p>
           </div>
-          <!-- Barra de distribución de rarezas -->
+          <!-- Barra de distribución de rarezas — 100% controlada por
+               renderLeaderProbabilityBar() a partir de MOCK_POOL: ancho,
+               porcentaje, nombre y color de cada segmento se calculan ahí,
+               nunca se hardcodean en el HTML. -->
           <div class="flex-1 bg-white/85 rounded-3xl px-4 py-4 shadow-soft flex flex-col justify-center">
-            <!-- Aquí va renderLeaderProbabilityBar() -->
-            <div id="leader-probability-bar" class="h-3 w-full rounded-full overflow-hidden flex mb-3">
-              <span class="h-full w-[30%] bg-[#EAF0FA]"></span>
-              <span class="h-full w-[15%] bg-[#1E4D8C]"></span>
-              <span class="h-full w-[15%] bg-[#FF6A00]"></span>
-              <span class="h-full w-[20%] bg-[#0F3070]"></span>
-              <span class="h-full w-[20%] bg-[#C7D2E6]"></span>
-            </div>
-            <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs font-semibold text-slate-600">
-              <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-[#EAF0FA]"></i>SOLID 7%</span>
-              <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-[#1E4D8C]"></i>RADAR 1%</span>
-              <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-[#FF6A00]"></i>LADDER 5%</span>
-              <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-[#0F3070]"></i>REPEATER 1%</span>
-            </div>
+            <div id="leader-probability-bar" class="h-3 w-full rounded-full overflow-hidden flex mb-3 bg-slate-100"></div>
+            <div id="leader-probability-legend" class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs font-semibold text-slate-600"></div>
             <div class="flex items-center justify-between mt-3">
-              <span class="text-[#0f2f66] font-extrabold text-lg" id="stats-value">544K</span>
+              <span class="text-[#0f2f66] font-extrabold text-lg" id="stats-value">0</span>
               <span class="text-slate-400 font-bold text-xs tracking-widest" data-i18n="home.valorTotal">VALOR TOTAL</span>
             </div>
           </div>
@@ -842,6 +833,17 @@ function goTo(screen){
 }
 function openModal(id){ document.getElementById(id)?.classList.remove('hidden'); }
 function closeModal(id){ document.getElementById(id)?.classList.add('hidden'); }
+
+// La página a veces arranca con un pequeño desplazamiento vertical (rebote
+// elástico de iOS, restauración de bfcache, o el colapso de la barra de
+// direcciones tras cargar) — esto la fuerza de vuelta al tope real.
+function dgtForceScrollTop(){ window.scrollTo(0, 0); }
+window.addEventListener('load', dgtForceScrollTop);
+window.addEventListener('pageshow', dgtForceScrollTop);
+document.addEventListener('DOMContentLoaded', dgtForceScrollTop);
+setTimeout(dgtForceScrollTop, 50);
+setTimeout(dgtForceScrollTop, 300);
+
 function showToast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -959,6 +961,7 @@ window.setLanguage = function(lang){
   renderGlobalResults();
   renderFavoritosScreen();
   renderRangoCard();
+  renderLeaderProbabilityBar();
   updateOfflineBanner();
 };
 
@@ -1773,6 +1776,60 @@ function renderStats(){
   if (valueLabel) valueLabel.textContent = totalValue >= 1000 ? Math.round(totalValue/1000) + 'K' : Math.round(totalValue);
   const statsMine = document.getElementById('stats-mine');
   if (statsMine && profile?.alias) statsMine.textContent = MOCK_POOL.filter(r => r.owner === profile.alias).length;
+  renderLeaderProbabilityBar();
+}
+// Orden de rareza (más rara → más común) + color propio de cada categoría.
+// Único lugar donde vive esta paleta — la barra y la leyenda la leen de aquí,
+// así nunca pueden quedar desincronizadas entre sí.
+const RARITY_BAR_DEFS = [
+  { key: 'SOLID',      color: '#0A2453' },
+  { key: 'RADAR',      color: '#1E4D8C' },
+  { key: 'LADDER',     color: '#FF6A00' },
+  { key: 'REPEATER',   color: '#123566' },
+  { key: 'BINARY',     color: '#E05A00' },
+  { key: 'SEMI-SOLID', color: '#5B7FB5' },
+  { key: 'COMUN',      color: '#C7D2E6' }
+];
+function rarityBarLabel(key){
+  if (key === 'COMUN') return currentLang === 'en' ? 'COMMON' : 'COMÚN';
+  return key;
+}
+// Única fuente de verdad para la barra Y la leyenda: cuenta cada rareza
+// presente en la Bóveda en este momento, calcula su % real sobre el total
+// y renderiza ambos elementos desde los mismos números — nunca hardcodeados.
+function renderLeaderProbabilityBar(){
+  const bar = document.getElementById('leader-probability-bar');
+  const legend = document.getElementById('leader-probability-legend');
+  if (!bar || !legend) return;
+
+  const total = MOCK_POOL.length;
+  if (total === 0){
+    bar.innerHTML = '';
+    legend.innerHTML = `<span class="col-span-2 text-slate-400">${currentLang === 'en' ? 'No data yet' : 'Sin datos todavía'}</span>`;
+    return;
+  }
+
+  const counts = {};
+  RARITY_BAR_DEFS.forEach(d => { counts[d.key] = 0; });
+  MOCK_POOL.forEach(r => {
+    const key = r.rarity?.key || 'COMUN';
+    counts[key] = (counts[key] || 0) + 1;
+  });
+
+  // Solo las categorías realmente presentes, en orden de rareza — la suma
+  // de sus % siempre da 100% porque salen del mismo conteo que los anchos.
+  const present = RARITY_BAR_DEFS
+    .map(d => ({ ...d, count: counts[d.key] || 0 }))
+    .filter(d => d.count > 0)
+    .map(d => ({ ...d, pct: Math.round((d.count / total) * 100) }));
+
+  bar.innerHTML = present.map(d =>
+    `<span class="h-full" style="width:${(d.count / total) * 100}%; background:${d.color};"></span>`
+  ).join('');
+
+  legend.innerHTML = present.map(d =>
+    `<span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full shrink-0" style="background:${d.color};"></i>${rarityBarLabel(d.key)} ${d.pct}%</span>`
+  ).join('');
 }
 function renderDigitHistogram(digits){
   const cont = document.getElementById('leader-digit-histogram');
