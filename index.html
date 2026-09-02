@@ -492,6 +492,42 @@
         </div>
       </div>
 
+      <!-- Tarjeta: Mi Código de Propagación — código, enlace, QR, contador
+           y saldo. Los números vienen de mi_resumen_referidos() en
+           Supabase, nunca calculados en el cliente. -->
+      <div class="bg-white rounded-3xl p-5 shadow-soft mb-5">
+        <p class="text-[10px] font-extrabold tracking-widest text-slate-400 mb-3">🌎 MI CÓDIGO DE PROPAGACIÓN</p>
+        <div class="flex items-center gap-3 mb-4">
+          <div id="referral-qr-box" class="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden">
+            <img id="referral-qr-img" class="w-full h-full hidden" alt="QR de referido" />
+            <span id="referral-qr-placeholder" class="text-2xl">🔗</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p id="referral-code-display" class="text-xl font-black text-[#0f2f66] tracking-wide truncate">DGT-------</p>
+            <p id="referral-link-display" class="text-xs text-slate-400 truncate">dollardgt.com/?ref=…</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center mb-4">
+          <div>
+            <p id="referral-total-count" class="text-2xl font-black text-[#0f2f66]">0</p>
+            <p class="text-[9px] font-bold tracking-widest text-slate-400 leading-tight">REFERIDOS</p>
+          </div>
+          <div>
+            <p id="referral-pending-count" class="text-2xl font-black text-amber-500">0</p>
+            <p class="text-[9px] font-bold tracking-widest text-slate-400 leading-tight">PENDIENTES</p>
+          </div>
+          <div>
+            <p id="referral-balance" class="text-2xl font-black text-[#E05A00]">$0</p>
+            <p class="text-[9px] font-bold tracking-widest text-slate-400 leading-tight">SALDO</p>
+          </div>
+        </div>
+        <div class="flex gap-2 mb-2">
+          <button onclick="copyReferralLink()" class="flex-1 h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold text-sm">🔗 Copiar enlace</button>
+          <button onclick="shareReferralLink()" class="flex-1 h-11 rounded-2xl bg-[#0f2f66] text-white font-semibold text-sm">Compartir</button>
+        </div>
+        <button onclick="openReferralHistoryModal()" class="w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold text-sm">Ver historial de referidos</button>
+      </div>
+
       <!-- Tarjeta de Rango + Insignias (Fase 5) -->
       <div class="bg-white rounded-3xl p-5 shadow-soft mb-5">
         <div class="flex items-center justify-between mb-3">
@@ -741,6 +777,18 @@
         <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">👑 Historial de Liderazgo</h2>
         <div id="leadership-history-list" class="flex flex-col gap-2"></div>
         <button id="leadership-history-more-btn" onclick="showMoreLeadershipHistory()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold">Ver más</button>
+      </div>
+    </div>
+
+    <!-- MODAL: Historial de Referidos — cada fila viene de
+         mi_historial_referidos() en Supabase. -->
+    <div id="referral-history-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('referral-history-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">🌎 Historial de Referidos</h2>
+        <div id="referral-history-list" class="flex flex-col gap-2"></div>
+        <button id="referral-history-more-btn" onclick="showMoreReferralHistory()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold">Ver más</button>
       </div>
     </div>
 
@@ -1496,6 +1544,8 @@ function updateSessionUI(){
   loadProfileToquesSummary();
   renderRangoCard();
   loadLeadershipSummary();
+  renderReferralCard();
+  loadReferralSummary();
 }
 window.handleAuthSubmit = async function(mode){
   const email = document.getElementById('auth-email').value.trim();
@@ -1568,11 +1618,13 @@ window.handleSaveProfile = async function(){
   if (!nickname || !alias){ err.textContent = 'Nombre y alias son obligatorios'; err.classList.remove('hidden'); return; }
   err.classList.add('hidden');
   try {
-    const { error } = await sb.from('profiles').upsert({
-      id: session.id, email: session.email, nickname, alias, country, updated_at: new Date().toISOString()
-    });
+    const payload = { id: session.id, email: session.email, nickname, alias, country, updated_at: new Date().toISOString() };
+    const pendingRef = getPendingReferral();
+    if (pendingRef) payload.referred_by = pendingRef; // el trigger en Supabase decide si es válido y lo bloquea tras el primer guardado
+    const { data, error } = await sb.from('profiles').upsert(payload).select().single();
     if (error) throw error;
-    profile = { ...(profile || {}), id: session.id, email: session.email, nickname, alias, country };
+    profile = data;
+    if (pendingRef) { try { localStorage.removeItem('dgt_pending_referral_v1'); } catch {} }
     closeModal('profile-modal');
     showToast('Perfil guardado');
     updateSessionUI();
@@ -2373,6 +2425,137 @@ function renderLeadershipHistory(){
 }
 
 /* =====================================================================
+   SISTEMA DE PROPAGACIÓN DOLLARDGT — código, enlace, QR, contador,
+   saldo. profile.referral_code lo genera solo un trigger en Supabase al
+   crear el perfil; profile.referred_by se captura una sola vez (o desde
+   el ?ref= de la URL, guardado localmente hasta que exista sesión) y
+   queda bloqueado del lado del servidor. El $1 por referido lo calcula
+   y liquida 100% el backend (dgt_registrar_referido /
+   dgt_confirmar_referidos_pendientes) — aquí solo se lee y se muestra.
+===================================================================== */
+function captureReferralFromURL(){
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref && !localStorage.getItem('dgt_pending_referral_v1')){
+      localStorage.setItem('dgt_pending_referral_v1', ref.trim().toUpperCase());
+    }
+  } catch {}
+}
+function getPendingReferral(){
+  try { return localStorage.getItem('dgt_pending_referral_v1'); } catch { return null; }
+}
+function getReferralLink(){
+  const code = profile?.referral_code;
+  return code ? `https://dollardgt.com/?ref=${code}` : '';
+}
+async function renderReferralQR(link){
+  const img = document.getElementById('referral-qr-img');
+  const placeholder = document.getElementById('referral-qr-placeholder');
+  if (!img || !link) return;
+  try {
+    const dataUrl = await QRCode.toDataURL(link, { margin: 1, width: 160, color: { dark: '#0f2f66', light: '#ffffff' } });
+    img.src = dataUrl;
+    img.classList.remove('hidden');
+    if (placeholder) placeholder.classList.add('hidden');
+  } catch { /* sin QR, se queda el ícono de respaldo */ }
+}
+function renderReferralCard(){
+  const codeEl = document.getElementById('referral-code-display');
+  const linkEl = document.getElementById('referral-link-display');
+  if (!codeEl) return;
+  codeEl.textContent = profile?.referral_code || '—';
+  const link = getReferralLink();
+  linkEl.textContent = link ? link.replace('https://', '') : (currentLang === 'en' ? 'Complete your profile to unlock it' : 'Completa tu perfil para desbloquearlo');
+  if (link) renderReferralQR(link);
+}
+async function loadReferralSummary(){
+  if (!profile?.alias) return;
+  try {
+    const { data, error } = await sb.rpc('mi_resumen_referidos');
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    const totalEl = document.getElementById('referral-total-count');
+    const pendEl = document.getElementById('referral-pending-count');
+    const balEl = document.getElementById('referral-balance');
+    if (totalEl) totalEl.textContent = Number(row?.total_referidos || 0).toLocaleString('es');
+    if (pendEl) pendEl.textContent = Number(row?.total_pendientes || 0).toLocaleString('es');
+    const saldo = Number(row?.saldo_confirmado_usd || 0) + Number(row?.saldo_pagado_usd || 0);
+    if (balEl) balEl.textContent = `$${saldo.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  } catch (e) {
+    // Requiere mi_resumen_referidos() en Supabase — si aún no existe, se queda en 0 sin romper la pantalla
+  }
+}
+window.copyReferralLink = async function(){
+  const link = getReferralLink();
+  if (!link){ showToast(currentLang === 'en' ? 'Complete your profile first' : 'Completa tu perfil primero'); return; }
+  try { await navigator.clipboard.writeText(link); showToast('🔗 ' + (currentLang === 'en' ? 'Link copied' : 'Enlace copiado')); }
+  catch { showToast(link); }
+};
+window.shareReferralLink = async function(){
+  const link = getReferralLink();
+  if (!link){ showToast(currentLang === 'en' ? 'Complete your profile first' : 'Completa tu perfil primero'); return; }
+  const text = currentLang === 'en'
+    ? `Join $DOLLARDGT with my code — ${link}`
+    : `Únete a $DOLLARDGT con mi código — ${link}`;
+  if (navigator.share){
+    try { await navigator.share({ title: '$DOLLARDGT', text, url: link }); } catch { /* el usuario canceló el share sheet */ }
+  } else {
+    window.copyReferralLink();
+  }
+};
+
+let referralHistoryCache = [];
+let referralHistoryShowCount = 10;
+window.openReferralHistoryModal = async function(){
+  if (!session){ openModal('auth-modal'); return; }
+  if (!profile?.alias){ openModal('profile-modal'); return; }
+  referralHistoryShowCount = 10;
+  const cont = document.getElementById('referral-history-list');
+  cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Cargando…</p>`;
+  document.getElementById('referral-history-more-btn').classList.add('hidden');
+  openModal('referral-history-modal');
+  try {
+    const { data, error } = await sb.rpc('mi_historial_referidos', { p_limit: 200, p_offset: 0 });
+    if (error) throw error;
+    referralHistoryCache = data || [];
+  } catch (e) {
+    referralHistoryCache = [];
+  }
+  renderReferralHistory();
+};
+window.showMoreReferralHistory = function(){ referralHistoryShowCount += 10; renderReferralHistory(); };
+function renderReferralHistory(){
+  const cont = document.getElementById('referral-history-list');
+  const moreBtn = document.getElementById('referral-history-more-btn');
+  if (!cont) return;
+  if (referralHistoryCache.length === 0){
+    cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Todavía no tienes referidos.</p>`;
+    moreBtn.classList.add('hidden');
+    return;
+  }
+  const STATUS_LABEL = { pending: '⏳ Pendiente', confirmed: '✅ Confirmado', paid: '💰 Pagado' };
+  const STATUS_COLOR = { pending: 'text-amber-500', confirmed: 'text-emerald-600', paid: 'text-[#E05A00]' };
+  const shown = referralHistoryCache.slice(0, referralHistoryShowCount);
+  cont.innerHTML = shown.map(r => {
+    const dt = r.created_at ? new Date(r.created_at).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+    return `
+    <div class="bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+      <div class="min-w-0">
+        <p class="font-extrabold text-[#0f2f66] text-sm truncate">@${r.referred_alias || ''}</p>
+        <p class="text-xs text-slate-500">${dt}</p>
+      </div>
+      <div class="text-right shrink-0">
+        <p class="text-[#0f2f66] font-extrabold text-sm">$${Number(r.amount_usd || 0).toFixed(2)}</p>
+        <p class="text-[10px] font-bold ${STATUS_COLOR[r.status] || 'text-slate-400'}">${STATUS_LABEL[r.status] || r.status}</p>
+      </div>
+    </div>`;
+  }).join('');
+  moreBtn.classList.toggle('hidden', referralHistoryCache.length <= shown.length);
+  moreBtn.textContent = `Ver más (${referralHistoryCache.length - shown.length})`;
+}
+
+/* =====================================================================
    CERTIFICADO DIGITAL DE AUTENTICIDAD — PDF + QR (Fase 3)
    Genera un PDF descargable/compartible por cada serie registrada, con
    un QR de verificación. 100% client-side (jsPDF + qrcode.js) — usa
@@ -2778,6 +2961,7 @@ function showHookCardOnce(){
 
 /* ---------------- Inicialización real ---------------- */
 async function initReal(){
+  captureReferralFromURL();
   applyStaticTranslations();
   if (location.protocol === 'file:'){
     showToast('⚠️ Abre este archivo desde un servidor (no con doble clic) para que Supabase funcione');
