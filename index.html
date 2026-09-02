@@ -599,6 +599,16 @@
         <button onclick="openLeadershipHistoryModal()" class="w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold text-sm">Ver historial de rondas</button>
       </div>
 
+      <!-- Tarjeta: Mis Colecciones — solo referencias a familias, nunca
+           copias de los registros; crece sola cuando aparecen nuevos. -->
+      <div class="bg-white rounded-3xl p-5 shadow-soft mb-5">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-[10px] font-extrabold tracking-widest text-slate-400">🔗 MIS COLECCIONES</p>
+          <span id="collections-count" class="text-lg font-black text-[#0f2f66]">0</span>
+        </div>
+        <button onclick="openMyCollectionsModal()" class="w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold text-sm">Ver mis colecciones</button>
+      </div>
+
       <!-- Mis registros / Mis toques — botones compactos, cada uno abre su modal -->
       <div class="flex gap-3 mb-5">
         <button onclick="openMySeriesModal()" class="flex-1 bg-white rounded-3xl p-4 shadow-soft flex flex-col items-start gap-2">
@@ -807,6 +817,31 @@
         <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">🌎 Historial de Referidos</h2>
         <div id="referral-history-list" class="flex flex-col gap-2"></div>
         <button id="referral-history-more-btn" onclick="showMoreReferralHistory()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-100 text-slate-600 font-semibold">Ver más</button>
+      </div>
+    </div>
+
+    <!-- MODAL: Familia de Coincidencias — miembros leídos en vivo de
+         boveda_jugadas vía dgt_familia_miembros(), nunca una copia. -->
+    <div id="family-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('family-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-2xl font-extrabold text-[#0f2f66]">🔗 Coincidencias</h2>
+          <button id="family-save-btn" onclick="toggleSaveCollection()" class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0">♡</button>
+        </div>
+        <p id="family-modal-subtitle" class="text-sm text-slate-500 mb-4"></p>
+        <div id="family-modal-list" class="flex flex-col gap-2"></div>
+      </div>
+    </div>
+
+    <!-- MODAL: Mis Colecciones -->
+    <div id="my-collections-modal" class="dgt-modal fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50" onclick="closeModal('my-collections-modal')"></div>
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <h2 class="text-2xl font-extrabold text-[#0f2f66] mb-4">🔗 Mis Colecciones</h2>
+        <div id="my-collections-list" class="flex flex-col gap-2"></div>
       </div>
     </div>
 
@@ -1564,6 +1599,7 @@ function updateSessionUI(){
   loadLeadershipSummary();
   renderReferralCard();
   loadReferralSummary();
+  fetchMyCollections();
 }
 window.handleAuthSubmit = async function(mode){
   const email = document.getElementById('auth-email').value.trim();
@@ -1827,6 +1863,7 @@ async function fetchPool(){
   const rows = await fetchFromFirstAvailable('points', 300);
   MOCK_POOL = rows.map(row => ({ ...row, serial: row.serial || row.serial_display || row.digits, owner: row.owner || row.alias, rarity: normalizeRarity(row.rarity), disponibilidad: row.disponibilidad || 'mantener' }));
   await fetchDemandAndWatchers();
+  await fetchFamilyCounts();
   saveToCache(MOCK_POOL);
   updateOfflineBanner();
   return MOCK_POOL;
@@ -1857,6 +1894,137 @@ async function fetchDemandAndWatchers(){
       MY_WATCHED = new Set();
     }
   } catch { MY_WATCHED = new Set(); }
+}
+
+/* ---------------- Familias de coincidencias (EXACTA + ESPECIAL) ---------------- */
+let FAMILY_COUNTS = {}; // family_key -> member_count, ya calculado en Supabase (nunca se recuenta aquí)
+async function fetchFamilyCounts(){
+  try {
+    const { data, error } = await sb.from('dgt_coincidence_families').select('family_key, member_count');
+    if (error) throw error;
+    const map = {};
+    (data || []).forEach(f => { map[f.family_key] = f.member_count; });
+    FAMILY_COUNTS = map;
+  } catch { FAMILY_COUNTS = {}; }
+}
+function familyKeyForRow(r){ return 'EXACT:' + (r.digits || ''); }
+function coincidenceBadgeHtml(r){
+  const key = familyKeyForRow(r);
+  const count = FAMILY_COUNTS[key] || 0;
+  if (count <= 1) return ''; // 1 = solo él mismo, no es "coincidencia" con nadie
+  return `<button onclick="event.stopPropagation(); openFamilyModal('${key}')" class="text-[10px] font-bold text-[#0f2f66] bg-[#EAF0FA] px-2 py-0.5 rounded-full whitespace-nowrap">🔗 ${count} coincidencias registradas</button>`;
+}
+
+let MY_COLLECTIONS = new Set(); // family_key de las colecciones que ya guardé
+async function fetchMyCollections(){
+  if (!session){ MY_COLLECTIONS = new Set(); return; }
+  try {
+    const { data, error } = await sb.rpc('mis_colecciones');
+    if (error) throw error;
+    MY_COLLECTIONS = new Set((data || []).map(c => c.family_key));
+    const countEl = document.getElementById('collections-count');
+    if (countEl) countEl.textContent = MY_COLLECTIONS.size.toLocaleString('es');
+  } catch { MY_COLLECTIONS = new Set(); }
+}
+
+let currentFamilyKey = null;
+let familyMembersCache = [];
+window.openFamilyModal = async function(familyKey){
+  currentFamilyKey = familyKey;
+  const count = FAMILY_COUNTS[familyKey] || 0;
+  const subtitle = document.getElementById('family-modal-subtitle');
+  if (subtitle) subtitle.textContent = `${count} registro${count === 1 ? '' : 's'} reales con este mismo número de serie.`;
+  document.getElementById('family-modal-list').innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Cargando…</p>`;
+  openModal('family-modal');
+  updateSaveButtonState();
+  try {
+    const { data, error } = await sb.rpc('dgt_familia_miembros', { p_family_key: familyKey, p_limit: 100, p_offset: 0 });
+    if (error) throw error;
+    familyMembersCache = data || [];
+  } catch (e) {
+    familyMembersCache = [];
+  }
+  renderFamilyMembers();
+};
+function renderFamilyMembers(){
+  const cont = document.getElementById('family-modal-list');
+  if (!cont) return;
+  if (familyMembersCache.length === 0){
+    cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Sin miembros todavía.</p>`;
+    return;
+  }
+  cont.innerHTML = familyMembersCache.map(r => `
+    <div class="bg-slate-50 rounded-2xl p-3.5">
+      <p class="font-extrabold text-[#0f2f66] text-sm truncate">${r.serial || ''}</p>
+      <p class="text-xs text-slate-500 truncate">${r.country || ''}${r.yr ? ' · ' + r.yr : ''} · ${rarityLabelFallback(r.rarity)}${r.denom ? ' · ' + r.denom.toLocaleString('es') : ''}</p>
+      <p class="text-xs text-[#FF6A00] font-semibold">@${r.owner || 'anónimo'}</p>
+    </div>`).join('');
+}
+function updateSaveButtonState(){
+  const btn = document.getElementById('family-save-btn');
+  if (!btn || !currentFamilyKey) return;
+  const saved = MY_COLLECTIONS.has(currentFamilyKey);
+  btn.textContent = saved ? '♥' : '♡';
+  btn.classList.toggle('bg-amber-500', saved);
+  btn.classList.toggle('text-white', saved);
+  btn.classList.toggle('bg-amber-50', !saved);
+  btn.classList.toggle('text-amber-500', !saved);
+}
+window.toggleSaveCollection = async function(){
+  if (!currentFamilyKey) return;
+  if (!session){ openModal('auth-modal'); return; }
+  if (!profile?.alias){ openModal('profile-modal'); return; }
+  const already = MY_COLLECTIONS.has(currentFamilyKey);
+  try {
+    if (already){
+      await sb.rpc('dgt_quitar_coleccion', { p_family_key: currentFamilyKey });
+      MY_COLLECTIONS.delete(currentFamilyKey);
+      showToast('Colección quitada');
+    } else {
+      await sb.rpc('dgt_guardar_coleccion', { p_family_key: currentFamilyKey });
+      MY_COLLECTIONS.add(currentFamilyKey);
+      showToast('♥ Colección guardada');
+    }
+    updateSaveButtonState();
+    const countEl = document.getElementById('collections-count');
+    if (countEl) countEl.textContent = MY_COLLECTIONS.size.toLocaleString('es');
+  } catch (e) {
+    showToast('Error: ' + (e.message || e));
+  }
+};
+
+window.openMyCollectionsModal = async function(){
+  if (!session){ openModal('auth-modal'); return; }
+  if (!profile?.alias){ openModal('profile-modal'); return; }
+  const cont = document.getElementById('my-collections-list');
+  cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Cargando…</p>`;
+  openModal('my-collections-modal');
+  try {
+    const { data, error } = await sb.rpc('mis_colecciones');
+    if (error) throw error;
+    renderMyCollectionsList(data || []);
+  } catch (e) {
+    renderMyCollectionsList([]);
+  }
+};
+function renderMyCollectionsList(list){
+  const cont = document.getElementById('my-collections-list');
+  if (!cont) return;
+  if (list.length === 0){
+    cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Todavía no has guardado ninguna colección.</p>`;
+    return;
+  }
+  cont.innerHTML = list.map(c => {
+    const typeLabel = c.type === 'EXACT' ? 'Serie exacta' : 'Rareza especial';
+    return `
+    <button onclick="closeModal('my-collections-modal'); openFamilyModal('${c.family_key}')" class="w-full text-left bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+      <div class="min-w-0">
+        <p class="font-extrabold text-[#0f2f66] text-sm truncate">${c.reference_value}</p>
+        <p class="text-xs text-slate-500">${typeLabel}</p>
+      </div>
+      <span class="text-[#E05A00] font-extrabold text-sm shrink-0">🔗 ${c.member_count}</span>
+    </button>`;
+  }).join('');
 }
 function transferBadgeHtml(serial){
   const n = TRANSFER_COUNTS[serial] || 0;
@@ -3119,7 +3287,7 @@ function globalResultCardHtml(r){
         <p class="font-extrabold text-[#0f2f66] text-lg truncate">${r.serial || ''}</p>
         <p class="text-xs text-slate-500 truncate">${r.country || ''}${anio ? ' · ' + anio : ''} · ${r.rarity.label}${simLabel}</p>
         <p class="text-xs text-[#FF6A00] font-semibold mb-1">@${r.owner || 'anónimo'}</p>
-        <div class="flex flex-wrap gap-1">${dispTag}${demandBadgeHtml(r.serial)}${transferBadgeHtml(r.serial)}</div>
+        <div class="flex flex-wrap gap-1">${dispTag}${demandBadgeHtml(r.serial)}${transferBadgeHtml(r.serial)}${coincidenceBadgeHtml(r)}</div>
       </div>
       <span class="text-[#E05A00] font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
       <div class="flex flex-col gap-1.5">
@@ -3203,7 +3371,7 @@ function profileSeriesCardHtml(r){
         <span class="text-[#E05A00] font-extrabold text-sm">${(r.points||0).toLocaleString('es')}</span>
         <button onclick="generarCertificado('${r.serial}')" class="w-9 h-9 rounded-lg bg-[#0f2f66]/10 text-[#0f2f66] flex items-center justify-center text-sm shrink-0" title="Generar certificado">🎓</button>
       </div>
-      ${demandBadgeHtml(r.serial) || transferBadgeHtml(r.serial) ? `<div class="flex flex-wrap gap-1">${demandBadgeHtml(r.serial)}${transferBadgeHtml(r.serial)}</div>` : ''}
+      ${demandBadgeHtml(r.serial) || transferBadgeHtml(r.serial) || coincidenceBadgeHtml(r) ? `<div class="flex flex-wrap gap-1">${demandBadgeHtml(r.serial)}${transferBadgeHtml(r.serial)}${coincidenceBadgeHtml(r)}</div>` : ''}
       <div class="flex gap-1.5">
         ${opciones.map(o => `<button onclick="cambiarDisponibilidad('${r.serial}','${o.key}')" class="flex-1 h-8 rounded-lg text-[11px] font-bold ${disp === o.key ? 'bg-[#0f2f66] text-white' : 'bg-slate-100 text-slate-500'}">${o.label}</button>`).join('')}
       </div>
