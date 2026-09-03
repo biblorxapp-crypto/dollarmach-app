@@ -897,6 +897,7 @@
           <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
           <p class="font-extrabold text-[#0f2f66]" id="chat-with-label">@sarah_bills</p>
           <p class="text-xs text-slate-500" id="chat-serial-label">Serie C12344321</p>
+          <p id="chat-context-label" class="hidden text-xs text-[#FF6A00] font-semibold mt-1">🔗 Coincidencia de colección</p>
         </div>
         <button id="chat-transfer-btn" onclick="markSerieTransferred()" class="hidden mx-5 mt-3 h-11 rounded-2xl bg-[#FF6A00] text-white text-sm font-bold">✅ Marcar serie como transferida a este usuario</button>
         <div id="chat-messages" class="flex-1 overflow-y-auto p-5 flex flex-col gap-2 min-h-[240px]">
@@ -2019,20 +2020,45 @@ function renderFamilyMembers(){
     cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Sin miembros todavía.</p>`;
     return;
   }
-  cont.innerHTML = familyMembersCache.map(r => {
+  cont.innerHTML = familyMembersCache.map((r, i) => {
     const dt = r.created_at ? new Date(r.created_at).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+    const esMio = profile?.alias && r.owner === profile.alias;
+    let actionHtml = '';
+    if (!esMio){
+      if (r.disponibilidad === 'transferible'){
+        actionHtml = `<button onclick="onFamilyMemberToqueClick(${i})" class="w-full h-10 mt-2 rounded-xl bg-[#FF6A00] text-white text-sm font-bold">💬 Enviar toque</button>`;
+      } else if (r.disponibilidad === 'propuestas'){
+        actionHtml = `<button onclick="onFamilyMemberToqueClick(${i})" class="w-full h-10 mt-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold">💬 Enviar toque</button>`;
+      } else {
+        actionHtml = `<p class="text-[11px] font-semibold text-slate-400 mt-2">🔒 El propietario no recibe propuestas</p>`;
+      }
+    }
     return `
     <div class="bg-slate-50 rounded-2xl p-3.5">
-      <p class="font-extrabold text-[#0f2f66] text-sm truncate">${r.serial || ''}</p>
+      <p class="font-extrabold text-[#0f2f66] text-base truncate">${r.serial || ''}</p>
       <p class="text-xs text-slate-500 truncate">${r.country || ''}${r.yr ? ' · ' + r.yr : ''} · ${rarityLabelFallback(r.rarity)}${r.denom ? ' · ' + r.denom.toLocaleString('es') : ''}</p>
       <p class="text-xs text-[#FF6A00] font-semibold">@${r.owner || 'anónimo'}</p>
       <div class="flex items-center justify-between mt-1.5">
         ${familyMemberDispTag(r.disponibilidad) || '<span></span>'}
         <span class="text-[10px] text-slate-400">${dt}</span>
       </div>
+      ${actionHtml}
     </div>`;
   }).join('');
 }
+// El toque de un miembro de familia usa los datos que YA trajo el RPC —
+// nunca busca en MOCK_POOL (que solo tiene los 300 de mayor puntaje, y
+// un miembro de colección puede no estar ahí). Reutiliza gate() y
+// executeToque() tal cual, sin tocar su lógica interna.
+window.onFamilyMemberToqueClick = function(i){
+  const m = familyMembersCache[i];
+  if (!m) return;
+  if (!session){ openModal('auth-modal'); return; }
+  if (profile?.alias && m.owner === profile.alias){ showToast('No puedes tocar tu propio billete'); return; }
+  const payload = { toOwner: m.owner, toEmail: decodeEmailIfNeeded(m.email), serial: m.serial, digits: m.digits };
+  if (!gate('toque', payload)) return;
+  executeToque(payload);
+};
 function updateSaveButtonState(){
   const btn = document.getElementById('family-save-btn');
   if (!btn || !currentFamilyKey) return;
@@ -3259,7 +3285,7 @@ function renderToquesReceived(){
         <button onclick="acceptToqueClick('${t.id}')" class="flex-1 h-10 rounded-xl bg-[#FF6A00] text-white text-sm font-bold">Aceptar → Chat</button>
         <button onclick="rejectToqueClick('${t.id}')" class="h-10 px-4 rounded-xl bg-slate-200 text-slate-600 text-sm font-bold">Rechazar</button>
       </div>` : t.status === 'accepted' ? `
-      <button onclick="openChatModal('${t.id}','${t.from_alias}','${t.serial || ''}')" class="w-full h-10 rounded-xl bg-[#0f2f66] text-white text-sm font-bold">💬 Abrir chat</button>`
+      <button onclick="openChatModal('${t.id}','${t.from_alias}','${t.serial || ''}','${t.digits || ''}',true)" class="w-full h-10 rounded-xl bg-[#0f2f66] text-white text-sm font-bold">💬 Abrir chat</button>`
       : t.status === 'expired' ? `
       <span class="text-xs font-bold text-amber-500">⏱ Serie transferida a otro dueño</span>`
       : `<span class="text-xs font-bold text-slate-400">✕ Rechazado</span>`}
@@ -3276,7 +3302,7 @@ function renderToquesSent(){
     <div class="bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between gap-3">
       <div class="min-w-0"><p class="font-bold text-[#0f2f66] truncate">@${t.to_owner}</p><p class="text-xs text-slate-500 truncate">Serie ${t.serial || ''}</p></div>
       ${t.status === 'accepted'
-        ? `<button onclick="openChatModal('${t.id}','${t.to_owner}','${t.serial || ''}')" class="shrink-0 h-9 px-3 rounded-xl bg-[#0f2f66] text-white text-xs font-bold">💬 Chat</button>`
+        ? `<button onclick="openChatModal('${t.id}','${t.to_owner}','${t.serial || ''}','${t.digits || ''}',false)" class="shrink-0 h-9 px-3 rounded-xl bg-[#0f2f66] text-white text-xs font-bold">💬 Chat</button>`
         : `<span class="shrink-0 text-xs font-bold ${t.status==='pending' ? 'text-amber-500' : t.status==='expired' ? 'text-amber-500' : 'text-slate-400'}">${t.status==='pending' ? 'Pendiente' : t.status==='expired' ? '⏱ Ya cambió de dueño' : 'Rechazado'}</span>`}
     </div>`).join('');
   if (toquesSentCache.length > shown.length){
@@ -3291,7 +3317,7 @@ window.acceptToqueClick = async function(id){
     await loadToquesReceived();
     loadProfileToquesSummary();
     const t = toquesReceivedCache.find(x => String(x.id) === String(id));
-    if (t) openChatModal(t.id, t.from_alias, t.serial || '');
+    if (t) openChatModal(t.id, t.from_alias, t.serial || '', t.digits || '', true);
   } catch (e) { showToast('Error: ' + (e.message || e)); }
 };
 window.rejectToqueClick = async function(id){
@@ -3309,14 +3335,16 @@ async function executeToque(payload){
 /* ---------------- Chat privado real (tabla dgt_chats) ---------------- */
 let activeChatToqueId = null, activeChatWith = null, activeChatSerial = null, chatMessagesCache = [];
 function dgtEscapeHtml(str){ return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-window.openChatModal = async function(toqueId, alias, serial){
+window.openChatModal = async function(toqueId, alias, serial, digits, isOwner){
   activeChatToqueId = toqueId; activeChatWith = alias; activeChatSerial = serial;
   document.getElementById('chat-with-label').textContent = '@' + alias;
   document.getElementById('chat-serial-label').textContent = 'Serie ' + (serial || '');
+  const contextEl = document.getElementById('chat-context-label');
+  const familyKey = digits ? ('EXACT:' + digits) : null;
+  const hasCoincidencia = !!familyKey && (FAMILY_COUNTS[familyKey] || 0) > 1;
+  if (contextEl) contextEl.classList.toggle('hidden', !hasCoincidencia);
   document.getElementById('chat-messages').innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Cargando…</p>`;
-  const row = MOCK_POOL.find(r => r.serial === serial);
-  const soyElDueno = !!(row && profile?.alias && row.owner === profile.alias);
-  document.getElementById('chat-transfer-btn').classList.toggle('hidden', !soyElDueno);
+  document.getElementById('chat-transfer-btn').classList.toggle('hidden', !isOwner);
   openModal('chat-modal');
   closeModal('toques-modal');
   await loadChatMessages();
