@@ -839,6 +839,12 @@
         <p id="family-modal-subtitle" class="text-sm text-slate-500 mb-2"></p>
         <div id="family-modal-stats" class="flex flex-wrap gap-x-4 gap-y-1 text-xs font-bold text-slate-500 mb-4"></div>
         <div id="family-modal-list" class="flex flex-col gap-2"></div>
+        <!-- Solo se llena/muestra cuando el family-modal abre una familia EXACT
+             y existen relaciones estructurales reales — colapsada por defecto. -->
+        <details id="family-modal-related" class="hidden mt-4 border-t border-slate-100 pt-3">
+          <summary class="text-xs font-bold text-slate-500 cursor-pointer select-none">🔎 También comparte estructura con otras series</summary>
+          <div id="family-modal-related-list" class="flex flex-col gap-2 mt-2"></div>
+        </details>
       </div>
     </div>
 
@@ -944,11 +950,22 @@
       <div class="absolute inset-0 flex items-center justify-center px-8">
         <div class="relative bg-white rounded-3xl p-8 w-full max-w-sm text-center shadow-premium">
           <div id="badge-modal-glow"></div>
-          <p class="text-[11px] font-extrabold tracking-widest text-[#E05A00] mb-2">¡INSIGNIA DESBLOQUEADA!</p>
+          <p id="badge-modal-eyebrow" class="text-[11px] font-extrabold tracking-widest text-[#E05A00] mb-2">¡INSIGNIA DESBLOQUEADA!</p>
           <div id="badge-modal-icon" class="text-6xl mb-3">🏆</div>
+          <!-- Solo se usa en modo Descubrimiento MIRROR: par de series en espejo -->
+          <div id="badge-modal-mirror-pair" class="hidden mb-3">
+            <p id="badge-modal-mirror-a" class="text-2xl font-black text-[#0f2f66] tracking-wide"></p>
+            <p class="text-slate-300 text-lg leading-none my-0.5">↕</p>
+            <p id="badge-modal-mirror-b" class="text-2xl font-black text-[#0f2f66] tracking-wide"></p>
+          </div>
           <h3 id="badge-modal-title" class="text-xl font-extrabold text-[#0f2f66] leading-snug mb-1">Coleccionista</h3>
           <p id="badge-modal-desc" class="text-sm text-slate-500 mb-6">Registraste 5 series en la Bóveda.</p>
-          <button onclick="closeModal('badge-modal')" class="w-full h-12 rounded-2xl bg-[#FF6A00] text-white font-bold">¡Genial!</button>
+          <!-- Solo se usa en modo Descubrimiento: acciones hacia la familia -->
+          <div id="badge-modal-discovery-actions" class="hidden gap-2 mb-2">
+            <button onclick="viewDiscoveredFamily()" class="flex-1 h-12 rounded-2xl bg-[#0f2f66] text-white font-bold">Ver familia</button>
+            <button onclick="saveDiscoveredFamily()" class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0">♡</button>
+          </div>
+          <button id="badge-modal-ok-btn" onclick="closeModal('badge-modal'); maybeShowPendingDiscovery();" class="w-full h-12 rounded-2xl bg-[#FF6A00] text-white font-bold">¡Genial!</button>
         </div>
       </div>
     </div>
@@ -1822,6 +1839,8 @@ window.handleRegister = async function(){
     await fetchPool(); refreshPoolDependentUI();
     updateSessionUI();
     checkForNewBadges();
+    await checkForFamilyDiscovery(digits);
+    maybeShowPendingDiscovery();
   } catch (e) {
     const isDuplicate = e.code === '23505' || /duplicate key|unique constraint/i.test(e.message || '');
     showToast(isDuplicate ? t('toast.registerDuplicate') : (currentLang === 'en' ? 'Registration error: ' : 'Error al registrar: ') + (e.message || e));
@@ -1948,9 +1967,14 @@ window.openFamilyModal = async function(familyKey){
   if (subtitle) subtitle.textContent = 'Cargando…';
   if (statsEl) statsEl.innerHTML = '';
   document.getElementById('family-modal-list').innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Cargando…</p>`;
+  const relatedWrap = document.getElementById('family-modal-related');
+  if (relatedWrap) relatedWrap.classList.add('hidden');
   openModal('family-modal');
   updateSaveButtonState();
   updateNotifyButtonState();
+  if (familyKey.startsWith('EXACT:')){
+    renderRelatedFamilies(familyKey.split(':').slice(1).join(':'));
+  }
 
   try {
     const { data, error } = await sb.rpc('dgt_familia_resumen', { p_family_key: familyKey });
@@ -2606,7 +2630,13 @@ function checkForNewBadges(){
   showBadgeUnlockedModal(nuevas[0]);
 }
 function showBadgeUnlockedModal(badge){
+  document.getElementById('badge-modal-eyebrow').textContent = '¡INSIGNIA DESBLOQUEADA!';
+  document.getElementById('badge-modal-icon').classList.remove('hidden');
   document.getElementById('badge-modal-icon').textContent = badge.icon;
+  document.getElementById('badge-modal-mirror-pair').classList.add('hidden');
+  document.getElementById('badge-modal-discovery-actions').classList.remove('flex');
+  document.getElementById('badge-modal-discovery-actions').classList.add('hidden');
+  document.getElementById('badge-modal-ok-btn').classList.remove('hidden');
   document.getElementById('badge-modal-title').textContent = t('badge.' + badge.key + '.label');
   document.getElementById('badge-modal-desc').textContent = t('badge.' + badge.key + '.desc');
   const icon = document.getElementById('badge-modal-icon');
@@ -2614,6 +2644,123 @@ function showBadgeUnlockedModal(badge){
   void icon.offsetWidth;
   icon.classList.add('dgt-badge-spin');
   openModal('badge-modal');
+}
+
+/* =====================================================================
+   DESCUBRIMIENTO DE FAMILIAS ESTRUCTURALES (Etapa 3A — frontend)
+   Se dispara UNA sola vez por family_key, exactamente en la transición
+   1→2 miembros (lo decide el servidor, dgt_detectar_descubrimiento).
+   PREFIX4/SUFFIX4 nunca disparan este momento — solo quedan como dato
+   secundario dentro del modal EXACT. Reutiliza badge-modal (modo
+   Descubrimiento) y family-modal — cero componentes nuevos.
+===================================================================== */
+let pendingDiscovery = null;
+let currentDiscovery = null;
+
+async function checkForFamilyDiscovery(digits){
+  try {
+    const { data, error } = await sb.rpc('dgt_detectar_descubrimiento', { p_digits: digits });
+    if (error) throw error;
+    const d = Array.isArray(data) ? data[0] : data;
+    if (!d || !d.family_key) return;
+    let countriesCount = 0;
+    try {
+      const { data: resumen } = await sb.rpc('dgt_familia_resumen', { p_family_key: d.family_key });
+      const r = Array.isArray(resumen) ? resumen[0] : resumen;
+      countriesCount = r?.countries_count || 0;
+    } catch { /* si falla el resumen, se muestra sin el dato de países */ }
+    pendingDiscovery = { ...d, countriesCount };
+  } catch (e) {
+    // Requiere dgt_detectar_descubrimiento() en Supabase — si aún no existe, no pasa nada visible
+  }
+}
+function maybeShowPendingDiscovery(){
+  if (!pendingDiscovery) return;
+  const badgeModal = document.getElementById('badge-modal');
+  if (badgeModal && !badgeModal.classList.contains('hidden')) return; // espera a que cierren la insignia primero
+  showDiscoveryModal(pendingDiscovery);
+  pendingDiscovery = null;
+}
+const DISCOVERY_COPY = {
+  MIRROR:  { eyebrow: '🪞 MIRROR ENCONTRADO',        title: 'Mirror encontrado' },
+  BLOCK:   { eyebrow: '🔗 NUEVA RELACIÓN ENCONTRADA', title: 'Estructura de bloque' },
+  PREFIX6: { eyebrow: '🔗 NUEVA RELACIÓN ENCONTRADA', title: 'Mismo inicio de serie' },
+  SUFFIX6: { eyebrow: '🔗 NUEVA RELACIÓN ENCONTRADA', title: 'Mismo final de serie' }
+};
+function showDiscoveryModal(d){
+  currentDiscovery = d;
+  const copy = DISCOVERY_COPY[d.type] || DISCOVERY_COPY.BLOCK;
+  document.getElementById('badge-modal-eyebrow').textContent = copy.eyebrow;
+  document.getElementById('badge-modal-title').textContent = copy.title;
+  document.getElementById('badge-modal-ok-btn').classList.add('hidden');
+  document.getElementById('badge-modal-discovery-actions').classList.remove('hidden');
+  document.getElementById('badge-modal-discovery-actions').classList.add('flex');
+
+  const iconEl = document.getElementById('badge-modal-icon');
+  const mirrorEl = document.getElementById('badge-modal-mirror-pair');
+  if (d.type === 'MIRROR'){
+    iconEl.classList.add('hidden');
+    mirrorEl.classList.remove('hidden');
+    document.getElementById('badge-modal-mirror-a').textContent = d.reference_value;
+    document.getElementById('badge-modal-mirror-b').textContent = d.reference_value.split('').reverse().join('');
+  } else {
+    mirrorEl.classList.add('hidden');
+    iconEl.classList.remove('hidden');
+    iconEl.textContent = d.type === 'BLOCK' ? '🧩' : '🔗';
+    iconEl.classList.remove('dgt-badge-spin');
+    void iconEl.offsetWidth;
+    iconEl.classList.add('dgt-badge-spin');
+  }
+
+  const parts = [`${d.member_count} coincidencia${d.member_count === 1 ? '' : 's'}`];
+  if ((d.countriesCount || 0) > 1) parts.push(`${d.countriesCount} países`);
+  document.getElementById('badge-modal-desc').textContent = parts.join(' · ');
+
+  openModal('badge-modal');
+}
+window.viewDiscoveredFamily = function(){
+  if (!currentDiscovery) return;
+  closeModal('badge-modal');
+  openFamilyModal(currentDiscovery.family_key);
+};
+window.saveDiscoveredFamily = async function(){
+  if (!currentDiscovery) return;
+  if (!session){ openModal('auth-modal'); return; }
+  if (!profile?.alias){ openModal('profile-modal'); return; }
+  try {
+    await sb.rpc('dgt_guardar_coleccion', { p_family_key: currentDiscovery.family_key });
+    MY_COLLECTIONS.add(currentDiscovery.family_key);
+    showToast('♥ Colección guardada');
+  } catch (e) {
+    showToast('Error: ' + (e.message || e));
+  }
+};
+
+/* ---------------- Sección secundaria dentro del modal EXACT ---------------- */
+async function renderRelatedFamilies(digits){
+  const wrap = document.getElementById('family-modal-related');
+  const list = document.getElementById('family-modal-related-list');
+  if (!wrap || !list) { return; }
+  wrap.classList.add('hidden');
+  list.innerHTML = '';
+  try {
+    const { data, error } = await sb.rpc('dgt_familias_relacionadas', { p_digits: digits });
+    if (error) throw error;
+    const rows = data || [];
+    if (rows.length === 0) return;
+    const TYPE_LABEL = { MIRROR: '🪞 Mirror', BLOCK: '🧩 Bloque', PREFIX6: '🔗 Mismo inicio (6)', SUFFIX6: '🔗 Mismo final (6)', PREFIX4: '🔗 Mismo inicio (4)', SUFFIX4: '🔗 Mismo final (4)' };
+    list.innerHTML = rows.map(r => `
+      <button onclick="closeModal('family-modal'); setTimeout(() => openFamilyModal('${r.family_key}'), 150)" class="w-full text-left bg-slate-50 rounded-2xl p-3 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <p class="font-bold text-[#0f2f66] text-sm truncate">${TYPE_LABEL[r.type] || r.type}</p>
+          <p class="text-xs text-slate-500 truncate">${r.reference_value}</p>
+        </div>
+        <span class="text-[#E05A00] font-extrabold text-sm shrink-0">${r.member_count}</span>
+      </button>`).join('');
+    wrap.classList.remove('hidden');
+  } catch (e) {
+    // Requiere dgt_familias_relacionadas() en Supabase — si aún no existe, la sección se queda oculta
+  }
 }
 
 /* =====================================================================
