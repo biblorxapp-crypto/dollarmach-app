@@ -2447,7 +2447,7 @@ function subscribeRadarRealtime(){
     .subscribe();
 }
 
-function handleRealtimeInsert(payload){
+async function handleRealtimeInsert(payload){
   const row = payload?.new;
   if (!row) return;
 
@@ -2479,16 +2479,29 @@ function handleRealtimeInsert(payload){
     events.push({ type: 'watch', row: normalized });
   }
 
-  // 3) Crecimiento de una colección que sigues (🔔 notify) — el único
-  // evento capaz de mover el contador es un INSERT válido (no demo, no
-  // anulado), que es justo lo que llega por Realtime en este punto.
-  const familyKey = familyKeyForRow(normalized);
-  if (MY_NOTIFY_FAMILIES.has(familyKey)){
-    const before = FAMILY_COUNTS[familyKey] || 0;
-    const after = before + 1;
-    FAMILY_COUNTS[familyKey] = after;
-    events.push({ type: 'coleccion', row: normalized, familyKey, before, after });
-  }
+  // 3) Crecimiento de CUALQUIER colección que sigues (🔔 notify) — nunca
+  // se recalcula MIRROR/BLOCK en el cliente: dgt_familias_de_registro()
+  // en Supabase es la única fuente de verdad de a qué familias
+  // pertenece este registro (EXACT, SPECIAL, PREFIX4/6, SUFFIX4/6,
+  // MIRROR, BLOCK); aquí solo se compara el resultado contra lo que el
+  // usuario ya sigue.
+  try {
+    const { data: familias, error: familiasErr } = await sb.rpc('dgt_familias_de_registro', {
+      p_digits: normalized.digits,
+      p_rarity: row.rarity
+    });
+    if (!familiasErr){
+      (familias || []).forEach(f => {
+        const familyKey = f.family_key;
+        if (MY_NOTIFY_FAMILIES.has(familyKey)){
+          const before = FAMILY_COUNTS[familyKey] || 0;
+          const after = before + 1;
+          FAMILY_COUNTS[familyKey] = after;
+          events.push({ type: 'coleccion', row: normalized, familyKey, before, after });
+        }
+      });
+    }
+  } catch (e) { /* si falla, simplemente no se dispara este aviso puntual */ }
 
   // Cosecha en vivo: el líder de la ronda cobra su "peaje del minuto" por este registro ajeno
   addHarvestFromRegistration(normalized);
