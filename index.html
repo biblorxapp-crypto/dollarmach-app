@@ -826,11 +826,18 @@
       <div class="absolute inset-0 bg-black/50" onclick="closeModal('family-modal')"></div>
       <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
         <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-2xl font-extrabold text-[#0f2f66]">🔗 Coincidencias</h2>
-          <button id="family-save-btn" onclick="toggleSaveCollection()" class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0">♡</button>
+        <div class="flex items-center justify-between mb-1">
+          <div class="min-w-0">
+            <p class="text-[10px] font-extrabold tracking-widest text-slate-400">COLECCIÓN</p>
+            <h2 id="family-modal-title" class="text-2xl font-extrabold text-[#0f2f66] truncate">—</h2>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button id="family-save-btn" onclick="toggleSaveCollection()" class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl">♡</button>
+            <button id="family-notify-btn" onclick="toggleNotifyCollection()" class="w-11 h-11 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-xl">🔔</button>
+          </div>
         </div>
-        <p id="family-modal-subtitle" class="text-sm text-slate-500 mb-4"></p>
+        <p id="family-modal-subtitle" class="text-sm text-slate-500 mb-2"></p>
+        <div id="family-modal-stats" class="flex flex-wrap gap-x-4 gap-y-1 text-xs font-bold text-slate-500 mb-4"></div>
         <div id="family-modal-list" class="flex flex-col gap-2"></div>
       </div>
     </div>
@@ -1916,27 +1923,44 @@ function coincidenceBadgeHtml(r){
 }
 
 let MY_COLLECTIONS = new Set(); // family_key de las colecciones que ya guardé
+let MY_NOTIFY_FAMILIES = new Set(); // family_key con notify = true, para el Radar
 async function fetchMyCollections(){
-  if (!session){ MY_COLLECTIONS = new Set(); return; }
+  if (!session){ MY_COLLECTIONS = new Set(); MY_NOTIFY_FAMILIES = new Set(); return; }
   try {
     const { data, error } = await sb.rpc('mis_colecciones');
     if (error) throw error;
-    MY_COLLECTIONS = new Set((data || []).map(c => c.family_key));
+    const list = data || [];
+    MY_COLLECTIONS = new Set(list.map(c => c.family_key));
+    MY_NOTIFY_FAMILIES = new Set(list.filter(c => c.notify).map(c => c.family_key));
     const countEl = document.getElementById('collections-count');
     if (countEl) countEl.textContent = MY_COLLECTIONS.size.toLocaleString('es');
-  } catch { MY_COLLECTIONS = new Set(); }
+  } catch { MY_COLLECTIONS = new Set(); MY_NOTIFY_FAMILIES = new Set(); }
 }
 
 let currentFamilyKey = null;
 let familyMembersCache = [];
 window.openFamilyModal = async function(familyKey){
   currentFamilyKey = familyKey;
-  const count = FAMILY_COUNTS[familyKey] || 0;
+  const titleEl = document.getElementById('family-modal-title');
   const subtitle = document.getElementById('family-modal-subtitle');
-  if (subtitle) subtitle.textContent = `${count} registro${count === 1 ? '' : 's'} reales con este mismo número de serie.`;
+  const statsEl = document.getElementById('family-modal-stats');
+  if (titleEl) titleEl.textContent = familyKey.split(':').slice(1).join(':') || familyKey; // el valor de la familia, nunca un serial específico
+  if (subtitle) subtitle.textContent = 'Cargando…';
+  if (statsEl) statsEl.innerHTML = '';
   document.getElementById('family-modal-list').innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Cargando…</p>`;
   openModal('family-modal');
   updateSaveButtonState();
+  updateNotifyButtonState();
+
+  try {
+    const { data, error } = await sb.rpc('dgt_familia_resumen', { p_family_key: familyKey });
+    if (error) throw error;
+    const r = Array.isArray(data) ? data[0] : data;
+    renderFamilyStats(r);
+  } catch (e) {
+    if (subtitle) subtitle.textContent = `${FAMILY_COUNTS[familyKey] || 0} coincidencias registradas.`;
+  }
+
   try {
     const { data, error } = await sb.rpc('dgt_familia_miembros', { p_family_key: familyKey, p_limit: 100, p_offset: 0 });
     if (error) throw error;
@@ -1946,6 +1970,24 @@ window.openFamilyModal = async function(familyKey){
   }
   renderFamilyMembers();
 };
+function renderFamilyStats(r){
+  const subtitle = document.getElementById('family-modal-subtitle');
+  const statsEl = document.getElementById('family-modal-stats');
+  if (!r){ if (subtitle) subtitle.textContent = 'Sin datos todavía.'; return; }
+  const count = r.member_count || 0;
+  if (subtitle) subtitle.textContent = `🔗 ${count.toLocaleString('es')} coincidencia${count === 1 ? '' : 's'} registrada${count === 1 ? '' : 's'}`;
+  const chips = [];
+  if ((r.countries_count || 0) > 1) chips.push(`🌎 ${r.countries_count} países`);
+  if ((r.denoms_count || 0) > 1) chips.push(`💵 ${r.denoms_count} denom.`);
+  if ((r.eras_count || 0) > 1) chips.push(`📅 ${r.eras_count} eras`);
+  if (r.has_special) chips.push(`✨ Especial`);
+  if (statsEl) statsEl.innerHTML = chips.map(c => `<span>${c}</span>`).join('');
+}
+function familyMemberDispTag(disp){
+  if (disp === 'transferible') return `<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">🔴 Transferible</span>`;
+  if (disp === 'propuestas') return `<span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">🟡 Recibe propuestas</span>`;
+  return '';
+}
 function renderFamilyMembers(){
   const cont = document.getElementById('family-modal-list');
   if (!cont) return;
@@ -1953,12 +1995,19 @@ function renderFamilyMembers(){
     cont.innerHTML = `<p class="text-center text-slate-400 text-sm py-6">Sin miembros todavía.</p>`;
     return;
   }
-  cont.innerHTML = familyMembersCache.map(r => `
+  cont.innerHTML = familyMembersCache.map(r => {
+    const dt = r.created_at ? new Date(r.created_at).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+    return `
     <div class="bg-slate-50 rounded-2xl p-3.5">
       <p class="font-extrabold text-[#0f2f66] text-sm truncate">${r.serial || ''}</p>
       <p class="text-xs text-slate-500 truncate">${r.country || ''}${r.yr ? ' · ' + r.yr : ''} · ${rarityLabelFallback(r.rarity)}${r.denom ? ' · ' + r.denom.toLocaleString('es') : ''}</p>
       <p class="text-xs text-[#FF6A00] font-semibold">@${r.owner || 'anónimo'}</p>
-    </div>`).join('');
+      <div class="flex items-center justify-between mt-1.5">
+        ${familyMemberDispTag(r.disponibilidad) || '<span></span>'}
+        <span class="text-[10px] text-slate-400">${dt}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 function updateSaveButtonState(){
   const btn = document.getElementById('family-save-btn');
@@ -1970,6 +2019,15 @@ function updateSaveButtonState(){
   btn.classList.toggle('bg-amber-50', !saved);
   btn.classList.toggle('text-amber-500', !saved);
 }
+function updateNotifyButtonState(){
+  const btn = document.getElementById('family-notify-btn');
+  if (!btn || !currentFamilyKey) return;
+  const on = MY_NOTIFY_FAMILIES.has(currentFamilyKey);
+  btn.classList.toggle('bg-[#0f2f66]', on);
+  btn.classList.toggle('text-white', on);
+  btn.classList.toggle('bg-slate-100', !on);
+  btn.classList.toggle('text-slate-400', !on);
+}
 window.toggleSaveCollection = async function(){
   if (!currentFamilyKey) return;
   if (!session){ openModal('auth-modal'); return; }
@@ -1979,6 +2037,7 @@ window.toggleSaveCollection = async function(){
     if (already){
       await sb.rpc('dgt_quitar_coleccion', { p_family_key: currentFamilyKey });
       MY_COLLECTIONS.delete(currentFamilyKey);
+      MY_NOTIFY_FAMILIES.delete(currentFamilyKey); // sin colección guardada, no aplica seguirla
       showToast('Colección quitada');
     } else {
       await sb.rpc('dgt_guardar_coleccion', { p_family_key: currentFamilyKey });
@@ -1986,8 +2045,27 @@ window.toggleSaveCollection = async function(){
       showToast('♥ Colección guardada');
     }
     updateSaveButtonState();
+    updateNotifyButtonState();
     const countEl = document.getElementById('collections-count');
     if (countEl) countEl.textContent = MY_COLLECTIONS.size.toLocaleString('es');
+  } catch (e) {
+    showToast('Error: ' + (e.message || e));
+  }
+};
+window.toggleNotifyCollection = async function(){
+  if (!currentFamilyKey) return;
+  if (!session){ openModal('auth-modal'); return; }
+  if (!profile?.alias){ openModal('profile-modal'); return; }
+  if (!MY_COLLECTIONS.has(currentFamilyKey)){
+    showToast('Primero guarda la colección con ♡');
+    return;
+  }
+  const turningOn = !MY_NOTIFY_FAMILIES.has(currentFamilyKey);
+  try {
+    await sb.rpc('dgt_set_notify_coleccion', { p_family_key: currentFamilyKey, p_notify: turningOn });
+    if (turningOn){ MY_NOTIFY_FAMILIES.add(currentFamilyKey); showToast('🔔 Te avisaremos si esta colección crece'); }
+    else { MY_NOTIFY_FAMILIES.delete(currentFamilyKey); showToast('Notificaciones desactivadas'); }
+    updateNotifyButtonState();
   } catch (e) {
     showToast('Error: ' + (e.message || e));
   }
@@ -2019,7 +2097,7 @@ function renderMyCollectionsList(list){
     return `
     <button onclick="closeModal('my-collections-modal'); openFamilyModal('${c.family_key}')" class="w-full text-left bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between gap-3">
       <div class="min-w-0">
-        <p class="font-extrabold text-[#0f2f66] text-sm truncate">${c.reference_value}</p>
+        <p class="font-extrabold text-[#0f2f66] text-sm truncate">${c.reference_value}${c.notify ? ' 🔔' : ''}</p>
         <p class="text-xs text-slate-500">${typeLabel}</p>
       </div>
       <span class="text-[#E05A00] font-extrabold text-sm shrink-0">🔗 ${c.member_count}</span>
@@ -2377,6 +2455,17 @@ function handleRealtimeInsert(payload){
     events.push({ type: 'watch', row: normalized });
   }
 
+  // 3) Crecimiento de una colección que sigues (🔔 notify) — el único
+  // evento capaz de mover el contador es un INSERT válido (no demo, no
+  // anulado), que es justo lo que llega por Realtime en este punto.
+  const familyKey = familyKeyForRow(normalized);
+  if (MY_NOTIFY_FAMILIES.has(familyKey)){
+    const before = FAMILY_COUNTS[familyKey] || 0;
+    const after = before + 1;
+    FAMILY_COUNTS[familyKey] = after;
+    events.push({ type: 'coleccion', row: normalized, familyKey, before, after });
+  }
+
   // Cosecha en vivo: el líder de la ronda cobra su "peaje del minuto" por este registro ajeno
   addHarvestFromRegistration(normalized);
 
@@ -2387,7 +2476,7 @@ function handleRealtimeInsert(payload){
   events.forEach(pushRadarNotification);
 }
 
-function pushRadarNotification({ type, row }){
+function pushRadarNotification({ type, row, familyKey, before, after }){
   const stack = document.getElementById('radar-stack');
   if (!stack) return;
 
@@ -2397,7 +2486,12 @@ function pushRadarNotification({ type, row }){
 
   const label = type === 'coincidencia'
     ? `🌐 Coincidencia con tu serie — ${row.digits}`
-    : `🔔 Una serie que sigues acaba de aparecer`;
+    : type === 'coleccion'
+      ? `🔔 NUEVA COINCIDENCIA`
+      : `🔔 Una serie que sigues acaba de aparecer`;
+  const sublabel = type === 'coleccion'
+    ? `Tu colección ${(familyKey || '').split(':').slice(1).join(':')} acaba de crecer. ${before} → ${after} coincidencias registradas.`
+    : `${row.serial || ''} · ${row.rarity.label} · @${row.owner || 'anónimo'}`;
 
   const card = document.createElement('div');
   card.className = 'radar-toast';
@@ -2405,12 +2499,13 @@ function pushRadarNotification({ type, row }){
     <span class="dgt-live-dot"></span>
     <div class="flex-1 min-w-0">
       <p class="text-xs font-bold text-[#0f2f66] leading-snug">${label}</p>
-      <p class="text-[11px] text-slate-500 truncate">${row.serial || ''} · ${row.rarity.label} · @${row.owner || 'anónimo'}</p>
+      <p class="text-[11px] text-slate-500 truncate">${sublabel}</p>
     </div>
   `;
   card.onclick = () => {
     dismissRadarCard(card);
     if (type === 'coincidencia') openCoincidenceModal();
+    else if (type === 'coleccion') openFamilyModal(familyKey);
     else goTo('global');
   };
 
